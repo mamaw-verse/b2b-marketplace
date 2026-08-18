@@ -1,0 +1,198 @@
+/**
+ * Halal B2B Marketplace — Design System Tokens
+ *
+ * Brand palette, neutrals, semantic colors, typography, spacing, radius, elevation, and motion.
+ * Extracted from the marketing/reference page per PRD §8.
+ *
+ * Usage: these CSS custom properties are consumed by Tailwind via @theme in app.css.
+ */
+
+:root {
+    /* ===========================
+       BRAND — Halal Emerald Green
+       =========================== */
+    --hs-green-50: #ECFDF5;
+    --hs-green-100: #D1FAE5;
+    --hs-green-200: #A7F3D0;
+    --hs-green-300: #6EE7B7;
+    --hs-green-400: #34D399;
+    --hs-green-500: #10B981;
+    --hs-green-600: #158A5A; /* Primary */
+    --hs-green-700: #117A4C;
+    --hs-green-800: #0D5E3A;
+    --hs-green-900: #083D26;
+    --hs-green-950: #05291B; /* Deep forest — hero/footer/dark surfaces */
+
+    /* ===========================
+       ACCENT — Gold (restrained, export/premium cues)
+       =========================== */
+    --hs-gold-100: #FEF9E7;
+    --hs-gold-200: #FCF0C3;
+    --hs-gold-300: #F9E08E;
+    --hs-gold-400: #E8C548;
+    --hs-gold-500: #C9A24B; /* Export/premium accent */
+    --hs-gold-600: #A8842E;
+    --hs-gold-700: #86681F;
+    --hs-gold-800: #6B5219;
+    --hs-gold-900: #4A3810;
+
+    /* ===========================
+       NEUTRALS — Slightly green-tinted
+       =========================== */
+    --hs-neutral-0: #FFFFFF;
+    --hs-neutral-50: #F8FAF9;
+    --hs-neutral-100: #F1F5F3;
+    --hs-neutral-200: #E2E8E5;
+    --hs-neutral-300: #C8D1CC;
+    --hs-neutral-400: #9CA8A2;
+    --hs-neutral-500: #6B7A73;
+    --hs-neutral-600: #4A5650;
+    --hs-neutral-700: #374240;
+    --hs-neutral-800: #242D2A;
+    --hs-neutral-900: #121917;
+
+    /* ===========================
+       SEMANTIC COLORS
+       =========================== */
+    --hs-success-50: #ECFDF5;
+    --hs-success-500: #10B981;
+    --hs-success-700: #047857;
+
+    --hs-warning-50: #FFFBEB;
+    --hs-warning-500: #F59E0B;
+    --hs-warning-700: #B45309;
+
+    --hs-danger-50: #FEF2F2;
+    --hs-danger-500: #EF4444;
+    --hs-danger-700: #B91C1C;
+
+    --hs-info-50: #EFF6FF;
+    --hs-info-500: #3B82F6;
+    --hs-info-700: #1D4ED8;
+
+    /* ===========================
+       TYPOGRAPHY
+       =========================== */
+    --hs-font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+    --hs-font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* Type scale */
+    --hs-text-xs: 0.75rem;      /* 12px — captions */
+    --hs-text-sm: 0.875rem;     /* 14px — small body */
+    --hs-text-base: 1rem;       /* 16px — body */
+    --hs-text-lg: 1.125rem;     /* 18px — large body */
+    --hs-text-xl: 1.25rem;      /* 20px — subheading */
+    --hs-text-2xl: 1.5rem;      /* 24px — section heading */
+    --hs-text-3xl: 1.875rem;    /* 30px — page heading */
+    --hs-text-4xl: 2.25rem;     /* 36px — display */
+    --hs-text-5xl: 3rem;        /* 48px — large display */
+    --hs-text-6xl: 3.5rem;      /* 56px — hero H1 */
+
+    /* ===========================
+       SPACING — 4px base
+       =========================== */
+    --hs-space-0: 0;
+    --hs-space-1: 0.25rem;   /* 4px */
+    --hs-space-2: 0.5rem;    /* 8px */
+    --hs-space-3: 0.75rem;   /* 12px */
+    --hs-space-4: 1rem;      /* 16px */
+    --hs-space-5: 1.25rem;   /* 20px */
+    --hs-space-6: 1.5rem;    /* 24px */
+    --hs-space-8: 2rem;      /* 32px */
+    --hs-space-10: 2.5rem;   /* 40px */
+    --hs-space-12: 3rem;     /* 48px */
+    --hs-space-16: 4rem;     /* 64px */
+    --hs-space-20: 5rem;     /* 80px */
+    --hs-space-24: 6rem;     /* 96px */
+
+    /* ===========================
+       BORDER RADIUS
+       =========================== */
+    --hs-radius-xs: 0.25rem;    /* 4px — tags */
+    --hs-radius-sm: 0.375rem;   /* 6px — inputs */
+    --hs-radius-md: 0.5rem;     /* 8px — cards */
+    --hs-radius-lg: 0.75rem;    /* 12px — panels */
+    --hs-radius-xl: 1rem;       /* 16px — modals */
+    --hs-radius-2xl: 1.5rem;    /* 24px — hero search panel */
+    --hs-radius-pill: 999px;    /* verification badges, value-chain steps */
+    --hs-radius-card: 14px;
+    --hs-radius-panel: 24px;
+    --hs-radius-tag: 4px;
+
+    /* ===========================
+       ELEVATION / SHADOWS
+       =========================== */
+    --hs-shadow-xs: 0 1px 2px rgba(5, 41, 27, 0.05);
+    --hs-shadow-sm: 0 1px 2px rgba(5,41,27,0.06);
+    --hs-shadow-md: 0 4px 14px rgba(5,41,27,0.08);
+    --hs-shadow-lg: 0 12px 32px rgba(5,41,27,0.14);
+    --hs-shadow-xl: 0 20px 25px rgba(5, 41, 27, 0.08), 0 8px 10px rgba(5, 41, 27, 0.04);
+
+    /* ===========================
+       MOTION / TRANSITIONS
+       =========================== */
+    --hs-duration-fast: 150ms;
+    --hs-duration-normal: 250ms;
+    --hs-duration-slow: 400ms;
+    --hs-easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --hs-easing-in: cubic-bezier(0.4, 0, 1, 1);
+    --hs-easing-out: cubic-bezier(0, 0, 0.2, 1);
+
+    /* ===========================
+       BREAKPOINTS (reference only — Tailwind handles these internally)
+       =========================== */
+    --hs-bp-sm: 640px;
+    --hs-bp-md: 768px;
+    --hs-bp-lg: 1024px;
+    --hs-bp-xl: 1280px;
+    --hs-bp-2xl: 1536px;
+}
+
+.dark {
+    /* Calibrated Neutrals for Dark Mode */
+    --hs-neutral-0: #1A2421;   /* Elevated Card Surface */
+    --hs-neutral-50: #121917;  /* Deep Page Background */
+    --hs-neutral-100: #242D2A; /* Subtle Hover State / Secondary bg */
+    --hs-neutral-200: #2A3632; /* Subtle Borders */
+    --hs-neutral-300: #374240; /* Prominent Borders / Dividers */
+    --hs-neutral-400: #4A5650; /* Muted Icon / Disabled Text */
+    --hs-neutral-500: #6B7A73; /* Placeholder Text */
+    --hs-neutral-600: #9CA8A2; /* Muted Text */
+    --hs-neutral-700: #C8D1CC; /* Tertiary Text */
+    --hs-neutral-800: #E2E8E5; /* Secondary Text */
+    --hs-neutral-900: #F8FAF9; /* Primary High-Contrast Text */
+
+    /* Calibrated Shadows for Dark Mode (Pure Black based) */
+    --hs-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --hs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --hs-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
+    --hs-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.7);
+    --hs-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6), 0 8px 10px rgba(0, 0, 0, 0.4);
+
+    /* Brand Colors - Adjusting deep greens for readability on dark surfaces */
+    --hs-green-50: #05291B;  /* Was light green, now deep forest for dark bg */
+    --hs-green-100: #083D26;
+    --hs-green-200: #0D5E3A;
+    --hs-green-700: #34D399; /* Map dark text greens to a brighter readable green (400) */
+    --hs-green-800: #6EE7B7; /* Map deeper text greens to (300) */
+    --hs-green-900: #A7F3D0; /* Map darkest text greens to (200) */
+
+    /* Semantic Backgrounds */
+    --hs-success-50: #05291B;
+    --hs-warning-50: #422006;
+    --hs-danger-50: #450A0A;
+    --hs-info-50: #172554;
+
+    /* Override Zinc colors for Flux UI compatibility in Dark Mode */
+    --color-zinc-50: var(--hs-neutral-50);
+    --color-zinc-100: var(--hs-neutral-100);
+    --color-zinc-200: var(--hs-neutral-200);
+    --color-zinc-300: var(--hs-neutral-300);
+    --color-zinc-400: var(--hs-neutral-400);
+    --color-zinc-500: var(--hs-neutral-500);
+    --color-zinc-600: var(--hs-neutral-100); /* Active items / hover states */
+    --color-zinc-700: var(--hs-neutral-0);   /* Popover / Dropdown backgrounds */
+    --color-zinc-800: var(--hs-neutral-0);   /* Modals / Cards */
+    --color-zinc-900: var(--hs-neutral-0);
+    --color-zinc-950: var(--hs-neutral-0);
+}

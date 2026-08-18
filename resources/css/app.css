@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './tokens.css';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @source '../views';
@@ -10,7 +11,10 @@
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: var(--hs-font-display);
+    --font-body: var(--hs-font-body);
 
+    /* Zinc neutrals (preserved for Flux UI compatibility) */
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
     --color-zinc-200: #e5e5e5;
@@ -23,9 +27,87 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
-    --color-accent-foreground: var(--color-white);
+    /* Brand — Halal Emerald Green */
+    --color-green-50: var(--hs-green-50);
+    --color-green-100: var(--hs-green-100);
+    --color-green-200: var(--hs-green-200);
+    --color-green-300: var(--hs-green-300);
+    --color-green-400: var(--hs-green-400);
+    --color-green-500: var(--hs-green-500);
+    --color-green-600: var(--hs-green-600);
+    --color-green-700: var(--hs-green-700);
+    --color-green-800: var(--hs-green-800);
+    --color-green-900: var(--hs-green-900);
+    --color-green-950: var(--hs-green-950);
+
+    /* Gold accent */
+    --color-gold-100: var(--hs-gold-100);
+    --color-gold-200: var(--hs-gold-200);
+    --color-gold-300: var(--hs-gold-300);
+    --color-gold-400: var(--hs-gold-400);
+    --color-gold-500: var(--hs-gold-500);
+    --color-gold-600: var(--hs-gold-600);
+    --color-gold-700: var(--hs-gold-700);
+    --color-gold-800: var(--hs-gold-800);
+    --color-gold-900: var(--hs-gold-900);
+
+    /* Semantic colors */
+    --color-success-50: var(--hs-success-50);
+    --color-success-500: var(--hs-success-500);
+    --color-success-700: var(--hs-success-700);
+
+    --color-warning-50: var(--hs-warning-50);
+    --color-warning-500: var(--hs-warning-500);
+    --color-warning-700: var(--hs-warning-700);
+
+    --color-danger-50: var(--hs-danger-50);
+    --color-danger-500: var(--hs-danger-500);
+    --color-danger-700: var(--hs-danger-700);
+
+    --color-info-50: var(--hs-info-50);
+    --color-info-500: var(--hs-info-500);
+    --color-info-700: var(--hs-info-700);
+
+    /* Spacing scale */
+    --spacing-hs-1: var(--hs-space-1);
+    --spacing-hs-2: var(--hs-space-2);
+    --spacing-hs-3: var(--hs-space-3);
+    --spacing-hs-4: var(--hs-space-4);
+    --spacing-hs-5: var(--hs-space-5);
+    --spacing-hs-6: var(--hs-space-6);
+    --spacing-hs-8: var(--hs-space-8);
+    --spacing-hs-10: var(--hs-space-10);
+    --spacing-hs-12: var(--hs-space-12);
+    --spacing-hs-16: var(--hs-space-16);
+    --spacing-hs-20: var(--hs-space-20);
+    --spacing-hs-24: var(--hs-space-24);
+
+    /* Border radius */
+    --radius-xs: var(--hs-radius-xs);
+    --radius-sm: var(--hs-radius-sm);
+    --radius-md: var(--hs-radius-md);
+    --radius-lg: var(--hs-radius-lg);
+    --radius-xl: var(--hs-radius-xl);
+    --radius-2xl: var(--hs-radius-2xl);
+    --radius-pill: var(--hs-radius-pill);
+    --radius-card: var(--hs-radius-card);
+    --radius-panel: var(--hs-radius-panel);
+    --radius-tag: var(--hs-radius-tag);
+
+    /* Shadows */
+    --shadow-xs: var(--hs-shadow-xs);
+    --shadow-sm: var(--hs-shadow-sm);
+    --shadow-md: var(--hs-shadow-md);
+    --shadow-lg: var(--hs-shadow-lg);
+    --shadow-xl: var(--hs-shadow-xl);
+    --shadow-hs-sm: var(--hs-shadow-sm);
+    --shadow-hs-md: var(--hs-shadow-md);
+    --shadow-hs-lg: var(--hs-shadow-lg);
+
+    /* Accent (overrides for Flux UI) */
+    --color-accent: var(--hs-green-600);
+    --color-accent-content: var(--hs-green-600);
+    --color-accent-foreground: var(--hs-neutral-0);
 }
 
 @layer theme {
@@ -64,3 +146,38 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* ============================================================
+   FLUX TABLE — Global Style Overrides
+   Targets data-flux-* attributes per Flux UI customization docs.
+   Applied universally to every flux:table in the app.
+   ============================================================ */
+
+/* Header columns: tighter padding, muted label, light bg */
+[data-flux-column] {
+    @apply py-2.5 px-4 first:ps-4 last:pe-4
+           text-xs font-semibold uppercase tracking-wide
+           text-[var(--hs-neutral-500)]
+           bg-[var(--hs-neutral-50)]
+           border-b border-[var(--hs-neutral-200)];
+}
+
+/* Body cells: tighter vertical padding, consistent horizontal */
+[data-flux-cell] {
+    @apply py-2.5 px-4 first:ps-4 last:pe-4
+           text-sm
+           border-b border-[var(--hs-neutral-100)];
+}
+
+/* Remove bottom border from last row's cells */
+[data-flux-row]:last-child [data-flux-cell] {
+    @apply border-b-0;
+}
+
+/* Row hover state */
+[data-flux-row] {
+    @apply transition-colors duration-100;
+}
+[data-flux-row]:hover [data-flux-cell] {
+    @apply bg-[var(--hs-neutral-50)];
+}

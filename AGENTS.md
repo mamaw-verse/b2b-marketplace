@@ -1,4 +1,70 @@
 <laravel-boost-guidelines>
+=== .ai/project-conventions rules ===
+
+# Project Conventions
+
+## Database & Schema
+
+- All money/price fields use `NUMERIC(12,2)` — never `FLOAT` or `DOUBLE`.
+- Primary keys are `BIGINT GENERATED ALWAYS AS IDENTITY` (Laravel `$table->id()`).
+- All tables include `created_at` / `updated_at` managed by Eloquent.
+- Never hard-delete `shops` or `products` — use soft deletes (`deleted_at` / `SoftDeletes` trait).
+- PostgreSQL enums are used for status fields (`onboarding_status`, `business_structure`, `export_readiness`, `shop_status`, `halal_cert_body`, `shop_cert_status`, `listing_status`).
+- JSONB columns (`value_chain_positions`, `capabilities`, `attributes`, `quantity_breaks`) are cast to `array` or `AsCollection` in Eloquent models.
+- PostGIS `GEOGRAPHY(POINT, 4326)` type is used for geospatial columns (`geo_location`).
+
+## Certificate Expiry Alerts
+
+- Certificate expiry alerts MUST be idempotent per threshold — track `last_alert_threshold_days` on `shop_certificates` to avoid duplicate notifications on repeated job runs.
+- Thresholds: 60, 30, 7 days before expiry, and on expiry day.
+- Status transitions: `active` → `expiring_soon` → `expired`, driven by the scheduled `ScanCertificateExpiryJob`.
+
+## File Upload Security
+
+- Strict MIME/extension allow-list enforced both client-side and server-side.
+- All uploaded files must pass antivirus scan (`ScanUploadedFileJob`) before being marked `clean`.
+- Documents blocked from onboarding-checklist completion until scan passes.
+- Private documents served via time-limited pre-signed S3/Minio URLs — never public paths.
+- When catching upload errors in Livewire, always catch `ValidationException` **before** the generic `Throwable` so user-friendly field errors surface correctly.
+- The Minio bucket is auto-created by the `minio-createbuckets` service in `compose.yaml` — do not assume buckets exist without this service running.
+
+## Authorization Model
+
+- RBAC via `spatie/laravel-permission` — roles: `admin`, `seller`, `buyer`.
+- Row-level ownership enforced via Laravel Policies independent of role (`record->user_id === auth()->id()`).
+- Admin document access gated by `document.view_any` permission.
+
+## Search & Indexing
+
+- Only `active` shops and `published` products appear in the Typesense search index.
+- Index writes are event-driven (queued jobs: `IndexShopJob`, `IndexProductJob`) — never synchronous with the HTTP request.
+- A scheduled safety-net job (`SyncSearchIndexJob`) reconciles stale entries every 5 minutes.
+
+## API Conventions
+
+- All API endpoints versioned under `/api/v1`.
+- Auth: Laravel Sanctum (session cookies for browser clients, personal access tokens for external API consumers).
+- Pagination: cursor-based (`?cursor=<opaque>&limit=20`).
+- Error envelope: `{ "error": { "code": "...", "message": "...", "fields": {...} } }`.
+- Admin mutations (approve/reject) wrapped in DB transactions; index sync dispatched after commit, not inside the transaction.
+
+## Frontend & Dark Theme
+
+- This project uses an **adaptive CSS variable-based dark theme** driven by `@fluxAppearance`. Never use hardcoded `dark:bg-zinc-*`, `dark:text-*` or `dark:border-*` classes in application Blade files.
+- Use `--hs-neutral-*` design system CSS variables for all backgrounds, text, and borders. These variables automatically invert when the `.dark` class is active (set by OS dark mode detection).
+- Use `bg-[var(--hs-neutral-0)]` for card surfaces, `bg-[var(--hs-neutral-50)]` for page backgrounds, `text-[var(--hs-neutral-900)]` for primary text, `text-[var(--hs-neutral-600)]` for muted text, and `border-[var(--hs-neutral-200)]` for borders.
+- The `.dark` overrides in `resources/css/tokens.css` MUST be placed at the **top level** (not inside `@layer theme`). Variables inside `@layer` are silently overridden by unlayered `:root` rules.
+- Flux UI zinc colours are remapped inside `.dark` in `tokens.css` so all Flux dropdowns, popovers, and menus automatically inherit the project dark surface without editing any Flux stub files.
+- Run `vendor/bin/sail npm run build` after every CSS change. Users must hard-refresh (Cmd+Shift+R) to see changes.
+- The dedicated `dark-theme-system` skill in `.ai/skills/dark-theme-system/SKILL.md` documents the full token palette and architecture.
+
+## Phase 1 Constraints
+
+- One company per user account (`shops.user_id UNIQUE`).
+- No RFQ, chat, quoting, orders, or payments — Phase 1 is discovery only.
+- Certificate renewal workflow is deferred; only expiry tracking/alerting is in scope.
+- The sidebar navigation shows **Onboarding Wizard** only when `shop.status !== 'active'`, and **Products** only when `shop.status === 'active'`.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines

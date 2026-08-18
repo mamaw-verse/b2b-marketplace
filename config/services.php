@@ -37,4 +37,16 @@ return [
         ],
     ],
 
+    'clamav' => [
+        'host' => env('CLAMAV_HOST', 'localhost'),
+        'port' => (int) env('CLAMAV_PORT', 3310),
+        'timeout' => (int) env('CLAMAV_TIMEOUT', 30),
+        'skip_when_unavailable' => (bool) env('CLAMAV_SKIP_WHEN_UNAVAILABLE', true),
+    ],
+
+    'geocoding' => [
+        'provider' => env('GEOCODING_PROVIDER', 'google'),
+        'api_key' => env('GEOCODING_API_KEY'),
+    ],
+
 ];

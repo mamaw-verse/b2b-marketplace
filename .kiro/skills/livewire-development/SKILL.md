@@ -139,6 +139,18 @@ These things changed in Livewire 4, but may not have been updated in this applic
 - Use `wire:model.live` for instant updates (default is debounced)
 - Validate and authorize in actions (treat like HTTP requests)
 
+### Tabbed Navigation across Pages
+
+When building complex forms (e.g. editing a Product that has Basic Info, Variants, Gallery, and Documents), prefer splitting the UI into separate full-page Livewire components and using a shared tabbed navigation header with `wire:navigate` rather than building massive monolithic components or using complex state-driven tabs.
+
+<!-- Example Tab Header Partial -->
+```blade
+<nav class="flex space-x-4 border-b">
+    <a href="{{ route('hub.products.edit', $product) }}" wire:navigate class="{{ request()->routeIs('hub.products.edit') ? 'border-b-2' : '' }}">Basic Info</a>
+    <a href="{{ route('hub.products.gallery', $product) }}" wire:navigate class="{{ request()->routeIs('hub.products.gallery') ? 'border-b-2' : '' }}">Gallery</a>
+</nav>
+```
+
 ## Configuration
 
 - `smart_wire_keys` defaults to `true`; new configs: `component_locations`, `component_namespaces`, `make_command`, `csp_safe`.
@@ -173,3 +185,50 @@ Livewire::test(Counter::class)
 - Unclosed component tags → syntax errors in v4
 - Using deprecated config keys or JS hooks
 - Including Alpine.js separately (already bundled in Livewire 4)
+
+## File Upload Error Handling
+
+When catching errors from file upload services, always handle `ValidationException` separately before the generic `Throwable` catch so user-friendly validation messages are shown correctly:
+
+```php
+try {
+    $media = $uploadService->store($file, Auth::id(), 'halal_certificate');
+} catch (ValidationException $e) {
+    $message = collect($e->errors())->flatten()->first() ?? $e->getMessage();
+    $this->addError("certificateFiles.{$index}", $message);
+    continue;
+} catch (Throwable $e) {
+    $this->addError("certificateFiles.{$index}", $e->getMessage());
+    continue;
+}
+```
+
+## Refreshing State Patterns
+
+For long-running background jobs (e.g. AV scans), expose a refresh method users can call manually. Do not poll automatically unless the UX explicitly requires it:
+
+```php
+public function refreshDocumentStatuses(): void
+{
+    $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+
+    if ($onboarding) {
+        $this->loadUploadedDocuments($onboarding);
+    }
+}
+```
+
+## Conditional Sidebar Navigation
+
+Use shop status conditions to show/hide sidebar links rather than always showing all navigation. This prevents users from accessing areas before they are eligible:
+
+```blade
+@if (auth()->user()?->shop?->status !== 'active')
+    {{-- Onboarding Wizard --}}
+@endif
+
+@if (auth()->user()?->shop?->status === 'active')
+    {{-- Products --}}
+@endif
+```
+
