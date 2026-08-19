@@ -8,16 +8,27 @@
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
             <!-- Name -->
-            <flux:input
-                name="name"
-                :label="__('Name')"
-                :value="old('name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-                :placeholder="__('Full name')"
-            />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <flux:input
+                    name="first_name"
+                    :label="__('First name')"
+                    :value="old('first_name')"
+                    type="text"
+                    required
+                    autofocus
+                    autocomplete="given-name"
+                    :placeholder="__('First name')"
+                />
+                <flux:input
+                    name="last_name"
+                    :label="__('Last name')"
+                    :value="old('last_name')"
+                    type="text"
+                    required
+                    autocomplete="family-name"
+                    :placeholder="__('Last name')"
+                />
+            </div>
 
             <!-- Email Address -->
             <flux:input
@@ -61,7 +72,7 @@
             </div>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
+        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-[var(--hs-neutral-600)]">
             <span>{{ __('Already have an account?') }}</span>
             <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
         </div>

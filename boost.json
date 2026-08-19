@@ -8,18 +8,22 @@
     "mcp": true,
     "nightwatch": false,
     "packages": [
-        "livewire/blaze"
+        "livewire/blaze",
+        "spatie/laravel-permission"
     ],
     "sail": true,
     "skills": [
         "infer-conventions",
         "fortify-development",
         "laravel-best-practices",
+        "scout-development",
         "fluxui-development",
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
         "blaze-optimize",
+        "laravel-permission-development",
+        "dark-theme-system",
         "deploying-laravel-cloud"
     ]
 }
