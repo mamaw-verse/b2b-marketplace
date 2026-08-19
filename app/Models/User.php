@@ -74,6 +74,22 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * The user's buyer profile (1:1).
+     */
+    public function buyerProfile(): HasOne
+    {
+        return $this->hasOne(BuyerProfile::class);
+    }
+
+    /**
+     * RFQs created by this user (as a buyer).
+     */
+    public function rfqs(): HasMany
+    {
+        return $this->hasMany(Rfq::class);
+    }
+
+    /**
      * Media files uploaded by this user.
      */
     public function uploadedMedia(): HasMany

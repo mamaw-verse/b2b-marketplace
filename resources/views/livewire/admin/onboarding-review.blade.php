@@ -123,7 +123,7 @@
                 </div>
                 <div class="p-6">
                     @if ($onboarding->certificates->isNotEmpty())
-                        <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-hidden">
+                        <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
                             <flux:table>
                                 <flux:table.columns>
                                     <flux:table.column>Certification Body</flux:table.column>
@@ -164,7 +164,7 @@
                 </div>
                 <div class="p-6">
                     @if ($onboarding->documents->isNotEmpty())
-                        <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-hidden">
+                        <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
                             <flux:table>
                                 <flux:table.columns>
                                     <flux:table.column>Document</flux:table.column>

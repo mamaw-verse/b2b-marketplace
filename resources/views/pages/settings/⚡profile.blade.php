@@ -6,10 +6,11 @@ use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('Profile settings')] class extends Component {
+new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settings')] class extends Component {
     use ProfileValidationRules;
 
     public string $first_name = '';
@@ -79,13 +80,11 @@ new #[Title('Profile settings')] class extends Component {
 }; ?>
 
 <section class="w-full">
-    @include('partials.settings-heading')
-
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
     <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <flux:input wire:model="first_name" :label="__('First name')" type="text" required autofocus autocomplete="given-name" />
                 <flux:input wire:model="last_name" :label="__('Last name')" type="text" required autocomplete="family-name" />
             </div>
@@ -104,7 +103,7 @@ new #[Title('Profile settings')] class extends Component {
                         </flux:text>
 
                         @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
+                            <flux:text class="mt-2 font-medium text-[var(--hs-green-700)]">
                                 {{ __('A new verification link has been sent to your email address.') }}
                             </flux:text>
                         @endif

@@ -96,18 +96,16 @@ test('media record has pending scan status on creation', function () {
     expect($media->fresh()->scan_status)->toBe('pending');
 });
 
-test('generates a time-limited pre-signed URL for media', function () {
-    // Use real S3 for this test since fake doesn't support temporaryUrl
-    Storage::fake('s3'); // Override - we'll test the service method directly
-
+test('generates a view URL for media via the authenticated media route', function () {
     $media = Media::factory()->create([
         'uploaded_by_id' => $this->user->id,
         'storage_path' => 'media/2026/08/14/test-file.pdf',
     ]);
 
-    // The fake S3 driver's temporaryUrl returns a URL string
     $url = $this->service->signedUrl($media, 15);
 
+    // signedUrl returns the authenticated media proxy route, not a direct S3 URL.
+    // This ensures private documents are served through the app with auth checks.
     expect($url)->toBeString()
-        ->and($url)->toContain($media->storage_path);
+        ->and($url)->toContain(route('media.view', $media, false));
 });

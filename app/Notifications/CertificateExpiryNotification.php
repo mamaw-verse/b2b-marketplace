@@ -7,6 +7,7 @@ namespace App\Notifications;
 use App\Models\ShopCertificate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -26,7 +27,7 @@ final class CertificateExpiryNotification extends Notification implements Should
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail', 'broadcast'];
     }
 
     /**
@@ -58,11 +59,23 @@ final class CertificateExpiryNotification extends Notification implements Should
      */
     public function toArray(object $notifiable): array
     {
+        $registrationNumber = $this->certificate->registration_number;
+        $message = $this->daysUntilExpiry <= 0
+            ? "Halal certificate {$registrationNumber} has expired."
+            : "Halal certificate {$registrationNumber} expires in {$this->daysUntilExpiry} days.";
+
         return [
+            'type' => $this->daysUntilExpiry <= 0 ? 'certificate_expired' : 'certificate_expiring',
             'certificate_id' => $this->certificate->id,
             'registration_number' => $this->certificate->registration_number,
             'days_until_expiry' => $this->daysUntilExpiry,
             'shop_name' => $this->certificate->shop->storefront_name,
+            'message' => $message,
         ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
     }
 }

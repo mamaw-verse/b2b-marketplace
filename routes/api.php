@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AdminCategoryController;
 use App\Http\Controllers\Api\V1\AdminOnboardingController;
+use App\Http\Controllers\Api\V1\BuyerProfileController;
+use App\Http\Controllers\Api\V1\ConversationController;
+use App\Http\Controllers\Api\V1\Hub\QuotationController;
+use App\Http\Controllers\Api\V1\Hub\RfqRecipientController;
 use App\Http\Controllers\Api\V1\HubProductController;
+use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
+use App\Http\Controllers\Api\V1\QuotationActionController;
+use App\Http\Controllers\Api\V1\RfqController;
 use App\Http\Controllers\Api\V1\SearchController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +30,31 @@ Route::prefix('v1')->group(function () {
 
     // Company Onboarding (requires auth + verified email)
     Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+        // Buyer Profile
+        Route::get('/buyer-profile', [BuyerProfileController::class, 'show']);
+        Route::put('/buyer-profile', [BuyerProfileController::class, 'update']);
+
+        // RFQs (Buyer)
+        Route::post('/rfqs', [RfqController::class, 'store'])
+            ->middleware('throttle:10,60');
+        Route::get('/rfqs', [RfqController::class, 'index']);
+        Route::get('/rfqs/{rfq}', [RfqController::class, 'show']);
+        Route::post('/rfqs/{rfq}/close', [RfqController::class, 'close']);
+
+        // Quotation Actions (Buyer)
+        Route::post('/quotations/{quotation}/award', [QuotationActionController::class, 'award']);
+        Route::post('/quotations/{quotation}/reject', [QuotationActionController::class, 'reject']);
+
+        // Chat / Messaging
+        Route::get('/conversations', [ConversationController::class, 'index']);
+        Route::get('/conversations/{conversation}/threads', [ConversationController::class, 'threads']);
+        Route::post('/conversations/{conversation}/threads', [ConversationController::class, 'storeThread']);
+        Route::get('/threads/{thread}/messages', [MessageController::class, 'index'])
+            ->where('thread', '[0-9]+');
+        Route::post('/threads/{thread}/messages', [MessageController::class, 'store'])
+            ->middleware('throttle:60,1')
+            ->where('thread', '[0-9]+');
+
         Route::get('/onboarding', [OnboardingController::class, 'show']);
         Route::put('/onboarding/step/{step}', [OnboardingController::class, 'updateStep'])
             ->whereIn('step', ['1', '2', '3', '4', '5']);
@@ -34,6 +66,21 @@ Route::prefix('v1')->group(function () {
 
     // Company Hub — Product Catalog (requires auth + verified email)
     Route::middleware(['auth:sanctum', 'verified'])->prefix('hub')->group(function () {
+        // Seller RFQ Queue
+        Route::get('/rfqs', [RfqRecipientController::class, 'index']);
+        Route::get('/rfqs/{rfqRecipient}', [RfqRecipientController::class, 'show']);
+        Route::post('/rfqs/{rfqRecipient}/review', [RfqRecipientController::class, 'review']);
+        Route::post('/rfqs/{rfqRecipient}/in-progress', [RfqRecipientController::class, 'inProgress']);
+        Route::post('/rfqs/{rfqRecipient}/decline', [RfqRecipientController::class, 'decline']);
+
+        // Quotations (Seller)
+        Route::post('/rfqs/{rfqRecipient}/quotations', [QuotationController::class, 'store'])
+            ->middleware('throttle:20,60');
+        Route::put('/quotations/{quotation}', [QuotationController::class, 'update']);
+        Route::delete('/quotations/{quotation}', [QuotationController::class, 'destroy']);
+        Route::post('/quotations/{quotation}/submit', [QuotationController::class, 'submit']);
+        Route::post('/quotations/{quotation}/withdraw', [QuotationController::class, 'withdraw']);
+
         Route::get('/products', [HubProductController::class, 'index']);
         Route::post('/products', [HubProductController::class, 'store']);
         Route::put('/products/{product}', [HubProductController::class, 'update']);

@@ -30,7 +30,7 @@
             </div>
 
             {{-- Documents table --}}
-            <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-hidden">
+            <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column>Filename</flux:table.column>

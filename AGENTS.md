@@ -25,8 +25,6 @@
 - All uploaded files must pass antivirus scan (`ScanUploadedFileJob`) before being marked `clean`.
 - Documents blocked from onboarding-checklist completion until scan passes.
 - Private documents served via time-limited pre-signed S3/Minio URLs — never public paths.
-- When catching upload errors in Livewire, always catch `ValidationException` **before** the generic `Throwable` so user-friendly field errors surface correctly.
-- The Minio bucket is auto-created by the `minio-createbuckets` service in `compose.yaml` — do not assume buckets exist without this service running.
 
 ## Authorization Model
 
@@ -48,22 +46,11 @@
 - Error envelope: `{ "error": { "code": "...", "message": "...", "fields": {...} } }`.
 - Admin mutations (approve/reject) wrapped in DB transactions; index sync dispatched after commit, not inside the transaction.
 
-## Frontend & Dark Theme
-
-- This project uses an **adaptive CSS variable-based dark theme** driven by `@fluxAppearance`. Never use hardcoded `dark:bg-zinc-*`, `dark:text-*` or `dark:border-*` classes in application Blade files.
-- Use `--hs-neutral-*` design system CSS variables for all backgrounds, text, and borders. These variables automatically invert when the `.dark` class is active (set by OS dark mode detection).
-- Use `bg-[var(--hs-neutral-0)]` for card surfaces, `bg-[var(--hs-neutral-50)]` for page backgrounds, `text-[var(--hs-neutral-900)]` for primary text, `text-[var(--hs-neutral-600)]` for muted text, and `border-[var(--hs-neutral-200)]` for borders.
-- The `.dark` overrides in `resources/css/tokens.css` MUST be placed at the **top level** (not inside `@layer theme`). Variables inside `@layer` are silently overridden by unlayered `:root` rules.
-- Flux UI zinc colours are remapped inside `.dark` in `tokens.css` so all Flux dropdowns, popovers, and menus automatically inherit the project dark surface without editing any Flux stub files.
-- Run `vendor/bin/sail npm run build` after every CSS change. Users must hard-refresh (Cmd+Shift+R) to see changes.
-- The dedicated `dark-theme-system` skill in `.ai/skills/dark-theme-system/SKILL.md` documents the full token palette and architecture.
-
 ## Phase 1 Constraints
 
 - One company per user account (`shops.user_id UNIQUE`).
 - No RFQ, chat, quoting, orders, or payments — Phase 1 is discovery only.
 - Certificate renewal workflow is deferred; only expiry tracking/alerting is in scope.
-- The sidebar navigation shows **Onboarding Wizard** only when `shop.status !== 'active'`, and **Products** only when `shop.status === 'active'`.
 
 === foundation rules ===
 

@@ -109,16 +109,38 @@
                 </section>
             @endif
 
-            {{-- Phase 1 Info Banner --}}
-            <div class="rounded-[var(--hs-radius-card)] bg-[var(--hs-info-50)] border border-blue-200 p-4">
-                <div class="flex items-start gap-3">
-                    <svg class="size-5 text-[var(--hs-info-500)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
-                    <div>
-                        <p class="text-sm font-medium text-[var(--hs-info-700)]">Discovery Phase</p>
-                        <p class="text-xs text-blue-600 mt-0.5">This marketplace is currently in discovery mode. Ordering and quoting will be available in a future release.</p>
+            {{-- Request Quote Action --}}
+            @if ($product->shop)
+                <div class="rounded-[var(--hs-radius-card)] bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] p-5">
+                    <div class="flex items-start gap-3">
+                        <svg class="size-5 text-[var(--hs-green-600)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-[var(--hs-green-800)]">{{ __('Interested in this product?') }}</p>
+                            <p class="text-xs text-[var(--hs-green-600)] mt-0.5">{{ __('Send a Request for Quotation to get a price from the supplier.') }}</p>
+                            <div class="mt-3">
+                                @auth
+                                    <a
+                                        href="{{ route('account.rfqs.create', ['shop_id' => $product->shop->id, 'title' => $product->name]) }}"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] text-white text-sm font-medium hover:bg-[var(--hs-green-700)] transition"
+                                        wire:navigate
+                                    >
+                                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                                        {{ __('Request Quote') }}
+                                    </a>
+                                @else
+                                    <a
+                                        href="{{ route('login') }}"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] text-white text-sm font-medium hover:bg-[var(--hs-green-700)] transition"
+                                    >
+                                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                                        {{ __('Log in to Request Quote') }}
+                                    </a>
+                                @endauth
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 </div>

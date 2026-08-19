@@ -55,20 +55,32 @@
        SEMANTIC COLORS
        =========================== */
     --hs-success-50: #ECFDF5;
+    --hs-success-100: #D1FAE5;
+    --hs-success-200: #A7F3D0;
     --hs-success-500: #10B981;
     --hs-success-700: #047857;
+    --hs-success-800: #065F46;
 
     --hs-warning-50: #FFFBEB;
+    --hs-warning-100: #FEF3C7;
+    --hs-warning-200: #FDE68A;
     --hs-warning-500: #F59E0B;
     --hs-warning-700: #B45309;
+    --hs-warning-800: #92400E;
 
     --hs-danger-50: #FEF2F2;
+    --hs-danger-100: #FEE2E2;
+    --hs-danger-200: #FECACA;
     --hs-danger-500: #EF4444;
     --hs-danger-700: #B91C1C;
+    --hs-danger-800: #991B1B;
 
     --hs-info-50: #EFF6FF;
+    --hs-info-100: #DBEAFE;
+    --hs-info-200: #BFDBFE;
     --hs-info-500: #3B82F6;
     --hs-info-700: #1D4ED8;
+    --hs-info-800: #1E40AF;
 
     /* ===========================
        TYPOGRAPHY
@@ -179,20 +191,27 @@
 
     /* Semantic Backgrounds */
     --hs-success-50: #05291B;
-    --hs-warning-50: #422006;
-    --hs-danger-50: #450A0A;
-    --hs-info-50: #172554;
+    --hs-success-100: #064E3B;
+    --hs-success-200: #065F46;
+    --hs-success-700: #34D399;
+    --hs-success-800: #6EE7B7;
 
-    /* Override Zinc colors for Flux UI compatibility in Dark Mode */
-    --color-zinc-50: var(--hs-neutral-50);
-    --color-zinc-100: var(--hs-neutral-100);
-    --color-zinc-200: var(--hs-neutral-200);
-    --color-zinc-300: var(--hs-neutral-300);
-    --color-zinc-400: var(--hs-neutral-400);
-    --color-zinc-500: var(--hs-neutral-500);
-    --color-zinc-600: var(--hs-neutral-100); /* Active items / hover states */
-    --color-zinc-700: var(--hs-neutral-0);   /* Popover / Dropdown backgrounds */
-    --color-zinc-800: var(--hs-neutral-0);   /* Modals / Cards */
-    --color-zinc-900: var(--hs-neutral-0);
-    --color-zinc-950: var(--hs-neutral-0);
+    --hs-warning-50: #422006;
+    --hs-warning-100: #78350F;
+    --hs-warning-200: #92400E;
+    --hs-warning-700: #FBBF24;
+    --hs-warning-800: #FDE68A;
+
+    --hs-danger-50: #450A0A;
+    --hs-danger-100: #7F1D1D;
+    --hs-danger-200: #991B1B;
+    --hs-danger-700: #FCA5A5;
+    --hs-danger-800: #FECACA;
+
+    --hs-info-50: #172554;
+    --hs-info-100: #1E3A5F;
+    --hs-info-200: #1E40AF;
+    --hs-info-700: #93C5FD;
+    --hs-info-800: #BFDBFE;
+
 }

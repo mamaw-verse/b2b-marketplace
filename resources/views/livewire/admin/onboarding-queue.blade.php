@@ -6,7 +6,7 @@
         </div>
 
         {{-- Status filter tabs (pill style with counts) --}}
-        <div class="px-6 pt-5 pb-4 flex gap-1.5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
+        <div class="px-4 sm:px-6 pt-5 pb-4 flex flex-wrap gap-1.5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
             <button
                 wire:click="filterByStatus('submitted')"
                 @class([

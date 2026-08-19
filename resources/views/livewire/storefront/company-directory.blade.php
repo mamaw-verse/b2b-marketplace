@@ -6,9 +6,17 @@
 
     <div class="flex flex-col gap-8 lg:flex-row">
         {{-- Sidebar: Category Filter --}}
-        <aside class="w-full lg:w-56 shrink-0">
-            <nav class="space-y-1">
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-3 px-3">Categories</h3>
+        <aside class="w-full lg:w-56 shrink-0" x-data="{ open: false }">
+            <button
+                @click="open = !open"
+                class="lg:hidden flex items-center justify-between w-full py-2 px-3 rounded-lg text-sm font-semibold text-[var(--hs-neutral-700)] bg-[var(--hs-neutral-100)] hover:bg-[var(--hs-neutral-200)] transition mb-1"
+                :aria-expanded="open"
+            >
+                <span>{{ __('Categories') }}</span>
+                <svg class="size-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+            </button>
+            <nav class="space-y-1 lg:block" :class="open ? 'block' : 'hidden'" x-cloak>
+                <h3 class="hidden lg:block text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-3 px-3">{{ __('Categories') }}</h3>
 
                 <button
                     wire:click="$set('categoryId', null)"

@@ -58,7 +58,7 @@
         </div>
 
         {{-- Products Table --}}
-        <div class="mt-5 overflow-hidden">
+        <div class="mt-5 overflow-x-auto">
             <flux:table>
 
                 <flux:table.columns>

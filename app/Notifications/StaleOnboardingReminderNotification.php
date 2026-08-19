@@ -7,6 +7,7 @@ namespace App\Notifications;
 use App\Models\ShopOnboarding;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -25,7 +26,7 @@ final class StaleOnboardingReminderNotification extends Notification implements 
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail', 'broadcast'];
     }
 
     /**
@@ -48,9 +49,18 @@ final class StaleOnboardingReminderNotification extends Notification implements 
      */
     public function toArray(object $notifiable): array
     {
+        $storefrontName = $this->onboarding->storefront_name ?? 'your business';
+
         return [
+            'type' => 'stale_onboarding_reminder',
             'onboarding_id' => $this->onboarding->id,
-            'storefront_name' => $this->onboarding->storefront_name,
+            'storefront_name' => $storefrontName,
+            'message' => "Onboarding application for {$storefrontName} is still pending.",
         ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
     }
 }

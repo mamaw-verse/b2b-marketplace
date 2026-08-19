@@ -56,8 +56,8 @@
             </div>
         </flux:card>
     @empty
-        <div class="rounded-lg border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-600">
-            <flux:icon name="document-text" class="mx-auto size-10 text-zinc-400" />
+        <div class="rounded-lg border border-dashed border-[var(--hs-neutral-300)] p-8 text-center">
+            <flux:icon name="document-text" class="mx-auto size-10 text-[var(--hs-neutral-400)]" />
             <flux:text class="mt-2">{{ __('No certificates added yet.') }}</flux:text>
         </div>
     @endforelse

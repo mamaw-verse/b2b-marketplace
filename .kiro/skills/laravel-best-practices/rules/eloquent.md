@@ -148,32 +148,3 @@ Order::where('status', 'pending')->get();
 Prefer Eloquent queries and relationships over `DB::table()` whenever possible — they already reference the model's table. When `DB::table()` or raw joins are unavoidable, always use `(new Model)->getTable()` to keep the reference traceable.
 
 **Exception — migrations:** In migrations, hardcoded table names via `DB::table('settings')` are acceptable and preferred. Models change over time but migrations are frozen snapshots — referencing a model that is later renamed or deleted would break the migration.
-
-## External URLs vs Storage URLs in Accessors
-
-When a model has a column storing image or file paths that could either be an absolute external URL (e.g. from seed data or a CDN) or a relative path on a specific disk (e.g. `s3`), use an accessor to resolve the correct URL dynamically.
-
-Incorrect:
-```php
-protected function imageUrl(): Attribute
-{
-    return Attribute::get(fn () => Storage::disk('s3')->url($this->image_path));
-}
-// This breaks if $this->image_path is already "https://unsplash.com/..."
-```
-
-Correct:
-```php
-protected function imageUrl(): Attribute
-{
-    return Attribute::get(function () {
-        if (! $this->image_path) {
-            return null;
-        }
-        
-        return str_starts_with($this->image_path, 'http')
-            ? $this->image_path
-            : Storage::disk('s3')->url($this->image_path);
-    });
-}
-```

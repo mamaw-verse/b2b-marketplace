@@ -30,17 +30,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return redirect()->route('hub.onboarding');
     })->name('dashboard');
 
-    Route::get('media/{media}/view', function (\App\Models\Media $media) {
+    Route::get('media/{media}/view', function (App\Models\Media $media) {
         $user = auth()->user();
         if (! $user->hasRole('admin') && $media->uploaded_by_id !== $user->id) {
             abort(403);
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('s3')->response(
+        return Illuminate\Support\Facades\Storage::disk('s3')->response(
             $media->storage_path,
             $media->original_filename
         );
     })->name('media.view');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Buyer Account Routes (auth + verified required)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->group(function () {
+    Route::livewire('profile', 'account.buyer-profile-form')->name('profile');
+    Route::livewire('rfqs', 'account.rfq-list')->name('rfqs.index');
+    Route::livewire('rfqs/create', 'account.rfq-create-form')->name('rfqs.create');
+    Route::livewire('rfqs/{rfq}', 'account.rfq-detail')->name('rfqs.show');
+    Route::livewire('messages', 'account.chat-inbox')->name('messages');
 });
 
 /*
@@ -66,6 +79,13 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::livewire('products/{product}/variants', 'company-hub.variant-manager')->name('products.variants');
     Route::livewire('products/{product}/gallery', 'company-hub.gallery-manager')->name('products.gallery');
     Route::livewire('products/{product}/documents', 'company-hub.document-manager')->name('products.documents');
+
+    // RFQ management (seller)
+    Route::livewire('rfqs', 'company-hub.rfq-queue')->name('rfqs.index');
+    Route::livewire('rfqs/{rfqRecipient}', 'company-hub.rfq-detail')->name('rfqs.show');
+    Route::livewire('rfqs/{rfqRecipient}/quotations/create', 'company-hub.quotation-builder')->name('quotations.create');
+    Route::livewire('rfqs/{rfqRecipient}/quotations/{quotation}/edit', 'company-hub.quotation-builder')->name('quotations.edit');
+    Route::livewire('messages', 'company-hub.chat-inbox')->name('messages');
 });
 
 /*

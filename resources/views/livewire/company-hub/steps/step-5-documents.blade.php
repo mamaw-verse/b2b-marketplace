@@ -13,7 +13,7 @@
     @foreach (self::REQUIRED_DOCUMENTS as $type => $label)
         @php $doc = $uploadedDocuments[$type] ?? null; @endphp
         <flux:card class="p-4">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                         <flux:heading size="sm">{{ __($label) }}</flux:heading>
@@ -52,7 +52,7 @@
                     @endif
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0 mt-2 sm:mt-0">
                     @if (! $doc || $doc['scan_status'] === 'infected')
                         <flux:input
                             wire:model="documentUploads.{{ $type }}"

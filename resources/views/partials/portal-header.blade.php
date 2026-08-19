@@ -6,7 +6,11 @@
     $isAdmin = $user?->hasRole('admin');
     $isSeller = $user?->hasRole('seller');
 @endphp
-<header class="sticky top-0 z-50 border-b border-[var(--hs-neutral-200)] bg-white/80 backdrop-blur-md">
+<header class="sticky top-0 z-50 border-b border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]/80 backdrop-blur-md">
+    {{-- Auth user ID for Echo notification channel (safe to expose — it's the PK, not a secret) --}}
+    @auth
+        <meta name="auth-user-id" content="{{ $user->id }}">
+    @endauth
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
 
@@ -47,6 +51,10 @@
                     </nav>
                 @endif
 
+                @auth
+                    <livewire:shared.notification-bell />
+                @endauth
+
                 {{-- Auth --}}
                 @auth
                     <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
@@ -69,7 +77,7 @@
                             x-transition:leave="transition ease-in duration-75"
                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                             x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-                            class="absolute right-0 mt-1 w-52 origin-top-right rounded-xl border border-[var(--hs-neutral-200)] bg-white shadow-[var(--hs-shadow-lg)] py-1"
+                            class="absolute right-0 mt-1 w-52 origin-top-right rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-lg)] py-1"
                             style="display: none;"
                         >
                             <div class="px-4 py-3 border-b border-[var(--hs-neutral-100)]">
@@ -126,5 +134,33 @@
 
             </div>
         </div>
+
+        {{-- Mobile storefront nav row (sm:hidden, only shown on storefront pages) --}}
+        @if ($isStorefront)
+            <div class="flex sm:hidden border-t border-[var(--hs-neutral-100)] px-4 py-1.5 gap-1">
+                <a
+                    href="{{ route('storefront.companies') }}"
+                    wire:navigate
+                    @class([
+                        'flex-1 text-center rounded-lg px-3 py-1.5 text-sm font-medium transition',
+                        'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.companies') || request()->routeIs('storefront.company'),
+                        'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)]' => !(request()->routeIs('storefront.companies') || request()->routeIs('storefront.company')),
+                    ])
+                >
+                    {{ __('Companies') }}
+                </a>
+                <a
+                    href="{{ route('storefront.products') }}"
+                    wire:navigate
+                    @class([
+                        'flex-1 text-center rounded-lg px-3 py-1.5 text-sm font-medium transition',
+                        'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.products') || request()->routeIs('storefront.product'),
+                        'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)]' => !(request()->routeIs('storefront.products') || request()->routeIs('storefront.product')),
+                    ])
+                >
+                    {{ __('Products') }}
+                </a>
+            </div>
+        @endif
     </div>
 </header>

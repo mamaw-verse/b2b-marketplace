@@ -76,75 +76,15 @@ Use `gap` utilities instead of margins for spacing between siblings:
 </div>
 ```
 
-## Dark Mode — Project-Specific Adaptive Theme
+## Dark Mode
 
-> **IMPORTANT: This project does NOT use `dark:` utility classes in application Blade files.** Read this section before adding any dark mode styling.
+If existing pages and components support dark mode, new pages and components must support it the same way, typically using the `dark:` variant:
 
-### How It Works
-
-This project uses an **adaptive CSS variable-based dark theme** defined in `resources/css/tokens.css`. The `.dark` class (toggled by `@fluxAppearance` based on OS preference) overrides all `--hs-neutral-*` variables to their dark equivalents.
-
-**The rule:** Use `--hs-neutral-*` and `--hs-green-*` CSS variables for all backgrounds, borders, and text. They automatically invert in dark mode without any `dark:` classes.
-
-### Design System Token Usage (Required Pattern)
-
+<!-- Dark Mode -->
 ```html
-<!-- ✅ Correct — adapts automatically -->
-<div class="bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)] border border-[var(--hs-neutral-200)]">
-    Card surface adapts to light and dark
+<div class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    Content adapts to color scheme
 </div>
-
-<!-- ❌ Wrong — broken in dark mode -->
-<div class="bg-white text-gray-900 border border-gray-200">
-    This will be invisible text in dark mode
-</div>
-
-<!-- ❌ Wrong — hardcoded dark: classes are not the pattern used here -->
-<div class="bg-white dark:bg-zinc-800 text-gray-900 dark:text-white">
-    Do not do this
-</div>
-```
-
-### Token Reference (Light → Dark)
-
-| Token | Light Value | Dark Value | Use For |
-|-------|-------------|------------|---------|
-| `--hs-neutral-0` | `#FFFFFF` | `#1A2421` | Card / elevated surface |
-| `--hs-neutral-50` | `#F8FAF9` | `#121917` | Page background |
-| `--hs-neutral-100` | `#F1F5F3` | `#242D2A` | Hover states, secondary bg |
-| `--hs-neutral-200` | `#E2E8E5` | `#2A3632` | Borders |
-| `--hs-neutral-300` | `#C8D1CC` | `#374240` | Prominent borders |
-| `--hs-neutral-500` | `#6B7A73` | `#6B7A73` | Placeholder text |
-| `--hs-neutral-600` | `#4A5650` | `#9CA8A2` | Muted text |
-| `--hs-neutral-700` | `#374240` | `#C8D1CC` | Tertiary text |
-| `--hs-neutral-800` | `#242D2A` | `#E2E8E5` | Secondary text |
-| `--hs-neutral-900` | `#121917` | `#F8FAF9` | Primary text |
-
-### CSS Variable Specificity Rule
-
-When overriding CSS variables for dark mode, **do NOT place them inside `@layer theme`**. Variables in unlayered `:root` have higher specificity than anything inside `@layer`. Always write `.dark { ... }` at the top level:
-
-```css
-/* ✅ Correct — unlayered, overrides :root */
-.dark {
-    --hs-neutral-0: #1A2421;
-}
-
-/* ❌ Wrong — @layer theme has lower priority than unlayered :root */
-@layer theme {
-    .dark {
-        --hs-neutral-0: #1A2421;
-    }
-}
-```
-
-### Exceptions: When `text-white` Is OK
-
-`text-white` is acceptable and correct when placed **on top of a brand green background** (e.g. buttons, hero banners, active step indicators) because white will always be readable there regardless of dark mode:
-
-```html
-<!-- ✅ OK: white text on green button -->
-<button class="bg-[var(--hs-green-600)] text-white">Submit</button>
 ```
 
 ## Common Patterns
@@ -176,6 +116,4 @@ When overriding CSS variables for dark mode, **do NOT place them inside `@layer 
 - Using `@tailwind` directives instead of `@import "tailwindcss"`
 - Trying to use `tailwind.config.js` instead of CSS `@theme` directive
 - Using margins for spacing between siblings instead of gap utilities
-- **Using `bg-white` in application views** — use `bg-[var(--hs-neutral-0)]` instead
-- **Adding `dark:` utility classes** — this project uses adaptive CSS variables, not `dark:` utilities
-- **Placing `.dark` overrides inside `@layer theme`** — they will be ignored due to CSS specificity rules
+- Forgetting to add dark mode variants when the project uses dark mode

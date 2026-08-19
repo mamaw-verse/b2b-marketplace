@@ -28,6 +28,7 @@ services:
             - mailpit
             - minio
             - clamav
+            - reverb
     worker:
         build:
             context: './vendor/laravel/sail/runtimes/8.5'
@@ -49,6 +50,26 @@ services:
             - typesense
             - minio
             - clamav
+    reverb:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.5'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'sail-8.5/app'
+        command: php artisan reverb:start --host=0.0.0.0 --port=${REVERB_PORT:-8080} --no-interaction
+        ports:
+            - '${REVERB_PORT:-8080}:${REVERB_PORT:-8080}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+            - redis
     clamav:
         image: mkodockx/docker-clamav:alpine
         networks:

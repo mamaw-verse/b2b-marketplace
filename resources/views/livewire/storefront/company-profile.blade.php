@@ -2,11 +2,11 @@
     {{-- Dark Header Band --}}
     <section class="bg-[var(--hs-green-950)] py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex items-start gap-5">
-                <x-hs-avatar :initials="strtoupper(mb_substr($shop->storefront_name, 0, 2))" size="lg" />
-                <div>
-                    <div class="flex items-center gap-3">
-                        <h1 class="text-3xl font-bold text-white font-[var(--hs-font-display)]">{{ $shop->storefront_name }}</h1>
+            <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+                <x-hs-avatar :initials="strtoupper(mb_substr($shop->storefront_name, 0, 2))" size="lg" class="shrink-0" />
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white font-[var(--hs-font-display)] break-words">{{ $shop->storefront_name }}</h1>
                         @if($shop->certificates->contains(fn($c) => $c->status === 'active'))
                             <x-hs-badge variant="verified" label="Verified" />
                         @endif
@@ -22,7 +22,7 @@
 
     {{-- Main Content Card --}}
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 pb-12">
-        <div class="rounded-[var(--hs-radius-panel)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-md)] p-8">
+        <div class="rounded-[var(--hs-radius-panel)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-md)] p-4 sm:p-8">
             <div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
                 {{-- Main Content (2/3) --}}
                 <div class="lg:col-span-2 space-y-8">

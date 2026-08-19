@@ -261,7 +261,7 @@
 
         {{-- ── Why Trust Us / CTA Banner ─────────────────────── --}}
         <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-            <div class="relative overflow-hidden rounded-2xl bg-[var(--hs-green-950)] px-8 py-12 text-center">
+            <div class="relative overflow-hidden rounded-2xl bg-[var(--hs-green-950)] px-5 sm:px-8 py-10 sm:py-12 text-center">
                 <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px); background-size: 20px 20px;"></div>
                 <div class="relative">
                     <h2 class="text-2xl sm:text-3xl font-bold text-white font-[var(--hs-font-display)]">

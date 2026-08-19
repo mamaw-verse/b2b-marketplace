@@ -1,25 +1,82 @@
 @if ($product)
     <div class="mb-6 border-b border-[var(--hs-neutral-200)]">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-            <a href="{{ route('hub.products.edit', $product) }}" wire:navigate
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition {{ request()->routeIs('hub.products.edit') ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)] hover:border-[var(--hs-neutral-300)]' }}">
-                Basic Info
+        <nav
+            class="flex items-center gap-6 overflow-x-auto"
+            aria-label="Product navigation"
+        >
+
+            {{-- Basic Info --}}
+            <a
+                href="{{ route('hub.products.edit', $product) }}"
+                wire:navigate
+                @class([
+                    'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
+                    'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.edit'),
+                    'border-transparent text-[var(--hs-neutral-500)] hover:border-[var(--hs-neutral-300)] hover:text-[var(--hs-neutral-800)]' => !request()->routeIs('hub.products.edit'),
+                ])
+            >
+                <flux:icon
+                    name="information-circle"
+                    variant="mini"
+                    class="shrink-0"
+                />
+                <span>Basic Info</span>
             </a>
 
-            <a href="{{ route('hub.products.variants', $product) }}" wire:navigate
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition {{ request()->routeIs('hub.products.variants') ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)] hover:border-[var(--hs-neutral-300)]' }}">
-                Manage Variants
+            {{-- Variants --}}
+            <a
+                href="{{ route('hub.products.variants', $product) }}"
+                wire:navigate
+                @class([
+                    'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
+                    'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.variants'),
+                    'border-transparent text-[var(--hs-neutral-500)] hover:border-[var(--hs-neutral-300)] hover:text-[var(--hs-neutral-800)]' => !request()->routeIs('hub.products.variants'),
+                ])
+            >
+                <flux:icon
+                    name="squares-2x2"
+                    variant="mini"
+                    class="shrink-0"
+                />
+                <span>Variants</span>
             </a>
 
-            <a href="{{ route('hub.products.gallery', $product) }}" wire:navigate
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition {{ request()->routeIs('hub.products.gallery') ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)] hover:border-[var(--hs-neutral-300)]' }}">
-                Gallery
+            {{-- Gallery --}}
+            <a
+                href="{{ route('hub.products.gallery', $product) }}"
+                wire:navigate
+                @class([
+                    'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
+                    'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.gallery'),
+                    'border-transparent text-[var(--hs-neutral-500)] hover:border-[var(--hs-neutral-300)] hover:text-[var(--hs-neutral-800)]' => !request()->routeIs('hub.products.gallery'),
+                ])
+            >
+                <flux:icon
+                    name="photo"
+                    variant="mini"
+                    class="shrink-0"
+                />
+                <span>Gallery</span>
             </a>
 
-            <a href="{{ route('hub.products.documents', $product) }}" wire:navigate
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition {{ request()->routeIs('hub.products.documents') ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)] hover:border-[var(--hs-neutral-300)]' }}">
-                Documents
+            {{-- Documents --}}
+            <a
+                href="{{ route('hub.products.documents', $product) }}"
+                wire:navigate
+                @class([
+                    'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
+                    'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.documents'),
+                    'border-transparent text-[var(--hs-neutral-500)] hover:border-[var(--hs-neutral-300)] hover:text-[var(--hs-neutral-800)]' => !request()->routeIs('hub.products.documents'),
+                ])
+            >
+                <flux:icon
+                    name="document-text"
+                    variant="mini"
+                    class="shrink-0"
+                />
+                <span>Documents</span>
             </a>
+
         </nav>
     </div>
 @endif

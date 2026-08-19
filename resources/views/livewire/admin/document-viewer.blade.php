@@ -18,7 +18,7 @@
             @endif
 
             <div class="flex items-center justify-between">
-                <flux:text class="text-sm text-zinc-500">{{ $media?->original_filename }}</flux:text>
+                <flux:text class="text-sm text-[var(--hs-neutral-500)]">{{ $media?->original_filename }}</flux:text>
                 <flux:button variant="ghost" wire:click="closeDocumentViewer">Close</flux:button>
             </div>
         @else

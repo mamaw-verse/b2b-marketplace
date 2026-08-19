@@ -15,7 +15,7 @@
                             {{-- Step circle --}}
                             <div class="flex flex-col items-center">
                                 <div @class([
-                                    'flex size-10 items-center justify-center rounded-full text-sm font-bold border-2 transition',
+                                    'flex size-7 sm:size-10 items-center justify-center rounded-full text-xs sm:text-sm font-bold border-2 transition',
                                     'bg-[var(--hs-green-600)] border-[var(--hs-green-600)] text-white' => $step === $currentStep,
                                     'bg-[var(--hs-green-50)] border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => $step < $currentStep,
                                     'bg-[var(--hs-neutral-100)] border-[var(--hs-neutral-200)] text-[var(--hs-neutral-500)]' => $step > $currentStep,
@@ -43,7 +43,7 @@
                             {{-- Connecting line --}}
                             @if ($step < 5)
                                 <div @class([
-                                    'flex-1 h-0.5 mx-2',
+                                    'flex-1 h-0.5 mx-1 sm:mx-2',
                                     'bg-[var(--hs-green-600)]' => $step < $currentStep,
                                     'bg-[var(--hs-neutral-200)]' => $step >= $currentStep,
                                 ])></div>

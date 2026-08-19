@@ -2,7 +2,7 @@
 @php
 $cheapestVariant = $product->relationLoaded('variants') ? $product->variants->sortBy('price')->first() : null;
 $shopName = $product->relationLoaded('shop') && $product->shop ? $product->shop->storefront_name : null;
-$bgColors = ['bg-[var(--hs-green-50)]', 'bg-[var(--hs-gold-100)]', 'bg-[var(--hs-neutral-50)]', 'bg-blue-50'];
+$bgColors = ['bg-[var(--hs-green-50)]', 'bg-[var(--hs-gold-100)]', 'bg-[var(--hs-neutral-50)]', 'bg-[var(--hs-info-50)]'];
 $bgColor = $bgColors[$product->id % count($bgColors)];
 @endphp
 <a href="{{ route('storefront.product', $product) }}" wire:navigate {{ $attributes->merge(['class' => 'group block rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] overflow-hidden shadow-[var(--hs-shadow-sm)] transition hover:shadow-[var(--hs-shadow-md)] hover:border-[var(--hs-green-200)]']) }}>

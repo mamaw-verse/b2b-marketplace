@@ -7,7 +7,7 @@
         </div>
 
         {{-- Categories Table --}}
-        <div class="overflow-hidden">
+        <div class="overflow-x-auto">
             <flux:table>
                     <flux:table.columns>
                         <flux:table.column>Name</flux:table.column>
