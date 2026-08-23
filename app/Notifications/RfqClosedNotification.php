@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\Rfq;
+use App\Models\RfqRecipient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -16,7 +16,7 @@ final class RfqClosedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public Rfq $rfq,
+        public RfqRecipient $recipient,
         public string $closedBy = 'buyer',
     ) {}
 
@@ -33,19 +33,21 @@ final class RfqClosedNotification extends Notification implements ShouldQueue
             : 'The buyer has closed this RFQ.';
 
         return (new MailMessage)
-            ->subject('RFQ Closed: '.$this->rfq->title)
+            ->subject('RFQ Closed: '.$this->recipient->rfq->title)
             ->line($reason)
-            ->line('RFQ: '.$this->rfq->title)
-            ->action('View Details', url('/hub/rfqs'));
+            ->line('RFQ: '.$this->recipient->rfq->title)
+            ->action('View Details', url('/hub/rfqs/'.$this->recipient->id));
     }
 
     public function toArray(object $notifiable): array
     {
         return [
             'type' => 'rfq_closed',
-            'rfq_id' => $this->rfq->id,
+            'rfq_id' => $this->recipient->rfq_id,
+            'rfq_recipient_id' => $this->recipient->id,
             'closed_by' => $this->closedBy,
-            'message' => 'RFQ closed: '.$this->rfq->title,
+            'message' => 'RFQ closed: '.$this->recipient->rfq->title,
+            'url' => url('/hub/rfqs/'.$this->recipient->id),
         ];
     }
 

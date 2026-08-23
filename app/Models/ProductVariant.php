@@ -58,6 +58,34 @@ final class ProductVariant extends Model
     }
 
     /**
+     * Quotation items that reference this variant (soft link — may be null on the item).
+     */
+    public function quotationItems(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(QuotationItem::class, 'variant_id');
+    }
+
+    /**
+     * Snapshot of this variant's key fields, captured at quotation submission time.
+     * The quotation item stores this so the line item is self-contained even if
+     * the variant is later edited or deleted.
+     *
+     * @return array<string, mixed>
+     */
+    public function toQuotationSnapshot(): array
+    {
+        return [
+            'sku' => $this->sku,
+            'product_name' => $this->product->name ?? null,
+            'description' => $this->description,
+            'unit_price' => (string) $this->price,
+            'unit' => $this->unit,
+            'moq' => $this->minimum_order_quantity,
+            'pack_size' => $this->pack_size,
+        ];
+    }
+
+    /**
      * Scope a query to only include published variants.
      */
     public function scopePublished($query)

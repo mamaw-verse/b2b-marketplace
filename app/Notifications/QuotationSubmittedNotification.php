@@ -43,6 +43,7 @@ final class QuotationSubmittedNotification extends Notification implements Shoul
             'quotation_id' => $this->quotation->id,
             'rfq_id' => $this->quotation->rfq_id,
             'message' => 'New quotation received for your RFQ.',
+            'url' => url('/account/rfqs/'.$this->quotation->rfq_id),
         ];
     }
 

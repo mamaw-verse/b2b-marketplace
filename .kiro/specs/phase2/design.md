@@ -883,3 +883,300 @@ Similarly, **RFQ close** must atomically cascade child quotations within a trans
 | `Phase 1 design.md` §4 | Existing Livewire component hierarchy that Phase 2 adds to |
 | `Phase 1 design.md` §5 | Existing job/queue/integration infrastructure reused by Phase 2 jobs |
 | `Phase 2 requirements.md` | PRD, state machines (§5), detailed feature specs, user flows, milestones, non-functional requirements |
+
+---
+
+---
+
+## Epic 20 — Product Variant Attribute System & Seller Tooling
+
+**Sessions:** Two independent sessions on 2026-08-22.
+**Session A** (prior session, confirmed by git diff) covered notifications, schema migrations, category management pages, and the initial product form schema editor.
+**Session B** (this session) fixed bugs introduced in Session A, completed the auto-populate flow, overhauled the variant manager, and added the demo seeder.
+
+---
+
+### 20.1 Architectural Overview
+
+A three-tier attribute schema propagates from admin → product → variant:
+
+```
+Admin: Category.variant_attributes_schema (JSONB)
+    ↓ auto-populated when seller selects a category
+Seller: Product.variant_attributes_schema (JSONB, editable)
+    ↓ rendered as inputs in the variant add/edit modal
+Per-SKU: ProductVariant.attributes (JSONB, values per variant)
+```
+
+The category schema is the template; the product schema is the seller's editable fork; the variant attributes are the concrete per-SKU values. Sellers never have to manually configure schemas — selecting a category populates them automatically.
+
+**Schema key format:** `attr_<uniqid()>` — opaque, stable keys. Labels are human-readable; keys are the stable reference used in `ProductVariant.attributes`.
+
+**Schema shape (both `categories.variant_attributes_schema` and `products.variant_attributes_schema`):**
+```json
+{
+  "attr_6a2f1b3": {
+    "label": "Cut",
+    "type": "select",
+    "options": "Whole,Half,Quarter,Breast,Thigh",
+    "required": true
+  },
+  "attr_9c4d2e1": {
+    "label": "Weight",
+    "type": "number",
+    "options": "",
+    "required": true
+  }
+}
+```
+
+`type` is one of `select | text | number`. For `select`, `options` is a comma-separated string. `options` is always a string (not an array) — consistent with how the admin form saves and the variant form reads it.
+
+**`ProductVariant.attributes` shape:**
+```json
+{
+  "attr_6a2f1b3": "Whole",
+  "attr_9c4d2e1": "1.2"
+}
+```
+
+---
+
+### 20.2 Database Changes
+
+| Table | Column | Type | Notes |
+|---|---|---|---|
+| `categories` | `variant_attributes_schema` | `JSONB NOT NULL DEFAULT '{}'` | Added in Session A |
+| `products` | `variant_attributes_schema` | `JSONB NOT NULL DEFAULT '{}'` | Added in Session A |
+
+No additional migrations in Session B.
+
+---
+
+### 20.3 Session A Changes (Confirmed by git diff)
+
+#### Notifications — context-aware URL fix
+8 notification classes updated (see Epic 19 in tasks.md). Core change: seller-facing notifications now accept `RfqRecipient` instead of `Rfq` to generate `/hub/rfqs/{rfqRecipient_id}` URLs. `NewMessageNotification` checks `$notifiable->shop->status === 'active'` instead of role. 2 listeners + 1 job updated accordingly.
+
+#### Schema migrations
+- `2026_08_22_090626_add_variant_attributes_schema_to_categories_table.php`
+- `2026_08_22_090710_add_variant_attributes_schema_to_products_table.php`
+- `Category.php` + `Product.php` — added `variant_attributes_schema` to `$fillable` and cast as `'array'`
+
+#### Category management pages
+- `CategoryCreate` + `CategoryEdit` Livewire components created as full pages (not modals)
+- Routes: `/admin/categories/create`, `/admin/categories/{category}/edit`
+- `CategoryManager` blade updated: "Add Category" button and edit pencil changed from `wire:click` inline actions to `href="{{ route(...) }}" wire:navigate` — the category create/edit modal was replaced by dedicated pages
+
+#### Product Form — initial schema editor
+`ProductForm.php` and `product-form.blade.php` updated with `variantAttributesSchema` property, `addAttribute()`, `removeAttribute()`. An `updatedCategoryIds()` hook and `loadFromCategory()` button were added. **Note:** the `$toggle` approach for category pills introduced here was broken and fixed in Session B.
+
+---
+
+### 20.4 Session B Changes (This Session)
+
+#### Bugs fixed
+
+| File | Bug | Fix |
+|---|---|---|
+| `variant-manager.blade.php` | `$mergedAttributeSchema` → `ErrorException: Undefined variable` | `#[Computed]` in Livewire 4 accessed as `$this->mergedAttributeSchema` in blade |
+| `variant-manager.blade.php` | Required asterisk `{{ ... ? '<span>*</span>' : '' }}` rendered as escaped text | Replaced with `@if` block |
+| `VariantManager.php` | `mergedAttributeSchema()` used `pluck()->collapse()` — fails on keyed JSONB | Simplified to `return $product->variant_attributes_schema ?? []` |
+| `product-form.blade.php` | `variant="secondary"` on `<flux:button>` — `UnhandledMatchError` (no such Flux 2.x variant) | Changed to `variant="outline"` |
+| `product-form.blade.php` | `wire:click="$toggle('category_ids', id)"` — `$toggle` is `!value` (boolean flip), not array push/pop | Replaced with `wire:click="toggleCategory(id)"` Livewire action |
+| `hs-modal.blade.php` | `ParseError: unexpected ":"` — `@if` blocks inside Blade component opening tags invalid | Replaced with PHP ternary string expressions |
+
+#### ProductForm — auto-populate product options
+
+`toggleCategory(int $id)` replaces the broken `$toggle` + `updatedCategoryIds()` pattern:
+
+```php
+public function toggleCategory(int $id): void
+// Pushes/pops $id from $category_ids.
+// On CREATE: if schema is empty, calls populateSchemaFromCategories().
+// On EDIT: never auto-populates (saved schema is authoritative).
+```
+
+```php
+public function reloadSchemaFromCategories(): void
+// Clears and rebuilds schema from all selected categories.
+// Works on both create and edit. On edit: persists to DB immediately.
+// Shows warning toast if none of the selected categories have schemas.
+
+private function populateSchemaFromCategories(): void
+// Merges schemas from all selected categories.
+// Deduplicates by lowercase label — the same attribute name from two
+// categories is only added once.
+```
+
+**Why not `wire:model` on a checkbox array?** `wire:model` on checkbox arrays requires the `updated*` hook which is unreliable when the property is mutated via JavaScript. A dedicated action owns the mutation and the side effect explicitly.
+
+#### Product Options UI — all three forms
+
+Applied to `product-form.blade.php`, `category-create.blade.php`, `category-edit.blade.php`:
+
+- Category pills: `<button wire:click="toggleCategory()">` with server-side `in_array()` active state and a checkmark icon when selected
+- Attribute rows: `flex flex-wrap lg:flex-nowrap` with fixed widths (`w-64` label, `w-32` type, `flex-1` choices)
+- Column headers above the first row only (`@if ($loop->first)`)
+- **Choices field always in DOM** — `x-data="{ type: '...' }"` per row, `x-model="type"` on the select alongside `wire:model`. `x-bind:disabled="type !== 'select'"` + `opacity-40 cursor-not-allowed` disables it instantly without a round-trip
+- Dashed-border empty state with context-aware message
+
+#### Reusable `x-hs-modal` Blade component
+
+`resources/views/components/hs-modal.blade.php`:
+
+```blade
+<x-hs-modal model="showVariantModal" title="Add Variant" subtitle="..." size="lg">
+    ...slot...
+</x-hs-modal>
+```
+
+Props: `model` (wire:model), `name` (named modal), `title`, `subtitle`, `size` (`sm|md|lg|xl|2xl`). Wraps `flux:modal` with a consistent bordered title/subtitle header.
+
+#### VariantManager overhaul
+
+**Before:** inline table with form inputs in every cell — unusable on mobile, required a "Save All" button.
+
+**After:** read-only variant cards + modal for add/edit with immediate persistence.
+
+`VariantManager.php` new state:
+```php
+public bool $showVariantModal = false;
+public ?int $editingVariantId = null;  // null = create, int = edit by DB id
+public string $draftSku, $draftPrice, $draftMoq, $draftUnit;
+public string $draftLeadTime, $draftPackSize, $draftStatus;
+public array $draftAttributes = [];    // pre-keyed from schema via blankAttributes()
+```
+
+Key method changes:
+
+| Old | New | Change |
+|---|---|---|
+| `addVariant()` | `openAddVariant()` | Opens modal with blank draft |
+| _(none)_ | `openEditVariant(int $id)` | Opens modal pre-filled from DB record |
+| `saveAll()` | `saveVariant()` | Validates + persists single variant immediately |
+| `toggleVariantStatus(int $index)` | `toggleStatus(int $id)` | Operates by DB id, persists immediately |
+| `removeVariant(int $index)` | `removeVariant(int $id)` | Operates by DB id |
+| `saveQuantityBreaks()` (array-based) | `saveQuantityBreaks()` (DB write) | Now persists directly to the DB record |
+
+`blankAttributes()` returns `array_fill_keys(array_keys($this->mergedAttributeSchema()), '')` — ensures all schema keys are present in `draftAttributes` even when creating a new variant.
+
+**Blade cards** — each variant shows:
+- Top bar: SKU (monospace) + clickable status pill + Qty Breaks button (with count badge) + edit + delete
+- Body: Price | Min Order+Unit | Lead Time | Pack Size
+- Attribute tag row: `Label: Value` pills for non-empty attributes
+
+**Add/Edit modal** (via `x-hs-modal size="lg"`):
+- Fields: SKU, Status, Price, MOQ, Unit, Lead Time, Pack Size
+- "Product Options" section (only when schema is non-empty): schema-driven inputs rendered from `mergedAttributeSchema`, bound to `draftAttributes.{key}`
+
+**Quantity Breaks modal** (via `x-hs-modal size="md"`): 3-column grid (Min Qty | Price | Delete), saves directly to DB.
+
+#### Demo seeder
+
+`DemoUsersSeeder.php` seeds:
+- `buyer@gmail.com` / `password` — role `buyer`, `BuyerProfile` (Santos Food Enterprises, Makati City)
+- `seller@gmail.com` / `password` — role `seller`, active `Shop` (Macapaar Halal Foods Corporation, Cotabato City), 5 published products with Unsplash featured images
+
+Registered in `DatabaseSeeder` after `DemoDataSeeder`. All use `firstOrCreate` — safe to re-run.
+
+---
+
+### 20.5 Architectural Decisions
+
+| Decision | Rationale |
+|---|---|
+| `options` stored as comma-separated string | Consistent across admin form (saves as string) and seller/variant forms (splits on `,` + `trim()` at render). Not normalized to array. |
+| Product schema is source of truth for variants | No need to re-query category schemas on every variant page load. The product schema is the seller's already-customised fork. `mergedAttributeSchema()` returns `$product->variant_attributes_schema` directly. |
+| `toggleCategory()` action instead of `wire:model` | `$toggle` is a boolean flipper. `wire:model` on array checkboxes doesn't reliably trigger `updated*` hooks. Explicit action owns both mutation and side effect. |
+| Immediate save on variant modal submit | Eliminates risk of losing unsaved changes when navigating between tabs. No "Save All" needed. Same principle applied to quantity breaks. |
+| `x-hs-modal` wraps `flux:modal` | Ensures consistent title/subtitle header, width scale, and spacing across all modals in the app. Pass `model=` for `wire:model` binding or `name=` for named modals. |
+
+---
+
+### 20.6 Session C Changes (This Session — Quotation Variant Link + Unit Picker)
+
+#### Quotation line item soft variant link
+
+**Problem:** The quotation builder was a blank freeform form — sellers had to re-type product descriptions, prices, and units that already existed on their published variants. No traceability between quoted items and the seller's catalogue.
+
+**Decision:** Nullable `variant_id` FK (`ON DELETE SET NULL`) + `variant_snapshot` JSONB on `quotation_items`. The FK is optional — freeform items work as before. At submission the snapshot is written, making each item self-contained regardless of future catalogue changes.
+
+**Why not a mandatory FK:** Freeform items are a valid use case (custom packaging, one-off bundles). A mandatory FK would force sellers to add every quoted item to their catalogue first. `ON DELETE RESTRICT` would also block routine catalogue cleanup.
+
+**New `quotation_items` columns:**
+
+| Column | Type | Notes |
+|---|---|---|
+| `variant_id` | `BIGINT NULL FK → product_variants ON DELETE SET NULL` | Soft link; null for freeform items |
+| `variant_snapshot` | `JSONB NULL` | Written at submit: `{sku, product_name, description, unit_price, unit, moq, pack_size}` |
+
+**`ProductVariant.toQuotationSnapshot()` returns:**
+```json
+{
+  "sku": "ALA-CHK-1200",
+  "product_name": "Halal Frozen Whole Chicken",
+  "description": "1.2 kg average weight per bird",
+  "unit_price": "220.00",
+  "unit": "piece",
+  "moq": 100,
+  "pack_size": "10 pieces per carton"
+}
+```
+
+**`QuotationBuilder` new behaviour:**
+- `shopVariants()` `#[Computed]` — loads all published variants from the seller's shop, returned as a flat array for the picker dropdown
+- `selectVariant(int $index, ?int $variantId)` — security: validates variant belongs to this shop before filling; auto-fills `description`, `unit`, `unit_price`, `quantity` (from MOQ); `null` clears back to freeform
+- `captureVariantSnapshots()` — called at `submitQuotation()`, bulk-writes snapshots via a single variant query + loop
+
+**Wire:change bug and fix:**
+`wire:change="..., Number($event.target.value)"` threw 500 because `Number()` is a JavaScript global that Livewire's server-side expression parser doesn't recognise. Fixed by switching to `x-on:change="$wire.selectVariant(..., parseInt(...))"` with an `x-data` Alpine wrapper — the expression stays client-side, then calls Livewire as RPC.
+
+---
+
+#### Unit-of-measure picker
+
+**Problem:** Unit fields were free-text `flux:input` everywhere, leading to inconsistent entries (`kg`, `Kg`, `KG`, `kilogram`). No curation.
+
+**Solution:** `config/units.php` + `x-hs-unit-select` Blade component.
+
+`config/units.php` — 23 curated units in 5 groups (Weight, Volume, Packaging, Count, Other). Single source of truth; extend by editing one file.
+
+`x-hs-unit-select` — wraps a native `<select>` with `<optgroup>` sections. "Other…" option reveals a debounced text input for custom values. Syncs to Livewire via `$wire.set()` in Alpine watchers (not `wire:model` — anonymous Blade components don't have `@this` scope). Handles existing DB values not in the list by auto-selecting "Other…" and pre-filling the text.
+
+Applied to: `draftUnit` in variant manager modal, `items.N.unit` in quotation builder line items.
+
+---
+
+#### UI pattern rules documented
+
+All patterns established across this session's blade work were recorded in `.ai/rules/views.md`:
+- Standard page card shell
+- Multi-card page layout (`space-y-6`)
+- Form layout (section dividers, action row, validation errors)
+- Info and warning notice boxes
+- Modal pattern (`x-hs-modal` always, never `flux:modal` directly)
+- Status-dependent card backgrounds
+- Empty states (full and dashed-border inline)
+- Attachment lists, file upload input, inline data tables
+- Reusable component reference (`x-hs-modal`, `x-hs-unit-select`, `x-hs-status-pill`, `x-hs-empty-state`)
+
+4 binding rules recorded via `record-rule`:
+
+| Rule | Scope |
+|---|---|
+| Standard card shell | All blade templates |
+| Always use `x-hs-modal`, never `flux:modal` directly | All blade templates |
+| Always use `x-hs-unit-select` for unit fields | All blade templates |
+| Form layout: `space-y-6`, border-t dividers, action row | All blade templates |
+
+---
+
+### 20.7 Updated Architectural Decisions
+
+| Decision | Rationale |
+|---|---|
+| Nullable `variant_id` on `quotation_items` | Freeform quotation items remain valid. `ON DELETE SET NULL` means catalogue cleanup is never blocked by historical quotations. |
+| Snapshot at submission, not at draft time | Draft is mutable; snapshot serves as immutable audit record. Written once at `submitQuotation()` alongside `buyer_snapshot`. |
+| `config/units.php` not a DB table | Units don't need admin UI or versioning at this scale. A PHP config is instantly available, cacheable, and requires no migration. Add units by editing one file. |
+| `x-hs-unit-select` uses `$wire.set()` not `wire:model` | Anonymous Blade components don't have access to `@this`. `$wire` is the Alpine-accessible Livewire proxy, available in any template where Livewire is active. |

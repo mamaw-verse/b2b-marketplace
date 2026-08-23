@@ -41,6 +41,7 @@ final class RfqNoBidNotification extends Notification implements ShouldQueue
             'type' => 'rfq_no_bid',
             'rfq_id' => $this->rfqRecipient->rfq_id,
             'message' => 'Seller did not respond to your RFQ.',
+            'url' => url('/account/rfqs/'.$this->rfqRecipient->rfq_id),
         ];
     }
 

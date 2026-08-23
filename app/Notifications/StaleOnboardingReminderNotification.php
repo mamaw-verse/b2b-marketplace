@@ -56,6 +56,7 @@ final class StaleOnboardingReminderNotification extends Notification implements 
             'onboarding_id' => $this->onboarding->id,
             'storefront_name' => $storefrontName,
             'message' => "Onboarding application for {$storefrontName} is still pending.",
+            'url' => url('/hub/onboarding'),
         ];
     }
 

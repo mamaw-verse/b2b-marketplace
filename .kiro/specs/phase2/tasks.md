@@ -956,6 +956,149 @@
 
 ---
 
+## Phase 2 — Remaining UI/UX Implementation Report (Merged from phase2-remaining-work.md)
+
+| | |
+|---|---|
+| **Status** | ✅ All Priority 1 & 2 items complete |
+| **Date** | 2026-08-18 |
+| **Context** | All 70 backend tasks done (E11–E18), 287 tests passing. Frontend wiring complete. |
+
+---
+
+### Priority 1 — Functional Gaps ✅ ALL RESOLVED
+
+#### ~~1.1 Chat UI Not Accessible from Navigation~~ ✅ DONE
+
+Added "Messages" nav links to both `hub` and `account` portal sidebars in `portal-nav.blade.php`. Fixed layout variable override bug.
+
+#### ~~1.2 Real-Time Chat Not Working (Echo Not Wired)~~ ✅ DONE
+
+- Laravel Echo configured in `resources/js/app.js` with Reverb connection (via `pusher-js`)
+- Dynamic Echo listeners in both `ChatInbox` components using `getListeners()` method
+- Alpine.js auto-scroll on mount + after render
+- Computed message cache cleared on `MessageSent` broadcast
+
+#### ~~1.3 Notification Bell/Badge Not Present~~ ✅ DONE
+
+- `NotificationBell` Livewire component created with unread count badge, dropdown, mark-as-read
+- Embedded in portal header (`portal-header.blade.php`)
+- Listens for `notification-received` Echo event for instant updates
+- 6 tests passing
+
+#### ~~1.4 Reverb WebSocket Server Not Auto-Started~~ ✅ DONE
+
+- Added `reverb` service to `compose.yaml` (Laravel Sail runtime 8.5, port 8080)
+- Added as dependency under `laravel.test`
+
+---
+
+### Priority 2 — Missing Navigation Links ✅ ALL RESOLVED
+
+#### ~~2.1 Account Portal Sidebar Incomplete~~ ✅ DONE
+
+Added: My RFQs, Messages links.
+
+#### ~~2.2 Hub Portal Sidebar Missing Phase 2 Links~~ ✅ DONE
+
+Added: RFQs Received, Messages links.
+
+---
+
+### Priority 3 — Polish / Enhancement (Deferred)
+
+#### ~~3.1 Chat Message Stream Auto-Scroll~~ ✅ DONE
+
+Alpine.js auto-scroll on mount + after Livewire render cycle.
+
+#### ~~3.2 RFQ/Quotation Cards in Chat Thread~~ ✅ DONE
+
+System messages with RFQ prefix are detected and rendered as inline cards using `<x-shared.rfq-card>` component. Quotation card component also created for future use.
+
+#### 3.3 Typing Indicators — NOT YET (Low Priority)
+
+Add debounced `TypingStarted` event broadcast + "typing..." indicator.
+
+#### ~~3.4 Unread Message Count Per Conversation~~ ✅ DONE
+
+Added `conversation_reads` table tracking `last_read_at` per user per conversation. Unread count badge shown on conversation list. Conversations marked as read on selection.
+
+---
+
+### Remaining Implementation Order
+
+| # | Item | Effort | Status |
+|---|------|--------|--------|
+| 1 | Nav links (2.1 + 2.2) | Small | ✅ Done |
+| 2 | Echo in app.js (1.2) | Small | ✅ Done |
+| 3 | Reverb in docker-compose (1.4) | Small | ✅ Done |
+| 4 | Echo listeners in ChatInbox (1.2) | Medium | ✅ Done |
+| 5 | Notification bell (1.3) | Medium | ✅ Done |
+| 6 | Auto-scroll (3.1) | Small | ✅ Done |
+| 7 | RFQ/Quotation cards in chat (3.2) | Medium | ✅ Done |
+| 8 | Unread count (3.4) | Medium | ✅ Done |
+| 9 | Typing indicators (3.3) | Low priority | Deferred |
+
+---
+
+### Current Test Count
+
+```
+Total: 287 tests, 872 assertions — all passing
+Phase 2 specific: 109 tests (99 original + 10 new frontend wiring tests)
+```
+
+---
+
+## Epic 19 — Notification URL Fix (Post-Implementation Documentation)
+
+**Goal:** Document the fix for notification URLs to correctly route users based on their portal access (buyer `/account` vs seller `/hub`) rather than role-based checks.
+
+**Background:** Users can be both buyers AND sellers simultaneously (have an active shop). The original implementation used `$notifiable->hasRole('seller')` to determine URLs, but access is determined by portal structure, not roles.
+
+**Changes Made:**
+
+| Notification | Recipient | Old URL Logic | New URL |
+|--------------|-----------|---------------|---------|
+| `rfq_received` | Seller | Role-based (`/hub/rfqs/{rfq_id}`) | `/hub/rfqs/{rfqRecipient_id}` ✓ |
+| `quotation_submitted` | Buyer | Role-based (`/account` or `/hub`) | `/account/rfqs/{rfq_id}` ✓ |
+| `quotation_awarded` | Seller | Role-based | `/hub/rfqs/{rfqRecipient_id}` ✓ |
+| `quotation_rejected` | Seller | Role-based | `/hub/rfqs/{rfqRecipient_id}` ✓ |
+| `quotation_withdrawn` | Buyer | Role-based | `/account/rfqs/{rfq_id}` ✓ |
+| `rfq_closed` | Seller | Role-based | `/hub/rfqs/{rfqRecipient_id}` ✓ |
+| `rfq_no_bid` | Buyer | Role-based | `/account/rfqs/{rfq_id}` ✓ |
+| `new_message` | Both | Role-based | `/hub/messages` if active shop, else `/account/messages` ✓ |
+| `certificate_expiring/expired` | Seller | Already correct | `/hub/onboarding` |
+| `stale_onboarding_reminder` | Seller | Already correct | `/hub/onboarding` |
+
+**Technical Changes:**
+1. **Notifications now accept `RfqRecipient`** instead of `Rfq` for seller-facing notifications — provides access to `rfqRecipient_id` for `/hub/rfqs/{id}` routes
+2. **Listeners/Jobs updated** to pass `RfqRecipient` where needed
+3. **URL generation** is context-aware (based on notification type/recipient) not role-based
+4. **NewMessageNotification** checks `$notifiable->shop->status === 'active'` instead of roles
+
+**Files Modified:**
+- `app/Notifications/RfqReceivedNotification.php` (accepts `RfqRecipient`)
+- `app/Notifications/QuotationSubmittedNotification.php`
+- `app/Notifications/QuotationAwardedNotification.php`
+- `app/Notifications/QuotationRejectedNotification.php`
+- `app/Notifications/QuotationWithdrawnNotification.php`
+- `app/Notifications/RfqClosedNotification.php` (accepts `RfqRecipient`)
+- `app/Notifications/RfqNoBidNotification.php`
+- `app/Notifications/NewMessageNotification.php`
+- `app/Listeners/NotifySellerRfqReceived.php`
+- `app/Listeners/NotifySellerRfqClosed.php`
+- `app/Jobs/RfqAutoCloseJob.php`
+
+**Tests Verified:**
+- All 289 existing tests pass
+- `NotificationBellTest.php` — 6 tests pass
+- `NotificationDeliveryTest.php` — 5 tests pass
+- `TimerJobsTest.php` — 11 tests pass
+- `CertificateExpiryJobTest.php` — 6 tests pass
+
+---
+
 ## Escalation
 
 If, while executing any task, the agent encounters:
@@ -965,3 +1108,194 @@ If, while executing any task, the agent encounters:
 - A **race condition** or concurrency scenario not covered by the existing `SELECT ... FOR UPDATE` patterns in design.md §6.2,
 
 the agent should **stop, log the specific conflict with file/line references, and flag it for human review** rather than inferring a resolution. Known cross-epic dependencies (E12 ↔ E16 for conversation creation) are already annotated in the task descriptions — follow the documented resolution approach.
+
+---
+
+---
+
+## Epic 20 — Product Variant Attribute System & Seller Tooling
+
+**Status:** ✅ Complete (two sessions on 2026-08-22)
+**Depends on:** E18 complete; Phase 1 `categories`, `products`, `product_variants` tables in place
+
+---
+
+### Session A Tasks (Confirmed by git diff against HEAD)
+
+- [x] **E20.T1** Fix notification URL generation — context-aware routing
+  - Files: `app/Notifications/RfqReceivedNotification.php`, `QuotationSubmittedNotification.php`, `QuotationAwardedNotification.php`, `QuotationRejectedNotification.php`, `QuotationWithdrawnNotification.php`, `RfqClosedNotification.php`, `RfqNoBidNotification.php`, `NewMessageNotification.php`
+  - Files: `app/Listeners/NotifySellerRfqReceived.php`, `NotifySellerRfqClosed.php`, `app/Jobs/RfqAutoCloseJob.php`
+  - Seller-facing notifications now accept `RfqRecipient` (not `Rfq`) for `/hub/rfqs/{id}` URLs
+  - `NewMessageNotification` checks `$notifiable->shop->status === 'active'` instead of role
+  - See design.md §20.3 and Epic 19 for full detail
+  - Verify: all 289 tests pass
+
+- [x] **E20.T2** Add `variant_attributes_schema` to `categories` table
+  - File: `database/migrations/2026_08_22_090626_add_variant_attributes_schema_to_categories_table.php`
+  - `JSONB NOT NULL DEFAULT '{}'`
+  - Model: `app/Models/Category.php` — added to `$fillable`, cast as `'array'`
+
+- [x] **E20.T3** Add `variant_attributes_schema` to `products` table
+  - File: `database/migrations/2026_08_22_090710_add_variant_attributes_schema_to_products_table.php`
+  - `JSONB NOT NULL DEFAULT '{}'`
+  - Model: `app/Models/Product.php` — added to `$fillable`, cast as `'array'`
+
+- [x] **E20.T4** Create `CategoryCreate` Livewire component
+  - Files: `app/Livewire/Admin/CategoryCreate.php`, `resources/views/livewire/admin/category-create.blade.php`
+  - Full-page form: name (with live slug preview), description, schema editor with add/remove rows
+  - Route: `/admin/categories/create` → `admin.categories.create`
+
+- [x] **E20.T5** Create `CategoryEdit` Livewire component
+  - Files: `app/Livewire/Admin/CategoryEdit.php`, `resources/views/livewire/admin/category-edit.blade.php`
+  - Pre-populates schema from existing category; same schema editor as create
+  - Route: `/admin/categories/{category}/edit` → `admin.categories.edit`
+
+- [x] **E20.T6** Update `CategoryManager` blade to link to new routes
+  - File: `resources/views/livewire/admin/category-manager.blade.php`
+  - "Add Category" button and edit pencil changed from `wire:click` to `href="{{ route(...) }}" wire:navigate`
+  - The inline create/edit modal pattern replaced by dedicated pages
+
+- [x] **E20.T7** Add schema editor to `ProductForm` (initial — buggy category toggle)
+  - Files: `app/Livewire/CompanyHub/ProductForm.php`, `resources/views/livewire/company-hub/product-form.blade.php`
+  - Added `variantAttributesSchema`, `addAttribute()`, `removeAttribute()`, `loadFromCategory()`
+  - Category pills used `wire:click="$toggle()"` — broken (see E20.T10 for fix)
+
+---
+
+### Session B Tasks (This Session)
+
+- [x] **E20.T8** Fix `$mergedAttributeSchema` undefined variable in variant-manager blade
+  - File: `resources/views/livewire/company-hub/variant-manager.blade.php`
+  - `$mergedAttributeSchema` → `$this->mergedAttributeSchema` (Livewire 4 `#[Computed]` blade syntax)
+  - Fixed HTML-in-echo for required asterisk (`{{ ... ? '<span>' : '' }}` → `@if` block)
+
+- [x] **E20.T9** Fix broken `mergedAttributeSchema()` implementation in `VariantManager`
+  - File: `app/Livewire/CompanyHub/VariantManager.php`
+  - `pluck()->collapse()` fails on keyed associative JSONB arrays
+  - Simplified to `return $this->product->variant_attributes_schema ?? []`
+
+- [x] **E20.T10** Fix `variant="secondary"` `UnhandledMatchError` on product edit page
+  - File: `resources/views/livewire/company-hub/product-form.blade.php`
+  - `variant="secondary"` does not exist in Flux 2.x — `UnhandledMatchError` in compiled view
+  - Changed to `variant="outline"`
+
+- [x] **E20.T11** Fix broken category toggle — replace `$toggle` with `toggleCategory()` action
+  - File: `app/Livewire/CompanyHub/ProductForm.php`
+  - Root cause: `$toggle` calls `$wire.set(name, !$wire.get(name))` — boolean flip, not array push/pop
+  - Added `toggleCategory(int $id)` — proper push/pop, triggers `populateSchemaFromCategories()` on create when schema is empty
+
+- [x] **E20.T12** Implement auto-populate and reload schema from categories
+  - File: `app/Livewire/CompanyHub/ProductForm.php`
+  - `populateSchemaFromCategories()` — merges schemas from all selected categories, deduplicates by lowercase label
+  - `reloadSchemaFromCategories()` — clears + rebuilds; persists to DB on edit page; shows warning if no categories have schemas
+  - On **create**: fires automatically when category selected and schema is empty
+  - On **edit**: only via explicit "Reload" button (existing product schema is preserved)
+
+- [x] **E20.T13** Add Alpine-driven instant disable of Choices field when type ≠ select
+  - Files: `product-form.blade.php`, `category-create.blade.php`, `category-edit.blade.php`
+  - `x-data="{ type: '{{ $attr[\"type\"] ?? \"select\" }}' }"` per row
+  - Type select: `x-model="type"` alongside `wire:model` for local reactive state
+  - Choices input: `x-bind:disabled="type !== 'select'"` + `x-bind:class` for `opacity-40 cursor-not-allowed`
+  - No server round-trip needed for the disable/enable toggle
+
+- [x] **E20.T14** Improve Product Options UI layout across all three forms
+  - Files: `product-form.blade.php`, `category-create.blade.php`, `category-edit.blade.php`
+  - Attribute rows: `flex flex-wrap lg:flex-nowrap` with `w-64` label, `w-32` type, `flex-1` choices, fixed actions width
+  - Column headers rendered above first row only (`@if ($loop->first)`)
+  - Category pills: `<button wire:click="toggleCategory()">` with checkmark icon on selected state
+  - Dashed-border empty state with icon and context-aware message
+
+- [x] **E20.T15** Create reusable `x-hs-modal` Blade component
+  - File: `resources/views/components/hs-modal.blade.php`
+  - Props: `model` (wire:model binding), `name` (named modal), `title`, `subtitle`, `size` (`sm|md|lg|xl|2xl`)
+  - Renders `flux:modal` with a consistent bordered title/subtitle header block
+  - Used by variant manager and available for all future modals
+
+- [x] **E20.T16** Overhaul `VariantManager` — modal-driven flow, immediate persistence
+  - File: `app/Livewire/CompanyHub/VariantManager.php`
+  - Added: `showVariantModal`, `editingVariantId`, `draftSku/Price/Moq/Unit/LeadTime/PackSize/Status/Attributes`
+  - Added: `openAddVariant()`, `openEditVariant(int $id)`, `saveVariant()`, `blankAttributes()`
+  - Added: `toggleStatus(int $id)`, `removeVariant(int $id)` — by DB id, persist immediately
+  - Updated: `saveQuantityBreaks()` — now writes directly to DB record (not intermediate array)
+  - Removed: `saveAll()`, `addVariant()`, `toggleVariantStatus(int $index)`, `removeVariant(int $index)`, `openQuantityBreaks(int $index)`
+  - Verify: `/hub/products/{id}/variants` returns 200; "Add Variant" opens modal; save persists to DB
+
+- [x] **E20.T17** Rewrite variant-manager blade with read-only cards and modals
+  - File: `resources/views/livewire/company-hub/variant-manager.blade.php`
+  - Variant cards: SKU + status pill (clickable toggle) + Qty Breaks button (count badge) + edit + delete
+  - Card body: Price, MOQ/Unit, Lead Time, Pack Size, attribute tag pills for non-empty values
+  - Add/Edit modal via `<x-hs-modal size="lg">`: all variant fields + "Product Options" section from schema
+  - Quantity Breaks modal via `<x-hs-modal size="md">`: 3-column grid layout
+  - No-schema info notice links to Basic Info tab
+
+- [x] **E20.T18** Create `DemoUsersSeeder` with buyer and seller accounts
+  - File: `database/seeders/DemoUsersSeeder.php`
+  - `buyer@gmail.com` / `password` — role `buyer`, `BuyerProfile` (Santos Food Enterprises, Makati)
+  - `seller@gmail.com` / `password` — role `seller`, active `Shop` (Macapaar Halal Foods, Cotabato City), 5 published products with Unsplash images
+  - Registered in `DatabaseSeeder` after `DemoDataSeeder`; all use `firstOrCreate` (re-run safe)
+  - Verify: `vendor/bin/sail artisan db:seed --class=DemoUsersSeeder` completes without error
+
+---
+
+### Verification
+
+```bash
+vendor/bin/sail artisan migrate           # schema columns present
+vendor/bin/sail artisan route:list --path=admin/categories  # create + edit routes present
+vendor/bin/sail artisan view:clear
+
+# All pages return 200 (after login as seller@gmail.com / password):
+# /hub/products/create
+# /hub/products/{id}/edit
+# /hub/products/{id}/variants
+# /admin/categories/create          (as admin)
+# /admin/categories/{id}/edit       (as admin)
+```
+
+- [x] **E20.T19** Add soft variant link to `quotation_items`
+  - File: `database/migrations/2026_08_22_124906_add_variant_link_to_quotation_items.php`
+  - Added `variant_id BIGINT NULLABLE FK → product_variants ON DELETE SET NULL`
+  - Added `variant_snapshot JSONB NULLABLE` — written at submission time; self-contained audit record
+  - Ran: `vendor/bin/sail artisan migrate`
+
+- [x] **E20.T20** Update `QuotationItem` and `ProductVariant` models for variant link
+  - `app/Models/QuotationItem.php` — added `variant_id`, `variant_snapshot` to `$fillable`; cast `variant_snapshot` as `'array'`; added `variant(): BelongsTo(ProductVariant)`
+  - `app/Models/ProductVariant.php` — added `quotationItems(): HasMany(QuotationItem)`; added `toQuotationSnapshot(): array` returning `{sku, product_name, description, unit_price, unit, moq, pack_size}`
+
+- [x] **E20.T21** Add variant picker and auto-fill to `QuotationBuilder`
+  - File: `app/Livewire/CompanyHub/QuotationBuilder.php`
+  - Added `shopVariants()` `#[Computed]` — returns published variants from seller's shop with `{id, label, sku, unit, price, moq}`
+  - Added `selectVariant(int $index, ?int $variantId)` — validates variant belongs to this shop; auto-fills `description`, `unit`, `unit_price`, `quantity` (from MOQ); passing `null` clears to freeform
+  - Updated `saveDraft()` — persists `variant_id` per item
+  - Added `captureVariantSnapshots()` — called on `submitQuotation()`; bulk-writes `variant_snapshot` to all linked items
+  - Updated `mount()` — loads existing `variant_id` per item from DB
+
+- [x] **E20.T22** Update quotation-builder blade with variant picker per line item
+  - File: `resources/views/livewire/company-hub/quotation-builder.blade.php`
+  - Per item: `flux:select` variant picker using `x-on:change="$wire.selectVariant(index, parseInt(val) || null)"` (Alpine `x-data` wrapper required; `wire:change` with `Number()` caused 500 — fixed)
+  - "Linked to catalogue SKU" hint shown when `variant_id` is set
+  - Running total shown live below items
+  - Submit confirmation migrated to `<x-hs-modal>`
+  - RFQ title displayed as `<span class="font-medium">` in header subtitle
+
+- [x] **E20.T23** Fix `wire:change` 500 on variant picker select
+  - File: `resources/views/livewire/company-hub/quotation-builder.blade.php`
+  - Root cause: `wire:change="..., Number($event.target.value)"` — `Number()` is a JS global; Livewire evaluates `wire:` expressions server-side and throws `BadFunctionCallException`
+  - Fix: changed to `x-on:change="$wire.selectVariant(..., parseInt(...))"` with `x-data` wrapper — Alpine keeps the expression client-side, then calls Livewire as RPC
+
+- [x] **E20.T24** Create `config/units.php` — curated unit-of-measure list
+  - File: `config/units.php`
+  - 23 units in 5 groups: Weight (kg, g, mt, lb), Volume (L, mL), Packaging (bag, bottle, box, bundle, can, carton, crate, jar, pack, pail, pouch, sack, tray, tub), Count (pcs, dozen, gross), Other (escape hatch)
+
+- [x] **E20.T25** Create `x-hs-unit-select` reusable Blade component
+  - File: `resources/views/components/hs-unit-select.blade.php`
+  - Props: `wire-model` (Livewire property path), `value` (current value), `label`, `size` (sm|null), `required`
+  - Renders `<select>` with `<optgroup>` from `config/units.php`; "Other…" option reveals a debounced text input
+  - Syncs to Livewire via `$wire.set()` in Alpine watchers — works correctly inside loops and Blade anonymous components
+  - Handles values not in the list (auto-selects "Other…" and pre-fills custom text)
+  - Applied to: `variant-manager.blade.php` (draftUnit), `quotation-builder.blade.php` (items.N.unit)
+
+- [x] **E20.T26** Record UI patterns in `.ai/rules/views.md`
+  - File: `.ai/rules/views.md`
+  - Added: standard card shell, multi-card layout, form layout, info/warning notices, modal pattern, status-dependent card backgrounds, empty states, attachment lists, file upload, inline tables, reusable component reference
+  - 4 rules recorded via `record-rule`: card shell, `x-hs-modal` mandatory, `x-hs-unit-select` mandatory, form layout + validation errors

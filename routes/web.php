@@ -98,6 +98,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::livewire('onboardings', 'admin.onboarding-queue')->name('onboardings.index');
     Route::livewire('onboardings/{onboarding}', 'admin.onboarding-review')->name('onboardings.show');
     Route::livewire('categories', 'admin.category-manager')->name('categories.index');
+    Route::livewire('categories/create', 'admin.category-create')->name('categories.create');
+    Route::livewire('categories/{category}/edit', 'admin.category-edit')->name('categories.edit');
 });
 
 require __DIR__.'/settings.php';

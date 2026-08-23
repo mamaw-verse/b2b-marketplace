@@ -42,12 +42,19 @@ final class NotificationBell extends Component
 
     public function markRead(string $notificationId): void
     {
-        Auth::user()
+        $notification = Auth::user()
             ->notifications()
-            ->findOrFail($notificationId)
-            ->markAsRead();
+            ->findOrFail($notificationId);
+
+        $url = $notification->data['url'] ?? null;
+
+        $notification->markAsRead();
 
         unset($this->notifications, $this->unreadCount);
+
+        if ($url) {
+            $this->redirect($url, navigate: false);
+        }
     }
 
     public function markAllRead(): void

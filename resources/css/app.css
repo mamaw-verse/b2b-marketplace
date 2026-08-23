@@ -181,3 +181,42 @@ select:focus[data-flux-control] {
 [data-flux-row]:hover [data-flux-cell] {
     @apply bg-[var(--hs-neutral-50)];
 }
+
+
+/* ============================================================
+   FLUX BUTTON — Danger variant token overrides
+   Maps Flux's hardcoded red-* to --hs-danger-* tokens so they
+   respond correctly to dark mode via tokens.css .dark block.
+   ============================================================ */
+[data-flux-button].bg-red-500 {
+    background-color: var(--hs-danger-500) !important;
+}
+[data-flux-button].hover\:bg-red-600:hover {
+    background-color: var(--hs-danger-700) !important;
+}
+:is(.dark, .dark *) [data-flux-button].dark\:bg-red-600 {
+    background-color: var(--hs-danger-700) !important;
+}
+:is(.dark, .dark *) [data-flux-button].dark\:hover\:bg-red-500:hover {
+    background-color: var(--hs-danger-500) !important;
+}
+
+/* ============================================================
+   FLUX INPUTS / SELECT / TEXTAREA — Border radius override
+   Flux uses rounded-lg (8px); storefront spec uses --hs-radius-sm (6px).
+   ============================================================ */
+[data-flux-control] {
+    border-radius: var(--hs-radius-sm) !important;
+}
+
+/* ============================================================
+   FLUX BUTTON — Ghost/Subtle hover tint
+   Override neutral grey hover to branded green-50 tint for
+   visual consistency with the storefront.
+   ============================================================ */
+[data-flux-button].hover\:bg-zinc-800\/5:hover {
+    background-color: var(--hs-green-50) !important;
+}
+:is(.dark, .dark *) [data-flux-button].dark\:hover\:bg-white\/15:hover {
+    background-color: var(--hs-green-950) !important;
+}

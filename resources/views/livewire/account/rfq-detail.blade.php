@@ -3,24 +3,31 @@
         {{-- Header --}}
         <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
             <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-                <div class="flex items-center justify-between">
+                <div class="flex items-start justify-between gap-4">
                     <div>
                         <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ $rfq->title }}</h1>
                         <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">
                             {{ __('Sent') }} {{ $rfq->created_at->diffForHumans() }}
                             @if ($rfq->recipients->first())
-                                · {{ __('To') }} <span class="font-medium">{{ $rfq->recipients->first()->shop->storefront_name }}</span>
+                                <span class="text-[var(--hs-neutral-300)]">·</span>
+                                {{ __('To') }} <span class="font-medium text-[var(--hs-neutral-700)]">{{ $rfq->recipients->first()->shop->storefront_name }}</span>
                             @endif
                         </p>
                     </div>
-                    <x-hs-status-pill :status="$rfq->status" />
+                    <x-hs-status-pill :status="$rfq->status" class="shrink-0" />
                 </div>
             </div>
 
             {{-- Close RFQ Action --}}
             @if ($rfq->isOpen())
-                <div class="px-6 py-3 border-b border-[var(--hs-neutral-100)] flex items-center gap-3">
-                    <flux:button variant="ghost" size="sm" wire:click="$set('showCloseConfirmation', true)" class="text-red-600 hover:text-red-700">
+                <div class="px-6 py-3 border-b border-[var(--hs-neutral-100)]">
+                    <flux:button
+                        variant="ghost"
+                        size="sm"
+                        icon="x-circle"
+                        wire:click="$set('showCloseConfirmation', true)"
+                        class="text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)] hover:text-[var(--hs-danger-700)]"
+                    >
                         {{ __('Close RFQ') }}
                     </flux:button>
                 </div>
@@ -40,54 +47,63 @@
 
         {{-- Quotations --}}
         <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
-            <div class="px-6 py-4 border-b border-[var(--hs-neutral-100)]">
+            <div class="px-6 py-4 border-b border-[var(--hs-neutral-100)] flex items-center gap-2">
                 <h2 class="text-base font-semibold text-[var(--hs-neutral-800)]">{{ __('Quotations') }}</h2>
+                @php $visibleQuotations = $rfq->quotations->where('status', '!=', 'draft'); @endphp
+                @if ($visibleQuotations->isNotEmpty())
+                    <flux:badge size="sm" color="zinc">{{ $visibleQuotations->count() }}</flux:badge>
+                @endif
             </div>
             <div class="p-6">
-                @php
-                    $visibleQuotations = $rfq->quotations->where('status', '!=', 'draft');
-                @endphp
-
                 @if ($visibleQuotations->isEmpty())
-                    <p class="text-sm text-[var(--hs-neutral-500)] italic">{{ __('No quotations received yet.') }}</p>
+                    <div class="text-center py-8">
+                        <flux:icon name="document-text" class="mx-auto size-8 text-[var(--hs-neutral-300)]" />
+                        <p class="mt-2 text-sm text-[var(--hs-neutral-500)]">{{ __('No quotations received yet.') }}</p>
+                    </div>
                 @else
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         @foreach ($visibleQuotations as $quotation)
-                            <div class="rounded-lg border border-[var(--hs-neutral-200)] p-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm font-semibold text-[var(--hs-neutral-900)]">
+                            <div @class([
+                                'rounded-[var(--hs-radius-card)] border p-4',
+                                'border-[var(--hs-success-200)] bg-[var(--hs-success-50)]' => $quotation->status === 'awarded',
+                                'border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]' => $quotation->status === 'rejected',
+                                'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' => $quotation->status === 'withdrawn',
+                                'border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]' => in_array($quotation->status, ['submitted', 'not_awarded', 'expired']),
+                            ])>
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-base font-bold text-[var(--hs-neutral-900)]">
                                             {{ $quotation->currency }} {{ number_format((float) $quotation->total_amount, 2) }}
                                         </span>
                                         <x-hs-status-pill :status="$quotation->status" />
                                     </div>
                                     @if ($quotation->valid_until)
-                                        <span class="text-xs text-[var(--hs-neutral-500)]">
+                                        <span class="text-xs text-[var(--hs-neutral-500)] shrink-0 whitespace-nowrap">
                                             {{ __('Valid until') }} {{ $quotation->valid_until->format('M d, Y') }}
                                         </span>
                                     @endif
                                 </div>
 
                                 {{-- Line items --}}
-                                <div class="overflow-x-auto">
+                                <div class="overflow-x-auto rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)]">
                                     <table class="w-full text-xs">
                                         <thead>
-                                            <tr class="text-left text-[var(--hs-neutral-500)]">
-                                                <th class="pb-1">{{ __('Item') }}</th>
-                                                <th class="pb-1 text-right">{{ __('Qty') }}</th>
-                                                <th class="pb-1">{{ __('Unit') }}</th>
-                                                <th class="pb-1 text-right">{{ __('Price') }}</th>
-                                                <th class="pb-1 text-right">{{ __('Subtotal') }}</th>
+                                            <tr class="text-left text-[var(--hs-neutral-500)] bg-[var(--hs-neutral-50)]">
+                                                <th class="px-3 py-2 font-medium">{{ __('Item') }}</th>
+                                                <th class="px-3 py-2 font-medium text-right">{{ __('Qty') }}</th>
+                                                <th class="px-3 py-2 font-medium">{{ __('Unit') }}</th>
+                                                <th class="px-3 py-2 font-medium text-right">{{ __('Price') }}</th>
+                                                <th class="px-3 py-2 font-medium text-right">{{ __('Subtotal') }}</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="text-[var(--hs-neutral-700)]">
+                                        <tbody class="text-[var(--hs-neutral-700)] divide-y divide-[var(--hs-neutral-100)]">
                                             @foreach ($quotation->items as $item)
                                                 <tr>
-                                                    <td class="py-0.5">{{ $item->description }}</td>
-                                                    <td class="py-0.5 text-right">{{ $item->quantity }}</td>
-                                                    <td class="py-0.5">{{ $item->unit }}</td>
-                                                    <td class="py-0.5 text-right">{{ number_format((float) $item->unit_price, 2) }}</td>
-                                                    <td class="py-0.5 text-right font-medium">{{ number_format((float) $item->subtotal, 2) }}</td>
+                                                    <td class="px-3 py-1.5">{{ $item->description }}</td>
+                                                    <td class="px-3 py-1.5 text-right">{{ $item->quantity }}</td>
+                                                    <td class="px-3 py-1.5">{{ $item->unit }}</td>
+                                                    <td class="px-3 py-1.5 text-right">{{ number_format((float) $item->unit_price, 2) }}</td>
+                                                    <td class="px-3 py-1.5 text-right font-medium">{{ number_format((float) $item->subtotal, 2) }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -101,10 +117,16 @@
                                 {{-- Actions for submitted quotations --}}
                                 @if ($quotation->isSubmitted() && $rfq->isOpen())
                                     <div class="mt-3 pt-3 border-t border-[var(--hs-neutral-100)] flex items-center gap-2">
-                                        <flux:button variant="primary" size="xs" wire:click="awardQuotation({{ $quotation->id }})">
+                                        <flux:button variant="primary" size="xs" icon="check" wire:click="awardQuotation({{ $quotation->id }})">
                                             {{ __('Award') }}
                                         </flux:button>
-                                        <flux:button variant="ghost" size="xs" wire:click="rejectQuotation({{ $quotation->id }})" class="text-red-600">
+                                        <flux:button
+                                            variant="ghost"
+                                            size="xs"
+                                            icon="x-mark"
+                                            wire:click="rejectQuotation({{ $quotation->id }})"
+                                            class="text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)]"
+                                        >
                                             {{ __('Reject') }}
                                         </flux:button>
                                     </div>
@@ -122,12 +144,19 @@
                 <div class="px-6 py-4 border-b border-[var(--hs-neutral-100)]">
                     <h2 class="text-base font-semibold text-[var(--hs-neutral-800)]">{{ __('Attachments') }}</h2>
                 </div>
-                <div class="p-6">
-                    <ul class="space-y-2">
+                <div class="p-3">
+                    <ul class="divide-y divide-[var(--hs-neutral-100)]">
                         @foreach ($rfq->attachments as $attachment)
-                            <li class="flex items-center gap-2 text-sm text-[var(--hs-neutral-700)]">
-                                <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
-                                {{ $attachment->original_filename }}
+                            <li>
+                                <a
+                                    href="{{ route('media.view', $attachment) }}"
+                                    target="_blank"
+                                    class="flex items-center gap-3 rounded-[var(--hs-radius-card)] px-3 py-2.5 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition"
+                                >
+                                    <flux:icon name="paper-clip" variant="mini" class="shrink-0 text-[var(--hs-neutral-400)]" />
+                                    <span class="truncate">{{ $attachment->original_filename }}</span>
+                                    <flux:icon name="arrow-top-right-on-square" variant="mini" class="ml-auto shrink-0 text-[var(--hs-neutral-300)]" />
+                                </a>
                             </li>
                         @endforeach
                     </ul>

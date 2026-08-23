@@ -42,6 +42,7 @@ final class QuotationWithdrawnNotification extends Notification implements Shoul
             'quotation_id' => $this->quotation->id,
             'rfq_id' => $this->quotation->rfq_id,
             'message' => 'A quotation was withdrawn by the seller.',
+            'url' => url('/account/rfqs/'.$this->quotation->rfq_id),
         ];
     }
 

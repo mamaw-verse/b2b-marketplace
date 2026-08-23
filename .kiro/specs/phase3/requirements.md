@@ -112,6 +112,7 @@ A seller's "customers" are buyers (`users`) who have at least one `orders` row (
 - A seller can start a new order directly from the **Customers list** (§2.1) or an existing customer's profile within the Company Hub, without an underlying quotation.
 - The seller selects the customer, then manually enters/edits customer contact, billing/shipping address (pre-filled from that buyer's latest known snapshot where available, e.g., their most recent order or quotation with this seller, but always editable), and builds order items from scratch.
 - `quotation_id` is `NULL` for standalone orders. This is also the documented workaround for "replacements" — a replacement is simply a new standalone order, not a dispute-resolution type (§1.4).
+- **Documented constraint — existing customers only**: standalone orders are limited to buyers who already appear in the seller's customer list (i.e., they have at least one prior awarded quotation or order with this shop). Creating a standalone order for a brand-new buyer with no prior interaction is intentionally unsupported in v1. The intended onboarding path for a new buyer is: seller invites them to submit an RFQ → quotation awarded → order created from that quotation. This keeps the buyer's identity and address details in the system before an order is raised against them.
 
 ### 4.2 Draft editing & submission
 
@@ -175,7 +176,7 @@ A seller's "customers" are buyers (`users`) who have at least one `orders` row (
 ### 4.9 Order thread (chat)
 
 - Mirrors the Phase 2 RFQ-thread pattern exactly: `conversation_threads` gains an optional `order_id` (alongside the existing optional `rfq_id`), so an order gets its own thread within the same persistent buyer–seller `conversations` row used since Phase 2.
-- The order (and its dispute, if any) renders as an **attached card** in that thread, reflecting current status at a glance — same `message_cards` polymorphic mechanism as RFQ/quotation cards, extended to reference `orders` and `disputes`.
+- The order (and its dispute, if any) renders as an **attached card** in that thread, reflecting current status at a glance. This uses the same mechanism established in Phase 2: a system `messages` row is created with a typed body prefix (e.g. `order:{order_id}` or `dispute:{dispute_id}`), and the `MessageStream` Livewire component detects the prefix and renders the appropriate Blade card component (`<x-shared.order-card>` or `<x-shared.dispute-card>`) inline — identical to how Phase 2 renders RFQ cards via `<x-shared.rfq-card>`. There is no separate `message_cards` polymorphic table.
 - No new conversation is created — if a buyer–seller conversation already exists (from a prior RFQ or message), the order thread is simply a new thread inside it.
 
 ### 4.10 Seller Hub
@@ -278,7 +279,6 @@ Full DDL belongs in a Phase 3 addendum to `design.md`; this section defines the 
 | `disputes` | A buyer-raised dispute against an order | belongs to `orders` (1:N — an order could theoretically have sequential disputes over time, e.g., withdrawn then reopened) |
 | `ledger_entries` | Simple transaction log for all simulated fund movement | belongs to `orders` (1:N); types: `escrow_hold`, `payout`, `refund` |
 | `conversation_threads` | *(Phase 2, extended)* | gains an optional nullable `order_id` FK alongside existing `rfq_id` |
-| `message_cards` | *(Phase 2, extended)* | polymorphic reference extended to also cover `orders` and `disputes` |
 
 ### 6.1 Relationship summary
 
@@ -293,8 +293,9 @@ orders 1───N disputes
 orders 1───N ledger_entries
 conversations 1───N conversation_threads ───0:1 rfqs
                                           └──0:1 orders
-messages 0:1───message_cards ───polymorphic─→ rfqs | quotations | orders | disputes
 ```
+
+**Order/dispute cards in the message stream** are rendered via the same pattern established in Phase 2 for RFQ/quotation cards: a system `messages` row is created with a typed body prefix (e.g. `order:{order_id}`, `dispute:{dispute_id}`). The `MessageStream` Livewire component detects the prefix and renders the appropriate Blade component inline (`<x-shared.order-card>` or `<x-shared.dispute-card>`). There is no `message_cards` polymorphic table — Phase 2 uses message body prefix detection + Blade card components, not a polymorphic join table.
 
 ### 6.2 Forward-compatibility notes
 
@@ -402,7 +403,7 @@ messages 0:1───message_cards ───polymorphic─→ rfqs | quotations 
 | M3 — Fulfilment | `fulfilments` (ship/deliver/returned-to-seller actions, tracking fields), buyer To-ship/To-receive tabs and CTA switch |
 | M4 — Completion & cancellation | Confirm-receipt action, 7-day auto-accept job, payout ledger entry, buyer pre-payment cancel, seller pre-fulfilment cancel + refund |
 | M5 — Disputes | `disputes`, return/refund-only flows, seller-resolution path, admin escalation queue + arbitration, timer-pause logic |
-| M6 — Order thread | `conversation_threads.order_id`, order/dispute cards via `message_cards` |
+| M6 — Order thread | `conversation_threads.order_id`, order/dispute system messages + Blade card components (`x-shared.order-card`, `x-shared.dispute-card`) |
 | M7 — Seller Hub | Dashboard to-do widget, customers list, reports, leaderboards |
 
 ---
@@ -416,7 +417,7 @@ messages 0:1───message_cards ───polymorphic─→ rfqs | quotations 
 5. **Late-dispute funds already paid out**: §7.7 assumes a partial refund after payout is a ledger reversal (seller owes back a portion) rather than a fresh charge to the buyer — needs a concrete mechanic (e.g., a `refund` ledger entry that nets against the seller's next payout, since v1 has no real payment processor to reverse a real transaction against).
 6. **Ledger richness**: per your steer, v1 ships the simple transaction-log ledger (`order_id`, `type`, `amount`, `status`). If audit/accounting needs grow (e.g., reconciling seller balances across many orders), a double-entry ledger with explicit escrow/payable/refundable accounts is the natural upgrade — noted here rather than built now.
 7. **Dispute reopening**: `disputes` is modeled 1:N against `orders` to allow a withdrawn dispute to be reopened or a second dispute raised later (e.g., a different problem after a first dispute resolved) — confirm this is desired vs. capping at one dispute per order.
-8. **Standalone order customer scope**: "customers list" is defined here as anyone with an order or awarded quotation history with the shop. If a seller wants to create a standalone order for a brand-new buyer (no prior interaction at all), that's currently unsupported — confirm whether that's intentional or a gap.
+8. ~~**Standalone order customer scope**~~: **Resolved.** Standalone orders are intentionally limited to existing customers (buyers with at least one prior awarded quotation or order with the shop). Creating an order for a brand-new buyer with no prior history is out of scope for v1. See §4.1 for the documented constraint and intended onboarding path.
 
 ---
 

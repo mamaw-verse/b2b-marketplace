@@ -21,6 +21,7 @@ use Laravel\Scout\Searchable;
  * @property string|null $description
  * @property string|null $featured_image_path
  * @property string $status
+ * @property array<string, array<string, mixed>> $variant_attributes_schema
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -36,6 +37,7 @@ final class Product extends Model
         'description',
         'featured_image_path',
         'status',
+        'variant_attributes_schema',
     ];
 
     public function searchableAs(): string
@@ -114,6 +116,13 @@ final class Product extends Model
         return $query->where('status', 'published');
     }
 
+    protected function casts(): array
+    {
+        return [
+            'variant_attributes_schema' => 'array',
+        ];
+    }
+
     /**
      * Get the full S3 URL for the featured image.
      */
@@ -123,8 +132,9 @@ final class Product extends Model
             if (! $this->featured_image_path) {
                 return null;
             }
-            return str_starts_with($this->featured_image_path, 'http') 
-                ? $this->featured_image_path 
+
+            return str_starts_with($this->featured_image_path, 'http')
+                ? $this->featured_image_path
                 : \Illuminate\Support\Facades\Storage::disk('s3')->url($this->featured_image_path);
         });
     }

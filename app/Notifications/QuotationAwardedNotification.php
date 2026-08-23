@@ -32,7 +32,7 @@ final class QuotationAwardedNotification extends Notification implements ShouldQ
             ->line('Great news! The buyer has awarded your quotation.')
             ->line('RFQ: '.$this->quotation->rfq->title)
             ->line('Total: '.$this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2))
-            ->action('View Details', url('/hub/rfqs'))
+            ->action('View Details', url('/hub/rfqs/'.$this->quotation->rfqRecipient->id))
             ->line('The buyer has accepted your offer.');
     }
 
@@ -42,7 +42,9 @@ final class QuotationAwardedNotification extends Notification implements ShouldQ
             'type' => 'quotation_awarded',
             'quotation_id' => $this->quotation->id,
             'rfq_id' => $this->quotation->rfq_id,
+            'rfq_recipient_id' => $this->quotation->rfqRecipient->id,
             'message' => 'Your quotation was awarded!',
+            'url' => url('/hub/rfqs/'.$this->quotation->rfqRecipient->id),
         ];
     }
 

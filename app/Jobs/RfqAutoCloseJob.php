@@ -49,7 +49,7 @@ final class RfqAutoCloseJob implements ShouldQueue
             foreach ($rfq->recipients as $recipient) {
                 $shopOwner = $recipient->shop->user ?? null;
                 if ($shopOwner) {
-                    $shopOwner->notify(new RfqClosedNotification($rfq, 'system'));
+                    $shopOwner->notify(new RfqClosedNotification($recipient, 'system'));
                 }
             }
 

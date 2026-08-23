@@ -17,7 +17,9 @@ final class DemoDataSeeder extends Seeder
     /**
      * Seed the database with realistic Philippine halal food marketplace data.
      *
-     * 5 companies, 10 products, 8 categories — all with real Unsplash image URLs.
+     * 5 companies · 10 products · 8 categories — all with real Unsplash image URLs.
+     * Each category carries a variant_attributes_schema; products inherit it and
+     * variant attributes are keyed to match the schema (attr_<slug> format).
      */
     public function run(): void
     {
@@ -25,6 +27,187 @@ final class DemoDataSeeder extends Seeder
         $companies = $this->seedCompanies();
         $this->seedProducts($companies, $categories);
     }
+
+    // -------------------------------------------------------------------------
+    // Category schema definitions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Canonical variant attribute schemas, keyed by category slug.
+     * Key format: attr_<slug> — stable, reproducible, matches admin editor convention.
+     * "options" is always a comma-separated string (not an array).
+     *
+     * @return array<string, array<string, array{label: string, type: string, options: string, required: bool}>>
+     */
+    private function categorySchemas(): array
+    {
+        return [
+            'meat-poultry' => [
+                'attr_cut' => [
+                    'label' => 'Cut',
+                    'type' => 'select',
+                    'options' => 'Whole,Breast,Thigh,Drumstick,Wing,Bone-in,Boneless',
+                    'required' => true,
+                ],
+                'attr_weight' => [
+                    'label' => 'Weight',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+            ],
+            'processed-foods' => [
+                'attr_weight' => [
+                    'label' => 'Weight / Volume',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+                'attr_shelf_life' => [
+                    'label' => 'Shelf Life',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+            ],
+            'spices-seasonings' => [
+                'attr_weight' => [
+                    'label' => 'Weight',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_grade' => [
+                    'label' => 'Grade',
+                    'type' => 'select',
+                    'options' => 'Food Grade,Premium,Organic,Export Grade',
+                    'required' => false,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+            ],
+            'dairy-alternatives' => [
+                'attr_volume' => [
+                    'label' => 'Volume',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_fat_content' => [
+                    'label' => 'Fat Content',
+                    'type' => 'select',
+                    'options' => 'Full Fat,Reduced Fat,Low Fat,Skimmed',
+                    'required' => false,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+            ],
+            'grains-legumes' => [
+                'attr_weight' => [
+                    'label' => 'Weight',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_grade' => [
+                    'label' => 'Grade',
+                    'type' => 'select',
+                    'options' => 'Premium,Food Grade,Organic,Export Grade',
+                    'required' => false,
+                ],
+                'attr_milling' => [
+                    'label' => 'Milling',
+                    'type' => 'select',
+                    'options' => 'Whole Grain,Light Bran,Fully Milled,Stone Ground',
+                    'required' => false,
+                ],
+            ],
+            'beverages' => [
+                'attr_volume' => [
+                    'label' => 'Volume',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'select',
+                    'options' => 'PET Bottle,Glass Bottle,Tetra Pak,Carton,Can,Pouch',
+                    'required' => false,
+                ],
+                'attr_concentration' => [
+                    'label' => 'Concentration',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+            ],
+            'condiments-sauces' => [
+                'attr_weight' => [
+                    'label' => 'Weight / Volume',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+                'attr_heat_level' => [
+                    'label' => 'Heat Level',
+                    'type' => 'select',
+                    'options' => 'Mild,Medium,Medium-hot,Hot,Extra Hot',
+                    'required' => false,
+                ],
+            ],
+            'snacks-confectionery' => [
+                'attr_weight' => [
+                    'label' => 'Weight',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => true,
+                ],
+                'attr_count' => [
+                    'label' => 'Count / Pieces',
+                    'type' => 'text',
+                    'options' => '',
+                    'required' => false,
+                ],
+                'attr_packaging' => [
+                    'label' => 'Packaging',
+                    'type' => 'select',
+                    'options' => 'Retail Box,Pouch,Tin Can,Gift Box,Bulk Bag,Wrapper',
+                    'required' => false,
+                ],
+            ],
+        ];
+    }
+
+    // -------------------------------------------------------------------------
+    // Seeders
+    // -------------------------------------------------------------------------
 
     /**
      * @return array<string, Category>
@@ -74,13 +257,24 @@ final class DemoDataSeeder extends Seeder
             ],
         ];
 
+        $schemas = $this->categorySchemas();
         $map = [];
 
         foreach ($definitions as $def) {
             $category = Category::firstOrCreate(
                 ['slug' => $def['slug']],
-                ['name' => $def['name'], 'description' => $def['description']]
+                [
+                    'name' => $def['name'],
+                    'description' => $def['description'],
+                    'variant_attributes_schema' => $schemas[$def['slug']] ?? [],
+                ]
             );
+
+            // Update schema on existing rows (safe on re-seed).
+            if (empty($category->variant_attributes_schema)) {
+                $category->update(['variant_attributes_schema' => $schemas[$def['slug']] ?? []]);
+            }
+
             $map[$def['slug']] = $category;
         }
 
@@ -119,7 +313,6 @@ final class DemoDataSeeder extends Seeder
                     'value_chain_positions' => ['manufacturing', 'distribution'],
                     'capabilities' => ['processing', 'contract_manufacturing', 'private_label', 'exporting'],
                     'status' => 'active',
-                    'geo_location' => null,
                 ],
                 'categories' => ['meat-poultry', 'processed-foods'],
             ],
@@ -149,7 +342,6 @@ final class DemoDataSeeder extends Seeder
                     'value_chain_positions' => ['processing', 'manufacturing', 'distribution'],
                     'capabilities' => ['processing', 'packaging', 'contract_processing', 'oem_odm', 'private_label', 'exporting'],
                     'status' => 'active',
-                    'geo_location' => null,
                 ],
                 'categories' => ['spices-seasonings', 'condiments-sauces', 'processed-foods'],
             ],
@@ -168,7 +360,6 @@ final class DemoDataSeeder extends Seeder
                     'phone' => '+63 83 228 6600',
                     'email' => 'info@mindanaoorganic.ph',
                     'address_1' => 'Maharlika Highway, Barangay Poblacion',
-                    'address_2' => null,
                     'city' => 'General Santos City',
                     'province' => 'South Cotabato',
                     'zip_code' => '9500',
@@ -179,7 +370,6 @@ final class DemoDataSeeder extends Seeder
                     'value_chain_positions' => ['farm', 'processing', 'distribution'],
                     'capabilities' => ['processing', 'packaging', 'wholesale', 'exporting'],
                     'status' => 'active',
-                    'geo_location' => null,
                 ],
                 'categories' => ['grains-legumes', 'spices-seasonings'],
             ],
@@ -198,7 +388,6 @@ final class DemoDataSeeder extends Seeder
                     'phone' => '+63 63 221 7090',
                     'email' => 'trade@lanahalalsnacks.ph',
                     'address_1' => 'National Highway, Puga-an District',
-                    'address_2' => null,
                     'city' => 'Marawi City',
                     'province' => 'Lanao del Sur',
                     'zip_code' => '9700',
@@ -209,7 +398,6 @@ final class DemoDataSeeder extends Seeder
                     'value_chain_positions' => ['manufacturing', 'retail'],
                     'capabilities' => ['processing', 'packaging', 'private_label', 'wholesale'],
                     'status' => 'active',
-                    'geo_location' => null,
                 ],
                 'categories' => ['snacks-confectionery', 'beverages'],
             ],
@@ -239,7 +427,6 @@ final class DemoDataSeeder extends Seeder
                     'value_chain_positions' => ['farm', 'processing', 'manufacturing', 'distribution', 'exporting'],
                     'capabilities' => ['processing', 'contract_processing', 'packaging', 'cold_storage', 'warehousing', 'exporting'],
                     'status' => 'active',
-                    'geo_location' => null,
                 ],
                 'categories' => ['dairy-alternatives', 'beverages', 'grains-legumes'],
             ],
@@ -258,18 +445,14 @@ final class DemoDataSeeder extends Seeder
                 ]
             );
 
-            $shopData = array_filter($data['shop'], fn ($v) => $v !== null);
-
             /** @var Shop $shop */
             $shop = Shop::firstOrCreate(
                 ['email' => $data['shop']['email']],
-                array_merge($shopData, ['user_id' => $user->id])
+                array_merge($data['shop'], ['user_id' => $user->id])
             );
 
-            // Assign seller role
             $user->assignRole('seller');
 
-            // Attach shop categories
             foreach ($data['categories'] as $slug) {
                 $categoryId = Category::where('slug', $slug)->value('id');
                 if ($categoryId && ! $shop->categories()->where('category_id', $categoryId)->exists()) {
@@ -284,15 +467,40 @@ final class DemoDataSeeder extends Seeder
     }
 
     /**
-     * @param  array<int, Shop>  $companies
-     * @param  array<string, Category>  $categories
+     * Merge schemas from multiple category slugs into a single product schema.
+     * Deduplicates by key — first occurrence wins.
+     *
+     * @param  string[]  $categorySlugs
+     * @param  array<string, Category>  $categoryMap
+     * @return array<string, mixed>
      */
-    private function seedProducts(array $companies, array $categories): void
+    private function mergedSchema(array $categorySlugs, array $categoryMap): array
+    {
+        $schemas = $this->categorySchemas();
+        $merged = [];
+
+        foreach ($categorySlugs as $slug) {
+            foreach ($schemas[$slug] ?? [] as $key => $def) {
+                $merged[$key] ??= $def;
+            }
+        }
+
+        return $merged;
+    }
+
+    /**
+     * @param  array<int, Shop>  $companies
+     * @param  array<string, Category>  $categoryMap
+     */
+    private function seedProducts(array $companies, array $categoryMap): void
     {
         [$alAmin, $golden, $mindanao, $lanao, $zamboanga] = $companies;
 
         $products = [
-            // Al-Amin International Foods — 2 products
+
+            // ----------------------------------------------------------------
+            // Al-Amin International Foods — Meat & Poultry / Processed Foods
+            // ----------------------------------------------------------------
             [
                 'shop' => $alAmin,
                 'product' => [
@@ -306,7 +514,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'ALA-CHK-1200',
                         'description' => '1.2 kg average weight per bird',
-                        'attributes' => ['weight' => '1.2 kg avg', 'packaging' => 'Vacuum-sealed, 10 per carton'],
+                        'attributes' => [
+                            'attr_cut' => 'Whole',
+                            'attr_weight' => '1.2 kg avg',
+                            'attr_packaging' => 'Vacuum-sealed, 10 per carton',
+                        ],
                         'price' => 220.00,
                         'minimum_order_quantity' => 100,
                         'unit' => 'piece',
@@ -323,7 +535,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'ALA-CHK-1800',
                         'description' => '1.8 kg average weight per bird',
-                        'attributes' => ['weight' => '1.8 kg avg', 'packaging' => 'Vacuum-sealed, 8 per carton'],
+                        'attributes' => [
+                            'attr_cut' => 'Whole',
+                            'attr_weight' => '1.8 kg avg',
+                            'attr_packaging' => 'Vacuum-sealed, 8 per carton',
+                        ],
                         'price' => 320.00,
                         'minimum_order_quantity' => 50,
                         'unit' => 'piece',
@@ -343,7 +559,7 @@ final class DemoDataSeeder extends Seeder
                 'shop' => $alAmin,
                 'product' => [
                     'name' => 'Halal Beef Tapa (Thinly Sliced)',
-                    'description' => 'Traditional Filipino beef tapa made from premium halal-certified Brahman beef, marinated in a blend of garlic, soy sauce, calamansi, and muscovado sugar. Ready to pan-fry or grill. Vacuum-packed for extended shelf life. Popular for tapa-rice breakfast meals and food service operations.',
+                    'description' => 'Traditional Filipino beef tapa made from premium halal-certified Brahman beef, marinated in a blend of garlic, soy sauce, calamansi, and muscovado sugar. Ready to pan-fry or grill. Vacuum-packed for extended shelf life.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -351,8 +567,13 @@ final class DemoDataSeeder extends Seeder
                 'variants' => [
                     [
                         'sku' => 'ALA-TAPA-500G',
-                        'description' => '500g retail pack',
-                        'attributes' => ['weight' => '500g', 'marination' => 'Classic garlic-soy'],
+                        'description' => '500g retail vacuum pack',
+                        'attributes' => [
+                            'attr_cut' => 'Boneless',
+                            'attr_weight' => '500g',
+                            'attr_packaging' => 'Vacuum-sealed',
+                            'attr_shelf_life' => '21 days refrigerated',
+                        ],
                         'price' => 280.00,
                         'minimum_order_quantity' => 50,
                         'unit' => 'pack',
@@ -369,12 +590,14 @@ final class DemoDataSeeder extends Seeder
                 ],
             ],
 
-            // Golden Halal Foods — 2 products
+            // ----------------------------------------------------------------
+            // Golden Halal Foods — Spices & Condiments
+            // ----------------------------------------------------------------
             [
                 'shop' => $golden,
                 'product' => [
                     'name' => 'Satti Spice Blend (Halal)',
-                    'description' => 'Authentic Mindanao satti spice blend — a proprietary mix of roasted coriander, cumin, turmeric, chili, galangal, and lemongrass. Used for marinating grilled meats, satay, and rice dishes. Produced in a dedicated halal facility, certified by IDCP. Available in bulk bags for food manufacturers and restaurant chains.',
+                    'description' => 'Authentic Mindanao satti spice blend — a proprietary mix of roasted coriander, cumin, turmeric, chili, galangal, and lemongrass. Certified by IDCP. Available in bulk bags for food manufacturers and restaurant chains.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -383,7 +606,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'GHF-SATTI-1KG',
                         'description' => '1 kg re-sealable foil bag',
-                        'attributes' => ['weight' => '1 kg', 'packaging' => 'Foil bag, re-sealable'],
+                        'attributes' => [
+                            'attr_weight' => '1 kg',
+                            'attr_grade' => 'Food Grade',
+                            'attr_packaging' => 'Foil bag, re-sealable',
+                        ],
                         'price' => 480.00,
                         'minimum_order_quantity' => 20,
                         'unit' => 'bag',
@@ -400,7 +627,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'GHF-SATTI-25KG',
                         'description' => '25 kg bulk sack for food manufacturers',
-                        'attributes' => ['weight' => '25 kg', 'packaging' => 'Multi-wall kraft sack'],
+                        'attributes' => [
+                            'attr_weight' => '25 kg',
+                            'attr_grade' => 'Food Grade',
+                            'attr_packaging' => 'Multi-wall kraft sack',
+                        ],
                         'price' => 9800.00,
                         'minimum_order_quantity' => 5,
                         'unit' => 'sack',
@@ -420,7 +651,7 @@ final class DemoDataSeeder extends Seeder
                 'shop' => $golden,
                 'product' => [
                     'name' => 'Halal Banana Ketchup (Bulk)',
-                    'description' => 'A uniquely Filipino condiment — sweet banana ketchup made from ripe Cavendish bananas, vinegar, onion, garlic, and spices. No artificial colors, halal-certified. Used widely in quick-service restaurants, school canteens, and institutional food service across the Philippines and Southeast Asia.',
+                    'description' => 'A uniquely Filipino condiment — sweet banana ketchup made from ripe Cavendish bananas, vinegar, onion, garlic, and spices. No artificial colors, halal-certified. Used in quick-service restaurants, school canteens, and institutional food service.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1606914501449-5a96b6ce24ca?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -429,7 +660,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'GHF-BKETCH-3KG',
                         'description' => '3 kg institutional jar',
-                        'attributes' => ['weight' => '3 kg', 'packaging' => 'PET jar with tamper-evident seal'],
+                        'attributes' => [
+                            'attr_weight' => '3 kg',
+                            'attr_packaging' => 'PET jar with tamper-evident seal',
+                            'attr_heat_level' => 'Mild',
+                        ],
                         'price' => 185.00,
                         'minimum_order_quantity' => 48,
                         'unit' => 'jar',
@@ -446,12 +681,14 @@ final class DemoDataSeeder extends Seeder
                 ],
             ],
 
-            // Mindanao Organic Grains — 2 products
+            // ----------------------------------------------------------------
+            // Mindanao Organic Grains — Grains & Spices
+            // ----------------------------------------------------------------
             [
                 'shop' => $mindanao,
                 'product' => [
                     'name' => 'Organic Brown Rice (Mindanao Upland)',
-                    'description' => 'Single-origin organic brown rice harvested from the upland rice terraces of Bukidnon and Cotabato. Naturally gluten-free, whole-grain, with a nutty aroma. No synthetic pesticides or fertilizers. Halal-certified through IDCP. Suitable for organic food retailers, health food brands, and export.',
+                    'description' => 'Single-origin organic brown rice harvested from the upland rice terraces of Bukidnon and Cotabato. Naturally gluten-free, whole-grain, with a nutty aroma. No synthetic pesticides. Halal-certified through IDCP.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1505253304499-671c55fb57fe?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -460,7 +697,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'MOG-BRICE-5KG',
                         'description' => '5 kg retail bag',
-                        'attributes' => ['weight' => '5 kg', 'grade' => 'Premium Organic', 'milling' => 'Light bran'],
+                        'attributes' => [
+                            'attr_weight' => '5 kg',
+                            'attr_grade' => 'Organic',
+                            'attr_milling' => 'Light Bran',
+                        ],
                         'price' => 420.00,
                         'minimum_order_quantity' => 50,
                         'unit' => 'bag',
@@ -477,7 +718,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'MOG-BRICE-50KG',
                         'description' => '50 kg bulk sack',
-                        'attributes' => ['weight' => '50 kg', 'grade' => 'Food Grade', 'milling' => 'Light bran'],
+                        'attributes' => [
+                            'attr_weight' => '50 kg',
+                            'attr_grade' => 'Food Grade',
+                            'attr_milling' => 'Light Bran',
+                        ],
                         'price' => 3800.00,
                         'minimum_order_quantity' => 10,
                         'unit' => 'sack',
@@ -497,7 +742,7 @@ final class DemoDataSeeder extends Seeder
                 'shop' => $mindanao,
                 'product' => [
                     'name' => 'Turmeric Powder (Luyang Dilaw)',
-                    'description' => 'Sun-dried and stone-ground turmeric (Curcuma longa) from organically cultivated farms in North Cotabato. High curcumin content (>3%). Used in food manufacturing for natural coloring, flavor, and health claims. Halal-certified; available with COA and moisture analysis upon request.',
+                    'description' => 'Sun-dried and stone-ground turmeric (Curcuma longa) from organically cultivated farms in North Cotabato. High curcumin content (>3%). Halal-certified; COA and moisture analysis available on request.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -506,7 +751,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'MOG-TURM-1KG',
                         'description' => '1 kg fine powder, food grade',
-                        'attributes' => ['weight' => '1 kg', 'grade' => 'Food Grade', 'curcumin_content' => '>3%'],
+                        'attributes' => [
+                            'attr_weight' => '1 kg',
+                            'attr_grade' => 'Organic',
+                            'attr_packaging' => '1 kg heat-sealed pouch',
+                        ],
                         'price' => 560.00,
                         'minimum_order_quantity' => 25,
                         'unit' => 'bag',
@@ -523,12 +772,14 @@ final class DemoDataSeeder extends Seeder
                 ],
             ],
 
-            // Lanao Halal Snacks — 2 products
+            // ----------------------------------------------------------------
+            // Lanao Halal Snacks — Snacks & Beverages
+            // ----------------------------------------------------------------
             [
                 'shop' => $lanao,
                 'product' => [
                     'name' => 'Maranao Peanut Brittle (Ampao)',
-                    'description' => 'Traditional Maranao ampao — peanut brittle made from locally sourced roasted peanuts, muscovado sugar, and coconut oil. No artificial preservatives or flavors. Individually wrapped, halal-certified by IDMA. A popular pasalubong item and impulse snack for regional and national distribution.',
+                    'description' => 'Traditional Maranao ampao — peanut brittle made from locally sourced roasted peanuts, muscovado sugar, and coconut oil. No artificial preservatives. Halal-certified by IDMA. A popular pasalubong item for regional and national distribution.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -537,7 +788,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'LHS-AMPAO-200G',
                         'description' => '200g gift box (12 pieces)',
-                        'attributes' => ['weight' => '200g', 'count' => '12 pieces', 'packaging' => 'Gift box'],
+                        'attributes' => [
+                            'attr_weight' => '200g',
+                            'attr_count' => '12 pieces',
+                            'attr_packaging' => 'Gift Box',
+                        ],
                         'price' => 95.00,
                         'minimum_order_quantity' => 100,
                         'unit' => 'box',
@@ -557,7 +812,7 @@ final class DemoDataSeeder extends Seeder
                 'shop' => $lanao,
                 'product' => [
                     'name' => 'Halal Coconut Water (Bottled)',
-                    'description' => 'Pure, not-from-concentrate coconut water sourced from young Matutum coconuts in South Cotabato. No added sugar, preservatives, or artificial flavors. Cold-filled in BPA-free PET bottles. BFAD/FDA registered, halal-certified. Suitable for health food retail, gyms, hotels, and export.',
+                    'description' => 'Pure, not-from-concentrate coconut water sourced from young Matutum coconuts in South Cotabato. No added sugar, preservatives, or artificial flavors. Cold-filled in BPA-free PET bottles. BFAD/FDA registered, halal-certified.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -566,7 +821,10 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'LHS-COCOWATER-330ML',
                         'description' => '330ml single-serve bottle',
-                        'attributes' => ['volume' => '330 ml', 'packaging' => 'PET bottle, 24 per carton'],
+                        'attributes' => [
+                            'attr_volume' => '330 ml',
+                            'attr_packaging' => 'PET Bottle',
+                        ],
                         'price' => 42.00,
                         'minimum_order_quantity' => 240,
                         'unit' => 'bottle',
@@ -583,12 +841,14 @@ final class DemoDataSeeder extends Seeder
                 ],
             ],
 
-            // Zamboanga Halal Agri-Ventures — 2 products
+            // ----------------------------------------------------------------
+            // Zamboanga Halal Agri-Ventures — Processed Foods & Beverages
+            // ----------------------------------------------------------------
             [
                 'shop' => $zamboanga,
                 'product' => [
                     'name' => 'Zamboanga Sardines in Olive Oil (Halal)',
-                    'description' => 'Wild-caught Pacific sardines from the Sulu Sea, packed in premium extra-virgin olive oil with sea salt and bay leaf. Processed in a halal-certified fish canning facility in Zamboanga City. No preservatives, no MSG. Ideal for supermarket chains, export, and food service accounts across ASEAN.',
+                    'description' => 'Wild-caught Pacific sardines from the Sulu Sea, packed in premium extra-virgin olive oil with sea salt and bay leaf. Processed in a halal-certified fish canning facility. No preservatives, no MSG.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -597,7 +857,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'ZHA-SARD-155G',
                         'description' => '155g retail can',
-                        'attributes' => ['weight' => '155g', 'packaging' => 'EZO tin can, 50 per master carton'],
+                        'attributes' => [
+                            'attr_weight' => '155g',
+                            'attr_packaging' => 'EZO tin can',
+                            'attr_shelf_life' => '3 years',
+                        ],
                         'price' => 68.00,
                         'minimum_order_quantity' => 500,
                         'unit' => 'can',
@@ -617,7 +881,7 @@ final class DemoDataSeeder extends Seeder
                 'shop' => $zamboanga,
                 'product' => [
                     'name' => 'Calamansi Concentrate (Halal)',
-                    'description' => 'Cold-pressed, minimally processed calamansi (Philippine lime) juice concentrate. 5:1 concentration ratio. Sourced from contract farms in Zamboanga Peninsula. No added sugar; natural high vitamin C content. Suitable for beverage manufacturers, culinary brands, and export markets seeking authentic Filipino citrus flavors.',
+                    'description' => 'Cold-pressed, minimally processed calamansi (Philippine lime) juice concentrate. 5:1 concentration ratio. Sourced from contract farms in Zamboanga Peninsula. No added sugar. Suitable for beverage manufacturers and export markets.',
                     'featured_image_path' => 'https://images.unsplash.com/photo-1587496679742-bad502958fbf?w=800&q=80',
                     'status' => 'published',
                 ],
@@ -626,7 +890,11 @@ final class DemoDataSeeder extends Seeder
                     [
                         'sku' => 'ZHA-CALAMANSI-1L',
                         'description' => '1 liter Tetra Pak',
-                        'attributes' => ['volume' => '1L', 'concentration' => '5:1', 'packaging' => 'Tetra Pak, 12 per carton'],
+                        'attributes' => [
+                            'attr_volume' => '1 L',
+                            'attr_packaging' => 'Tetra Pak',
+                            'attr_concentration' => '5:1',
+                        ],
                         'price' => 320.00,
                         'minimum_order_quantity' => 48,
                         'unit' => 'carton',
@@ -645,28 +913,39 @@ final class DemoDataSeeder extends Seeder
         ];
 
         foreach ($products as $data) {
+            // Build merged schema from the product's categories
+            $schema = $this->mergedSchema($data['categories'], $categoryMap);
+
             /** @var Product $product */
             $product = Product::firstOrCreate(
                 [
                     'shop_id' => $data['shop']->id,
                     'name' => $data['product']['name'],
                 ],
-                $data['product'] + ['shop_id' => $data['shop']->id]
+                array_merge($data['product'], [
+                    'shop_id' => $data['shop']->id,
+                    'variant_attributes_schema' => $schema,
+                ])
             );
+
+            // Update schema on existing rows (safe on re-seed).
+            if (empty($product->variant_attributes_schema)) {
+                $product->update(['variant_attributes_schema' => $schema]);
+            }
 
             // Attach product categories
             foreach ($data['categories'] as $slug) {
-                $categoryId = $categories[$slug]?->id ?? null;
+                $categoryId = $categoryMap[$slug]?->id ?? null;
                 if ($categoryId && ! $product->categories()->where('category_id', $categoryId)->exists()) {
                     $product->categories()->attach($categoryId);
                 }
             }
 
-            // Create variants
+            // Create variants — attributes keyed to match the product schema
             foreach ($data['variants'] as $variantData) {
                 ProductVariant::firstOrCreate(
                     ['sku' => $variantData['sku']],
-                    $variantData + ['product_id' => $product->id]
+                    array_merge($variantData, ['product_id' => $product->id])
                 );
             }
         }

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $quotation_id
+ * @property int|null $variant_id
+ * @property array<string, mixed>|null $variant_snapshot
  * @property string $description
  * @property string $quantity
  * @property string $unit
@@ -28,6 +30,8 @@ final class QuotationItem extends Model
 
     protected $fillable = [
         'quotation_id',
+        'variant_id',
+        'variant_snapshot',
         'description',
         'quantity',
         'unit',
@@ -42,6 +46,14 @@ final class QuotationItem extends Model
     }
 
     /**
+     * The product variant this line item was sourced from (nullable — freeform items have none).
+     */
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -50,6 +62,7 @@ final class QuotationItem extends Model
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
             'subtotal' => 'decimal:2',
+            'variant_snapshot' => 'array',
         ];
     }
 }

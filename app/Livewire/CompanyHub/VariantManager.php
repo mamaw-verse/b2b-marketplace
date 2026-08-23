@@ -6,6 +6,7 @@ namespace App\Livewire\CompanyHub;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -19,12 +20,40 @@ final class VariantManager extends Component
     /** @var array<int, array<string, mixed>> */
     public array $variants = [];
 
-    /** @var array<int, array{min_qty: int|string, price: float|string}> */
-    public array $quantityBreaks = [];
+    // ── Add / Edit modal ─────────────────────────────────────────────────────
+
+    public bool $showVariantModal = false;
+
+    /** Null means creating a new variant; int is the DB id being edited. */
+    public ?int $editingVariantId = null;
+
+    public string $draftSku = '';
+
+    public string $draftPrice = '';
+
+    public string $draftMoq = '1';
+
+    public string $draftUnit = '';
+
+    public string $draftLeadTime = '';
+
+    public string $draftPackSize = '';
+
+    public string $draftStatus = 'archived';
+
+    /** @var array<string, mixed> */
+    public array $draftAttributes = [];
+
+    // ── Quantity breaks modal ─────────────────────────────────────────────────
 
     public bool $showQuantityBreaksModal = false;
 
-    public ?int $editingBreaksIndex = null;
+    public ?int $editingBreaksVariantId = null;
+
+    /** @var array<int, array{min_qty: int|string, price: float|string}> */
+    public array $quantityBreaks = [];
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     public function mount(Product $product): void
     {
@@ -33,50 +62,106 @@ final class VariantManager extends Component
         $this->loadVariants();
     }
 
-    public function addVariant(): void
+    // ── Variant modal ─────────────────────────────────────────────────────────
+
+    public function openAddVariant(): void
     {
-        $this->variants[] = [
-            'id' => null,
-            'sku' => '',
-            'price' => '',
-            'minimum_order_quantity' => '1',
-            'unit' => '',
-            'lead_time_days' => '',
-            'pack_size' => '',
-            'status' => 'archived',
-            'quantity_breaks' => [],
+        $this->editingVariantId = null;
+        $this->draftSku = '';
+        $this->draftPrice = '';
+        $this->draftMoq = '1';
+        $this->draftUnit = '';
+        $this->draftLeadTime = '';
+        $this->draftPackSize = '';
+        $this->draftStatus = 'archived';
+        $this->draftAttributes = $this->blankAttributes();
+        $this->resetValidation();
+        $this->showVariantModal = true;
+    }
+
+    public function openEditVariant(int $variantId): void
+    {
+        $variant = collect($this->variants)->firstWhere('id', $variantId);
+
+        if (! $variant) {
+            return;
+        }
+
+        $this->editingVariantId = $variantId;
+        $this->draftSku = $variant['sku'];
+        $this->draftPrice = (string) $variant['price'];
+        $this->draftMoq = (string) $variant['minimum_order_quantity'];
+        $this->draftUnit = $variant['unit'];
+        $this->draftLeadTime = (string) ($variant['lead_time_days'] ?? '');
+        $this->draftPackSize = $variant['pack_size'] ?? '';
+        $this->draftStatus = $variant['status'];
+        $this->draftAttributes = array_merge($this->blankAttributes(), $variant['attributes'] ?? []);
+        $this->resetValidation();
+        $this->showVariantModal = true;
+    }
+
+    public function saveVariant(): void
+    {
+        $this->validateVariantDraft();
+
+        $data = [
+            'product_id' => $this->product->id,
+            'sku' => $this->draftSku,
+            'price' => $this->draftPrice,
+            'minimum_order_quantity' => (int) $this->draftMoq,
+            'unit' => $this->draftUnit,
+            'lead_time_days' => $this->draftLeadTime !== '' ? (int) $this->draftLeadTime : null,
+            'pack_size' => $this->draftPackSize ?: null,
+            'status' => $this->draftStatus,
+            'attributes' => $this->draftAttributes,
         ];
-    }
 
-    public function removeVariant(int $index): void
-    {
-        $variant = $this->variants[$index] ?? null;
-
-        if ($variant && $variant['id']) {
-            ProductVariant::where('id', $variant['id'])
+        if ($this->editingVariantId) {
+            ProductVariant::where('id', $this->editingVariantId)
                 ->where('product_id', $this->product->id)
-                ->delete();
+                ->update($data);
+            $message = 'Variant updated.';
+        } else {
+            $data['quantity_breaks'] = [];
+            ProductVariant::create($data);
+            $message = 'Variant added.';
         }
 
-        unset($this->variants[$index]);
-        $this->variants = array_values($this->variants);
-
-        \Flux\Flux::toast('Variant removed.', variant: 'success');
+        $this->showVariantModal = false;
+        $this->loadVariants();
+        \Flux\Flux::toast($message, variant: 'success');
     }
 
-    public function toggleVariantStatus(int $index): void
+    public function removeVariant(int $variantId): void
     {
-        if (isset($this->variants[$index])) {
-            $this->variants[$index]['status'] = $this->variants[$index]['status'] === 'published'
-                ? 'archived'
-                : 'published';
-        }
+        ProductVariant::where('id', $variantId)
+            ->where('product_id', $this->product->id)
+            ->delete();
+
+        $this->loadVariants();
+        \Flux\Flux::toast('Variant removed.', variant: 'warning');
     }
 
-    public function openQuantityBreaks(int $index): void
+    public function toggleStatus(int $variantId): void
     {
-        $this->editingBreaksIndex = $index;
-        $this->quantityBreaks = $this->variants[$index]['quantity_breaks'] ?? [];
+        $variant = ProductVariant::where('id', $variantId)
+            ->where('product_id', $this->product->id)
+            ->firstOrFail();
+
+        $variant->update([
+            'status' => $variant->status === 'published' ? 'archived' : 'published',
+        ]);
+
+        $this->loadVariants();
+    }
+
+    // ── Quantity breaks modal ─────────────────────────────────────────────────
+
+    public function openQuantityBreaks(int $variantId): void
+    {
+        $this->editingBreaksVariantId = $variantId;
+        $variant = collect($this->variants)->firstWhere('id', $variantId);
+        $this->quantityBreaks = $variant['quantity_breaks'] ?? [];
 
         if (empty($this->quantityBreaks)) {
             $this->quantityBreaks = [['min_qty' => '', 'price' => '']];
@@ -98,50 +183,49 @@ final class VariantManager extends Component
 
     public function saveQuantityBreaks(): void
     {
-        if ($this->editingBreaksIndex !== null && isset($this->variants[$this->editingBreaksIndex])) {
-            $breaks = collect($this->quantityBreaks)
-                ->filter(fn (array $b) => $b['min_qty'] !== '' && $b['price'] !== '')
-                ->map(fn (array $b) => ['min_qty' => (int) $b['min_qty'], 'price' => (float) $b['price']])
-                ->values()
-                ->all();
+        $breaks = collect($this->quantityBreaks)
+            ->filter(fn (array $b) => $b['min_qty'] !== '' && $b['price'] !== '')
+            ->map(fn (array $b) => ['min_qty' => (int) $b['min_qty'], 'price' => (float) $b['price']])
+            ->values()
+            ->all();
 
-            $this->variants[$this->editingBreaksIndex]['quantity_breaks'] = $breaks;
+        if ($this->editingBreaksVariantId) {
+            ProductVariant::where('id', $this->editingBreaksVariantId)
+                ->where('product_id', $this->product->id)
+                ->update(['quantity_breaks' => $breaks]);
+
+            $this->loadVariants();
         }
 
         $this->showQuantityBreaksModal = false;
-        $this->editingBreaksIndex = null;
+        $this->editingBreaksVariantId = null;
         $this->quantityBreaks = [];
+
+        \Flux\Flux::toast('Quantity breaks saved.', variant: 'success');
     }
 
-    public function saveAll(): void
+    // ── Computed ──────────────────────────────────────────────────────────────
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    #[Computed]
+    public function mergedAttributeSchema(): array
     {
-        $this->validate();
+        $schema = $this->product->variant_attributes_schema ?? [];
 
-        foreach ($this->variants as $variantData) {
-            $attributes = [
-                'product_id' => $this->product->id,
-                'sku' => $variantData['sku'],
-                'price' => $variantData['price'],
-                'minimum_order_quantity' => (int) $variantData['minimum_order_quantity'],
-                'unit' => $variantData['unit'],
-                'lead_time_days' => $variantData['lead_time_days'] !== '' ? (int) $variantData['lead_time_days'] : null,
-                'pack_size' => $variantData['pack_size'] ?: null,
-                'status' => $variantData['status'],
-                'quantity_breaks' => $variantData['quantity_breaks'] ?? [],
-            ];
-
-            if ($variantData['id']) {
-                ProductVariant::where('id', $variantData['id'])
-                    ->where('product_id', $this->product->id)
-                    ->update($attributes);
-            } else {
-                ProductVariant::create($attributes);
-            }
+        // Normalize schema: if it's a numeric array OR uses attr_* keys from uniqid,
+        // convert to associative using label as key
+        if ($schema && (array_is_list($schema) || $this->looksLikeUniqidKeys($schema))) {
+            return collect($schema)
+                ->filter(fn ($attr) => isset($attr['label']) && $attr['label'] !== '')
+                ->mapWithKeys(fn ($attr) => [
+                    mb_strtolower(str_replace(' ', '_', $attr['label'])) => $attr,
+                ])
+                ->toArray();
         }
 
-        $this->loadVariants();
-
-        \Flux\Flux::toast('Variants saved successfully.', variant: 'success');
+        return $schema;
     }
 
     public function render()
@@ -150,20 +234,53 @@ final class VariantManager extends Component
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * Check if schema uses auto-generated uniqid keys (attr_xxx).
      */
-    protected function rules(): array
+    private function looksLikeUniqidKeys(array $schema): bool
     {
-        return [
-            'variants' => ['array'],
-            'variants.*.sku' => ['required', 'string', 'max:100'],
-            'variants.*.price' => ['required', 'numeric', 'min:0'],
-            'variants.*.minimum_order_quantity' => ['required', 'integer', 'min:1'],
-            'variants.*.unit' => ['required', 'string', 'max:30'],
-            'variants.*.lead_time_days' => ['nullable', 'integer', 'min:0'],
-            'variants.*.pack_size' => ['nullable', 'string', 'max:100'],
-            'variants.*.status' => ['required', 'in:published,archived'],
-        ];
+        foreach (array_keys($schema) as $key) {
+            if (! is_string($key) || ! str_starts_with($key, 'attr_')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ── Internals ─────────────────────────────────────────────────────────────
+
+    private function validateVariantDraft(): void
+    {
+        $prefix = 'draft';
+
+        $this->validate([
+            'draftSku' => ['required', 'string', 'max:100'],
+            'draftPrice' => ['required', 'numeric', 'min:0'],
+            'draftMoq' => ['required', 'integer', 'min:1'],
+            'draftUnit' => ['required', 'string', 'max:30'],
+            'draftLeadTime' => ['nullable', 'integer', 'min:0'],
+            'draftPackSize' => ['nullable', 'string', 'max:100'],
+            'draftStatus' => ['required', 'in:published,archived'],
+            'draftAttributes' => ['array'],
+        ], [], [
+            'draftSku' => 'SKU',
+            'draftPrice' => 'Price',
+            'draftMoq' => 'Minimum order quantity',
+            'draftUnit' => 'Unit',
+            'draftLeadTime' => 'Lead time',
+            'draftPackSize' => 'Pack size',
+            'draftStatus' => 'Status',
+        ]);
+    }
+
+    /**
+     * Build a blank attributes map keyed by schema key.
+     *
+     * @return array<string, string>
+     */
+    private function blankAttributes(): array
+    {
+        return array_fill_keys(array_keys($this->mergedAttributeSchema()), '');
     }
 
     private function loadVariants(): void
@@ -174,13 +291,14 @@ final class VariantManager extends Component
             ->map(fn (ProductVariant $v) => [
                 'id' => $v->id,
                 'sku' => $v->sku,
-                'price' => $v->price,
+                'price' => (string) $v->price,
                 'minimum_order_quantity' => (string) $v->minimum_order_quantity,
                 'unit' => $v->unit,
                 'lead_time_days' => $v->lead_time_days !== null ? (string) $v->lead_time_days : '',
                 'pack_size' => $v->pack_size ?? '',
                 'status' => $v->status,
                 'quantity_breaks' => $v->quantity_breaks ?? [],
+                'attributes' => $v->attributes ?? [],
             ])
             ->all();
     }

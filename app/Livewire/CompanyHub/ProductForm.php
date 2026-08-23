@@ -28,6 +28,9 @@ final class ProductForm extends Component
     /** @var array<int, int> */
     public array $category_ids = [];
 
+    /** @var array<string, array<string, mixed>> */
+    public array $variantAttributesSchema = [];
+
     public $featured_image = null;
 
     public function mount(?Product $product = null): void
@@ -38,7 +41,67 @@ final class ProductForm extends Component
             $this->name = $product->name;
             $this->description = $product->description ?? '';
             $this->category_ids = $product->categories()->pluck('categories.id')->map(fn ($id) => (int) $id)->all();
+            $this->variantAttributesSchema = $product->variant_attributes_schema ?? [];
         }
+    }
+
+    /**
+     * Toggle a category on/off and immediately re-evaluate the schema population.
+     * Using a dedicated action instead of wire:model on an array ensures the
+     * updatedCategoryIds logic runs reliably on every toggle.
+     */
+    public function toggleCategory(int $id): void
+    {
+        if (in_array($id, $this->category_ids, true)) {
+            $this->category_ids = array_values(array_filter(
+                $this->category_ids,
+                fn ($existing) => $existing !== $id
+            ));
+        } else {
+            $this->category_ids[] = $id;
+        }
+
+        // On the create form only: auto-populate schema whenever categories change.
+        if (! $this->product && empty($this->variantAttributesSchema)) {
+            $this->populateSchemaFromCategories();
+        }
+    }
+
+    /**
+     * Replace the current schema with the merged schemas from all selected
+     * categories. Works on both create and edit pages.
+     */
+    public function reloadSchemaFromCategories(): void
+    {
+        $this->variantAttributesSchema = [];
+        $this->populateSchemaFromCategories();
+
+        if (empty($this->variantAttributesSchema)) {
+            \Flux\Flux::toast('None of the selected categories have options defined.', variant: 'warning');
+
+            return;
+        }
+
+        // On edit, persist immediately so the reload survives a page refresh.
+        $this->product?->update(['variant_attributes_schema' => $this->variantAttributesSchema]);
+
+        \Flux\Flux::toast('Product options reloaded from selected categories.', variant: 'success');
+    }
+
+    public function addAttribute(): void
+    {
+        $key = 'attr_'.uniqid();
+        $this->variantAttributesSchema[$key] = [
+            'label' => '',
+            'type' => 'select',
+            'options' => '',
+            'required' => false,
+        ];
+    }
+
+    public function removeAttribute(string $key): void
+    {
+        unset($this->variantAttributesSchema[$key]);
     }
 
     public function save(): void
@@ -52,6 +115,7 @@ final class ProductForm extends Component
         $data = [
             'name' => $this->name,
             'description' => $this->description ?: null,
+            'variant_attributes_schema' => $this->variantAttributesSchema,
         ];
 
         if ($this->featured_image) {
@@ -99,6 +163,52 @@ final class ProductForm extends Component
             'category_ids' => ['array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'featured_image' => ['nullable', 'image', 'max:5120'],
+            'variantAttributesSchema' => 'array',
         ];
+    }
+
+    /**
+     * Merge variant attribute schemas from all selected categories into the
+     * current schema. Existing attributes (matched by label) are not duplicated.
+     */
+    private function populateSchemaFromCategories(): void
+    {
+        if (empty($this->category_ids)) {
+            return;
+        }
+
+        $existingLabels = array_map(
+            fn ($attr) => mb_strtolower(mb_trim($attr['label'] ?? '')),
+            $this->variantAttributesSchema
+        );
+
+        $categories = Category::whereIn('id', $this->category_ids)
+            ->whereNotNull('variant_attributes_schema')
+            ->get();
+
+        foreach ($categories as $category) {
+            $schema = $category->variant_attributes_schema;
+
+            if (empty($schema)) {
+                continue;
+            }
+
+            foreach ($schema as $attr) {
+                $label = mb_strtolower(mb_trim($attr['label'] ?? ''));
+
+                if ($label === '' || in_array($label, $existingLabels, true)) {
+                    continue;
+                }
+
+                $key = 'attr_'.uniqid();
+                $this->variantAttributesSchema[$key] = [
+                    'label' => $attr['label'] ?? '',
+                    'type' => $attr['type'] ?? 'select',
+                    'options' => $attr['options'] ?? '',
+                    'required' => (bool) ($attr['required'] ?? false),
+                ];
+                $existingLabels[] = $label;
+            }
+        }
     }
 }

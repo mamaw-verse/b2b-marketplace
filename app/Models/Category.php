@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string|null $description
  * @property string $slug
+ * @property array<string, array<string, mixed>> $variant_attributes_schema
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -27,6 +28,7 @@ final class Category extends Model
         'name',
         'description',
         'slug',
+        'variant_attributes_schema',
     ];
 
     /**
@@ -43,5 +45,12 @@ final class Category extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_categories');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'variant_attributes_schema' => 'array',
+        ];
     }
 }

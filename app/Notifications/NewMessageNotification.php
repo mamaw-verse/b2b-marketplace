@@ -29,21 +29,30 @@ final class NewMessageNotification extends Notification implements ShouldQueue
     {
         $senderName = $this->message->sender->first_name.' '.$this->message->sender->last_name;
 
+        $url = $notifiable->shop && $notifiable->shop->status === 'active'
+            ? url('/hub/messages')
+            : url('/account/messages');
+
         return (new MailMessage)
             ->subject("New message from {$senderName}")
             ->line("{$senderName} sent you a message:")
             ->line('"'.str()->limit($this->message->body, 200).'"')
-            ->action('View Conversation', url('/account/messages'));
+            ->action('View Conversation', $url);
     }
 
     public function toArray(object $notifiable): array
     {
+        $url = $notifiable->shop && $notifiable->shop->status === 'active'
+            ? url('/hub/messages')
+            : url('/account/messages');
+
         return [
             'type' => 'new_message',
             'message_id' => $this->message->id,
             'sender_name' => $this->message->sender->first_name,
             'body_preview' => str()->limit($this->message->body, 100),
             'message' => 'New message from '.$this->message->sender->first_name,
+            'url' => $url,
         ];
     }
 

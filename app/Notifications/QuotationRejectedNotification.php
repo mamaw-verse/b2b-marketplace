@@ -31,7 +31,7 @@ final class QuotationRejectedNotification extends Notification implements Should
             ->subject('Quotation Rejected')
             ->line('The buyer has rejected your quotation.')
             ->line('RFQ: '.$this->quotation->rfq->title)
-            ->action('View Details', url('/hub/rfqs'))
+            ->action('View Details', url('/hub/rfqs/'.$this->quotation->rfqRecipient->id))
             ->line('You can submit a revised quotation with different terms.');
     }
 
@@ -41,7 +41,9 @@ final class QuotationRejectedNotification extends Notification implements Should
             'type' => 'quotation_rejected',
             'quotation_id' => $this->quotation->id,
             'rfq_id' => $this->quotation->rfq_id,
+            'rfq_recipient_id' => $this->quotation->rfqRecipient->id,
             'message' => 'Your quotation was rejected.',
+            'url' => url('/hub/rfqs/'.$this->quotation->rfqRecipient->id),
         ];
     }
 

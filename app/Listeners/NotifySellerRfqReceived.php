@@ -16,7 +16,7 @@ final class NotifySellerRfqReceived
         foreach ($rfq->recipients()->with('shop.user')->get() as $recipient) {
             $shopOwner = $recipient->shop->user ?? null;
             if ($shopOwner) {
-                $shopOwner->notify(new RfqReceivedNotification($rfq));
+                $shopOwner->notify(new RfqReceivedNotification($recipient));
             }
         }
     }

@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 final class DatabaseSeeder extends Seeder
 {
@@ -20,6 +21,7 @@ final class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             DemoDataSeeder::class,
+            DemoUsersSeeder::class,
         ]);
 
         User::firstOrCreate(
@@ -30,5 +32,16 @@ final class DatabaseSeeder extends Seeder
                 'password' => bcrypt('password'),
             ]
         );
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+        $admin->assignRole('admin');
     }
 }

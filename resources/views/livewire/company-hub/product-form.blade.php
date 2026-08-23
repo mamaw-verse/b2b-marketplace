@@ -10,8 +10,9 @@
         </div>
 
         <div class="p-6">
-
             <form wire:submit="save" class="space-y-6">
+
+                {{-- Product Name --}}
                 <flux:input
                     wire:model="name"
                     label="Product Name"
@@ -20,6 +21,7 @@
                 />
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
+                {{-- Description --}}
                 <flux:textarea
                     wire:model="description"
                     label="Description"
@@ -28,22 +30,27 @@
                 />
                 @error('description') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
+                {{-- ── Categories (toggle pills via Livewire action) ─────────── --}}
                 <div>
                     <label class="block text-sm font-semibold text-[var(--hs-neutral-700)] mb-1.5">Categories</label>
-                    <div class="flex flex-wrap gap-2" x-data="{ selected: @entangle('category_ids') }">
+                    <div class="flex flex-wrap gap-2">
                         @foreach ($this->categories as $id => $name)
-                            <label 
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--hs-radius-pill)] text-sm font-medium border cursor-pointer transition"
-                                x-bind:class="selected.includes({{ $id }}) || selected.includes('{{ $id }}') ? 'bg-[var(--hs-green-600)] border-[var(--hs-green-600)] text-white' : 'bg-[var(--hs-neutral-0)] border-[var(--hs-neutral-200)] text-[var(--hs-neutral-600)] hover:border-[var(--hs-green-300)]'"
+                            <button
+                                type="button"
+                                wire:click="toggleCategory({{ $id }})"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--hs-radius-pill)] text-sm font-medium border cursor-pointer transition {{ in_array($id, $category_ids, false) ? 'bg-[var(--hs-green-600)] border-[var(--hs-green-600)] text-white' : 'bg-[var(--hs-neutral-0)] border-[var(--hs-neutral-200)] text-[var(--hs-neutral-600)] hover:border-[var(--hs-green-300)]' }}"
                             >
-                                <input type="checkbox" wire:model="category_ids" value="{{ $id }}" class="hidden">
+                                @if (in_array($id, $category_ids, false))
+                                    <flux:icon name="check" variant="micro" class="size-3.5" />
+                                @endif
                                 {{ $name }}
-                            </label>
+                            </button>
                         @endforeach
                     </div>
                 </div>
                 @error('category_ids') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
+                {{-- ── Featured Image ────────────────────────────────────────── --}}
                 <div>
                     <label class="block text-sm font-medium text-[var(--hs-neutral-700)]">Featured Image</label>
                     @if ($product?->featured_image_path && ! $featured_image)
@@ -59,7 +66,132 @@
                     @endif
                 </div>
 
-                <div class="flex items-center gap-3">
+                {{-- ── Product Options (Variant Attribute Schema Editor) ──────── --}}
+                <div class="border-t border-[var(--hs-neutral-100)] pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">Product Options</h2>
+                            <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">
+                                Define the attributes buyers will see per variant (e.g. Cut, Weight, Packaging).
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            @if (! empty($category_ids))
+                                <flux:button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    icon="arrow-path"
+                                    wire:click="reloadSchemaFromCategories"
+                                    wire:confirm="This will replace all product options with fresh values from the selected categories. Continue?"
+                                >
+                                    Reload from Categories
+                                </flux:button>
+                            @endif
+                            <flux:button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                icon="plus"
+                                wire:click="addAttribute"
+                            >
+                                Add Option
+                            </flux:button>
+                        </div>
+                    </div>
+
+                    @if (! empty($variantAttributesSchema))
+                        <div class="space-y-2">
+                            @foreach ($variantAttributesSchema as $key => $attr)
+                                <div
+                                    x-data="{ type: '{{ $attr['type'] ?? 'select' }}' }"
+                                    class="flex flex-wrap lg:flex-nowrap items-end gap-3 p-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)]"
+                                >
+                                    {{-- Column headers on first row only --}}
+                                    @if ($loop->first)
+                                        {{-- We use a hidden-on-subsequent-rows trick but since we're in a loop, column headers render above the flex --}}
+                                    @endif
+
+                                    {{-- Label --}}
+                                    <div class="w-64 shrink-0">
+                                        @if ($loop->first)
+                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">Label</label>
+                                        @endif
+                                        <flux:input
+                                            wire:model="variantAttributesSchema.{{ $key }}.label"
+                                            placeholder="e.g. Cut"
+                                            size="sm"
+                                        />
+                                    </div>
+
+                                    {{-- Type --}}
+                                    <div class="w-32 shrink-0">
+                                        @if ($loop->first)
+                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">Type</label>
+                                        @endif
+                                        <flux:select
+                                            wire:model="variantAttributesSchema.{{ $key }}.type"
+                                            x-model="type"
+                                            size="sm"
+                                        >
+                                            <flux:select.option value="select">Select</flux:select.option>
+                                            <flux:select.option value="text">Text</flux:select.option>
+                                            <flux:select.option value="number">Number</flux:select.option>
+                                        </flux:select>
+                                    </div>
+
+                                    {{-- Choices (disabled unless type is select) --}}
+                                    <div class="flex-1 min-w-[180px]">
+                                        @if ($loop->first)
+                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">Choices (comma-separated)</label>
+                                        @endif
+                                        <flux:input
+                                            wire:model="variantAttributesSchema.{{ $key }}.options"
+                                            placeholder="e.g. Whole, Half, Quarter"
+                                            size="sm"
+                                            x-bind:disabled="type !== 'select'"
+                                            x-bind:class="type !== 'select' ? 'opacity-40 cursor-not-allowed' : ''"
+                                        />
+                                    </div>
+
+                                    {{-- Required toggle --}}
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <input
+                                            type="checkbox"
+                                            wire:model="variantAttributesSchema.{{ $key }}.required"
+                                            class="rounded border-[var(--hs-neutral-300)] text-[var(--hs-green-600)] focus:ring-[var(--hs-green-400)]"
+                                        />
+                                        <span class="text-xs text-[var(--hs-neutral-600)]">Req.</span>
+                                    </div>
+
+                                    {{-- Remove --}}
+                                    <flux:button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="trash"
+                                        wire:click="removeAttribute('{{ $key }}')"
+                                        class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)] shrink-0"
+                                    />
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="flex items-center gap-3 rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] px-5 py-6 text-center">
+                            <flux:icon name="squares-2x2" variant="outline" class="size-5 text-[var(--hs-neutral-400)] mx-auto" />
+                            <p class="text-sm text-[var(--hs-neutral-500)]">
+                                @if (empty($category_ids))
+                                    Select a category above — options will be populated automatically from the category's schema.
+                                @else
+                                    No options yet. Click <span class="font-medium">"Add Option"</span> or <span class="font-medium">"Reload from Categories"</span> to get started.
+                                @endif
+                            </p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- ── Form Actions ──────────────────────────────────────────── --}}
+                <div class="flex items-center gap-3 border-t border-[var(--hs-neutral-100)] pt-6">
                     <flux:button type="submit" variant="primary">
                         {{ $product ? 'Update Product' : 'Create Product' }}
                     </flux:button>

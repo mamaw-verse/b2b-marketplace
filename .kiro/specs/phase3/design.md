@@ -426,10 +426,12 @@ Config values read from `config/services.php`:
 3. `DltPaymentService::createQuickLinkSession()` is called; the response `token` and `checkout_url` are stored on the `payment_attempts` row.
 4. Buyer is redirected to the DLT hosted checkout URL.
 5. After the buyer pays (or cancels), DLT redirects to `success_url` or `failure_url`.
-6. Our callback controller calls `DltPaymentService::getQuickLinkSession(token)` to verify the payment status.
-7. If DLT status is `PAID` → update `payment_attempts.status = succeeded`, set `succeeded_at`; within the same DB transaction: move order to `paid`, create `escrow_hold` ledger entry, create order thread, broadcast `OrderPaid` event.
-8. If DLT status is `REJECTED` or `failure_url` reached → update `payment_attempts.status = failed`, set `failed_at`. Order stays `pending_payment`; buyer sees a retry button.
+6. **The redirect to `success_url` is the payment confirmation signal from DLT.** Our callback controller calls `DltPaymentService::getQuickLinkSession(token)` as a **tamper guard** — it verifies the token is real, belongs to this order/attempt, and hasn't expired. The Get Quick Link Session response does _not_ include a `payment_status` field; it returns session metadata only. Do not rely on it to confirm payment success — the `success_url` redirect itself is the authoritative signal.
+7. If the callback is to `success_url` and the token validates → update `payment_attempts.status = succeeded`, set `succeeded_at`; within the same DB transaction: move order to `paid`, create `escrow_hold` ledger entry, create order thread, broadcast `OrderPaid` event.
+8. If the callback is to `failure_url` → update `payment_attempts.status = failed`, set `failed_at`. Order stays `pending_payment`; buyer sees a retry button.
 9. **Idempotency**: the callback controller must handle duplicate redirects — if the `payment_attempts` row is already `succeeded`, skip re-processing and redirect to the order confirmation page.
+
+> **Note:** If DLT adds `payment_status` to the Get Quick Link Session response in a future API version, the verification in step 6 can be hardened to also assert `payment_status === 'PAID'` before accepting the callback.
 
 ### 3.4 Callback URLs
 
@@ -826,7 +828,7 @@ resources/views/livewire/
 |---|---|---|
 | §4.1 — Order creation from quotation | `company-hub/orders/order-builder` | "Create Order" action on awarded quotation card; auto-populates from quotation |
 | §4.1 — Standalone order | `company-hub/hub/customers-list` → `order-builder` | From customer row, "New Order" button; builder starts empty |
-| §4.2 — Draft editing | `company-hub/orders/order-builder` | Alpine.js add/remove rows for items and fees; real-time total recalculation |
+| §4.2 — Draft editing | `company-hub/orders/order-builder` | Alpine.js add/remove rows for items and fees; real-time total recalculation; unit fields use `<x-hs-unit-select>` per project convention (see `.ai/rules/views.md`) |
 | §4.2 — Submit for payment | `order-builder` submit action | Confirmation modal warning buyer will be notified |
 | §4.2 — Recall to draft | `company-hub/orders/order-detail` | Recall button visible while `pending_payment` only |
 | §4.5 — Buyer payment | `account/orders/payment-page` | "Pay Now" creates payment attempt, redirects to DLT; failure page shows retry button |
@@ -932,6 +934,16 @@ Route::get    ('admin/disputes',   [AdminDisputeController::class, 'index'])
 // Create one order_payment_terms row (type='full', amount=0 initially)
 // Returns Order
 ```
+
+**Copying quotation items → order items (Phase 2 variant link awareness):**
+
+Phase 2 Epic 20 added `variant_id` (nullable FK) and `variant_snapshot` (JSONB) to `quotation_items`. `order_items` does **not** carry these columns — items are fully decoupled once copied. The copy logic must account for this:
+
+- If `quotation_item.variant_snapshot` is non-null (normal case — all submitted quotations have snapshots written at submission time), populate `order_item.description`, `unit`, and `unit_price` from the snapshot fields (`description`, `unit`, `unit_price`).
+- If `variant_snapshot` is null but `variant_id` is set (edge case: draft quotation item somehow carried forward), fall back to reading the `ProductVariant` record directly.
+- If both are null (freeform item), copy `description`, `unit`, and `unit_price` directly from the `quotation_item` columns.
+
+`order_items` inherits only the human-readable values — the variant link itself (`variant_id`) is not propagated. Editing an order item never touches the source quotation or its variant.
 
 ### 7.2 `SubmitOrderAction`
 
@@ -1079,7 +1091,7 @@ Order customer/billing/shipping details are visible only to the buyer, the speci
 
 | Endpoint | Key validations |
 |---|---|
-| `POST /hub/orders` | `quotation_id` must exist and status='awarded' (if provided); `buyer_user_id` must be an existing user with ≥1 prior order or awarded quotation with this shop (if standalone) |
+| `POST /hub/orders` | `quotation_id` must exist and status='awarded' (if provided); `buyer_user_id` must be an existing user who appears in this shop's customer list — i.e., has at least one prior awarded quotation or completed/paid order with this shop (standalone order customer constraint, see requirements §4.1) |
 | `PUT /hub/orders/{order}` | Order must be `draft`; items: `description` max 500, `quantity` > 0, `unit` max 30, `unit_price` >= 0; fees: `label` max 255, `amount` >= 0 |
 | `POST /hub/orders/{order}/submit` | At least one item; `order_total` > 0 |
 | `POST /orders/{order}/disputes` | Fulfilment must be `delivered` or `returned_to_seller`; `type` must be valid enum; `reason` required, max 2000 chars |
