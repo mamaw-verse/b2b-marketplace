@@ -28,7 +28,7 @@
 **Goal:** Phase 3 enum types, `orders`, `order_items`, `order_fees`, `order_payment_terms` tables + models + factories. Extend `conversation_threads` with `order_id`.
 **Depends on:** Phase 2 complete (E20)
 
-- [ ] **E21.T1** Create Phase 3 PostgreSQL enum types migration `[parallel-safe]`
+- [x] **E21.T1** Create Phase 3 PostgreSQL enum types migration `[parallel-safe]`
   - File: `database/migrations/xxxx_create_phase3_enum_types.php`
   - Create types exactly as defined in design.md §2.1: `order_status`, `fulfilment_status`, `payment_attempt_status`, `payment_term_type`, `ledger_entry_type`, `dispute_type`, `dispute_status`.
   - Verify:
@@ -38,7 +38,7 @@
     ```
     All 7 enum types listed.
 
-- [ ] **E21.T2** Create `orders` migration
+- [x] **E21.T2** Create `orders` migration
   - File: `database/migrations/xxxx_create_orders_table.php`
   - Schema matches design.md §2.2 `orders` DDL exactly: `buyer_user_id` FK (RESTRICT), `shop_id` FK (RESTRICT), `quotation_id` FK (RESTRICT, nullable), `status order_status DEFAULT 'draft'`, all customer/billing/shipping snapshot columns, financial totals (`items_total`, `fees_total`, `order_total` as `NUMERIC(12,2)`), `currency CHAR(3) DEFAULT 'PHP'`, timestamp columns (`submitted_at`, `paid_at`, `completed_at`, `cancelled_at`, `created_at`, `updated_at`).
   - Indexes: `idx_orders_buyer`, `idx_orders_shop`, `idx_orders_quotation` (partial WHERE NOT NULL), `idx_orders_status`, `idx_orders_quotation_unique` (unique partial WHERE NOT NULL).
@@ -48,7 +48,7 @@
     ```
     Table exists with correct columns, FKs, and indexes.
 
-- [ ] **E21.T3** Create `order_items` migration `[parallel-safe with E21.T4, E21.T5]`
+- [x] **E21.T3** Create `order_items` migration `[parallel-safe with E21.T4, E21.T5]`
   - File: `database/migrations/xxxx_create_order_items_table.php`
   - Schema matches design.md §2.2: `order_id` FK (CASCADE), `description VARCHAR(500)`, `quantity NUMERIC(12,2)`, `unit VARCHAR(30)`, `unit_price NUMERIC(12,2)`, `subtotal NUMERIC(12,2)`, `sort_order SMALLINT DEFAULT 0`, timestamps.
   - Index: `idx_order_items_order` on `(order_id, sort_order)`.
@@ -57,7 +57,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T4** Create `order_fees` migration `[parallel-safe with E21.T3, E21.T5]`
+- [x] **E21.T4** Create `order_fees` migration `[parallel-safe with E21.T3, E21.T5]`
   - File: `database/migrations/xxxx_create_order_fees_table.php`
   - Schema matches design.md §2.2: `order_id` FK (CASCADE), `label VARCHAR(255)`, `amount NUMERIC(12,2)`, `sort_order SMALLINT DEFAULT 0`, timestamps.
   - Index: `idx_order_fees_order` on `(order_id, sort_order)`.
@@ -66,7 +66,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T5** Create `order_payment_terms` migration `[parallel-safe with E21.T3, E21.T4]`
+- [x] **E21.T5** Create `order_payment_terms` migration `[parallel-safe with E21.T3, E21.T4]`
   - File: `database/migrations/xxxx_create_order_payment_terms_table.php`
   - Schema matches design.md §2.2: `order_id` FK (CASCADE), `type payment_term_type DEFAULT 'full'`, `amount NUMERIC(12,2)`, `due_at TIMESTAMP(0) nullable`, timestamps.
   - Index: `idx_order_payment_terms_order`.
@@ -75,7 +75,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T6** Create `payment_attempts` migration
+- [x] **E21.T6** Create `payment_attempts` migration
   - File: `database/migrations/xxxx_create_payment_attempts_table.php`
   - Schema matches design.md §2.2: `order_payment_term_id` FK (CASCADE), `status payment_attempt_status DEFAULT 'pending'`, DLT gateway fields (`dlt_merchant_transaction_id VARCHAR(50) NOT NULL UNIQUE`, `dlt_quick_link_token VARCHAR(255)`, `dlt_payment_url VARCHAR(500)`, `dlt_payment_status VARCHAR(30)`, `dlt_amount VARCHAR(30)`), `gateway_response JSONB`, `succeeded_at`, `failed_at`, timestamps.
   - Indexes: `idx_payment_attempts_term`, `idx_payment_attempts_dlt_txn` (unique on `dlt_merchant_transaction_id`).
@@ -84,7 +84,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T7** Create `fulfilments` migration
+- [x] **E21.T7** Create `fulfilments` migration
   - File: `database/migrations/xxxx_create_fulfilments_table.php`
   - Schema matches design.md §2.2: `order_id` FK (RESTRICT), `status fulfilment_status DEFAULT 'pending'`, tracking fields (`carrier VARCHAR(120)`, `tracking_code VARCHAR(255)`, `tracking_url VARCHAR(500)`), `shipped_at`, `delivered_at`, `returned_at`, timestamps.
   - Indexes: `idx_fulfilments_order`, `idx_fulfilments_order_unique` (unique on `order_id` — v1 enforces one fulfilment per order).
@@ -93,7 +93,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T8** Create `disputes` migration
+- [x] **E21.T8** Create `disputes` migration
   - File: `database/migrations/xxxx_create_disputes_table.php`
   - Schema matches design.md §2.2: `order_id` FK (RESTRICT), `opened_by_user_id` FK (RESTRICT), `type dispute_type`, `status dispute_status DEFAULT 'open'`, `reason TEXT`, resolution fields (`resolution_type VARCHAR(30)`, `resolution_amount NUMERIC(12,2)`, `resolution_notes TEXT`, `resolved_by_user_id` FK nullable, `resolved_at`), `escalated_at`, return tracking (`return_carrier VARCHAR(120)`, `return_tracking_code VARCHAR(255)`), timestamps.
   - Indexes: `idx_disputes_order`, `idx_disputes_status` (partial WHERE status NOT IN terminal states), `idx_disputes_opened_by`.
@@ -102,7 +102,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T9** Create `ledger_entries` migration
+- [x] **E21.T9** Create `ledger_entries` migration
   - File: `database/migrations/xxxx_create_ledger_entries_table.php`
   - Schema matches design.md §2.2: `order_id` FK (RESTRICT), `type ledger_entry_type`, `amount NUMERIC(12,2)`, `note VARCHAR(255)`, `created_at TIMESTAMP(0)`. **No** `updated_at` — ledger entries are append-only.
   - Indexes: `idx_ledger_entries_order`, `idx_ledger_entries_type`.
@@ -111,7 +111,7 @@
     vendor/bin/sail artisan migrate
     ```
 
-- [ ] **E21.T10** Add `order_id` nullable FK to `conversation_threads`
+- [x] **E21.T10** Add `order_id` nullable FK to `conversation_threads`
   - File: `database/migrations/xxxx_add_order_id_to_conversation_threads.php`
   - Add nullable BIGINT `order_id` column referencing `orders(id) ON DELETE SET NULL`.
   - Index: `idx_conversation_threads_order` (partial WHERE NOT NULL).
@@ -122,7 +122,7 @@
     ```
     Returns `true`.
 
-- [ ] **E21.T11** Create Order model with relationships + factory
+- [x] **E21.T11** Create Order model with relationships + factory
   - Files:
     - `app/Models/Order.php`
     - `database/factories/OrderFactory.php`
@@ -135,7 +135,7 @@
     vendor/bin/sail artisan tinker --execute 'App\Models\Order::factory()->make();'
     ```
 
-- [ ] **E21.T12** Create OrderItem, OrderFee, OrderPaymentTerm models + factories `[parallel-safe]`
+- [x] **E21.T12** Create OrderItem, OrderFee, OrderPaymentTerm models + factories `[parallel-safe]`
   - Files:
     - `app/Models/OrderItem.php` — `belongsTo(Order)`, casts `quantity`/`unit_price`/`subtotal` as `decimal:2`.
     - `app/Models/OrderFee.php` — `belongsTo(Order)`, casts `amount` as `decimal:2`.
@@ -148,7 +148,7 @@
     vendor/bin/sail artisan tinker --execute 'App\Models\OrderItem::factory()->make(); App\Models\OrderFee::factory()->make(); App\Models\OrderPaymentTerm::factory()->make();'
     ```
 
-- [ ] **E21.T13** Create PaymentAttempt, Fulfilment, Dispute, LedgerEntry models + factories `[parallel-safe]`
+- [x] **E21.T13** Create PaymentAttempt, Fulfilment, Dispute, LedgerEntry models + factories `[parallel-safe]`
   - Files:
     - `app/Models/PaymentAttempt.php` — `belongsTo(OrderPaymentTerm)`, casts `status` as native enum, `gateway_response` as `array`.
     - `app/Models/Fulfilment.php` — `belongsTo(Order)`, casts `status` as native enum.
@@ -163,7 +163,7 @@
     vendor/bin/sail artisan tinker --execute 'App\Models\PaymentAttempt::factory()->make(); App\Models\Fulfilment::factory()->make(); App\Models\Dispute::factory()->make(); App\Models\LedgerEntry::factory()->make();'
     ```
 
-- [ ] **E21.T14** Update ConversationThread model to add `order_id` relationship
+- [x] **E21.T14** Update ConversationThread model to add `order_id` relationship
   - File: `app/Models/ConversationThread.php` (modify existing)
   - Add `belongsTo(Order::class)` (nullable).
   - Verify:
@@ -172,7 +172,7 @@
     ```
     Returns a BelongsTo relationship without error.
 
-- [ ] **E21.T15** Add inverse relationships on User, Shop, Quotation models
+- [x] **E21.T15** Add inverse relationships on User, Shop, Quotation models
   - Files (modify existing):
     - `app/Models/User.php` — add `hasMany(Order::class, 'buyer_user_id')`.
     - `app/Models/Shop.php` — add `hasMany(Order::class)`.
@@ -182,7 +182,7 @@
     vendor/bin/sail artisan tinker --execute '(new App\Models\User)->orders(); (new App\Models\Shop)->orders(); (new App\Models\Quotation)->order();'
     ```
 
-- [ ] **E21.T16** Feature tests for schema and model relationships
+- [x] **E21.T16** Feature tests for schema and model relationships
   - File: `tests/Feature/OrderSchemaTest.php`
   - Test cases:
     - Order can be created via factory with all default states.
@@ -202,7 +202,7 @@
 **Goal:** `CreateOrderAction`, `OrderPolicy`, draft CRUD (API + Livewire), customer list for standalone orders.
 **Depends on:** E21
 
-- [ ] **E22.T1** Create `CreateOrderAction`
+- [x] **E22.T1** Create `CreateOrderAction`
   - File: `app/Actions/CreateOrderAction.php`
   - Logic per design.md §7.1:
     - **From quotation**: accepts `quotation_id`. Validates quotation exists, `status = awarded`, no existing order for it. Copies items from `quotation_items` → `order_items` (description, quantity, unit, unit_price, subtotal, sort_order — see design.md §7.1 on variant snapshot handling). Copies buyer snapshot from quotation's `buyer_snapshot` → order's flat snapshot columns. Creates one `order_payment_terms` row (`type = full`, `amount = 0`).
@@ -213,7 +213,7 @@
     vendor/bin/sail artisan test --compact --filter=CreateOrderActionTest
     ```
 
-- [ ] **E22.T2** Create `OrderPolicy`
+- [x] **E22.T2** Create `OrderPolicy`
   - File: `app/Policies/OrderPolicy.php`
   - Rules per design.md §9.1:
     - `create`: authenticated user with an active shop (seller).
@@ -231,7 +231,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderPolicyTest
     ```
 
-- [ ] **E22.T3** Create `HubOrderController` with store/index/show/update/destroy endpoints
+- [x] **E22.T3** Create `HubOrderController` with store/index/show/update/destroy endpoints
   - Files:
     - `app/Http/Controllers/Api/V1/HubOrderController.php`
     - `app/Http/Requests/StoreOrderRequest.php`
@@ -251,7 +251,7 @@
     ```
     Shows POST, GET (index), GET (show), PUT, DELETE routes.
 
-- [ ] **E22.T4** Create `SubmitOrderAction`
+- [x] **E22.T4** Create `SubmitOrderAction`
   - File: `app/Actions/SubmitOrderAction.php`
   - Logic per design.md §7.2:
     - Validate: at least one item, `order_total > 0`.
@@ -267,7 +267,7 @@
     vendor/bin/sail artisan test --compact --filter=SubmitOrderAction
     ```
 
-- [ ] **E22.T5** Create submit and recall endpoints on `HubOrderController`
+- [x] **E22.T5** Create submit and recall endpoints on `HubOrderController`
   - File: `app/Http/Controllers/Api/V1/HubOrderController.php` (extend)
   - `POST /api/v1/hub/orders/{order}/submit`:
     - Policy: `submit`.
@@ -285,7 +285,7 @@
     ```
     Shows submit and recall routes.
 
-- [ ] **E22.T6** Create seller cancel endpoint on `HubOrderController`
+- [x] **E22.T6** Create seller cancel endpoint on `HubOrderController`
   - File: `app/Http/Controllers/Api/V1/HubOrderController.php` (extend)
   - `POST /api/v1/hub/orders/{order}/cancel`:
     - Policy: `cancelAsSeller`.
@@ -298,7 +298,7 @@
     vendor/bin/sail artisan route:list --path=api/v1/hub/orders
     ```
 
-- [ ] **E22.T7** Register all Hub order API routes
+- [x] **E22.T7** Register all Hub order API routes
   - File: `routes/api.php` (modify)
   - Add routes under `api/v1` prefix with `auth:sanctum` middleware:
     ```php
@@ -317,7 +317,7 @@
     ```
     All 8 routes listed.
 
-- [ ] **E22.T8** Create `OrderBuilder` Livewire component (company-hub/orders/order-builder)
+- [x] **E22.T8** Create `OrderBuilder` Livewire component (company-hub/orders/order-builder)
   - Files:
     - `app/Livewire/CompanyHub/Orders/OrderBuilder.php`
     - `resources/views/livewire/company-hub/orders/order-builder.blade.php`
@@ -334,7 +334,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderBuilder
     ```
 
-- [ ] **E22.T9** Create `OrderQueue` Livewire component (company-hub/orders/order-queue)
+- [x] **E22.T9** Create `OrderQueue` Livewire component (company-hub/orders/order-queue)
   - Files:
     - `app/Livewire/CompanyHub/Orders/OrderQueue.php`
     - `resources/views/livewire/company-hub/orders/order-queue.blade.php`
@@ -347,7 +347,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderQueue
     ```
 
-- [ ] **E22.T10** Create seller's order detail Livewire component (company-hub/orders/order-detail)
+- [x] **E22.T10** Create seller's order detail Livewire component (company-hub/orders/order-detail)
   - Files:
     - `app/Livewire/CompanyHub/Orders/OrderDetail.php`
     - `resources/views/livewire/company-hub/orders/order-detail.blade.php`
@@ -360,7 +360,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderDetail
     ```
 
-- [ ] **E22.T11** Create `BuyerOrderController` with index/show/cancel/confirm-receipt endpoints
+- [x] **E22.T11** Create `BuyerOrderController` with index/show/cancel/confirm-receipt endpoints
   - Files:
     - `app/Http/Controllers/Api/V1/BuyerOrderController.php`
     - `app/Http/Resources/BuyerOrderResource.php`
@@ -376,7 +376,7 @@
     ```
     Shows GET (index), GET (show), POST (cancel), POST (confirm-receipt).
 
-- [ ] **E22.T12** Create buyer `OrderList` Livewire component (account/orders/order-list)
+- [x] **E22.T12** Create buyer `OrderList` Livewire component (account/orders/order-list)
   - Files:
     - `app/Livewire/Account/Orders/OrderList.php`
     - `resources/views/livewire/account/orders/order-list.blade.php`
@@ -394,7 +394,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderList
     ```
 
-- [ ] **E22.T13** Create buyer `OrderDetail` Livewire component (account/orders/order-detail)
+- [x] **E22.T13** Create buyer `OrderDetail` Livewire component (account/orders/order-detail)
   - Files:
     - `app/Livewire/Account/Orders/OrderDetail.php`
     - `resources/views/livewire/account/orders/order-detail.blade.php`
@@ -406,7 +406,7 @@
     vendor/bin/sail artisan test --compact --filter="Account\\\\Orders\\\\OrderDetail"
     ```
 
-- [ ] **E22.T14** Register buyer order web routes
+- [x] **E22.T14** Register buyer order web routes
   - File: `routes/web.php` (modify)
   - Routes under authenticated buyer area:
     - `/account/orders` → `OrderList` Livewire page.
@@ -416,7 +416,7 @@
     vendor/bin/sail artisan route:list --path=account/orders
     ```
 
-- [ ] **E22.T15** Register seller order web routes
+- [x] **E22.T15** Register seller order web routes
   - File: `routes/web.php` (modify)
   - Routes under Company Hub area:
     - `/hub/orders` → `OrderQueue` Livewire page.
@@ -428,7 +428,7 @@
     vendor/bin/sail artisan route:list --path=hub/orders
     ```
 
-- [ ] **E22.T16** Feature tests for order creation, draft editing, submission, recall
+- [x] **E22.T16** Feature tests for order creation, draft editing, submission, recall
   - File: `tests/Feature/OrderCreationTest.php`
   - Test cases:
     - Seller can create order from awarded quotation (POST → 201; items copied correctly; snapshot populated).
@@ -448,7 +448,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderCreationTest
     ```
 
-- [ ] **E22.T17** Feature tests for buyer order listing, cancellation
+- [x] **E22.T17** Feature tests for buyer order listing, cancellation
   - File: `tests/Feature/BuyerOrderTest.php`
   - Test cases:
     - Buyer can list orders filtered by tab (index → 200; correct orders in each tab).
@@ -469,7 +469,7 @@
 **Goal:** `DltPaymentService`, payment initiation endpoint, DLT callback handling, escrow hold ledger entry.
 **Depends on:** E22
 
-- [ ] **E23.T1** Add DLT configuration to `config/services.php`
+- [x] **E23.T1** Add DLT configuration to `config/services.php`
   - File: `config/services.php` (modify)
   - Add `dlt` key per design.md §3.2:
     ```php
@@ -488,7 +488,7 @@
     ```
     Shows all 5 keys.
 
-- [ ] **E23.T2** Create `DltPaymentService`
+- [x] **E23.T2** Create `DltPaymentService`
   - File: `app/Services/DltPaymentService.php`
   - Responsibilities per design.md §3.2:
     - `getBearerToken()`: OAuth2 client credentials grant to `/oauth/token`. Cache in Redis with TTL = `expires_in - 60`. Return cached token if valid.
@@ -502,7 +502,7 @@
     vendor/bin/sail artisan test --compact --filter=DltPaymentServiceTest
     ```
 
-- [ ] **E23.T3** Create `OrderPaymentController` — payment initiation endpoint
+- [x] **E23.T3** Create `OrderPaymentController` — payment initiation endpoint
   - File: `app/Http/Controllers/Api/V1/OrderPaymentController.php`
   - Endpoint per design.md §4.3: `POST /api/v1/orders/{order}/payment`:
     - Validate order is `pending_payment` and buyer owns it.
@@ -519,7 +519,7 @@
     ```
     Shows `POST orders/{order}/payment`.
 
-- [ ] **E23.T4** Create `OrderPaymentCallbackController` — success/failure web routes
+- [x] **E23.T4** Create `OrderPaymentCallbackController` — success/failure web routes
   - File: `app/Http/Controllers/OrderPaymentCallbackController.php`
   - Routes per design.md §3.4:
     - `GET /orders/{order}/payment/success?attempt={paymentAttempt}` — calls `ProcessOrderPaymentAction` (success path).
@@ -534,7 +534,7 @@
     ```
     Shows `orders.payment.success` and `orders.payment.failure`.
 
-- [ ] **E23.T5** Create `ProcessOrderPaymentAction`
+- [x] **E23.T5** Create `ProcessOrderPaymentAction`
   - File: `app/Actions/ProcessOrderPaymentAction.php`
   - Logic per design.md §7.3:
     - DB transaction with row-level lock on `payment_attempts` (SELECT FOR UPDATE).
@@ -548,7 +548,7 @@
     vendor/bin/sail artisan test --compact --filter=ProcessOrderPaymentAction
     ```
 
-- [ ] **E23.T6** Create `PaymentPage` Livewire component (account/orders/payment-page)
+- [x] **E23.T6** Create `PaymentPage` Livewire component (account/orders/payment-page)
   - Files:
     - `app/Livewire/Account/Orders/PaymentPage.php`
     - `resources/views/livewire/account/orders/payment-page.blade.php`
@@ -562,7 +562,7 @@
     vendor/bin/sail artisan test --compact --filter=PaymentPage
     ```
 
-- [ ] **E23.T7** Create `OrderPaid` event and broadcaster
+- [x] **E23.T7** Create `OrderPaid` event and broadcaster
   - Files:
     - `app/Events/OrderPaid.php`
   - Event broadcasts on private channel `order.{id}` per design.md §8.3.
@@ -571,7 +571,7 @@
     vendor/bin/sail artisan tinker --execute 'new App\Events\OrderPaid(App\Models\Order::factory()->make());'
     ```
 
-- [ ] **E23.T8** Create `OrderSubmittedForPayment` event
+- [x] **E23.T8** Create `OrderSubmittedForPayment` event
   - File: `app/Events/OrderSubmittedForPayment.php`
   - Event fired after order submission. Listener creates order thread + sends notification to buyer (see E26 for thread creation details).
   - Verify:
@@ -579,7 +579,7 @@
     vendor/bin/sail artisan tinker --execute 'new App\Events\OrderSubmittedForPayment(App\Models\Order::factory()->make());'
     ```
 
-- [ ] **E23.T9** Register broadcast channel authorization for `order.{id}`
+- [x] **E23.T9** Register broadcast channel authorization for `order.{id}`
   - File: `routes/channels.php` (modify)
   - Add per design.md §8.3:
     ```php
@@ -594,7 +594,7 @@
     grep -n "order\." routes/channels.php
     ```
 
-- [ ] **E23.T10** Feature tests for payment flow
+- [x] **E23.T10** Feature tests for payment flow
   - File: `tests/Feature/OrderPaymentTest.php`
   - Test cases:
     - Payment initiation creates payment_attempt with DLT fields (mock DltPaymentService).
@@ -609,7 +609,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderPaymentTest
     ```
 
-- [ ] **E23.T11** Unit test for `DltPaymentService` (mocked HTTP)
+- [x] **E23.T11** Unit test for `DltPaymentService` (mocked HTTP)
   - File: `tests/Unit/DltPaymentServiceTest.php`
   - Test cases:
     - `getBearerToken()` caches token and returns it on subsequent calls.
@@ -629,7 +629,7 @@
 **Goal:** Fulfilment CRUD, ship/deliver/return actions, buyer tracking CTA, 7-day auto-accept job.
 **Depends on:** E23
 
-- [ ] **E24.T1** Create `FulfilmentPolicy`
+- [x] **E24.T1** Create `FulfilmentPolicy`
   - File: `app/Policies/FulfilmentPolicy.php`
   - Rules per design.md §9.1:
     - `create`: seller owns the parent order's shop AND `order.status = paid` AND no existing fulfilment for this order.
@@ -642,7 +642,7 @@
     vendor/bin/sail artisan test --compact --filter=FulfilmentPolicyTest
     ```
 
-- [ ] **E24.T2** Create `FulfilmentController` with store/update/ship/deliver/return endpoints
+- [x] **E24.T2** Create `FulfilmentController` with store/update/ship/deliver/return endpoints
   - File: `app/Http/Controllers/Api/V1/FulfilmentController.php`
   - Endpoints per design.md §4.4:
     - `POST /api/v1/hub/orders/{order}/fulfilment` — create fulfilment (status=pending, optional tracking fields). Returns 201.
@@ -657,7 +657,7 @@
     ```
     Shows fulfilment routes.
 
-- [ ] **E24.T3** Create `ConfirmReceiptAction`
+- [x] **E24.T3** Create `ConfirmReceiptAction`
   - File: `app/Actions/ConfirmReceiptAction.php`
   - Logic per design.md §7.4:
     - DB transaction with row-level lock on order.
@@ -670,7 +670,7 @@
     vendor/bin/sail artisan test --compact --filter=ConfirmReceiptAction
     ```
 
-- [ ] **E24.T4** Add `confirmReceipt` action to `BuyerOrderController`
+- [x] **E24.T4** Add `confirmReceipt` action to `BuyerOrderController`
   - File: `app/Http/Controllers/Api/V1/BuyerOrderController.php` (extend)
   - `POST /api/v1/orders/{order}/confirm-receipt`:
     - Policy check: `confirmReceipt`.
@@ -683,7 +683,7 @@
     ```
     Shows confirm-receipt route.
 
-- [ ] **E24.T5** Create `OrderAutoAcceptJob`
+- [x] **E24.T5** Create `OrderAutoAcceptJob`
   - File: `app/Jobs/OrderAutoAcceptJob.php`
   - Logic per design.md §8.1:
     - Query orders WHERE `status = paid` AND fulfilment `status = delivered` AND `delivered_at` ≤ `now() - 7 days` AND no active dispute (WHERE NOT EXISTS subquery on disputes with non-terminal status).
@@ -696,7 +696,7 @@
     ```
     Shows `OrderAutoAcceptJob` daily.
 
-- [ ] **E24.T6** Create `FulfilmentPanel` Livewire component (company-hub/fulfilment/fulfilment-panel)
+- [x] **E24.T6** Create `FulfilmentPanel` Livewire component (company-hub/fulfilment/fulfilment-panel)
   - Files:
     - `app/Livewire/CompanyHub/Fulfilment/FulfilmentPanel.php`
     - `resources/views/livewire/company-hub/fulfilment/fulfilment-panel.blade.php`
@@ -710,7 +710,7 @@
     vendor/bin/sail artisan test --compact --filter=FulfilmentPanel
     ```
 
-- [ ] **E24.T7** Create fulfilment events: `OrderShipped`, `OrderDelivered`
+- [x] **E24.T7** Create fulfilment events: `OrderShipped`, `OrderDelivered`
   - Files:
     - `app/Events/OrderShipped.php`
     - `app/Events/OrderDelivered.php`
@@ -720,7 +720,7 @@
     vendor/bin/sail artisan tinker --execute 'new App\Events\OrderShipped(App\Models\Order::factory()->make()); new App\Events\OrderDelivered(App\Models\Order::factory()->make());'
     ```
 
-- [ ] **E24.T8** Create `OrderCompleted` and `OrderCancelled` events
+- [x] **E24.T8** Create `OrderCompleted` and `OrderCancelled` events
   - Files:
     - `app/Events/OrderCompleted.php`
     - `app/Events/OrderCancelled.php`
@@ -730,7 +730,7 @@
     vendor/bin/sail artisan tinker --execute 'new App\Events\OrderCompleted(App\Models\Order::factory()->make()); new App\Events\OrderCancelled(App\Models\Order::factory()->make());'
     ```
 
-- [ ] **E24.T9** Add `marketplace.commission_rate` config
+- [x] **E24.T9** Add `marketplace.commission_rate` config
   - File: `config/marketplace.php` (create)
   - Contents:
     ```php
@@ -744,7 +744,7 @@
     vendor/bin/sail artisan config:show marketplace
     ```
 
-- [ ] **E24.T10** Feature tests for fulfilment flow
+- [x] **E24.T10** Feature tests for fulfilment flow
   - File: `tests/Feature/FulfilmentTest.php`
   - Test cases:
     - Seller can create fulfilment for paid order (POST → 201; status=pending).
@@ -770,7 +770,7 @@
 **Goal:** Dispute creation, seller resolution, admin arbitration, escalation, withdrawal, timer pause logic.
 **Depends on:** E24
 
-- [ ] **E25.T1** Create `DisputePolicy`
+- [x] **E25.T1** Create `DisputePolicy`
   - File: `app/Policies/DisputePolicy.php`
   - Rules per design.md §9.1:
     - `create`: buyer owns the order AND fulfilment.status IN (`delivered`, `returned_to_seller`) AND no active dispute (non-terminal) already open.
@@ -785,7 +785,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputePolicyTest
     ```
 
-- [ ] **E25.T2** Create `DisputeController` with store/show/escalate/withdraw endpoints
+- [x] **E25.T2** Create `DisputeController` with store/show/escalate/withdraw endpoints
   - File: `app/Http/Controllers/Api/V1/DisputeController.php`
   - Endpoints per design.md §4.5:
     - `POST /api/v1/orders/{order}/disputes` — buyer opens dispute. Validate type, reason. Creates dispute row, sets status (`open` for refund_only; `awaiting_return` for return_refund). Dispatches `DisputeOpened` event. Returns 201.
@@ -800,7 +800,7 @@
     ```
     Shows dispute routes.
 
-- [ ] **E25.T3** Add resolve and confirm-return endpoints to `DisputeController`
+- [x] **E25.T3** Add resolve and confirm-return endpoints to `DisputeController`
   - File: `app/Http/Controllers/Api/V1/DisputeController.php` (extend)
   - `POST /api/v1/orders/{order}/disputes/{dispute}/resolve`:
     - Seller resolves. Calls `ResolveDisputeAction`.
@@ -816,7 +816,7 @@
     vendor/bin/sail artisan route:list --path=api/v1/orders
     ```
 
-- [ ] **E25.T4** Create `ResolveDisputeAction`
+- [x] **E25.T4** Create `ResolveDisputeAction`
   - File: `app/Actions/ResolveDisputeAction.php`
   - Logic per design.md §7.5:
     - DB transaction with row-level lock on dispute + order.
@@ -834,7 +834,7 @@
     vendor/bin/sail artisan test --compact --filter=ResolveDisputeAction
     ```
 
-- [ ] **E25.T5** Create `AdminDisputeController` — arbitration endpoint + queue
+- [x] **E25.T5** Create `AdminDisputeController` — arbitration endpoint + queue
   - Files:
     - `app/Http/Controllers/Api/V1/AdminDisputeController.php`
   - Endpoints per design.md §4.5:
@@ -847,7 +847,7 @@
     vendor/bin/sail artisan route:list --path=api/v1/admin/disputes
     ```
 
-- [ ] **E25.T6** Create dispute events: `DisputeOpened`, `DisputeResolved`, `DisputeEscalated`
+- [x] **E25.T6** Create dispute events: `DisputeOpened`, `DisputeResolved`, `DisputeEscalated`
   - Files:
     - `app/Events/DisputeOpened.php`
     - `app/Events/DisputeResolved.php`
@@ -858,7 +858,7 @@
     vendor/bin/sail artisan tinker --execute 'new App\Events\DisputeOpened(App\Models\Dispute::factory()->make());'
     ```
 
-- [ ] **E25.T7** Create `DisputePanel` Livewire component (company-hub/disputes/dispute-panel)
+- [x] **E25.T7** Create `DisputePanel` Livewire component (company-hub/disputes/dispute-panel)
   - Files:
     - `app/Livewire/CompanyHub/Disputes/DisputePanel.php`
     - `resources/views/livewire/company-hub/disputes/dispute-panel.blade.php`
@@ -871,7 +871,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputePanel
     ```
 
-- [ ] **E25.T8** Create buyer `DisputeForm` Livewire component (account/disputes/dispute-form)
+- [x] **E25.T8** Create buyer `DisputeForm` Livewire component (account/disputes/dispute-form)
   - Files:
     - `app/Livewire/Account/Disputes/DisputeForm.php`
     - `resources/views/livewire/account/disputes/dispute-form.blade.php`
@@ -885,7 +885,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputeForm
     ```
 
-- [ ] **E25.T9** Create buyer `DisputeDetail` Livewire component (account/disputes/dispute-detail)
+- [x] **E25.T9** Create buyer `DisputeDetail` Livewire component (account/disputes/dispute-detail)
   - Files:
     - `app/Livewire/Account/Disputes/DisputeDetail.php`
     - `resources/views/livewire/account/disputes/dispute-detail.blade.php`
@@ -898,7 +898,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputeDetail
     ```
 
-- [ ] **E25.T10** Create admin `DisputeQueue` Livewire component (admin/disputes/dispute-queue)
+- [x] **E25.T10** Create admin `DisputeQueue` Livewire component (admin/disputes/dispute-queue)
   - Files:
     - `app/Livewire/Admin/Disputes/DisputeQueue.php`
     - `resources/views/livewire/admin/disputes/dispute-queue.blade.php`
@@ -910,7 +910,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputeQueue
     ```
 
-- [ ] **E25.T11** Create admin `DisputeArbitration` Livewire component (admin/disputes/dispute-arbitration)
+- [x] **E25.T11** Create admin `DisputeArbitration` Livewire component (admin/disputes/dispute-arbitration)
   - Files:
     - `app/Livewire/Admin/Disputes/DisputeArbitration.php`
     - `resources/views/livewire/admin/disputes/dispute-arbitration.blade.php`
@@ -923,7 +923,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputeArbitration
     ```
 
-- [ ] **E25.T12** Register dispute web routes (buyer + admin)
+- [x] **E25.T12** Register dispute web routes (buyer + admin)
   - File: `routes/web.php` (modify)
   - Buyer routes:
     - `/account/orders/{order}/dispute/create` → `DisputeForm`.
@@ -937,7 +937,7 @@
     vendor/bin/sail artisan route:list --path=account/orders
     ```
 
-- [ ] **E25.T13** Update `OrderAutoAcceptJob` to respect dispute timer pause
+- [x] **E25.T13** Update `OrderAutoAcceptJob` to respect dispute timer pause
   - File: `app/Jobs/OrderAutoAcceptJob.php` (modify)
   - Ensure the job's query excludes orders with active disputes:
     ```sql
@@ -953,7 +953,7 @@
     vendor/bin/sail artisan test --compact --filter="OrderAutoAcceptJob.*dispute"
     ```
 
-- [ ] **E25.T14** Feature tests for disputes
+- [x] **E25.T14** Feature tests for disputes
   - File: `tests/Feature/DisputeTest.php`
   - Test cases:
     - Buyer can open dispute on delivered order (POST → 201; dispute.status = open/awaiting_return based on type).
@@ -982,7 +982,7 @@
 **Goal:** Order thread in existing conversation, order/dispute card system messages, real-time updates.
 **Depends on:** E25
 
-- [ ] **E26.T1** Create listener to create order thread on submission
+- [x] **E26.T1** Create listener to create order thread on submission
   - File: `app/Listeners/CreateOrderConversationThread.php`
   - Logic (mirrors Phase 2's `CreateRfqConversationThread`):
     - Triggered by `OrderSubmittedForPayment` event.
@@ -995,7 +995,7 @@
     vendor/bin/sail artisan test --compact --filter=CreateOrderConversationThread
     ```
 
-- [ ] **E26.T2** Create `x-shared.order-card` Blade component
+- [x] **E26.T2** Create `x-shared.order-card` Blade component
   - File: `resources/views/components/shared/order-card.blade.php`
   - Component per design.md §6.1:
     - Renders order status at a glance: status pill, items summary (count + total), buyer/seller name, key dates.
@@ -1003,14 +1003,14 @@
     - Uses design tokens, `x-hs-status-pill`.
   - Verify: component renders without error in a test view.
 
-- [ ] **E26.T3** Create `x-shared.dispute-card` Blade component
+- [x] **E26.T3** Create `x-shared.dispute-card` Blade component
   - File: `resources/views/components/shared/dispute-card.blade.php`
   - Component per design.md §6.1:
     - Renders dispute status at a glance: type, status pill, reason (truncated), resolution info if resolved.
     - Accepts `$dispute` prop.
   - Verify: component renders without error in a test view.
 
-- [ ] **E26.T4** Update `MessageStream` Livewire component to detect and render order/dispute cards
+- [x] **E26.T4** Update `MessageStream` Livewire component to detect and render order/dispute cards
   - File: `app/Livewire/Shared/ChatInbox.php` (or the component handling message rendering — verify actual component name)
   - Logic per design.md §6.1 (mirrors existing RFQ card pattern):
     - Detect messages with body prefix `order:{id}` → render `<x-shared.order-card :order="$order" />`.
@@ -1021,7 +1021,7 @@
     vendor/bin/sail artisan test --compact --filter=MessageStream
     ```
 
-- [ ] **E26.T5** Post system messages on key order/dispute status changes
+- [x] **E26.T5** Post system messages on key order/dispute status changes
   - Files: modify existing event listeners or create new ones:
     - `app/Listeners/PostOrderStatusMessage.php` — triggered by `OrderPaid`, `OrderShipped`, `OrderDelivered`, `OrderCompleted`, `OrderCancelled`. Posts system message with `order:{order_id}` body prefix in the order's thread.
     - `app/Listeners/PostDisputeStatusMessage.php` — triggered by `DisputeOpened`, `DisputeResolved`, `DisputeEscalated`. Posts system message with `dispute:{dispute_id}` body prefix.
@@ -1031,7 +1031,7 @@
     vendor/bin/sail artisan test --compact --filter="PostOrderStatusMessage|PostDisputeStatusMessage"
     ```
 
-- [ ] **E26.T6** Feature tests for order thread
+- [x] **E26.T6** Feature tests for order thread
   - File: `tests/Feature/OrderThreadTest.php`
   - Test cases:
     - Submitting an order creates a conversation thread with `order_id` set.
@@ -1052,7 +1052,7 @@
 **Goal:** Email + broadcast notifications for all order lifecycle events.
 **Depends on:** E26
 
-- [ ] **E27.T1** Create order notifications
+- [x] **E27.T1** Create order notifications
   - Files:
     - `app/Notifications/OrderPendingPaymentNotification.php` — sent to buyer on submission.
     - `app/Notifications/OrderPaidNotification.php` — sent to seller on payment.
@@ -1066,7 +1066,7 @@
     vendor/bin/sail artisan test --compact --filter=OrderNotification
     ```
 
-- [ ] **E27.T2** Create dispute notifications
+- [x] **E27.T2** Create dispute notifications
   - Files:
     - `app/Notifications/DisputeOpenedNotification.php` — sent to seller.
     - `app/Notifications/DisputeResolvedNotification.php` — sent to both parties.
@@ -1077,7 +1077,7 @@
     vendor/bin/sail artisan test --compact --filter=DisputeNotification
     ```
 
-- [ ] **E27.T3** Create event listeners that dispatch notifications
+- [x] **E27.T3** Create event listeners that dispatch notifications
   - Files:
     - `app/Listeners/NotifyBuyerOrderPending.php` — on `OrderSubmittedForPayment`.
     - `app/Listeners/NotifySellerOrderPaid.php` — on `OrderPaid`.
@@ -1094,7 +1094,7 @@
     vendor/bin/sail artisan test --compact --filter="NotifyBuyer|NotifySeller|NotifyAdmin|NotifyCounterpart|NotifyParties"
     ```
 
-- [ ] **E27.T4** Feature tests for notifications
+- [x] **E27.T4** Feature tests for notifications
   - File: `tests/Feature/OrderNotificationsTest.php`
   - Test cases:
     - Order submission sends notification to buyer.
@@ -1118,7 +1118,7 @@
 **Goal:** Seller Hub dashboard to-do widget, customers list, reports, and leaderboards.
 **Depends on:** E24 (needs order/fulfilment data to query against)
 
-- [ ] **E28.T1** Create `SellerHubPolicy` gate
+- [x] **E28.T1** Create `SellerHubPolicy` gate
   - File: `app/Policies/SellerHubPolicy.php` (or register as a Gate in `AppServiceProvider`)
   - Gate per design.md §9.1: `accessHub` — user owns an active shop (shop exists, status = 'active', not soft-deleted).
   - Apply as middleware to all `/hub/*` routes and Seller Hub Livewire components.
@@ -1127,7 +1127,7 @@
     vendor/bin/sail artisan test --compact --filter=SellerHubPolicyTest
     ```
 
-- [ ] **E28.T2** Create `SellerHubController` API endpoints
+- [x] **E28.T2** Create `SellerHubController` API endpoints
   - File: `app/Http/Controllers/Api/V1/SellerHubController.php`
   - Endpoints per design.md §4.6:
     - `GET /api/v1/hub/dashboard` — returns to-do widget counts: new_rfqs, orders_in_progress, unfulfilled_orders, draft_orders, open_disputes, pending_quotations.
@@ -1142,7 +1142,7 @@
     ```
     Shows dashboard, customers, reports, leaderboards.
 
-- [ ] **E28.T3** Create `Dashboard` Livewire component (company-hub/hub/dashboard)
+- [x] **E28.T3** Create `Dashboard` Livewire component (company-hub/hub/dashboard)
   - Files:
     - `app/Livewire/CompanyHub/Hub/Dashboard.php`
     - `resources/views/livewire/company-hub/hub/dashboard.blade.php`
@@ -1155,7 +1155,7 @@
     vendor/bin/sail artisan test --compact --filter="CompanyHub\\\\Hub\\\\Dashboard"
     ```
 
-- [ ] **E28.T4** Create `CustomersList` Livewire component (company-hub/hub/customers-list)
+- [x] **E28.T4** Create `CustomersList` Livewire component (company-hub/hub/customers-list)
   - Files:
     - `app/Livewire/CompanyHub/Hub/CustomersList.php`
     - `resources/views/livewire/company-hub/hub/customers-list.blade.php`
@@ -1168,7 +1168,7 @@
     vendor/bin/sail artisan test --compact --filter=CustomersList
     ```
 
-- [ ] **E28.T5** Create `Reports` Livewire component (company-hub/hub/reports)
+- [x] **E28.T5** Create `Reports` Livewire component (company-hub/hub/reports)
   - Files:
     - `app/Livewire/CompanyHub/Hub/Reports.php`
     - `resources/views/livewire/company-hub/hub/reports.blade.php`
@@ -1181,7 +1181,7 @@
     vendor/bin/sail artisan test --compact --filter=Reports
     ```
 
-- [ ] **E28.T6** Create `Leaderboards` Livewire component (company-hub/hub/leaderboards)
+- [x] **E28.T6** Create `Leaderboards` Livewire component (company-hub/hub/leaderboards)
   - Files:
     - `app/Livewire/CompanyHub/Hub/Leaderboards.php`
     - `resources/views/livewire/company-hub/hub/leaderboards.blade.php`
@@ -1195,7 +1195,7 @@
     vendor/bin/sail artisan test --compact --filter=Leaderboards
     ```
 
-- [ ] **E28.T7** Register Seller Hub web routes
+- [x] **E28.T7** Register Seller Hub web routes
   - File: `routes/web.php` (modify)
   - Routes under Company Hub area:
     - `/hub/dashboard` → `Dashboard` Livewire page.
@@ -1210,7 +1210,7 @@
     vendor/bin/sail artisan route:list --path=hub/leaderboards
     ```
 
-- [ ] **E28.T8** Feature tests for Seller Hub
+- [x] **E28.T8** Feature tests for Seller Hub
   - File: `tests/Feature/SellerHubTest.php`
   - Test cases:
     - Dashboard returns correct counts for RFQs, orders, disputes.
@@ -1233,14 +1233,14 @@
 **Goal:** End-to-end flow verification, nav integration, seeder updates, final test suite pass.
 **Depends on:** E21–E28
 
-- [ ] **E29.T1** Update navigation components (buyer + seller + admin)
+- [x] **E29.T1** Update navigation components (buyer + seller + admin)
   - Files (modify existing):
     - Buyer nav: add "My Orders" link to `/account/orders`.
     - Seller nav: add "Orders" link to `/hub/orders`, "Dashboard" to `/hub/dashboard`, "Customers" to `/hub/customers`, "Reports" to `/hub/reports`.
     - Admin nav: add "Disputes" link to `/admin/disputes`.
   - Verify: navigation renders correctly in browser (links present and functional).
 
-- [ ] **E29.T2** Add "Create Order" action to awarded quotation card
+- [x] **E29.T2** Add "Create Order" action to awarded quotation card
   - File: modify existing quotation detail/card components (seller-facing)
   - When quotation is `awarded`: show a "Create Order" button/link that navigates to `OrderBuilder` with `quotationId` param.
   - If order already exists for this quotation: show "View Order" link instead.
@@ -1249,7 +1249,7 @@
     vendor/bin/sail artisan test --compact --filter=QuotationOrderIntegration
     ```
 
-- [ ] **E29.T3** Create database seeders for Phase 3 entities
+- [x] **E29.T3** Create database seeders for Phase 3 entities
   - File: `database/seeders/Phase3Seeder.php` (new)
   - Creates sample data for demo/testing:
     - A few orders in various states (draft, pending_payment, paid, completed, refunded, cancelled).
@@ -1263,7 +1263,7 @@
     vendor/bin/sail artisan db:seed --class=Phase3Seeder
     ```
 
-- [ ] **E29.T4** Full test suite pass
+- [x] **E29.T4** Full test suite pass
   - Run the complete test suite to ensure Phase 3 doesn't break existing functionality:
   - Verify:
     ```bash
@@ -1271,7 +1271,7 @@
     ```
     All tests pass (0 failures, 0 errors).
 
-- [ ] **E29.T5** Run Pint code formatter on all modified files
+- [x] **E29.T5** Run Pint code formatter on all modified files
   - Verify:
     ```bash
     vendor/bin/sail bin pint --dirty --format agent

@@ -53,6 +53,12 @@ final class VariantManager extends Component
     /** @var array<int, array{min_qty: int|string, price: float|string}> */
     public array $quantityBreaks = [];
 
+    // ── Confirm dialogs ────────────────────────────────────────────────────────
+
+    public ?int $confirmingVariantId = null;
+
+    public ?int $confirmingBreakIndex = null;
+
     // ─────────────────────────────────────────────────────────────────────────
 
     public function mount(Product $product): void
@@ -132,14 +138,25 @@ final class VariantManager extends Component
         \Flux\Flux::toast($message, variant: 'success');
     }
 
-    public function removeVariant(int $variantId): void
+    public function removeVariant(): void
     {
-        ProductVariant::where('id', $variantId)
+        if ($this->confirmingVariantId === null) {
+            return;
+        }
+
+        ProductVariant::where('id', $this->confirmingVariantId)
             ->where('product_id', $this->product->id)
             ->delete();
 
+        $this->confirmingVariantId = null;
         $this->loadVariants();
         \Flux\Flux::toast('Variant removed.', variant: 'warning');
+    }
+
+    public function confirmRemoveVariant(int $variantId): void
+    {
+        $this->confirmingVariantId = $variantId;
+        \Flux\Flux::modal('confirm-remove-variant')->show();
     }
 
     public function toggleStatus(int $variantId): void
@@ -175,10 +192,21 @@ final class VariantManager extends Component
         $this->quantityBreaks[] = ['min_qty' => '', 'price' => ''];
     }
 
-    public function removeQuantityBreak(int $index): void
+    public function removeQuantityBreak(): void
     {
-        unset($this->quantityBreaks[$index]);
+        if ($this->confirmingBreakIndex === null) {
+            return;
+        }
+
+        unset($this->quantityBreaks[$this->confirmingBreakIndex]);
         $this->quantityBreaks = array_values($this->quantityBreaks);
+        $this->confirmingBreakIndex = null;
+    }
+
+    public function confirmRemoveQuantityBreak(int $index): void
+    {
+        $this->confirmingBreakIndex = $index;
+        \Flux\Flux::modal('confirm-remove-quantity-break')->show();
     }
 
     public function saveQuantityBreaks(): void

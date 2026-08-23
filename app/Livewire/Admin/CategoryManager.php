@@ -14,8 +14,6 @@ use Livewire\Component;
 #[Title('Categories')]
 final class CategoryManager extends Component
 {
-    public bool $showDeleteModal = false;
-
     public ?int $deletingCategoryId = null;
 
     /**
@@ -30,7 +28,7 @@ final class CategoryManager extends Component
     public function confirmDelete(int $categoryId): void
     {
         $this->deletingCategoryId = $categoryId;
-        $this->showDeleteModal = true;
+        \Flux\Flux::modal('confirm-delete-category')->show();
     }
 
     public function delete(): void
@@ -39,7 +37,6 @@ final class CategoryManager extends Component
             Category::destroy($this->deletingCategoryId);
         }
 
-        $this->showDeleteModal = false;
         $this->deletingCategoryId = null;
         unset($this->categories);
     }

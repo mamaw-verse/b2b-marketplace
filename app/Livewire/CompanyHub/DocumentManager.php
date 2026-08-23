@@ -25,6 +25,8 @@ final class DocumentManager extends Component
     /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $newDocuments = [];
 
+    public ?int $confirmingDocumentId = null;
+
     public function mount(Product $product): void
     {
         $this->authorize('update', $product);
@@ -47,10 +49,21 @@ final class DocumentManager extends Component
         \Flux\Flux::toast('Documents uploaded successfully.', variant: 'success');
     }
 
-    public function removeDocument(int $mediaId): void
+    public function confirmRemoveDocument(int $mediaId): void
     {
-        $this->product->documents()->detach($mediaId);
+        $this->confirmingDocumentId = $mediaId;
+        \Flux\Flux::modal('remove-document-confirm')->show();
+    }
 
+    public function removeDocument(): void
+    {
+        if (! $this->confirmingDocumentId) {
+            return;
+        }
+
+        $this->product->documents()->detach($this->confirmingDocumentId);
+
+        $this->confirmingDocumentId = null;
         \Flux\Flux::toast('Document removed.', variant: 'success');
     }
 

@@ -77,16 +77,16 @@
                         </div>
                         <div class="flex gap-2">
                             @if (! empty($category_ids))
-                                <flux:button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    icon="arrow-path"
-                                    wire:click="reloadSchemaFromCategories"
-                                    wire:confirm="This will replace all product options with fresh values from the selected categories. Continue?"
-                                >
-                                    Reload from Categories
-                                </flux:button>
+                                <flux:modal.trigger name="confirm-reload-schema">
+                                    <flux:button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="arrow-path"
+                                    >
+                                        Reload from Categories
+                                    </flux:button>
+                                </flux:modal.trigger>
                             @endif
                             <flux:button
                                 type="button"
@@ -170,7 +170,7 @@
                                         variant="ghost"
                                         size="sm"
                                         icon="trash"
-                                        wire:click="removeAttribute('{{ $key }}')"
+                                        wire:click="confirmRemoveAttribute('{{ $key }}')"
                                         class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)] shrink-0"
                                     />
                                 </div>
@@ -202,4 +202,32 @@
             </form>
         </div>
     </div>
+
+    <x-hs-confirm
+        name="confirm-reload-schema"
+        title="Reload Product Options"
+        message="This will replace all product options with the new category's defaults. Continue?"
+        variant="warning"
+        confirmText="Reload"
+    >
+        <x-slot name="action">
+            <flux:button variant="filled" wire:click="reloadSchemaFromCategories" wire:loading.attr="disabled">
+                Reload
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
+
+    <x-hs-confirm
+        name="confirm-remove-attribute"
+        title="Remove Product Option"
+        message="Remove this product option?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeAttribute" wire:loading.attr="disabled">
+                Remove
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

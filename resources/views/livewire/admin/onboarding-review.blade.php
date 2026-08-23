@@ -229,9 +229,11 @@
                 <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-5">
                     <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-4">Decision</h3>
                     <div class="space-y-2">
-                        <flux:button variant="primary" icon="check" class="w-full" wire:click="approve" wire:confirm="Are you sure you want to approve this onboarding?">
-                            Approve
-                        </flux:button>
+                        <flux:modal.trigger name="approve-onboarding-confirm">
+                            <flux:button variant="primary" icon="check" class="w-full">
+                                Approve
+                            </flux:button>
+                        </flux:modal.trigger>
                         <flux:button variant="ghost" icon="arrow-path" class="w-full" wire:click="openActionModal('request_revision')">
                             Request Revision
                         </flux:button>
@@ -273,6 +275,21 @@
             </div>
         </div>
     </flux:modal>
+
+    {{-- Approve Onboarding Confirmation --}}
+    <x-hs-confirm
+        name="approve-onboarding-confirm"
+        title="Approve Onboarding"
+        message="Are you sure you want to approve this onboarding?"
+        variant="primary"
+        confirmText="Approve"
+    >
+        <x-slot name="action">
+            <flux:button variant="primary" wire:click="approve" wire:loading.attr="disabled">
+                {{ __('Approve') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 
     {{-- Document Viewer Modal --}}
     @include('livewire.admin.document-viewer')

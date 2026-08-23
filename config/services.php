@@ -49,4 +49,12 @@ return [
         'api_key' => env('GEOCODING_API_KEY'),
     ],
 
+    'dlt' => [
+        'base_url' => env('DLT_BASE_URL', 'https://checkout.dxp.dtic.com.ph'),
+        'client_id' => env('DLT_CLIENT_ID'),
+        'client_secret' => env('DLT_CLIENT_SECRET'),
+        'merchant_account_id' => env('DLT_MERCHANT_ACCOUNT_ID'),
+        'service_code' => env('DLT_SERVICE_CODE', 'APN-COLLECTION'),
+    ],
+
 ];

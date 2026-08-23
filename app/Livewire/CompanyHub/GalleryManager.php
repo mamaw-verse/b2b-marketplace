@@ -26,6 +26,8 @@ final class GalleryManager extends Component
     /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $newPhotos = [];
 
+    public ?int $confirmingImageId = null;
+
     public function mount(Product $product): void
     {
         $this->authorize('update', $product);
@@ -70,12 +72,23 @@ final class GalleryManager extends Component
             });
     }
 
-    public function removeImage(int $galleryId): void
+    public function confirmRemoveImage(int $galleryId): void
     {
-        ProductGallery::where('id', $galleryId)
+        $this->confirmingImageId = $galleryId;
+        \Flux\Flux::modal('remove-image-confirm')->show();
+    }
+
+    public function removeImage(): void
+    {
+        if (! $this->confirmingImageId) {
+            return;
+        }
+
+        ProductGallery::where('id', $this->confirmingImageId)
             ->where('product_id', $this->product->id)
             ->delete();
 
+        $this->confirmingImageId = null;
         \Flux\Flux::toast('Image removed.', variant: 'success');
     }
 

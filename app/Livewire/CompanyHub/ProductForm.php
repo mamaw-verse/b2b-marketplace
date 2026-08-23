@@ -33,6 +33,8 @@ final class ProductForm extends Component
 
     public $featured_image = null;
 
+    public ?string $confirmingAttributeKey = null;
+
     public function mount(?Product $product = null): void
     {
         if ($product?->exists) {
@@ -99,9 +101,20 @@ final class ProductForm extends Component
         ];
     }
 
-    public function removeAttribute(string $key): void
+    public function confirmRemoveAttribute(string $key): void
     {
-        unset($this->variantAttributesSchema[$key]);
+        $this->confirmingAttributeKey = $key;
+        \Flux\Flux::modal('confirm-remove-attribute')->show();
+    }
+
+    public function removeAttribute(): void
+    {
+        if ($this->confirmingAttributeKey === null) {
+            return;
+        }
+
+        unset($this->variantAttributesSchema[$this->confirmingAttributeKey]);
+        $this->confirmingAttributeKey = null;
     }
 
     public function save(): void

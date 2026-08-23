@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -60,6 +61,14 @@ final class Quotation extends Model
     public function attachments(): BelongsToMany
     {
         return $this->belongsToMany(Media::class, 'quotation_attachments');
+    }
+
+    /**
+     * The order created from this awarded quotation (0:1).
+     */
+    public function order(): HasOne
+    {
+        return $this->hasOne(Order::class);
     }
 
     /**

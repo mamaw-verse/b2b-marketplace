@@ -90,6 +90,14 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Orders placed by this user (as a buyer).
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'buyer_user_id');
+    }
+
+    /**
      * Media files uploaded by this user.
      */
     public function uploadedMedia(): HasMany

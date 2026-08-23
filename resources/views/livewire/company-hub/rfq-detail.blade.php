@@ -104,6 +104,18 @@
                                         <flux:icon name="check-circle" variant="mini" class="shrink-0" />
                                         {{ __('Buyer awarded this quotation. Proceed to next steps.') }}
                                     </div>
+                                    {{-- Create Order action --}}
+                                    <div class="mt-3 pt-3 border-t border-[var(--hs-success-200)]">
+                                        @if ($quotation->order)
+                                            <flux:button variant="ghost" size="xs" icon="eye" href="{{ route('hub.orders.show', $quotation->order) }}" wire:navigate>
+                                                {{ __('View Order #') }}{{ $quotation->order->id }}
+                                            </flux:button>
+                                        @else
+                                            <flux:button variant="primary" size="xs" icon="plus" href="{{ route('hub.orders.create', ['quotationId' => $quotation->id]) }}" wire:navigate>
+                                                {{ __('Create Order') }}
+                                            </flux:button>
+                                        @endif
+                                    </div>
                                 @elseif ($quotation->status === 'rejected')
                                     <div class="flex items-center gap-1.5 mt-2 text-sm text-[var(--hs-danger-700)]">
                                         <flux:icon name="x-circle" variant="mini" class="shrink-0" />

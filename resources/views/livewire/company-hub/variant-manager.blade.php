@@ -71,8 +71,7 @@
                                 variant="ghost"
                                 size="sm"
                                 icon="trash"
-                                wire:click="removeVariant({{ $variant['id'] }})"
-                                wire:confirm="Remove this variant permanently?"
+                                wire:click="confirmRemoveVariant({{ $variant['id'] }})"
                                 class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
                             />
                         </div>
@@ -260,15 +259,16 @@
 
         </div>
 
-        {{-- Footer actions --}}
-        <div class="flex justify-end gap-2 border-t border-[var(--hs-neutral-100)] pt-4 mt-4">
-            <flux:button variant="ghost" wire:click="$set('showVariantModal', false)">
-                Cancel
-            </flux:button>
-            <flux:button variant="primary" wire:click="saveVariant" wire:loading.attr="disabled">
-                {{ $editingVariantId ? 'Update Variant' : 'Save Variant' }}
-            </flux:button>
-        </div>
+        <x-slot name="footer">
+            <div class="flex justify-end gap-2">
+                <flux:button variant="ghost" wire:click="$set('showVariantModal', false)">
+                    Cancel
+                </flux:button>
+                <flux:button variant="primary" wire:click="saveVariant" wire:loading.attr="disabled">
+                    {{ $editingVariantId ? 'Update Variant' : 'Save Variant' }}
+                </flux:button>
+            </div>
+        </x-slot>
     </x-hs-modal>
 
     {{-- ── Quantity Breaks Modal ────────────────────────────────────────── --}}
@@ -310,7 +310,7 @@
                         variant="ghost"
                         size="sm"
                         icon="trash"
-                        wire:click="removeQuantityBreak({{ $breakIndex }})"
+                        wire:click="confirmRemoveQuantityBreak({{ $breakIndex }})"
                         class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)] shrink-0"
                     />
                 </div>
@@ -321,13 +321,43 @@
             </flux:button>
         </div>
 
-        <div class="flex justify-end gap-2 border-t border-[var(--hs-neutral-100)] pt-4 mt-4">
-            <flux:button variant="ghost" wire:click="$set('showQuantityBreaksModal', false)">
-                Cancel
-            </flux:button>
-            <flux:button variant="primary" wire:click="saveQuantityBreaks" wire:loading.attr="disabled">
-                Save Breaks
-            </flux:button>
-        </div>
+        <x-slot name="footer">
+            <div class="flex justify-end gap-2">
+                <flux:button variant="ghost" wire:click="$set('showQuantityBreaksModal', false)">
+                    Cancel
+                </flux:button>
+                <flux:button variant="primary" wire:click="saveQuantityBreaks" wire:loading.attr="disabled">
+                    Save Breaks
+                </flux:button>
+            </div>
+        </x-slot>
     </x-hs-modal>
+
+    <x-hs-confirm
+        name="confirm-remove-variant"
+        title="Remove Variant"
+        message="Remove this variant permanently?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeVariant" wire:loading.attr="disabled">
+                Remove
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
+
+    <x-hs-confirm
+        name="confirm-remove-quantity-break"
+        title="Remove Quantity Break"
+        message="Remove this quantity break?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeQuantityBreak" wire:loading.attr="disabled">
+                Remove
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

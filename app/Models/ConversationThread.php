@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $conversation_id
  * @property string|null $title
  * @property int|null $rfq_id
+ * @property int|null $order_id
  * @property bool $is_default
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -28,6 +29,7 @@ final class ConversationThread extends Model
         'conversation_id',
         'title',
         'rfq_id',
+        'order_id',
         'is_default',
     ];
 
@@ -41,6 +43,11 @@ final class ConversationThread extends Model
         return $this->belongsTo(Rfq::class);
     }
 
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class, 'thread_id');
@@ -52,6 +59,14 @@ final class ConversationThread extends Model
     public function isRfqLinked(): bool
     {
         return $this->rfq_id !== null;
+    }
+
+    /**
+     * Whether this thread is linked to an Order.
+     */
+    public function isOrderLinked(): bool
+    {
+        return $this->order_id !== null;
     }
 
     /**

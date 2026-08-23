@@ -40,7 +40,7 @@ final class QuotationBuilder extends Component
      */
     public array $items = [];
 
-    public bool $showSubmitConfirmation = false;
+    public ?int $confirmingRemoveItemIndex = null;
 
     public function mount(RfqRecipient $rfqRecipient, ?Quotation $quotation = null): void
     {
@@ -77,14 +77,28 @@ final class QuotationBuilder extends Component
         ];
     }
 
-    public function removeItem(int $index): void
+    public function removeItem(?int $index = null): void
     {
+        $index = $index ?? $this->confirmingRemoveItemIndex;
+
+        if ($index === null || ! isset($this->items[$index])) {
+            return;
+        }
+
         unset($this->items[$index]);
         $this->items = array_values($this->items);
 
         if (empty($this->items)) {
             $this->addItem();
         }
+
+        $this->confirmingRemoveItemIndex = null;
+    }
+
+    public function confirmRemoveItem(int $index): void
+    {
+        $this->confirmingRemoveItemIndex = $index;
+        \Flux\Flux::modal('confirm-remove-quotation-item')->show();
     }
 
     /**
@@ -180,7 +194,7 @@ final class QuotationBuilder extends Component
     public function confirmSubmit(): void
     {
         $this->validate();
-        $this->showSubmitConfirmation = true;
+        \Flux\Flux::modal('submit-quotation-confirm')->show();
     }
 
     public function submitQuotation(): void
@@ -214,11 +228,16 @@ final class QuotationBuilder extends Component
 
         QuotationSubmitted::dispatch($this->quotation->fresh());
 
-        $this->showSubmitConfirmation = false;
+        \Flux\Flux::modal('submit-quotation-confirm')->close();
 
         \Flux\Flux::toast('Quotation submitted successfully.', variant: 'success');
 
         $this->redirect(route('hub.rfqs.show', $this->rfqRecipient), navigate: true);
+    }
+
+    public function confirmWithdraw(): void
+    {
+        \Flux\Flux::modal('withdraw-quotation-confirm')->show();
     }
 
     public function withdrawQuotation(): void

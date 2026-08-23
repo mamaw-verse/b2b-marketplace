@@ -6,12 +6,13 @@ Source: DLT Payment API Documentation, Collection API 3.0.
 1. [Authentication](#authentication)
 2. [Get Payment Brands](#get-payment-brands)
 3. [Submit Payment](#submit-payment)
-4. [Quick Link Process Flow](#quick-link-process-flow)
-5. [Create Quick Link Session](#create-quick-link-session)
-6. [Get Quick Link Session](#get-quick-link-session)
-7. [Response Payload Shapes](#response-payload-shapes)
-8. [Data Tables](#data-tables)
-9. [Version History](#version-history)
+4. [Payment Collection Journey](#payment-collection-journey)
+5. [Quick Link Process Flow](#quick-link-process-flow)
+6. [Create Quick Link Session](#create-quick-link-session)
+7. [Get Quick Link Session](#get-quick-link-session)
+8. [Response Payload Shapes](#response-payload-shapes)
+9. [Data Tables](#data-tables)
+10. [Version History](#version-history)
 
 ---
 
@@ -19,7 +20,13 @@ Source: DLT Payment API Documentation, Collection API 3.0.
 
 OAuth 2.0 Client Credentials Grant. All protected endpoints require `Authorization: Bearer <access_token>`.
 
-**Base URL:** `https://checkout.dxp.dtic.com.ph/`
+### Common Settings (Basic)
+
+| Field | Value | Notes |
+|---|---|---|
+| Base URL | `https://checkout.dxp.dtic.com.ph/` | Listed as a plain static value in the source doc's Common Settings table — not explicitly labeled a "variable" there. However, the doc's own Postman example screenshots reference it as `{{base_url}}`, i.e. a Postman collection variable, in request URLs (e.g. `{{base_url}}/oauth/token`). This usage is only shown in screenshots, not stated in prose. |
+| Client ID | To be issued by DLT | Static placeholder text only — never templated as a variable anywhere in the doc (including screenshots, where it appears as a literal sample string, e.g. `"client_id": "3"`). |
+| Client Secret | To be issued by DLT | Same as Client ID — plain placeholder, never shown as a template variable. |
 
 **Common headers (all requests):**
 ```
@@ -80,7 +87,7 @@ Response:
 | message | String |
 | data | Array — list of brand objects |
 
-Each item in `data` (observed shape from sample response):
+Each item in `data` (observed shape from sample response — not in the PDF's formal response table, only visible in the Postman example screenshot):
 
 | Field | Type | Notes |
 |---|---|---|
@@ -375,15 +382,15 @@ Used in the `channel` field of Submit Payment.
 
 ## Version History
 
-| Version | Description | Date |
-|---|---|---|
-| 1.0.0 | Initial release | 09/26/2025 |
-| 1.2.0 | Payment journey; Submit payment endpoint | 10/06/2025 |
-| 1.2.1 | Transaction fee details added on payment submission response payload | 10/09/2025 |
-| 1.3 | Added "v1" to the API base route; added `service_code` as required; updated query params for payment brand endpoint | 06/29/2026 |
-| 2.0 | Added quick-link session + response payload formats | 07/08/2026 |
-| 2.1 | Added Get Quick Link Session endpoint | 07/08/2026 |
-| 2.2 | Renamed `redirect_url` to `payment_url`; updated Submit Payment response payload | 07/12/2026 |
-| 3.0 (current) | Updated Submit Payment request payload; added `channel`, `success_url`, `failure_url`; added Data Tables | 08/15/2026 |
+| Version | Description | Updated by | Date |
+|---|---|---|---|
+| 1.0.0 | Initial release | Arnel Miraflores | 09/26/2025 |
+| 1.2.0 | Payment journey; Submit payment endpoint | Arnel Miraflores | 10/06/2025 |
+| 1.2.1 | Transaction fee details added on payment submission response payload | Arne Miraflores *(sic — spelled without "l" in source PDF)* | 10/09/2025 |
+| 1.3 | Added "v1" to the API base route; added `service_code` as required; updated query params for payment brand endpoint | Arnel Miraflores | 06/29/2026 |
+| 2.0 | Added quick-link session + response payload formats | Arnel Miraflores | 07/08/2026 |
+| 2.1 | Added Get Quick Link Session endpoint | Arnel Miraflores | 07/08/2026 |
+| 2.2 | Renamed `redirect_url` to `payment_url`; updated Submit Payment response payload | Arnel Miraflores | 07/12/2026 |
+| 3.0 (current) | Updated Submit Payment request payload; added `channel`, `success_url`, `failure_url`; added Data Tables | Arnel Miraflores | 08/15/2026 |
 
 **Note:** If integrating against an older deployment, verify whether the `v1` route prefix, `service_code` requirement, `payment_url` field name (vs. legacy `redirect_url`), and `channel`/`success_url`/`failure_url` fields are actually present — these were all introduced/renamed across versions 1.3–3.0.

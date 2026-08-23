@@ -43,6 +43,8 @@ final class OnboardingWizard extends Component
     /** @var array<int, array<string, mixed>> */
     public array $certificates = [];
 
+    public ?int $confirmingRemoveCertificateIndex = null;
+
     /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> */
     public array $certificateFiles = [];
 
@@ -165,15 +167,15 @@ final class OnboardingWizard extends Component
         $errors = [];
 
         if (! empty($missingLabels)) {
-            $errors[] = 'Missing: ' . implode(', ', $missingLabels) . '.';
+            $errors[] = 'Missing: '.implode(', ', $missingLabels).'.';
         }
 
         if (! empty($pendingLabels)) {
-            $errors[] = 'Still scanning (please wait and try again): ' . implode(', ', $pendingLabels) . '.';
+            $errors[] = 'Still scanning (please wait and try again): '.implode(', ', $pendingLabels).'.';
         }
 
         if (! empty($infectedLabels)) {
-            $errors[] = 'Failed security scan (please re-upload): ' . implode(', ', $infectedLabels) . '.';
+            $errors[] = 'Failed security scan (please re-upload): '.implode(', ', $infectedLabels).'.';
         }
 
         if (! empty($errors)) {
@@ -204,8 +206,20 @@ final class OnboardingWizard extends Component
         ];
     }
 
-    public function removeCertificate(int $index): void
+    public function confirmRemoveCertificate(int $index): void
     {
+        $this->confirmingRemoveCertificateIndex = $index;
+        \Flux\Flux::modal('confirm-remove-certificate')->show();
+    }
+
+    public function removeCertificate(?int $index = null): void
+    {
+        $index = $index ?? $this->confirmingRemoveCertificateIndex;
+
+        if ($index === null) {
+            return;
+        }
+
         $certificate = $this->certificates[$index] ?? null;
 
         if ($certificate && $certificate['id']) {
@@ -215,6 +229,8 @@ final class OnboardingWizard extends Component
         unset($this->certificates[$index], $this->certificateFiles[$index]);
         $this->certificates = array_values($this->certificates);
         $this->certificateFiles = array_values($this->certificateFiles);
+
+        $this->confirmingRemoveCertificateIndex = null;
     }
 
     public function uploadDocument(string $documentType, MediaUploadService $uploadService): void

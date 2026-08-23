@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Notifications;
+
+use App\Models\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+final class OrderCancelledNotification extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    public function __construct(
+        public Order $order,
+    ) {}
+
+    /** @return array<int, string> */
+    public function via(object $notifiable): array
+    {
+        return ['database', 'mail', 'broadcast'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Order Cancelled')
+            ->line('Order #'.$this->order->id.' has been cancelled.')
+            ->action('View Details', $this->urlForRecipient($notifiable));
+    }
+
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'type' => 'order_cancelled',
+            'order_id' => $this->order->id,
+            'message' => 'Order #'.$this->order->id.' has been cancelled.',
+            'url' => $this->urlForRecipient($notifiable),
+        ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
+    }
+
+    private function urlForRecipient(object $notifiable): string
+    {
+        if ($notifiable->id === $this->order->buyer_user_id) {
+            return url('/account/orders/'.$this->order->id);
+        }
+
+        return url('/hub/orders/'.$this->order->id);
+    }
+}

@@ -14,3 +14,35 @@ These three patterns are intentional and should NOT be converted to hs-neutral t
 1. `components/app-logo.blade.php`: `text-white dark:text-black` — logo icon sits on Flux's `bg-accent-content` branded surface, which inverts in dark mode; the dark: class is correct here.
 2. `pages/settings/⚡two-factor-setup-modal.blade.php`: `bg-white` on QR code inner div — QR codes require a white background to scan; Alpine.js `filter: invert(1)` handles dark mode correctly for this specific element.
 3. `layouts/auth/split.blade.php`: `bg-neutral-900` on the decorative left panel — always intentionally dark, not an adaptive surface.
+
+## Use hs-confirm and hs-alert instead of wire:confirm or native dialogs
+Never use `wire:confirm` or native `alert()`/`confirm()` JavaScript calls. Use the project's custom dialog components instead:
+
+**`<x-hs-confirm>`** — For destructive/irreversible actions:
+```blade
+{{-- Simple (no loop param): wrap trigger in flux:modal.trigger --}}
+<flux:modal.trigger name="unique-name">
+    <flux:button>Delete</flux:button>
+</flux:modal.trigger>
+
+<x-hs-confirm
+    name="unique-name"
+    title="Delete Item"
+    message="Are you sure?"
+    variant="danger"
+>
+    <x-slot name="action">
+        <flux:button variant="danger" wire:click="delete" wire:loading.attr="disabled">Delete</flux:button>
+    </x-slot>
+</x-hs-confirm>
+```
+
+For loops (parameterized actions): add a Livewire `$confirmingXxxId` property, a `confirmXxx(int $id)` method that sets the property and calls `\Flux\Flux::modal('name')->show()`, then the action method uses the property.
+
+**`<x-hs-alert>`** — For informational notices:
+```blade
+<x-hs-alert name="my-alert" title="Done" message="Upload complete." variant="success" />
+```
+
+Variants: `primary` | `danger` | `warning` (hs-confirm), `info` | `success` | `warning` | `danger` (hs-alert).
+Action slot buttons must use valid Flux button variants: `primary`, `filled`, `danger`, `ghost`, `subtle` — never `variant="warning"` on `<flux:button>`.

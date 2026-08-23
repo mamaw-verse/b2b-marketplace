@@ -43,7 +43,7 @@ abstract class ChatInbox extends Component
         }
 
         return ConversationThread::where('conversation_id', $this->selectedConversationId)
-            ->with('rfq:id,title,status')
+            ->with(['rfq:id,title,status', 'order'])
             ->orderByDesc('updated_at')
             ->get();
     }

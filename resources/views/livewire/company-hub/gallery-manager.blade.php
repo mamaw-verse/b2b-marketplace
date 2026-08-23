@@ -46,7 +46,7 @@
                                 />
                             </div>
                             <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100 rounded-[var(--hs-radius-card)]">
-                                <flux:button variant="ghost" size="sm" icon="trash" class="text-white" wire:click="removeImage({{ $item->id }})" wire:confirm="Remove this image?" />
+                                <flux:button variant="ghost" size="sm" icon="trash" class="text-white" wire:click="confirmRemoveImage({{ $item->id }})" />
                             </div>
                             <div class="absolute top-2 left-2">
                                 <span class="inline-flex items-center justify-center size-6 rounded-full bg-[var(--hs-neutral-0)]/90 text-xs font-bold text-[var(--hs-neutral-700)] shadow-sm">
@@ -61,4 +61,19 @@
             @endif
         </div>
     </div>
+
+    {{-- Remove Image Confirmation --}}
+    <x-hs-confirm
+        name="remove-image-confirm"
+        title="Remove Image"
+        message="Remove this image?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeImage" wire:loading.attr="disabled">
+                {{ __('Remove') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

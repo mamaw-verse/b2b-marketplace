@@ -8,7 +8,7 @@
         <flux:card wire:key="certificate-{{ $certificate['id'] ?? 'new-' . $index }}" class="relative space-y-4 p-4">
             <div class="flex items-center justify-between">
                 <flux:heading size="sm">{{ __('Certificate') }} #{{ $index + 1 }}</flux:heading>
-                <flux:button wire:click="removeCertificate({{ $index }})" variant="ghost" size="sm" icon="trash" class="text-red-500 hover:text-red-700">
+                <flux:button wire:click="confirmRemoveCertificate({{ $index }})" variant="ghost" size="sm" icon="trash" class="text-red-500 hover:text-red-700">
                     {{ __('Remove') }}
                 </flux:button>
             </div>
@@ -65,4 +65,18 @@
     <flux:button wire:click="addCertificate" variant="subtle" icon="plus">
         {{ __('Add Certificate') }}
     </flux:button>
+
+    <x-hs-confirm
+        name="confirm-remove-certificate"
+        title="Remove Certificate"
+        message="Remove this certificate?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeCertificate" wire:loading.attr="disabled">
+                {{ __('Remove') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

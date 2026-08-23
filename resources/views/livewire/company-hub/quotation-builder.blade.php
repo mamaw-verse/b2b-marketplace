@@ -57,7 +57,7 @@
                                             variant="ghost"
                                             size="sm"
                                             icon="trash"
-                                            wire:click="removeItem({{ $index }})"
+                                            wire:click="confirmRemoveItem({{ $index }})"
                                             class="shrink-0 text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
                                         />
                                     @endif
@@ -187,8 +187,7 @@
                         <flux:button
                             type="button"
                             variant="ghost"
-                            wire:click="withdrawQuotation"
-                            wire:confirm="Withdraw this quotation? The buyer will no longer be able to award it."
+                            wire:click="confirmWithdraw"
                             class="ml-auto text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
                         >
                             {{ __('Withdraw') }}
@@ -200,23 +199,48 @@
         </div>
     </div>
 
-    {{-- Submit Confirmation Modal --}}
-    <x-hs-modal model="showSubmitConfirmation" title="Submit Quotation" size="sm">
-        <div class="flex items-start gap-2.5 rounded-[var(--hs-radius-card)] bg-[var(--hs-warning-50)] border border-[var(--hs-warning-200)] px-4 py-3">
-            <flux:icon name="exclamation-triangle" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-warning-500)]" />
-            <p class="text-sm text-[var(--hs-warning-700)]">
-                <strong>{{ __('Important:') }}</strong>
-                {{ __('Once submitted, this quotation cannot be edited. The buyer will see it immediately. You can withdraw it later if needed.') }}
-            </p>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t border-[var(--hs-neutral-100)] mt-4">
-            <flux:button variant="ghost" wire:click="$set('showSubmitConfirmation', false)">
-                {{ __('Cancel') }}
-            </flux:button>
+    {{-- Submit Confirmation --}}
+    <x-hs-confirm
+        name="submit-quotation-confirm"
+        title="Submit Quotation"
+        message="Once submitted, this quotation cannot be edited. The buyer will see it immediately. You can withdraw it later if needed."
+        variant="warning"
+        confirmText="Confirm & Submit"
+    >
+        <x-slot name="action">
             <flux:button variant="primary" wire:click="submitQuotation" wire:loading.attr="disabled">
                 {{ __('Confirm & Submit') }}
             </flux:button>
-        </div>
-    </x-hs-modal>
+        </x-slot>
+    </x-hs-confirm>
+
+    {{-- Withdraw Confirmation --}}
+    <x-hs-confirm
+        name="withdraw-quotation-confirm"
+        title="Withdraw Quotation"
+        message="Withdraw this quotation? The buyer will no longer be able to award it."
+        variant="danger"
+        confirmText="Withdraw"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="withdrawQuotation" wire:loading.attr="disabled">
+                {{ __('Withdraw') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
+
+    {{-- Remove Item Confirmation --}}
+    <x-hs-confirm
+        name="confirm-remove-quotation-item"
+        title="Remove Item"
+        message="Remove this quotation item?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeItem" wire:loading.attr="disabled">
+                {{ __('Remove') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

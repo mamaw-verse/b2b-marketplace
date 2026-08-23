@@ -88,7 +88,7 @@ final class RfqDetail extends Component
 
     public function render()
     {
-        $this->rfqRecipient->load(['quotations.items', 'rfq.attachments', 'rfq.user.buyerProfile']);
+        $this->rfqRecipient->load(['quotations.items', 'quotations.order', 'rfq.attachments', 'rfq.user.buyerProfile']);
 
         return view('livewire.company-hub.rfq-detail');
     }

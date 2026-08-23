@@ -115,10 +115,7 @@
                                         :icon="$product->status === 'published'
                                             ? 'archive-box'
                                             : 'arrow-up-circle'"
-                                        wire:click="toggleStatus({{ $product->id }})"
-                                        wire:confirm="{{ $product->status === 'published'
-                                            ? 'Archive this product?'
-                                            : 'Publish this product?' }}"
+                                        wire:click="confirmToggleStatus({{ $product->id }}, '{{ $product->status === 'published' ? 'archive' : 'publish' }}')"
                                     />
 
                                 </div>
@@ -145,4 +142,34 @@
         </div>
 
     </div>
+
+    {{-- Archive Product Confirmation --}}
+    <x-hs-confirm
+        name="archive-product-confirm"
+        title="Archive Product"
+        message="Archive this product?"
+        variant="warning"
+        confirmText="Archive"
+    >
+        <x-slot name="action">
+            <flux:button variant="filled" wire:click="toggleStatus" wire:loading.attr="disabled">
+                {{ __('Archive') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
+
+    {{-- Publish Product Confirmation --}}
+    <x-hs-confirm
+        name="publish-product-confirm"
+        title="Publish Product"
+        message="Publish this product?"
+        variant="primary"
+        confirmText="Publish"
+    >
+        <x-slot name="action">
+            <flux:button variant="primary" wire:click="toggleStatus" wire:loading.attr="disabled">
+                {{ __('Publish') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

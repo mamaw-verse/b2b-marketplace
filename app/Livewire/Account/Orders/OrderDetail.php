@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Account\Orders;
+
+use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
+
+#[Layout('layouts.portal', ['portal' => 'account'])]
+#[Title('Order Detail')]
+final class OrderDetail extends Component
+{
+    public Order $order;
+
+    public function mount(Order $order): void
+    {
+        abort_unless($order->buyer_user_id === Auth::id(), 403);
+        $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes', 'shop']);
+    }
+
+    public function cancel(): void
+    {
+        if ($this->order->status !== 'pending_payment') {
+            return;
+        }
+
+        $this->order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+        $this->order->refresh();
+        session()->flash('success', 'Order cancelled.');
+    }
+
+    public function confirmReceipt(): void
+    {
+        $action = app(\App\Actions\ConfirmReceiptAction::class);
+        $result = $action->execute($this->order);
+
+        if ($result['success']) {
+            $this->order = $result['order'];
+            session()->flash('success', 'Receipt confirmed. Order completed!');
+        } else {
+            session()->flash('error', $result['error']);
+        }
+    }
+
+    public function render()
+    {
+        return view('livewire.account.orders.order-detail');
+    }
+}

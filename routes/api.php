@@ -3,17 +3,24 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AdminCategoryController;
+use App\Http\Controllers\Api\V1\AdminDisputeController;
 use App\Http\Controllers\Api\V1\AdminOnboardingController;
+use App\Http\Controllers\Api\V1\BuyerOrderController;
 use App\Http\Controllers\Api\V1\BuyerProfileController;
 use App\Http\Controllers\Api\V1\ConversationController;
+use App\Http\Controllers\Api\V1\DisputeController;
+use App\Http\Controllers\Api\V1\FulfilmentController;
 use App\Http\Controllers\Api\V1\Hub\QuotationController;
 use App\Http\Controllers\Api\V1\Hub\RfqRecipientController;
+use App\Http\Controllers\Api\V1\HubOrderController;
 use App\Http\Controllers\Api\V1\HubProductController;
 use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
+use App\Http\Controllers\Api\V1\OrderPaymentController;
 use App\Http\Controllers\Api\V1\QuotationActionController;
 use App\Http\Controllers\Api\V1\RfqController;
 use App\Http\Controllers\Api\V1\SearchController;
+use App\Http\Controllers\Api\V1\SellerHubController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -55,6 +62,23 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1')
             ->where('thread', '[0-9]+');
 
+        // Buyer Orders
+        Route::get('/orders', [BuyerOrderController::class, 'index']);
+        Route::get('/orders/{order}', [BuyerOrderController::class, 'show']);
+        Route::post('/orders/{order}/cancel', [BuyerOrderController::class, 'cancel']);
+        Route::post('/orders/{order}/confirm-receipt', [BuyerOrderController::class, 'confirmReceipt']);
+
+        // Payment initiation
+        Route::post('/orders/{order}/payment', [OrderPaymentController::class, 'store'])
+            ->middleware('throttle:10,60');
+
+        // Buyer Disputes
+        Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])
+            ->middleware('throttle:5,1440');
+        Route::get('/orders/{order}/disputes/{dispute}', [DisputeController::class, 'show']);
+        Route::post('/orders/{order}/disputes/{dispute}/escalate', [DisputeController::class, 'escalate']);
+        Route::post('/orders/{order}/disputes/{dispute}/withdraw', [DisputeController::class, 'withdraw']);
+
         Route::get('/onboarding', [OnboardingController::class, 'show']);
         Route::put('/onboarding/step/{step}', [OnboardingController::class, 'updateStep'])
             ->whereIn('step', ['1', '2', '3', '4', '5']);
@@ -81,6 +105,36 @@ Route::prefix('v1')->group(function () {
         Route::post('/quotations/{quotation}/submit', [QuotationController::class, 'submit']);
         Route::post('/quotations/{quotation}/withdraw', [QuotationController::class, 'withdraw']);
 
+        // Orders (Seller)
+        Route::post('/orders', [HubOrderController::class, 'store'])
+            ->middleware('throttle:20,60');
+        Route::get('/orders', [HubOrderController::class, 'index']);
+        Route::get('/orders/{order}', [HubOrderController::class, 'show']);
+        Route::put('/orders/{order}', [HubOrderController::class, 'update']);
+        Route::post('/orders/{order}/submit', [HubOrderController::class, 'submit']);
+        Route::post('/orders/{order}/recall', [HubOrderController::class, 'recall']);
+        Route::post('/orders/{order}/cancel', [HubOrderController::class, 'cancel']);
+        Route::delete('/orders/{order}', [HubOrderController::class, 'destroy']);
+
+        // Fulfilment (Seller)
+        Route::post('/orders/{order}/fulfilment', [FulfilmentController::class, 'store']);
+        Route::put('/orders/{order}/fulfilment', [FulfilmentController::class, 'update']);
+        Route::post('/orders/{order}/fulfilment/ship', [FulfilmentController::class, 'ship']);
+        Route::post('/orders/{order}/fulfilment/deliver', [FulfilmentController::class, 'deliver']);
+        Route::post('/orders/{order}/fulfilment/return', [FulfilmentController::class, 'returnToSeller']);
+
+        // Seller Dispute Actions
+        Route::post('/orders/{order}/disputes/{dispute}/resolve', [DisputeController::class, 'resolve']);
+        Route::post('/orders/{order}/disputes/{dispute}/confirm-return', [DisputeController::class, 'confirmReturn']);
+
+        // Seller Hub
+        Route::get('/dashboard', [SellerHubController::class, 'dashboard']);
+        Route::get('/customers', [SellerHubController::class, 'customers']);
+        Route::get('/reports', [SellerHubController::class, 'reports'])
+            ->middleware('throttle:60,1');
+        Route::get('/leaderboards', [SellerHubController::class, 'leaderboards'])
+            ->middleware('throttle:60,1');
+
         Route::get('/products', [HubProductController::class, 'index']);
         Route::post('/products', [HubProductController::class, 'store']);
         Route::put('/products/{product}', [HubProductController::class, 'update']);
@@ -106,6 +160,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/categories', [AdminCategoryController::class, 'store']);
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update']);
         Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy']);
+    });
+
+    // Admin Disputes (requires auth + role:admin)
+    Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+        Route::get('/disputes', [AdminDisputeController::class, 'index']);
+        Route::post('/disputes/{dispute}/arbitrate', [AdminDisputeController::class, 'arbitrate']);
     });
 
     // Public Search & Discovery (no auth required)

@@ -22,6 +22,7 @@ final class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             DemoDataSeeder::class,
             DemoUsersSeeder::class,
+            Phase3Seeder::class,
         ]);
 
         User::firstOrCreate(

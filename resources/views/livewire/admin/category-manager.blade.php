@@ -46,12 +46,17 @@
     </div>
 
     {{-- Delete Confirmation Modal --}}
-    <x-hs-modal model="showDeleteModal" title="Delete Category" size="sm">
-        <flux:text>Are you sure you want to delete this category? This action cannot be undone.</flux:text>
-
-        <div class="flex justify-end gap-3 pt-4 border-t border-[var(--hs-neutral-100)] mt-4">
-            <flux:button variant="ghost" wire:click="$set('showDeleteModal', false)">Cancel</flux:button>
-            <flux:button variant="danger" wire:click="delete">Delete</flux:button>
-        </div>
-    </x-hs-modal>
+    <x-hs-confirm
+        name="confirm-delete-category"
+        title="Delete Category"
+        message="Are you sure you want to delete this category? This action cannot be undone."
+        variant="danger"
+        confirmText="Delete"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="delete" wire:loading.attr="disabled">
+                Delete
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

@@ -24,6 +24,8 @@ final class RfqDetail extends Component
 
     public bool $showCloseConfirmation = false;
 
+    public ?int $confirmingRejectQuotationId = null;
+
     public function mount(Rfq $rfq): void
     {
         Gate::authorize('view', $rfq);
@@ -50,8 +52,20 @@ final class RfqDetail extends Component
         $this->rfq->refresh();
     }
 
-    public function rejectQuotation(int $quotationId): void
+    public function confirmRejectQuotation(int $quotationId): void
     {
+        $this->confirmingRejectQuotationId = $quotationId;
+        \Flux\Flux::modal('confirm-reject-quotation')->show();
+    }
+
+    public function rejectQuotation(?int $quotationId = null): void
+    {
+        $quotationId = $quotationId ?? $this->confirmingRejectQuotationId;
+
+        if (! $quotationId) {
+            return;
+        }
+
         $quotation = Quotation::findOrFail($quotationId);
         Gate::authorize('reject', $quotation);
 
@@ -67,6 +81,7 @@ final class RfqDetail extends Component
         QuotationRejected::dispatch($result['quotation']);
 
         \Flux\Flux::toast('Quotation rejected.', variant: 'warning');
+        $this->confirmingRejectQuotationId = null;
         $this->rfq->refresh();
     }
 

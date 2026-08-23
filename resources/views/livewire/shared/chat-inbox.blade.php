@@ -100,25 +100,106 @@
                     </div>
                 </div>
 
-                {{-- Thread Tabs --}}
+                {{-- Thread Tabs (redesigned: pinned General, limited visible, More dropdown) --}}
                 @if ($this->threads->count())
-                    <div class="flex h-10 items-end gap-1 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        @foreach ($this->threads as $thread)
-                            @php $isThreadActive = $selectedThreadId === $thread->id; @endphp
+                    @php
+                        $generalThread = $this->threads->firstWhere('is_default', true);
+                        $rfqThreads = $this->threads->filter(fn ($t) => $t->rfq_id && ! $t->is_default);
+                        $orderThreads = $this->threads->filter(fn ($t) => $t->order_id && ! $t->is_default);
+
+                        // Visible order tabs: up to 2 most recent active (non-completed) orders, then completed
+                        $activeOrderThreads = $orderThreads->filter(fn ($t) => $t->order && ! in_array($t->order->status, ['completed', 'refunded', 'cancelled']));
+                        $closedOrderThreads = $orderThreads->filter(fn ($t) => $t->order && in_array($t->order->status, ['completed', 'refunded', 'cancelled']));
+
+                        $visibleTabs = collect();
+                        if ($generalThread) $visibleTabs->push($generalThread);
+                        $visibleTabs = $visibleTabs->merge($activeOrderThreads->take(2));
+                        $visibleTabs = $visibleTabs->merge($rfqThreads->take(1));
+
+                        // Overflow: remaining threads
+                        $overflowTabs = $this->threads->reject(fn ($t) => $visibleTabs->contains('id', $t->id));
+                    @endphp
+
+                    <div class="flex h-10 items-end px-5 border-b border-[var(--hs-neutral-100)]">
+                        {{-- Visible tabs --}}
+                        @foreach ($visibleTabs as $thread)
+                            @php
+                                $isThreadActive = $selectedThreadId === $thread->id;
+                                $orderForTab = $thread->order;
+                                $needsAttention = $orderForTab && in_array($orderForTab->status, ['pending_payment', 'paid']);
+                                $isResolved = $orderForTab && in_array($orderForTab->status, ['completed', 'refunded', 'cancelled']);
+                            @endphp
                             <button
                                 type="button"
                                 wire:click="selectThread({{ $thread->id }})"
-                                class="{{ $isThreadActive ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-800)]' }} flex h-10 max-w-[220px] shrink-0 items-center gap-1.5 border-b-2 px-3 text-xs font-semibold transition"
+                                class="{{ $isThreadActive ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-800)]' }} flex h-10 shrink-0 items-center gap-1.5 border-b-2 px-3 text-xs font-semibold transition"
                             >
-                                @if ($thread->rfq_id)
-                                    <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3.75h7.25L18.5 8v12.25H7V3.75Zm7 0V8h4.5" /></svg>
-                                @else
-                                    <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75h.008v.008h-.008V9.75Zm3.375 0h.008v.008H12V9.75Zm3.375 0h.008v.008H15.375V9.75ZM21 12c0 4.142-4.03 7.5-9 7.5-1.07 0-2.097-.145-3.045-.414L5.25 21l.735-3.705C4.125 15.93 3 14.08 3 12c0-4.142 4.03-7.5 9-7.5s9 3.358 9 7.5Z" /></svg>
+                                @if ($orderForTab && $needsAttention)
+                                    <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                @elseif ($orderForTab && $isResolved)
+                                    <svg class="size-3 text-[var(--hs-green-700)]" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                                @elseif ($thread->rfq_id)
+                                    <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
                                 @endif
-                                <span class="truncate">{{ $thread->title ?? __('General') }}</span>
+                                <span class="truncate max-w-[120px]">{{ $thread->title ?? __('General') }}</span>
                             </button>
                         @endforeach
+
+                        {{-- More dropdown --}}
+                        @if ($overflowTabs->isNotEmpty())
+                            <div class="relative ml-1" x-data="{ moreOpen: false }">
+                                <button type="button" @click="moreOpen = !moreOpen" class="flex h-10 items-center gap-1 px-3 text-xs font-semibold text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-800)] border-b-2 border-transparent">
+                                    {{ __('More') }} <span class="text-[9px]">▾</span>
+                                </button>
+                                <div x-show="moreOpen" @click.outside="moreOpen = false" x-cloak
+                                     class="absolute top-10 left-0 z-20 min-w-[220px] rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-1.5 shadow-lg">
+                                    @foreach ($overflowTabs as $thread)
+                                        @php
+                                            $isClosed = $thread->order && in_array($thread->order->status, ['completed', 'refunded', 'cancelled']);
+                                        @endphp
+                                        <button
+                                            type="button"
+                                            wire:click="selectThread({{ $thread->id }})"
+                                            @click="moreOpen = false"
+                                            class="flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium {{ $isClosed ? 'text-[var(--hs-neutral-400)]' : 'text-[var(--hs-neutral-700)]' }} hover:bg-[var(--hs-neutral-50)]"
+                                        >
+                                            <span class="truncate">
+                                                @if ($isClosed) ✓ @endif
+                                                {{ $thread->title }}
+                                            </span>
+                                            @if ($thread->order)
+                                                <span class="text-[10px] text-[var(--hs-neutral-400)]">{{ $thread->order->created_at->format('M d') }}</span>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
+
+                    {{-- Order summary strip (visible only when an order tab is active) --}}
+                    @if ($selectedThreadId)
+                        @php
+                            $activeThread = $this->threads->firstWhere('id', $selectedThreadId);
+                            $stripOrder = $activeThread?->order;
+                        @endphp
+                        @if ($stripOrder)
+                            <div class="flex items-center gap-3 px-5 py-2.5 bg-[var(--hs-green-50)] border-b border-[var(--hs-neutral-200)]">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-semibold text-[var(--hs-neutral-900)] truncate">
+                                        Order #{{ $stripOrder->id }} · {{ $stripOrder->items()->first()?->description ?? 'Order' }}
+                                    </p>
+                                    <p class="text-[11px] text-[var(--hs-neutral-500)] truncate">
+                                        {{ $stripOrder->items()->count() }} {{ Str::plural('item', $stripOrder->items()->count()) }} · {{ $stripOrder->currency }} {{ number_format((float) $stripOrder->order_total, 2) }}
+                                    </p>
+                                </div>
+                                <x-hs-status-pill :status="$stripOrder->status" />
+                                <a href="{{ $portal === 'hub' ? route('hub.orders.show', $stripOrder) : route('account.orders.show', $stripOrder) }}" wire:navigate class="text-[11px] font-semibold text-[var(--hs-green-700)] hover:underline shrink-0">
+                                    {{ __('View order →') }}
+                                </a>
+                            </div>
+                        @endif
+                    @endif
                 @endif
             </header>
 
@@ -150,7 +231,10 @@
                                 $isGrouped = $previous && $previous->sender_id === $message->sender_id;
                                 $isLastInGroup = !($next && $next->sender_id === $message->sender_id);
                                 $extraBottomGap = $isLastInGroup ? 'mb-3' : 'mb-0';
-                                $isSystemMessage = str_starts_with($message->body, 'Request for Quotation opened:') || str_starts_with($message->body, 'Quotation submitted:');
+                                $isSystemMessage = str_starts_with($message->body, 'Request for Quotation opened:')
+                                    || str_starts_with($message->body, 'Quotation submitted:')
+                                    || preg_match('/^order:\d+$/', $message->body)
+                                    || preg_match('/^dispute:\d+$/', $message->body);
                             @endphp
 
                             @if ($isSystemMessage)
@@ -158,6 +242,16 @@
                                 <div class="flex w-full justify-center my-4">
                                     @if (str_starts_with($message->body, 'Request for Quotation opened:') && $message->thread->rfq)
                                         <x-shared.rfq-card :rfq="$message->thread->rfq" />
+                                    @elseif (preg_match('/^order:(\d+)$/', $message->body, $m))
+                                        @php $orderCard = \App\Models\Order::with('items')->find((int) $m[1]); @endphp
+                                        @if ($orderCard)
+                                            <x-shared.order-card :order="$orderCard" />
+                                        @endif
+                                    @elseif (preg_match('/^dispute:(\d+)$/', $message->body, $m))
+                                        @php $disputeCard = \App\Models\Dispute::find((int) $m[1]); @endphp
+                                        @if ($disputeCard)
+                                            <x-shared.dispute-card :dispute="$disputeCard" />
+                                        @endif
                                     @else
                                         <div class="rounded-full bg-[var(--hs-neutral-200)] px-3.5 py-1.5 shadow-sm">
                                             <p class="text-[11px] font-medium text-[var(--hs-neutral-600)]">{{ $message->body }}</p>

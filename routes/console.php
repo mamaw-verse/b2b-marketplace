@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Jobs\OrderAutoAcceptJob;
 use App\Jobs\PruneStaleOnboardingDraftsJob;
 use App\Jobs\QuotationExpiryJob;
 use App\Jobs\ReconcileMediaOrphansJob;
@@ -24,3 +25,4 @@ Schedule::job(new RfqAutoCloseJob)->dailyAt('03:15')->timezone('UTC')->withoutOv
 Schedule::job(new QuotationExpiryJob)->dailyAt('03:30')->timezone('UTC')->withoutOverlapping();
 Schedule::job(new PruneStaleOnboardingDraftsJob)->weeklyOn(0, '03:00')->timezone('UTC');
 Schedule::job(new ReconcileMediaOrphansJob)->weeklyOn(0, '04:00')->timezone('UTC');
+Schedule::job(new OrderAutoAcceptJob)->dailyAt('04:00')->timezone('UTC')->withoutOverlapping();

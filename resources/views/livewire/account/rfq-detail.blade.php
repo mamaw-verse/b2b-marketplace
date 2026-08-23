@@ -124,7 +124,7 @@
                                             variant="ghost"
                                             size="xs"
                                             icon="x-mark"
-                                            wire:click="rejectQuotation({{ $quotation->id }})"
+                                            wire:click="confirmRejectQuotation({{ $quotation->id }})"
                                             class="text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)]"
                                         >
                                             {{ __('Reject') }}
@@ -182,4 +182,19 @@
             </div>
         </div>
     </flux:modal>
+
+    {{-- Reject Quotation Confirmation --}}
+    <x-hs-confirm
+        name="confirm-reject-quotation"
+        title="Reject Quotation"
+        message="Reject this quotation? This cannot be undone."
+        variant="danger"
+        confirmText="Reject"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="rejectQuotation" wire:loading.attr="disabled">
+                {{ __('Reject') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

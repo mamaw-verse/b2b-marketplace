@@ -52,7 +52,7 @@
                                     <x-hs-status-pill :status="$document->scan_status" />
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="removeDocument({{ $document->id }})" wire:confirm="Remove this document?" />
+                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmRemoveDocument({{ $document->id }})" />
                                 </flux:table.cell>
                             </flux:table.row>
                         @empty
@@ -67,4 +67,19 @@
             </div>
         </div>
     </div>
+
+    {{-- Remove Document Confirmation --}}
+    <x-hs-confirm
+        name="remove-document-confirm"
+        title="Remove Document"
+        message="Remove this document?"
+        variant="danger"
+        confirmText="Remove"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="removeDocument" wire:loading.attr="disabled">
+                {{ __('Remove') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

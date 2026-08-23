@@ -26,3 +26,10 @@ Broadcast::channel('conversation.{id}', function (User $user, int $id) {
 
     return $conversation->hasParticipant($user);
 });
+
+Broadcast::channel('order.{id}', function (User $user, int $id) {
+    $order = App\Models\Order::findOrFail($id);
+
+    return $user->id === $order->buyer_user_id
+        || $user->id === $order->shop->user_id;
+});

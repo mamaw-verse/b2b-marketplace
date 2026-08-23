@@ -20,7 +20,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Services\DltPaymentService::class);
     }
 
     /**
@@ -28,6 +28,15 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\PostOrderStatusMessage::class);
+        \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\PostDisputeStatusMessage::class);
+
+        \Illuminate\Support\Facades\Gate::define('accessHub', function (\App\Models\User $user) {
+            return $user->shop !== null
+                && $user->shop->status === 'active'
+                && $user->shop->deleted_at === null;
+        });
+
         $this->configureDefaults();
         $this->configureRateLimiting();
     }

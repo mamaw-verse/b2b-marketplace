@@ -21,18 +21,37 @@ final class ProductList extends Component
 
     public string $statusFilter = '';
 
+    public ?int $confirmingProductId = null;
+
+    public ?string $confirmingAction = null;
+
     public function updatedStatusFilter(): void
     {
         $this->resetPage();
     }
 
-    public function toggleStatus(int $productId): void
+    public function confirmToggleStatus(int $productId, string $action): void
     {
-        $product = $this->findOwnedProduct($productId);
+        $this->confirmingProductId = $productId;
+        $this->confirmingAction = $action;
+
+        \Flux\Flux::modal($action === 'archive' ? 'archive-product-confirm' : 'publish-product-confirm')->show();
+    }
+
+    public function toggleStatus(): void
+    {
+        if (! $this->confirmingProductId) {
+            return;
+        }
+
+        $product = $this->findOwnedProduct($this->confirmingProductId);
 
         $product->update([
             'status' => $product->status === 'published' ? 'archived' : 'published',
         ]);
+
+        $this->confirmingProductId = null;
+        $this->confirmingAction = null;
     }
 
     /**

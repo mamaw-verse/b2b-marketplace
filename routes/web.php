@@ -54,6 +54,15 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->gr
     Route::livewire('rfqs/create', 'account.rfq-create-form')->name('rfqs.create');
     Route::livewire('rfqs/{rfq}', 'account.rfq-detail')->name('rfqs.show');
     Route::livewire('messages', 'account.chat-inbox')->name('messages');
+
+    // Orders (buyer)
+    Route::livewire('orders', 'account.orders.order-list')->name('orders.index');
+    Route::livewire('orders/{order}', 'account.orders.order-detail')->name('orders.show');
+    Route::livewire('orders/{order}/pay', 'account.orders.payment-page')->name('orders.pay');
+
+    // Disputes (buyer)
+    Route::livewire('orders/{order}/dispute/create', 'account.disputes.dispute-form')->name('orders.dispute.create');
+    Route::livewire('orders/{order}/dispute/{dispute}', 'account.disputes.dispute-detail')->name('orders.dispute.show');
 });
 
 /*
@@ -86,6 +95,17 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::livewire('rfqs/{rfqRecipient}/quotations/create', 'company-hub.quotation-builder')->name('quotations.create');
     Route::livewire('rfqs/{rfqRecipient}/quotations/{quotation}/edit', 'company-hub.quotation-builder')->name('quotations.edit');
     Route::livewire('messages', 'company-hub.chat-inbox')->name('messages');
+
+    // Orders (seller)
+    Route::livewire('orders', 'company-hub.orders.order-queue')->name('orders.index');
+    Route::livewire('orders/create', 'company-hub.orders.order-builder')->name('orders.create');
+    Route::livewire('orders/{order}/edit', 'company-hub.orders.order-builder')->name('orders.edit');
+    Route::livewire('orders/{order}', 'company-hub.orders.order-detail')->name('orders.show');
+
+    // Seller Hub pages
+    Route::livewire('dashboard', 'company-hub.hub.dashboard')->name('hub-dashboard');
+    Route::livewire('customers', 'company-hub.hub.customers-list')->name('customers.index');
+    Route::livewire('reports', 'company-hub.hub.reports')->name('reports');
 });
 
 /*
@@ -100,6 +120,22 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::livewire('categories', 'admin.category-manager')->name('categories.index');
     Route::livewire('categories/create', 'admin.category-create')->name('categories.create');
     Route::livewire('categories/{category}/edit', 'admin.category-edit')->name('categories.edit');
+
+    // Disputes (admin)
+    Route::livewire('disputes', 'admin.disputes.dispute-queue')->name('disputes.index');
+    Route::livewire('disputes/{dispute}', 'admin.disputes.dispute-arbitration')->name('disputes.show');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Payment Callback Routes (DLT redirects here after checkout)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders/{order}/payment/success', [App\Http\Controllers\OrderPaymentCallbackController::class, 'success'])
+        ->name('orders.payment.success');
+    Route::get('/orders/{order}/payment/failure', [App\Http\Controllers\OrderPaymentCallbackController::class, 'failure'])
+        ->name('orders.payment.failure');
 });
 
 require __DIR__.'/settings.php';

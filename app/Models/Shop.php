@@ -152,6 +152,22 @@ final class Shop extends Model
     }
 
     /**
+     * Orders received by this shop (seller side).
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * RFQ recipients targeting this shop.
+     */
+    public function rfqRecipients(): HasMany
+    {
+        return $this->hasMany(RfqRecipient::class);
+    }
+
+    /**
      * Scope a query to only include active shops.
      */
     public function scopeActive($query)
