@@ -28,11 +28,13 @@
                         </flux:button>
                     @endif
 
-                    @if (in_array($rfqRecipient->status, ['reviewed', 'in_progress']))
+                    @if ($rfqRecipient->status === 'in_progress')
                         <flux:button variant="primary" href="{{ route('hub.quotations.create', $rfqRecipient) }}" size="sm" icon="document-plus" wire:navigate>
                             {{ __('Create Quotation') }}
                         </flux:button>
+                    @endif
 
+                    @if (in_array($rfqRecipient->status, ['reviewed', 'in_progress']))
                         <flux:button variant="ghost" wire:click="openDeclineModal" size="sm" class="ml-auto text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)] hover:text-[var(--hs-danger-700)]">
                             {{ __('Decline') }}
                         </flux:button>
@@ -70,7 +72,7 @@
                     <div class="text-center py-8">
                         <flux:icon name="document-text" class="mx-auto size-8 text-[var(--hs-neutral-300)]" />
                         <p class="mt-2 text-sm text-[var(--hs-neutral-500)]">{{ __('No quotations submitted yet.') }}</p>
-                        @if (! $rfqRecipient->isTerminal() && $rfqRecipient->rfq->isOpen())
+                        @if ($rfqRecipient->status === 'in_progress' && $rfqRecipient->rfq->isOpen())
                             <flux:button variant="primary" href="{{ route('hub.quotations.create', $rfqRecipient) }}" size="sm" icon="document-plus" class="mt-4" wire:navigate>
                                 {{ __('Create Quotation') }}
                             </flux:button>
@@ -162,7 +164,7 @@
                     </div>
 
                     {{-- Prompt to submit another after rejection --}}
-                    @if ($rfqRecipient->quotations->where('status', 'rejected')->isNotEmpty() && $rfqRecipient->rfq->isOpen() && ! $rfqRecipient->isTerminal())
+                    @if ($rfqRecipient->quotations->where('status', 'rejected')->isNotEmpty() && $rfqRecipient->rfq->isOpen() && $rfqRecipient->status === 'in_progress')
                         <div class="mt-4 flex items-start gap-3 rounded-[var(--hs-radius-card)] bg-[var(--hs-info-50)] border border-[var(--hs-info-200)] p-3.5">
                             <flux:icon name="light-bulb" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-info-500)]" />
                             <div>

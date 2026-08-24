@@ -190,6 +190,11 @@
                     @endif
                 </div>
 
+                {{-- ── Fee Calculator ────────────────────────────────────────── --}}
+                <div class="border-t border-[var(--hs-neutral-100)] pt-6">
+                    <livewire:company-hub.profit-calculator />
+                </div>
+
                 {{-- ── Form Actions ──────────────────────────────────────────── --}}
                 <div class="flex items-center gap-3 border-t border-[var(--hs-neutral-100)] pt-6">
                     <flux:button type="submit" variant="primary">

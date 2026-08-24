@@ -60,6 +60,9 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->gr
     Route::livewire('orders/{order}', 'account.orders.order-detail')->name('orders.show');
     Route::livewire('orders/{order}/pay', 'account.orders.payment-page')->name('orders.pay');
 
+    // Payment History (buyer)
+    Route::livewire('payments', 'account.payment-history')->name('payments');
+
     // Disputes (buyer)
     Route::livewire('orders/{order}/dispute/create', 'account.disputes.dispute-form')->name('orders.dispute.create');
     Route::livewire('orders/{order}/dispute/{dispute}', 'account.disputes.dispute-detail')->name('orders.dispute.show');
@@ -102,10 +105,23 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::livewire('orders/{order}/edit', 'company-hub.orders.order-builder')->name('orders.edit');
     Route::livewire('orders/{order}', 'company-hub.orders.order-detail')->name('orders.show');
 
+    // Payout Account
+    Route::livewire('payout-account', 'company-hub.payout-account-form')->name('payout-account');
+
+    // Payouts (seller)
+    Route::livewire('payouts', 'company-hub.payouts.payout-history')->name('payouts.index');
+    Route::livewire('payouts/{payout}', 'company-hub.payouts.payout-detail')->name('payouts.show');
+
     // Seller Hub pages
     Route::livewire('dashboard', 'company-hub.hub.dashboard')->name('hub-dashboard');
     Route::livewire('customers', 'company-hub.hub.customers-list')->name('customers.index');
     Route::livewire('reports', 'company-hub.hub.reports')->name('reports');
+
+    // Earnings (seller)
+    Route::livewire('earnings', 'company-hub.earnings.earnings-overview')->name('earnings');
+
+    // Reviews (seller)
+    Route::livewire('reviews', 'company-hub.reviews.review-list')->name('reviews.index');
 });
 
 /*
@@ -124,6 +140,26 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Disputes (admin)
     Route::livewire('disputes', 'admin.disputes.dispute-queue')->name('disputes.index');
     Route::livewire('disputes/{dispute}', 'admin.disputes.dispute-arbitration')->name('disputes.show');
+
+    // Payout Settings
+    Route::livewire('payout-settings', 'admin.payout-settings')->name('payout-settings');
+
+    // Financial Ledger (admin)
+    Route::livewire('ledger', 'admin.finance.financial-ledger')->name('ledger');
+
+    // Payout Accounts
+    Route::livewire('payout-accounts', 'admin.payout-accounts.payout-account-queue')->name('payout-accounts.index');
+
+    // Payouts
+    Route::livewire('payouts', 'admin.payouts.payout-queue')->name('payouts.index');
+    Route::livewire('payouts/eligible', 'admin.payouts.eligible-payouts')->name('payouts.eligible');
+    Route::livewire('payouts/{payout}', 'admin.payouts.payout-detail')->name('payouts.show');
+
+    // Analytics Dashboard
+    Route::livewire('analytics', 'admin.finance.analytics-dashboard')->name('analytics');
+
+    // Review Reports
+    Route::livewire('review-reports', 'admin.reviews.review-report-queue')->name('review-reports.index');
 });
 
 /*

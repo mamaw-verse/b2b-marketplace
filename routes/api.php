@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\Admin\AnalyticsController;
+use App\Http\Controllers\Api\V1\Admin\LedgerController;
+use App\Http\Controllers\Api\V1\Admin\PayoutAccountController;
+use App\Http\Controllers\Api\V1\Admin\PayoutController as AdminPayoutController;
 use App\Http\Controllers\Api\V1\AdminCategoryController;
 use App\Http\Controllers\Api\V1\AdminDisputeController;
 use App\Http\Controllers\Api\V1\AdminOnboardingController;
@@ -12,7 +16,11 @@ use App\Http\Controllers\Api\V1\DisputeController;
 use App\Http\Controllers\Api\V1\FulfilmentController;
 use App\Http\Controllers\Api\V1\Hub\QuotationController;
 use App\Http\Controllers\Api\V1\Hub\RfqRecipientController;
+use App\Http\Controllers\Api\V1\HubEarningsController;
+use App\Http\Controllers\Api\V1\HubFeeRatesController;
 use App\Http\Controllers\Api\V1\HubOrderController;
+use App\Http\Controllers\Api\V1\HubPayoutAccountController;
+use App\Http\Controllers\Api\V1\HubPayoutController;
 use App\Http\Controllers\Api\V1\HubProductController;
 use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
@@ -21,6 +29,7 @@ use App\Http\Controllers\Api\V1\QuotationActionController;
 use App\Http\Controllers\Api\V1\RfqController;
 use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\SellerHubController;
+use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -71,6 +80,9 @@ Route::prefix('v1')->group(function () {
         // Payment initiation
         Route::post('/orders/{order}/payment', [OrderPaymentController::class, 'store'])
             ->middleware('throttle:10,60');
+
+        // Buyer Payment History
+        Route::get('/transactions', [TransactionController::class, 'index']);
 
         // Buyer Disputes
         Route::post('/orders/{order}/disputes', [DisputeController::class, 'store'])
@@ -135,6 +147,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/leaderboards', [SellerHubController::class, 'leaderboards'])
             ->middleware('throttle:60,1');
 
+        // Payout Account
+        Route::get('/payout-account', [HubPayoutAccountController::class, 'show']);
+        Route::put('/payout-account', [HubPayoutAccountController::class, 'upsert']);
+
         Route::get('/products', [HubProductController::class, 'index']);
         Route::post('/products', [HubProductController::class, 'store']);
         Route::put('/products/{product}', [HubProductController::class, 'update']);
@@ -143,6 +159,17 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/{product}/variants/{variant}', [HubProductController::class, 'updateVariant']);
         Route::post('/products/{product}/gallery', [HubProductController::class, 'storeGallery']);
         Route::post('/products/{product}/documents', [HubProductController::class, 'storeDocument']);
+
+        // Fee Rates (Seller)
+        Route::get('/fee-rates', HubFeeRatesController::class);
+
+        // Earnings (Seller)
+        Route::get('/earnings', HubEarningsController::class);
+
+        // Payouts (Seller)
+        Route::get('/payouts/balance', [HubPayoutController::class, 'balance']);
+        Route::get('/payouts', [HubPayoutController::class, 'index']);
+        Route::get('/payouts/{payout}', [HubPayoutController::class, 'show']);
     });
 
     // Admin Review Console (requires auth + onboarding.review permission)
@@ -166,6 +193,46 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
         Route::get('/disputes', [AdminDisputeController::class, 'index']);
         Route::post('/disputes/{dispute}/arbitrate', [AdminDisputeController::class, 'arbitrate']);
+
+        // Financial Ledger (Admin)
+        Route::get('/ledger', [LedgerController::class, 'index']);
+
+        // Analytics
+        Route::get('/analytics', AnalyticsController::class);
+
+        // Payout Settings
+        Route::get('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'index']);
+        Route::put('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'update']);
+
+        // Review Reports
+        Route::get('/review-reports', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'index']);
+        Route::post('/review-reports/{reviewReport}/dismiss', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'dismiss']);
+        Route::post('/review-reports/{reviewReport}/action', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'action']);
+
+        // Payout Accounts
+        Route::get('/payout-accounts', [PayoutAccountController::class, 'index']);
+        Route::post('/payout-accounts/{sellerPayoutAccount}/verify', [PayoutAccountController::class, 'verify']);
+        Route::post('/payout-accounts/{sellerPayoutAccount}/reject', [PayoutAccountController::class, 'reject']);
+
+        // Payouts
+        Route::get('/payouts/eligible', [AdminPayoutController::class, 'eligible']);
+        Route::get('/payouts', [AdminPayoutController::class, 'index']);
+        Route::post('/payouts', [AdminPayoutController::class, 'store']);
+        Route::get('/payouts/{payout}', [AdminPayoutController::class, 'show']);
+        Route::post('/payouts/{payout}/release', [AdminPayoutController::class, 'release'])
+            ->middleware('permission:payout.release');
+        Route::post('/payouts/{payout}/retry', [AdminPayoutController::class, 'retry'])
+            ->middleware('permission:payout.release');
+    });
+
+    // Reviews (requires auth + verified)
+    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+        Route::post('/orders/{order}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'store'])
+            ->middleware('throttle:review-creation');
+        Route::put('/reviews/{review}', [App\Http\Controllers\Api\V1\ReviewController::class, 'update']);
+        Route::post('/reviews/{review}/respond', [App\Http\Controllers\Api\V1\ReviewResponseController::class, 'store']);
+        Route::put('/review-responses/{reviewResponse}', [App\Http\Controllers\Api\V1\ReviewResponseController::class, 'update']);
+        Route::post('/reviews/{review}/report', [App\Http\Controllers\Api\V1\ReviewController::class, 'report']);
     });
 
     // Public Search & Discovery (no auth required)
@@ -175,6 +242,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/companies/{shop}', [SearchController::class, 'showCompany']);
         Route::get('/products/{product}', [SearchController::class, 'showProduct']);
         Route::get('/categories', [SearchController::class, 'categories']);
+
+        // Public review listings
+        Route::get('/products/{product}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'productReviews']);
+        Route::get('/companies/{shop}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'shopReviews']);
     });
 
 });

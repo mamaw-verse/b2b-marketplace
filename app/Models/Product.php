@@ -38,6 +38,8 @@ final class Product extends Model
         'featured_image_path',
         'status',
         'variant_attributes_schema',
+        'average_rating',
+        'total_reviews',
     ];
 
     public function searchableAs(): string
@@ -59,6 +61,8 @@ final class Product extends Model
             'categories' => $this->categories->pluck('name')->toArray(),
             'price_from' => (float) $this->variants()->min('price'),
             'currency' => $this->variants()->value('currency') ?? 'PHP',
+            'average_rating' => (float) ($this->average_rating ?? 0),
+            'total_reviews' => (int) ($this->total_reviews ?? 0),
             'created_at' => $this->created_at->timestamp,
         ];
     }
@@ -106,6 +110,14 @@ final class Product extends Model
     public function gallery(): HasMany
     {
         return $this->hasMany(ProductGallery::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Reviews for this product.
+     */
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Review::class, 'reviewable');
     }
 
     /**

@@ -38,5 +38,18 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
                 </span>
             </div>
         @endif
+
+        {{-- Rating --}}
+        @if($product->average_rating)
+            <div class="mt-2 flex items-center gap-1">
+                <div class="flex items-center">
+                    @for($i = 1; $i <= 5; $i++)
+                        <span class="text-xs {{ $product->average_rating >= $i ? 'text-yellow-400' : ($product->average_rating >= $i - 0.5 ? 'text-yellow-300' : 'text-[var(--hs-neutral-300)]') }}">★</span>
+                    @endfor
+                </div>
+                <span class="text-xs text-[var(--hs-neutral-500)]">{{ number_format((float)$product->average_rating, 1) }}</span>
+                <span class="text-xs text-[var(--hs-neutral-400)]">({{ $product->total_reviews }})</span>
+            </div>
+        @endif
     </div>
 </a>

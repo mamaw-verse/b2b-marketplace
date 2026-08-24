@@ -46,9 +46,9 @@
 
         {{-- Main Content --}}
         <div class="flex-1">
-            {{-- Search --}}
-            <div class="mb-6">
-                <div class="relative">
+            {{-- Search & Sort --}}
+            <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="relative flex-1">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
                     <input
                         wire:model.live.debounce.300ms="query"
@@ -56,6 +56,17 @@
                         placeholder="Search companies..."
                         class="w-full rounded-[var(--hs-radius-pill)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent shadow-[var(--hs-shadow-sm)]"
                     />
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="sort-by" class="text-xs font-medium text-[var(--hs-neutral-500)] whitespace-nowrap">Sort by</label>
+                    <select
+                        id="sort-by"
+                        wire:model.live="sortBy"
+                        class="rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 text-sm text-[var(--hs-neutral-700)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent"
+                    >
+                        <option value="latest">Latest</option>
+                        <option value="rating">Highest Rated</option>
+                    </select>
                 </div>
             </div>
 

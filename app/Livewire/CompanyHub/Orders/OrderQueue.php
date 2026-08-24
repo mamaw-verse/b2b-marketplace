@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub\Orders;
 
 use App\Models\Order;
+use App\Models\Quotation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -24,6 +26,28 @@ final class OrderQueue extends Component
     public function updatedTab(): void
     {
         $this->resetPage();
+    }
+
+    /**
+     * Awarded quotations belonging to this shop that don't yet have an order.
+     *
+     * @return Collection<int, Quotation>
+     */
+    #[Computed]
+    public function awardedQuotations(): Collection
+    {
+        $shop = Auth::user()->shop;
+
+        if (! $shop) {
+            return new Collection;
+        }
+
+        return Quotation::where('status', 'awarded')
+            ->whereDoesntHave('order')
+            ->whereHas('rfqRecipient', fn ($q) => $q->where('shop_id', $shop->id))
+            ->with(['rfq:id,title', 'rfqRecipient:id,rfq_id,shop_id'])
+            ->orderByDesc('updated_at')
+            ->get();
     }
 
     #[Computed]

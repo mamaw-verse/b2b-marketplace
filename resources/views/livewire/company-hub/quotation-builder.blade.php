@@ -64,56 +64,62 @@
                                 </div>
 
                                 {{-- Item fields --}}
+                                @php
+                                    $fieldClasses = 'w-full border block appearance-none text-sm rounded-md py-1.5 h-8 leading-[1.125rem] ps-3 pe-3 bg-white text-zinc-700 placeholder-zinc-400 shadow-xs border-zinc-200 border-b-zinc-300/80 focus:outline-none focus:border-[var(--hs-green-400)] focus:ring-1 focus:ring-[var(--hs-green-400)] transition dark:bg-white/10 dark:text-zinc-300 dark:border-white/10 dark:placeholder-zinc-400';
+                                    $invalidClasses = '!border-red-500 !ring-1 !ring-red-500 !shadow-none';
+                                    $labelStyle = 'block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1';
+                                @endphp
                                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
                                     <div class="sm:col-span-5">
-                                        <flux:input
+                                        <label class="{{ $labelStyle }}">{{ __('Description') }} <span class="text-red-500">*</span></label>
+                                        <input
                                             wire:model="items.{{ $index }}.description"
-                                            label="Description"
+                                            type="text"
                                             placeholder="e.g. Halal Coconut Flour 25 kg"
-                                            size="sm"
+                                            class="{{ $fieldClasses }} {{ $errors->has("items.{$index}.description") ? $invalidClasses : '' }}"
                                         />
-                                        @error("items.{$index}.description")
-                                            <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
-                                        @enderror
                                     </div>
                                     <div class="sm:col-span-2">
-                                        <flux:input
-                                            wire:model="items.{{ $index }}.quantity"
-                                            label="Qty"
+                                        <label class="{{ $labelStyle }}">{{ __('Qty') }} <span class="text-red-500">*</span></label>
+                                        <input
+                                            wire:model.live.debounce.300ms="items.{{ $index }}.quantity"
                                             type="number"
                                             step="0.01"
                                             min="0.01"
-                                            size="sm"
+                                            class="{{ $fieldClasses }} {{ $errors->has("items.{$index}.quantity") ? $invalidClasses : '' }}"
                                         />
-                                        @error("items.{$index}.quantity")
-                                            <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
-                                        @enderror
                                     </div>
                                     <div class="sm:col-span-2">
-                                        <x-hs-unit-select
-                                            wire-model="items.{{ $index }}.unit"
-                                            :value="$item['unit'] ?? ''"
-                                            label="Unit"
-                                            size="sm"
-                                        />
-                                        @error("items.{$index}.unit")
-                                            <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
-                                        @enderror
+                                        <label class="{{ $labelStyle }}">{{ __('Unit') }} <span class="text-red-500">*</span></label>
+                                        <select
+                                            wire:model="items.{{ $index }}.unit"
+                                            class="{{ $fieldClasses }} {{ $errors->has("items.{$index}.unit") ? $invalidClasses : '' }}"
+                                        >
+                                            <option value="">{{ __('Select…') }}</option>
+                                            @foreach (config('units', []) as $unit)
+                                                <option value="{{ $unit['value'] }}">{{ $unit['label'] }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="sm:col-span-3">
-                                        <flux:input
-                                            wire:model="items.{{ $index }}.unit_price"
-                                            label="Unit Price (₱)"
+                                        <label class="{{ $labelStyle }}">{{ __('Unit Price (₱)') }} <span class="text-red-500">*</span></label>
+                                        <input
+                                            wire:model.live.debounce.300ms="items.{{ $index }}.unit_price"
                                             type="number"
                                             step="0.01"
                                             min="0.01"
-                                            size="sm"
+                                            class="{{ $fieldClasses }} {{ $errors->has("items.{$index}.unit_price") ? $invalidClasses : '' }}"
                                         />
-                                        @error("items.{$index}.unit_price")
-                                            <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
-                                        @enderror
                                     </div>
                                 </div>
+                                @if ($errors->hasAny(["items.{$index}.description", "items.{$index}.quantity", "items.{$index}.unit", "items.{$index}.unit_price"]))
+                                    <div class="text-xs text-[var(--hs-danger-500)] space-y-0.5">
+                                        @error("items.{$index}.description") <p>{{ $message }}</p> @enderror
+                                        @error("items.{$index}.quantity") <p>{{ $message }}</p> @enderror
+                                        @error("items.{$index}.unit") <p>{{ $message }}</p> @enderror
+                                        @error("items.{$index}.unit_price") <p>{{ $message }}</p> @enderror
+                                    </div>
+                                @endif
 
                                 {{-- Subtotal + variant hint --}}
                                 <div class="flex items-center justify-between pt-1">
@@ -160,6 +166,40 @@
                                 ₱{{ number_format($runningTotal, 2) }}
                             </span>
                         </p>
+                    </div>
+
+                    {{-- Payout Simulator --}}
+                    @php
+                        $commissionRate = \App\Models\PayoutSetting::getCommissionFeeRate();
+                        $transactionFee = \App\Models\PayoutSetting::getTransactionFeeAmount();
+                        $commissionAmount = round($runningTotal * $commissionRate, 2);
+                        $totalFees = round($transactionFee + $commissionAmount, 2);
+                        $netPayout = round($runningTotal - $totalFees, 2);
+                    @endphp
+                    <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <flux:icon name="calculator" variant="mini" class="size-4 text-[var(--hs-neutral-500)]" />
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">{{ __('Payout Estimate') }}</h3>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--hs-neutral-600)]">{{ __('Quotation Total') }}</span>
+                                <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums">₱{{ number_format($runningTotal, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--hs-neutral-600)]">{{ __('Commission') }} ({{ number_format($commissionRate * 100, 1) }}%)</span>
+                                <span class="font-medium text-[var(--hs-neutral-700)] tabular-nums">−₱{{ number_format($commissionAmount, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--hs-neutral-600)]">{{ __('Transaction Fee') }}</span>
+                                <span class="font-medium text-[var(--hs-neutral-700)] tabular-nums">−₱{{ number_format($transactionFee, 2) }}</span>
+                            </div>
+                            <div class="pt-2 mt-1 border-t border-[var(--hs-neutral-200)] flex justify-between text-sm">
+                                <span class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Estimated Payout') }}</span>
+                                <span class="font-bold text-[var(--hs-green-700)] tabular-nums">₱{{ number_format(max(0, $netPayout), 2) }}</span>
+                            </div>
+                        </div>
+                        <p class="mt-2.5 text-xs text-[var(--hs-neutral-400)]">{{ __('Based on current platform rates. Actual payout calculated after order completion.') }}</p>
                     </div>
                 @endif
 

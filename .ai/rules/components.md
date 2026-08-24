@@ -4,6 +4,8 @@ paths:
   - resources/views/components/hs-confirm.blade.php
   - resources/views/components/hs-alert.blade.php
   - resources/views/components/hs-modal.blade.php
+  - 'resources/views/components/hs-confirm*'
+  - 'resources/views/components/hs-alert*'
 ---
 
 # Components
@@ -19,3 +21,9 @@ hs-alert is an informational dialog built on flux:modal. Props: `name` (required
 
 ## hs-modal component API with fixed header/footer
 hs-modal has fixed header/footer with scrollable body. Props: `name`, `model` (wire:model), `title`, `subtitle`, `size` (sm|md|lg|xl|2xl). Optional named slot: `footer` — renders as a sticky bottom bar with top border. The default slot is the scrollable body area. Max height is 85vh.
+
+## hs-confirm action slot must auto-close the modal on click
+The action slot in hs-confirm is wrapped in `<div x-on:click="$flux.modal('{{ $name }}').close()">` so that clicking the confirm button closes the dialog immediately. Without this wrapper, the modal stays open after the Livewire action fires. Do not remove this wrapper div — it is intentional UX behavior.
+
+## hs-alert is a MODAL component — never use for inline flash messages
+hs-alert is built on flux:modal and requires a `name` prop. It is NOT an inline alert/banner. For inline flash messages or status banners, use plain styled divs with design tokens (e.g., `bg-[var(--hs-success-50)] border border-[var(--hs-success-200)] text-[var(--hs-success-700)]`). Never substitute hs-alert where you need an inline notification.

@@ -21,6 +21,13 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(\App\Services\DltPaymentService::class);
+
+        $this->app->singleton(
+            \App\Contracts\DltDisbursementServiceInterface::class,
+            fn () => config('services.dlt.disbursement_enabled', false)
+                ? new \App\Services\DltDisbursementService
+                : new \App\Services\MockDltDisbursementService,
+        );
     }
 
     /**
@@ -91,6 +98,18 @@ final class AppServiceProvider extends ServiceProvider
                         'error' => [
                             'code' => 'RATE_LIMITED',
                             'message' => 'Too many search requests. Please try again later.',
+                        ],
+                    ], 429);
+                });
+        });
+
+        RateLimiter::for('review-creation', function (Request $request) {
+            return Limit::perHour(10)->by($request->user()?->id ?: $request->ip())
+                ->response(function () {
+                    return response()->json([
+                        'error' => [
+                            'code' => 'RATE_LIMITED',
+                            'message' => 'Too many reviews submitted. Please try again later.',
                         ],
                     ], 429);
                 });

@@ -32,6 +32,7 @@ final class RolePermissionSeeder extends Seeder
             'shop.manage_own',
             'product.manage_own',
             'directory.browse',
+            'payout.release',
         ];
 
         foreach ($permissions as $permission) {
@@ -44,6 +45,7 @@ final class RolePermissionSeeder extends Seeder
             'onboarding.review',
             'category.manage',
             'document.view_any',
+            'payout.release',
         ]);
 
         $seller = Role::firstOrCreate(['name' => 'seller', 'guard_name' => 'web']);

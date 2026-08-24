@@ -106,6 +106,14 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Reviews written by this user.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewer_user_id');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

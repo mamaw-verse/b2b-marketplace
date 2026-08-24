@@ -23,6 +23,7 @@ final class DatabaseSeeder extends Seeder
             DemoDataSeeder::class,
             DemoUsersSeeder::class,
             Phase3Seeder::class,
+            PayoutSettingsSeeder::class,
         ]);
 
         User::firstOrCreate(

@@ -129,6 +129,16 @@ final class Order extends Model
         return $this->hasMany(LedgerEntry::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function payoutItem(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PayoutItem::class);
+    }
+
     // ──────────────────────────────────────────────────────────────
     // Scopes
     // ──────────────────────────────────────────────────────────────

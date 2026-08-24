@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\OnboardingSubmitted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Onboarding\Step1Request;
 use App\Http\Requests\Onboarding\Step2Request;
@@ -164,8 +165,7 @@ final class OnboardingController extends Controller
             'submitted_at' => now(),
         ]);
 
-        // Dispatch notification job (placeholder for OnboardingSubmittedNotification)
-        // OnboardingSubmittedNotification::dispatch($onboarding);
+        OnboardingSubmitted::dispatch($onboarding);
 
         return response()->json([
             'data' => [

@@ -32,6 +32,19 @@ $categories = $shop->relationLoaded('categories') ? $shop->categories->take(3) :
         </div>
     @endif
 
+    {{-- Rating --}}
+    @if($shop->average_rating)
+        <div class="mt-3 flex items-center gap-1">
+            <div class="flex items-center">
+                @for($i = 1; $i <= 5; $i++)
+                    <span class="text-xs {{ $shop->average_rating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}">★</span>
+                @endfor
+            </div>
+            <span class="text-xs text-[var(--hs-neutral-500)]">{{ number_format((float)$shop->average_rating, 1) }}</span>
+            <span class="text-xs text-[var(--hs-neutral-400)]">({{ $shop->total_reviews }})</span>
+        </div>
+    @endif
+
     {{-- Footer info --}}
     <div class="mt-4 flex items-center gap-3 text-xs text-[var(--hs-neutral-500)]">
         @if($shop->average_production_lead_time)

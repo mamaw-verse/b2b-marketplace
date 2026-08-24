@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Events\OnboardingSubmitted;
 use App\Models\ShopOnboarding;
 use App\Models\ShopOnboardingCertificate;
 use App\Services\MediaUploadService;
@@ -188,6 +189,8 @@ final class OnboardingWizard extends Component
             'status' => 'submitted',
             'submitted_at' => now(),
         ]);
+
+        OnboardingSubmitted::dispatch($onboarding);
 
         session()->flash('message', 'Your onboarding application has been submitted for review.');
 

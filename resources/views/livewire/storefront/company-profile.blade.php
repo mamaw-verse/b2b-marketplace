@@ -15,6 +15,17 @@
                     <p class="mt-1 text-sm text-[var(--hs-neutral-400)]">
                         {{ $shop->city }}{{ $shop->city && $shop->province ? ', ' : '' }}{{ $shop->province }}
                     </p>
+                    @if($shop->average_rating)
+                        <div class="mt-2 flex items-center gap-1">
+                            <div class="flex items-center">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <span class="text-sm {{ $shop->average_rating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}">★</span>
+                                @endfor
+                            </div>
+                            <span class="text-sm text-[var(--hs-neutral-200)]">{{ number_format((float)$shop->average_rating, 1) }}</span>
+                            <span class="text-sm text-[var(--hs-neutral-400)]">({{ $shop->total_reviews }} {{ Str::plural('review', $shop->total_reviews) }})</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -55,6 +66,14 @@
                                     <x-hs-product-card :product="$product" />
                                 @endforeach
                             </div>
+                        </section>
+                    @endif
+
+                    {{-- Reviews --}}
+                    @if ($shop->total_reviews > 0)
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">Reviews</h2>
+                            <livewire:storefront.review-list reviewable-type="shop" :reviewable-id="$shop->id" />
                         </section>
                     @endif
                 </div>

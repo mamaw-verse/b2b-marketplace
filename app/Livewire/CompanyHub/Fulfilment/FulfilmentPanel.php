@@ -40,12 +40,23 @@ final class FulfilmentPanel extends Component
             return;
         }
 
+        $this->validate([
+            'carrier' => ['required', 'string', 'max:100'],
+            'trackingCode' => ['required', 'string', 'max:100'],
+            'trackingUrl' => ['required', 'url', 'max:500'],
+        ], [
+            'carrier.required' => 'Please enter the carrier name.',
+            'trackingCode.required' => 'Please enter the tracking code.',
+            'trackingUrl.required' => 'Please enter the tracking URL.',
+            'trackingUrl.url' => 'Please enter a valid URL (e.g. https://...).',
+        ]);
+
         $this->fulfilment = Fulfilment::create([
             'order_id' => $this->order->id,
             'status' => 'pending',
-            'carrier' => $this->carrier ?: null,
-            'tracking_code' => $this->trackingCode ?: null,
-            'tracking_url' => $this->trackingUrl ?: null,
+            'carrier' => $this->carrier,
+            'tracking_code' => $this->trackingCode,
+            'tracking_url' => $this->trackingUrl,
         ]);
 
         session()->flash('success', 'Fulfilment created.');
@@ -57,12 +68,23 @@ final class FulfilmentPanel extends Component
             return;
         }
 
+        $this->validate([
+            'carrier' => ['required', 'string', 'max:100'],
+            'trackingCode' => ['required', 'string', 'max:100'],
+            'trackingUrl' => ['required', 'url', 'max:500'],
+        ], [
+            'carrier.required' => 'Please enter the carrier name.',
+            'trackingCode.required' => 'Please enter the tracking code.',
+            'trackingUrl.required' => 'Please enter the tracking URL.',
+            'trackingUrl.url' => 'Please enter a valid URL (e.g. https://...).',
+        ]);
+
         $this->fulfilment->update([
             'status' => 'shipped',
             'shipped_at' => now(),
-            'carrier' => $this->carrier ?: null,
-            'tracking_code' => $this->trackingCode ?: null,
-            'tracking_url' => $this->trackingUrl ?: null,
+            'carrier' => $this->carrier,
+            'tracking_code' => $this->trackingCode,
+            'tracking_url' => $this->trackingUrl,
         ]);
 
         OrderShipped::dispatch($this->order->fresh());

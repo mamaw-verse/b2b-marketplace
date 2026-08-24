@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 
 final class SellerHubController extends Controller
 {
@@ -161,6 +162,47 @@ final class SellerHubController extends Controller
             ->whereBetween('orders.paid_at', [$from, $to])
             ->sum('order_items.quantity');
 
+        // Payout metrics (graceful fallback if tables don't exist yet)
+        $totalEarned = 0.0;
+        $totalReleased = 0.0;
+        if (Schema::hasTable('payout_items') && Schema::hasTable('payouts')) {
+            $totalEarned = (float) DB::table('payout_items')
+                ->join('payouts', 'payouts.id', '=', 'payout_items.payout_id')
+                ->join('orders', 'orders.id', '=', 'payout_items.order_id')
+                ->where('orders.shop_id', $shop->id)
+                ->where('payouts.status', 'completed')
+                ->whereBetween('payouts.completed_at', [$from, $to])
+                ->sum('payout_items.net_amount');
+
+            $totalReleased = (float) DB::table('payouts')
+                ->where('shop_id', $shop->id)
+                ->where('status', 'completed')
+                ->whereBetween('completed_at', [$from, $to])
+                ->sum('net_amount');
+        }
+
+        // Pending balance: escrow_hold ledger entries for completed orders without a payout_items row
+        $pendingBalance = 0.0;
+        $pendingQuery = DB::table('ledger_entries')
+            ->join('orders', 'orders.id', '=', 'ledger_entries.order_id')
+            ->where('orders.shop_id', $shop->id)
+            ->where('orders.status', 'completed')
+            ->where('ledger_entries.type', 'escrow_hold');
+
+        if (Schema::hasTable('payout_items')) {
+            $pendingQuery->whereNotExists(function ($sub) {
+                $sub->select(DB::raw(1))
+                    ->from('payout_items')
+                    ->whereColumn('payout_items.order_id', 'ledger_entries.order_id');
+            });
+        }
+
+        $pendingBalance = (float) $pendingQuery->sum('ledger_entries.amount');
+
+        // Review metrics from shop's denormalized fields
+        $averageRating = (float) $shop->average_rating;
+        $totalReviews = (int) $shop->total_reviews;
+
         return response()->json([
             'data' => [
                 'window_days' => $windowDays,
@@ -172,6 +214,11 @@ final class SellerHubController extends Controller
                 'total_refunds' => $totalRefunds,
                 'platform_commission' => $platformCommission,
                 'net_sales' => $netSales,
+                'total_earned' => $totalEarned,
+                'pending_balance' => $pendingBalance,
+                'total_released' => $totalReleased,
+                'average_rating' => $averageRating,
+                'total_reviews' => $totalReviews,
             ],
         ]);
     }

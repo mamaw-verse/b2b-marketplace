@@ -46,3 +46,16 @@ For loops (parameterized actions): add a Livewire `$confirmingXxxId` property, a
 
 Variants: `primary` | `danger` | `warning` (hs-confirm), `info` | `success` | `warning` | `danger` (hs-alert).
 Action slot buttons must use valid Flux button variants: `primary`, `filled`, `danger`, `ghost`, `subtle` — never `variant="warning"` on `<flux:button>`.
+
+## Valid CSS design token variable names — check before using
+The design token system (resources/css/tokens.css) does NOT define every shade for every scale. Key gaps:
+- `--hs-success-600` DOES NOT EXIST. Available success: 50, 100, 200, 500, 700, 800.
+- For "completed/active" green states, use `--hs-green-600` (#158A5A, the primary brand green).
+- Neutrals ARE complete: 0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900.
+- Danger: 50, 100, 200, 500, 700, 800 (no 300, 400, 600).
+- Warning: 50, 100, 200, 500, 700, 800 (no 300, 400, 600).
+- Info: 50, 100, 200, 500, 700, 800 (no 300, 400, 600).
+Always verify a token exists in tokens.css before using it in a class like `bg-[var(--hs-*)]`.
+
+## No native <select> or <input type="date"> — use Flux UI components
+Native HTML `<select>` and `<input type="date">` render inconsistently across browsers (especially Safari). Always use `<flux:select>` / `<flux:select.option>` for dropdowns and `<flux:date-picker>` for date inputs. Exception: the pattern in views-livewire rules for custom-styled inputs when flux label auto-rendering causes layout issues — but those must still avoid native date pickers.

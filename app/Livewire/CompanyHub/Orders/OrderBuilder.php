@@ -57,20 +57,25 @@ final class OrderBuilder extends Component
         } elseif ($orderId) {
             $this->order = Order::where('shop_id', $shop->id)->where('status', 'draft')->findOrFail($orderId);
         } else {
-            // Read from query params: /hub/orders/create?quotationId=X or ?buyerUserId=X
+            // Read from query params: /hub/orders/create?quotationId=X
             $quotationId = $quotationId ?? request()->integer('quotationId') ?: null;
             $buyerUserId = $buyerUserId ?? request()->integer('buyerUserId') ?: null;
 
-            if ($quotationId || $buyerUserId) {
-                $result = (new CreateOrderAction)->execute($shop, $quotationId, $buyerUserId);
-                if ($result['success']) {
-                    $this->order = $result['order']->load(['items', 'fees']);
-                } else {
-                    session()->flash('error', $result['error']);
-                    $this->redirectRoute('hub.orders.index');
+            if (! $quotationId && ! $buyerUserId) {
+                session()->flash('error', 'An awarded quotation is required to create an order.');
+                $this->redirectRoute('hub.orders.index');
 
-                    return;
-                }
+                return;
+            }
+
+            $result = (new CreateOrderAction)->execute($shop, $quotationId, $buyerUserId);
+            if ($result['success']) {
+                $this->order = $result['order']->load(['items', 'fees']);
+            } else {
+                session()->flash('error', $result['error']);
+                $this->redirectRoute('hub.orders.index');
+
+                return;
             }
         }
 
@@ -112,6 +117,8 @@ final class OrderBuilder extends Component
                 'unit_price' => $item['unit_price'] ?? 0,
                 'subtotal' => $subtotal,
                 'sort_order' => $index,
+                'variant_id' => $item['variant_id'] ?? null,
+                'variant_snapshot' => $item['variant_snapshot'] ?? null,
             ]);
         }
 
@@ -144,11 +151,23 @@ final class OrderBuilder extends Component
 
     public function confirmSubmit(): void
     {
+        if (! $this->order) {
+            session()->flash('error', 'No order to submit. Please create an order from an awarded quotation.');
+
+            return;
+        }
+
         \Flux\Flux::modal('submit-order-confirm')->show();
     }
 
     public function submit(): void
     {
+        if (! $this->order) {
+            session()->flash('error', 'No order to submit.');
+
+            return;
+        }
+
         $this->save();
 
         $result = (new SubmitOrderAction)->execute($this->order);
@@ -186,6 +205,8 @@ final class OrderBuilder extends Component
             'quantity' => $item->quantity,
             'unit' => $item->unit,
             'unit_price' => $item->unit_price,
+            'variant_id' => $item->variant_id,
+            'variant_snapshot' => $item->variant_snapshot,
         ])->toArray();
 
         $this->fees = $this->order->fees->map(fn ($fee) => [

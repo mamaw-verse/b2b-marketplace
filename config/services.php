@@ -55,6 +55,7 @@ return [
         'client_secret' => env('DLT_CLIENT_SECRET'),
         'merchant_account_id' => env('DLT_MERCHANT_ACCOUNT_ID'),
         'service_code' => env('DLT_SERVICE_CODE', 'APN-COLLECTION'),
+        'disbursement_enabled' => (bool) env('DLT_DISBURSEMENT_ENABLED', false),
     ],
 
 ];

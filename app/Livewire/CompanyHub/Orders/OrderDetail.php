@@ -21,7 +21,7 @@ final class OrderDetail extends Component
         $shop = Auth::user()->shop;
         abort_unless($shop && $order->shop_id === $shop->id, 403);
 
-        $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes', 'buyer']);
+        $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes', 'ledgerEntries', 'buyer']);
     }
 
     public function recall(): void

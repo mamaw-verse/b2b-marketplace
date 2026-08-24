@@ -54,7 +54,9 @@ $icon = $icons[$variant] ?? 'information-circle';
                 <flux:modal.close>
                     <flux:button variant="ghost">{{ $cancelText }}</flux:button>
                 </flux:modal.close>
-                {{ $action }}
+                <div x-on:click="$flux.modal('{{ $name }}').close()">
+                    {{ $action }}
+                </div>
             </div>
         </div>
     </div>

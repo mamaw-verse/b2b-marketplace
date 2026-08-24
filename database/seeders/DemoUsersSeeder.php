@@ -69,8 +69,8 @@ final class DemoUsersSeeder extends Seeder
         $seller = User::firstOrCreate(
             ['email' => 'seller@gmail.com'],
             [
-                'first_name' => 'Abdullah',
-                'last_name' => 'Macapaar',
+                'first_name' => 'Jed',
+                'last_name' => 'dela Cruz',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
             ]

@@ -25,12 +25,19 @@ final class CompanyDirectory extends Component
 
     public ?int $categoryId = null;
 
+    public string $sortBy = 'latest';
+
     public function updatedQuery(): void
     {
         $this->resetPage();
     }
 
     public function updatedCategoryId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSortBy(): void
     {
         $this->resetPage();
     }
@@ -69,7 +76,12 @@ final class CompanyDirectory extends Component
             $query->whereHas('categories', fn ($q) => $q->where('categories.id', $this->categoryId));
         }
 
-        return $query->latest()->paginate(12);
+        $query = match ($this->sortBy) {
+            'rating' => $query->orderByRaw('average_rating DESC NULLS LAST'),
+            default => $query->latest(),
+        };
+
+        return $query->paginate(12);
     }
 
     public function render(): View

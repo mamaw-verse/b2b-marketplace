@@ -305,6 +305,28 @@ final class QuotationBuilder extends Component
     }
 
     /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        $messages = [];
+
+        foreach ($this->items as $index => $item) {
+            $label = 'Item '.($index + 1);
+            $messages["items.{$index}.description.required"] = "{$label}: Description is required.";
+            $messages["items.{$index}.quantity.required"] = "{$label}: Quantity is required.";
+            $messages["items.{$index}.quantity.numeric"] = "{$label}: Quantity must be a number.";
+            $messages["items.{$index}.quantity.gt"] = "{$label}: Quantity must be greater than zero.";
+            $messages["items.{$index}.unit.required"] = "{$label}: Unit is required.";
+            $messages["items.{$index}.unit_price.required"] = "{$label}: Unit price is required.";
+            $messages["items.{$index}.unit_price.numeric"] = "{$label}: Unit price must be a number.";
+            $messages["items.{$index}.unit_price.gt"] = "{$label}: Unit price must be greater than zero.";
+        }
+
+        return $messages;
+    }
+
+    /**
      * After submit: write a snapshot of each linked variant's fields into
      * the item row so the line item is self-contained regardless of future
      * catalogue changes.
