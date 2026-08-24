@@ -14,8 +14,18 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
 
-            {{-- Left: Logo + Context Label --}}
-            <div class="flex items-center gap-3 shrink-0">
+            {{-- Left: Hamburger (portal mobile only) + Logo --}}
+            <div class="flex items-center gap-2 shrink-0">
+                @if ($isAdminOrHub)
+                    <button
+                        x-data
+                        @click="window.dispatchEvent(new CustomEvent('toggle-portal-nav'))"
+                        class="lg:hidden flex size-9 items-center justify-center rounded-lg text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] transition"
+                        aria-label="{{ __('Open navigation menu') }}"
+                    >
+                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                    </button>
+                @endif
                 <a href="{{ route('home') }}" class="flex items-center gap-2" wire:navigate>
                     <img src="/images/logo.png" alt="One Halal Global" class="h-9 w-auto">
                 </a>
