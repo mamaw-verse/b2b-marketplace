@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub;
 
 use App\Events\OnboardingSubmitted;
+use App\Livewire\Forms\OnboardingForm;
+use App\Models\Category;
 use App\Models\ShopOnboarding;
 use App\Models\ShopOnboardingCertificate;
 use App\Services\MediaUploadService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -32,14 +36,41 @@ final class OnboardingWizard extends Component
         'ingredient_list' => 'Ingredient List',
     ];
 
+    /**
+     * Human-readable labels for validation error keys, used to render
+     * friendly messages instead of raw dotted field paths.
+     *
+     * @var array<string, string>
+     */
+    public const array FIELD_LABELS = [
+        'form.registered_business_name' => 'Registered Business Name',
+        'form.storefront_name' => 'Storefront Name',
+        'form.business_structure' => 'Business Structure',
+        'form.dti_sec_number' => 'DTI/SEC Number',
+        'form.tax_identification_number' => 'TIN',
+        'form.phone' => 'Phone',
+        'form.email' => 'Email',
+        'form.address_1' => 'Address Line 1',
+        'form.address_2' => 'Address Line 2',
+        'form.city' => 'City',
+        'form.province' => 'Province',
+        'form.zip_code' => 'Zip Code',
+        'form.product_categories' => 'Product Categories',
+        'form.fda_lto_number' => 'FDA LTO Number',
+        'form.average_production_lead_time' => 'Average Production Lead Time',
+        'form.export_readiness_status' => 'Export Readiness',
+        'form.value_chain_positions' => 'Value Chain Positions',
+        'form.capabilities' => 'Capabilities',
+        'documents' => 'Required Documents',
+    ];
+
     public int $currentStep = 1;
 
     public string $onboardingStatus = '';
 
     public ?string $adminNotes = null;
 
-    /** @var array<string, mixed> */
-    public array $formData = [];
+    public OnboardingForm $form;
 
     /** @var array<int, array<string, mixed>> */
     public array $certificates = [];
@@ -60,42 +91,29 @@ final class OnboardingWizard extends Component
         $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
 
         if ($onboarding) {
+            // Already approved: the wizard is read-only/complete — send to the
+            // dashboard rather than letting the seller re-edit an approved shop.
+            if ($onboarding->status === 'approved') {
+                $this->redirect(route('hub.hub-dashboard'));
+
+                return;
+            }
+
             $this->onboardingStatus = $onboarding->status ?? '';
             $this->adminNotes = $onboarding->admin_notes;
-            $this->formData = [
-                'registered_business_name' => $onboarding->registered_business_name ?? '',
-                'storefront_name' => $onboarding->storefront_name ?? '',
-                'business_structure' => $onboarding->business_structure ?? '',
-                'dti_sec_number' => $onboarding->dti_sec_number ?? '',
-                'tax_identification_number' => $onboarding->tax_identification_number ?? '',
-                'phone' => $onboarding->phone ?? '',
-                'email' => $onboarding->email ?? '',
-                'address_1' => $onboarding->address_1 ?? '',
-                'address_2' => $onboarding->address_2 ?? '',
-                'city' => $onboarding->city ?? '',
-                'province' => $onboarding->province ?? '',
-                'zip_code' => $onboarding->zip_code ?? '',
-                'country_code' => $onboarding->country_code ?? 'PH',
-                'product_categories' => $onboarding->product_categories ?? '',
-                'fda_lto_number' => $onboarding->fda_lto_number ?? '',
-                'average_production_lead_time' => $onboarding->average_production_lead_time ?? '',
-                'export_readiness_status' => $onboarding->export_readiness_status ?? '',
-                'value_chain_positions' => $onboarding->value_chain_positions ?? [],
-                'capabilities' => $onboarding->capabilities ?? [],
-            ];
+            $this->form->setOnboarding($onboarding);
 
-            $this->certificates = $onboarding->certificates->map(fn (ShopOnboardingCertificate $cert) => [
+            $this->certificates = $onboarding->certificates()->with('media')->get()->map(fn (ShopOnboardingCertificate $cert) => [
                 'id' => $cert->id,
                 'certification_body' => $cert->certification_body,
                 'certification_body_other' => $cert->certification_body_other ?? '',
                 'registration_number' => $cert->registration_number,
                 'expiry_date' => $cert->expiry_date?->format('Y-m-d') ?? '',
                 'media_id' => $cert->media_id,
+                'filename' => $cert->media?->original_filename,
             ])->toArray();
 
             $this->loadUploadedDocuments($onboarding);
-        } else {
-            $this->initializeFormData();
         }
     }
 
@@ -135,6 +153,12 @@ final class OnboardingWizard extends Component
 
     public function submit(): void
     {
+        // Only new/pending/revision/rejected applications may be (re)submitted.
+        // 'submitted' is awaiting review; 'approved' is final.
+        if (! in_array($this->onboardingStatus, ['', 'pending', 'requires_revision', 'rejected'], true)) {
+            return;
+        }
+
         $this->saveCurrentStep();
 
         $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
@@ -276,6 +300,71 @@ final class OnboardingWizard extends Component
         }
     }
 
+    /**
+     * Detach an uploaded document so the seller can re-upload it.
+     * Used when a scan is stuck in "pending" or otherwise needs replacing.
+     */
+    public function resetDocument(string $documentType): void
+    {
+        if (! array_key_exists($documentType, self::REQUIRED_DOCUMENTS)) {
+            return;
+        }
+
+        $mediaId = $this->uploadedDocuments[$documentType]['media_id'] ?? null;
+
+        if ($mediaId) {
+            $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+            $onboarding?->documents()->detach($mediaId);
+        }
+
+        unset($this->uploadedDocuments[$documentType]);
+        unset($this->documentUploads[$documentType]);
+    }
+
+    /**
+     * Re-open a rejected application for editing so the seller can correct it
+     * and resubmit. Moves the record back to the editable "pending" state.
+     */
+    public function reapply(): void
+    {
+        if ($this->onboardingStatus !== 'rejected') {
+            return;
+        }
+
+        $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+
+        $onboarding?->update([
+            'status' => 'pending',
+            'admin_notes' => null,
+        ]);
+
+        $this->onboardingStatus = 'pending';
+        $this->adminNotes = null;
+        $this->currentStep = 1;
+    }
+
+    /**
+     * Categories available for the step 2 product-category checkbox group.
+     *
+     * @return Collection<int, Category>
+     */
+    #[Computed]
+    public function categories(): Collection
+    {
+        return Category::orderBy('name')->get();
+    }
+
+    /**
+     * Expose the field-label map to the view for readable error messages.
+     *
+     * @return array<string, string>
+     */
+    #[Computed]
+    public function fieldLabels(): array
+    {
+        return self::FIELD_LABELS;
+    }
+
     public function render()
     {
         return view('livewire.company-hub.onboarding-wizard');
@@ -302,61 +391,19 @@ final class OnboardingWizard extends Component
         return Auth::id();
     }
 
-    private function initializeFormData(): void
-    {
-        $this->formData = [
-            'registered_business_name' => '',
-            'storefront_name' => '',
-            'business_structure' => '',
-            'dti_sec_number' => '',
-            'tax_identification_number' => '',
-            'phone' => '',
-            'email' => '',
-            'address_1' => '',
-            'address_2' => '',
-            'city' => '',
-            'province' => '',
-            'zip_code' => '',
-            'country_code' => 'PH',
-            'product_categories' => '',
-            'fda_lto_number' => '',
-            'average_production_lead_time' => '',
-            'export_readiness_status' => '',
-            'value_chain_positions' => [],
-            'capabilities' => [],
-        ];
-    }
-
     private function validateCurrentStep(): void
     {
-        $rules = match ($this->currentStep) {
-            1 => [
-                'formData.registered_business_name' => ['required', 'string', 'max:255'],
-                'formData.storefront_name' => ['required', 'string', 'max:255'],
-                'formData.business_structure' => ['required', 'string'],
-                'formData.dti_sec_number' => ['required', 'string', 'max:100'],
-                'formData.tax_identification_number' => ['required', 'string', 'max:50'],
-                'formData.phone' => ['nullable', 'string', 'max:30'],
-                'formData.email' => ['nullable', 'email', 'max:255'],
-                'formData.address_1' => ['nullable', 'string', 'max:255'],
-                'formData.address_2' => ['nullable', 'string', 'max:255'],
-                'formData.city' => ['nullable', 'string', 'max:120'],
-                'formData.province' => ['nullable', 'string', 'max:120'],
-                'formData.zip_code' => ['nullable', 'string', 'max:20'],
-                'formData.country_code' => ['nullable', 'string', 'max:2'],
-            ],
-            2 => [
-                'formData.product_categories' => ['nullable', 'string'],
-                'formData.fda_lto_number' => ['nullable', 'string', 'max:100'],
-                'formData.average_production_lead_time' => ['nullable', 'integer'],
-                'formData.export_readiness_status' => ['required', 'string'],
-            ],
-            4 => [
-                'formData.value_chain_positions' => ['array'],
-                'formData.capabilities' => ['array'],
-            ],
-            default => [],
-        };
+        $rules = collect($this->form->rulesForStep($this->currentStep))
+            ->mapWithKeys(fn ($rule, $field) => ["form.{$field}" => $rule])
+            ->all();
+
+        if ($this->currentStep === 3) {
+            [$certRules, $certMessages] = $this->certificateValidation();
+
+            if (! empty($certRules)) {
+                $this->validate($certRules, $certMessages);
+            }
+        }
 
         if (! empty($rules)) {
             $this->validate($rules);
@@ -364,38 +411,39 @@ final class OnboardingWizard extends Component
     }
 
     /**
+     * Build validation rules and per-index messages for step 3 certificates.
+     * Each certificate must have a certification body, and either an existing
+     * uploaded file (media_id) or a freshly selected upload.
+     *
+     * @return array{0: array<string, array<int, string>>, 1: array<string, string>}
+     */
+    private function certificateValidation(): array
+    {
+        $rules = [];
+        $messages = [];
+
+        foreach ($this->certificates as $index => $certificate) {
+            $rules["certificates.{$index}.certification_body"] = ['required', 'string'];
+            $messages["certificates.{$index}.certification_body.required"] = "Certificate #{$index}: Certification body is required.";
+
+            if (empty($certificate['media_id'])) {
+                $rules["certificateFiles.{$index}"] = ['required'];
+                $messages["certificateFiles.{$index}.required"] = 'Certificate #'.($index + 1).': A certificate file is required.';
+            }
+
+            // Fix the human index in the certification-body message (1-based).
+            $messages["certificates.{$index}.certification_body.required"] = 'Certificate #'.($index + 1).': Certification body is required.';
+        }
+
+        return [$rules, $messages];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function getStepData(): array
     {
-        return match ($this->currentStep) {
-            1 => [
-                'registered_business_name' => $this->formData['registered_business_name'] ?? '',
-                'storefront_name' => $this->formData['storefront_name'] ?? '',
-                'business_structure' => $this->formData['business_structure'] ?: null,
-                'dti_sec_number' => $this->formData['dti_sec_number'] ?? '',
-                'tax_identification_number' => $this->formData['tax_identification_number'] ?? '',
-                'phone' => $this->formData['phone'] ?? '',
-                'email' => $this->formData['email'] ?? '',
-                'address_1' => $this->formData['address_1'] ?? '',
-                'address_2' => $this->formData['address_2'] ?? '',
-                'city' => $this->formData['city'] ?? '',
-                'province' => $this->formData['province'] ?? '',
-                'zip_code' => $this->formData['zip_code'] ?? '',
-                'country_code' => $this->formData['country_code'] ?? 'PH',
-            ],
-            2 => [
-                'product_categories' => $this->formData['product_categories'] ?? '',
-                'fda_lto_number' => $this->formData['fda_lto_number'] ?? '',
-                'average_production_lead_time' => $this->formData['average_production_lead_time'] ?: null,
-                'export_readiness_status' => $this->formData['export_readiness_status'] ?: null,
-            ],
-            4 => [
-                'value_chain_positions' => $this->formData['value_chain_positions'] ?? [],
-                'capabilities' => $this->formData['capabilities'] ?? [],
-            ],
-            default => [],
-        };
+        return $this->form->dataForStep($this->currentStep);
     }
 
     private function saveCertificates(ShopOnboarding $onboarding): void
@@ -403,6 +451,11 @@ final class OnboardingWizard extends Component
         $uploadService = app(MediaUploadService::class);
 
         foreach ($this->certificates as $index => $certData) {
+            // Guard: never persist a certificate without a certification body.
+            if (empty($certData['certification_body'])) {
+                continue;
+            }
+
             $mediaId = $certData['media_id'];
 
             if (isset($this->certificateFiles[$index]) && $this->certificateFiles[$index]) {

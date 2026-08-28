@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub\Orders;
 
 use App\Models\Order;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -18,10 +18,9 @@ final class OrderDetail extends Component
 
     public function mount(Order $order): void
     {
-        $shop = Auth::user()->shop;
-        abort_unless($shop && $order->shop_id === $shop->id, 403);
+        Gate::authorize('view', $order);
 
-        $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes', 'ledgerEntries', 'buyer']);
+        $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes.openedBy', 'disputes.resolvedBy', 'ledgerEntries', 'buyer']);
     }
 
     public function recall(): void

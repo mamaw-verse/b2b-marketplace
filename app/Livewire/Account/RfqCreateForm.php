@@ -15,7 +15,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.portal', ['portal' => 'account'])]
+#[Layout('layouts.storefront')]
 #[Title('Request Quote')]
 final class RfqCreateForm extends Component
 {
@@ -29,17 +29,13 @@ final class RfqCreateForm extends Component
 
     public string $description = '';
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
-    public array $attachments = [];
+    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
+    public $attachment = null;
 
     public function mount(): void
     {
-        // Redirect to buyer profile if not yet created
-        $user = Auth::user();
-        if (! $user->buyerProfile) {
-            session()->flash('message', 'Please complete your buyer profile before sending an RFQ.');
-            $this->redirect(route('account.profile'), navigate: true);
-        }
+        // Buyer profile is no longer required before rendering the form.
+        // The submit() action still validates the profile exists before saving.
     }
 
     public function submit(): void
@@ -50,7 +46,7 @@ final class RfqCreateForm extends Component
         $buyerProfile = $user->buyerProfile;
 
         if (! $buyerProfile) {
-            $this->addError('buyer_profile', 'Please complete your buyer profile first.');
+            $this->addError('buyer_profile', 'Please complete your buyer profile before sending an RFQ.');
 
             return;
         }
@@ -65,11 +61,11 @@ final class RfqCreateForm extends Component
             return;
         }
 
-        // Store attachments as media records
+        // Store single attachment as a media record if provided
         $mediaIds = [];
-        foreach ($this->attachments as $file) {
+        if ($this->attachment) {
             $media = app(\App\Services\MediaUploadService::class)->store(
-                $file,
+                $this->attachment,
                 $user->id,
                 'rfq_attachment',
             );
@@ -101,7 +97,7 @@ final class RfqCreateForm extends Component
 
         RfqCreated::dispatch($rfq);
 
-        \Flux\Flux::toast('RFQ sent successfully.', variant: 'success');
+        \Flux\Flux::toast('RFQ submitted! You can track it under My RFQs.', variant: 'success');
 
         $this->redirect(route('account.rfqs.show', $rfq), navigate: true);
     }
@@ -124,8 +120,24 @@ final class RfqCreateForm extends Component
             'title' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'shop_id' => ['required', 'integer', 'exists:shops,id'],
-            'attachments' => ['nullable', 'array', 'max:5'],
-            'attachments.*' => ['file', 'max:10240'],
+            'attachment' => [
+                'nullable',
+                'file',
+                'max:10240',
+                // Explicit allow-list: PDF, Word, and common image formats only.
+                // text/plain and other generic types are rejected.
+                'mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'attachment.mimes' => 'Only PDF, Word, and image files are accepted.',
         ];
     }
 }

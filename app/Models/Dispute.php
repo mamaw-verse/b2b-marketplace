@@ -8,6 +8,7 @@ use Database\Factories\DisputeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property int $id
@@ -61,6 +62,11 @@ final class Dispute extends Model
     public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by_user_id');
+    }
+
+    public function photos(): BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'dispute_media');
     }
 
     /**

@@ -33,7 +33,7 @@ final class OnboardingApprovedNotification extends Notification implements Shoul
             ->subject('Your Onboarding Application Has Been Approved!')
             ->line("Congratulations! Your onboarding application for **{$storefrontName}** has been approved.")
             ->line('Your shop is now active on the marketplace.')
-            ->action('Go to Your Shop', url('/hub/shop'));
+            ->action('Go to Your Dashboard', route('hub.hub-dashboard'));
     }
 
     /** @return array<string, mixed> */
@@ -46,7 +46,7 @@ final class OnboardingApprovedNotification extends Notification implements Shoul
             'onboarding_id' => $this->onboarding->id,
             'storefront_name' => $storefrontName,
             'message' => "Your onboarding application for {$storefrontName} has been approved.",
-            'url' => url('/hub/shop'),
+            'url' => route('hub.hub-dashboard'),
         ];
     }
 

@@ -85,7 +85,7 @@
 
                     <div class="flex-1 min-w-0">
                         <p @class([
-                            'text-sm text-[var(--hs-neutral-800)] truncate',
+                            'text-sm text-[var(--hs-neutral-800)]',
                             'font-semibold' => $isUnread,
                             'font-normal' => !$isUnread,
                         ])>
@@ -105,6 +105,18 @@
                     {{ __('No notifications yet.') }}
                 </div>
             @endforelse
+        </div>
+
+        {{-- Footer: link to the full notifications page --}}
+        <div class="border-t border-[var(--hs-neutral-100)]">
+            <a
+                href="{{ route('account.notifications.index') }}"
+                wire:navigate
+                @click="open = false"
+                class="block px-4 py-3 text-center text-sm font-medium text-[var(--hs-green-700)] hover:bg-[var(--hs-neutral-50)] transition"
+            >
+                {{ __('View all notifications') }}
+            </a>
         </div>
     </div>
 </div>

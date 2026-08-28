@@ -7,56 +7,38 @@
 
         {{-- Status filter tabs (pill style with counts) --}}
         <div class="px-4 sm:px-6 pt-5 pb-4 flex flex-wrap gap-1.5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
-            <button
-                wire:click="filterByStatus('submitted')"
-                @class([
-                    'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
-                    'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-[var(--hs-neutral-200)]' => $statusFilter === 'submitted',
-                    'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-0)]' => $statusFilter !== 'submitted',
-                ])
-            >
-                Submitted
-            </button>
-            <button
-                wire:click="filterByStatus('pending')"
-                @class([
-                    'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
-                    'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-[var(--hs-neutral-200)]' => $statusFilter === 'pending',
-                    'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-0)]' => $statusFilter !== 'pending',
-                ])
-            >
-                Pending
-            </button>
-            <button
-                wire:click="filterByStatus('requires_revision')"
-                @class([
-                    'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
-                    'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-[var(--hs-neutral-200)]' => $statusFilter === 'requires_revision',
-                    'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-0)]' => $statusFilter !== 'requires_revision',
-                ])
-            >
-                Requires Revision
-            </button>
-            <button
-                wire:click="filterByStatus('approved')"
-                @class([
-                    'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
-                    'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-[var(--hs-neutral-200)]' => $statusFilter === 'approved',
-                    'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-0)]' => $statusFilter !== 'approved',
-                ])
-            >
-                Approved
-            </button>
-            <button
-                wire:click="filterByStatus('rejected')"
-                @class([
-                    'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
-                    'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-[var(--hs-neutral-200)]' => $statusFilter === 'rejected',
-                    'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-0)]' => $statusFilter !== 'rejected',
-                ])
-            >
-                Rejected
-            </button>
+            @php
+                $tabs = [
+                    'all' => 'All',
+                    'submitted' => 'Submitted',
+                    'pending' => 'Pending',
+                    'requires_revision' => 'Requires Revision',
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                ];
+            @endphp
+
+            @foreach ($tabs as $tabKey => $tabLabel)
+                <button
+                    wire:click="filterByStatus('{{ $tabKey }}')"
+                    @class([
+                        'inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
+                        'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-[var(--hs-neutral-200)]' => $statusFilter === $tabKey,
+                        'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-0)]' => $statusFilter !== $tabKey,
+                    ])
+                >
+                    <span>{{ $tabLabel }}</span>
+                    @if (($this->tabCounts[$tabKey] ?? 0) > 0)
+                        <span @class([
+                            'inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold rounded-[var(--hs-radius-pill)]',
+                            'bg-[var(--hs-green-600)] text-white' => $statusFilter === $tabKey,
+                            'bg-[var(--hs-neutral-200)] text-[var(--hs-neutral-700)]' => $statusFilter !== $tabKey,
+                        ])>
+                            {{ $this->tabCounts[$tabKey] }}
+                        </span>
+                    @endif
+                </button>
+            @endforeach
         </div>
 
         {{-- Onboarding submissions table --}}

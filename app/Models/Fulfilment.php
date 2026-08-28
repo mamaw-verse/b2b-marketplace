@@ -8,6 +8,7 @@ use Database\Factories\FulfilmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -41,6 +42,14 @@ final class Fulfilment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * @return HasMany<FulfilmentItem, $this>
+     */
+    public function fulfilmentItems(): HasMany
+    {
+        return $this->hasMany(FulfilmentItem::class);
     }
 
     /**

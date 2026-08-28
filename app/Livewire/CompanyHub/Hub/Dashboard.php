@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub\Hub;
 
 use App\Models\Order;
+use App\Models\Shop;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -16,6 +18,12 @@ use Livewire\Component;
 final class Dashboard extends Component
 {
     public array $counts = [];
+
+    #[Computed]
+    public function shop(): ?Shop
+    {
+        return Auth::user()->shop;
+    }
 
     public function mount(): void
     {

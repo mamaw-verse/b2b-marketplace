@@ -1,4 +1,12 @@
 <div>
+    {{-- Back navigation --}}
+    <div class="mb-4">
+        <a href="{{ route('account.orders.index') }}" wire:navigate class="inline-flex items-center gap-1.5 text-sm text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)] transition">
+            <flux:icon name="arrow-left" variant="mini" class="size-4" />
+            {{ __('Back to Orders') }}
+        </a>
+    </div>
+
     {{-- Single outer page card — the ONLY white/bordered/shadowed container --}}
     <div class="bg-[var(--hs-neutral-0)] rounded-[16px] border border-[var(--hs-neutral-200)] shadow-[0_1px_2px_rgba(20,22,30,.04)] overflow-hidden">
 

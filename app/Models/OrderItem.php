@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $order_id
  * @property int|null $variant_id
+ * @property int|null $product_id
  * @property array<string, mixed>|null $variant_snapshot
  * @property string $description
  * @property string $quantity
@@ -31,6 +32,7 @@ final class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'variant_id',
+        'product_id',
         'variant_snapshot',
         'description',
         'quantity',
@@ -51,6 +53,14 @@ final class OrderItem extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+
+    /**
+     * The parent product this line item was sourced from (nullable — freeform items have none).
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     /**

@@ -175,7 +175,18 @@
                 </div>
 
                 {{-- Title --}}
-                <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)]">{{ $product->name }}</h1>
+                <div class="flex items-start justify-between gap-4">
+                    <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)]">{{ $product->name }}</h1>
+                    @auth
+                        @if (auth()->user()->shop?->id === $product->shop_id)
+                            <a href="{{ route('hub.products.edit', $product) }}" wire:navigate
+                               class="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[var(--hs-neutral-200)] px-3 py-1.5 text-sm font-medium text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
+                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                                {{ __('Edit') }}
+                            </a>
+                        @endif
+                    @endauth
+                </div>
 
                 {{-- Supplier line --}}
                 @if ($product->shop)

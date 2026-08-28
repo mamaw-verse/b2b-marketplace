@@ -27,8 +27,21 @@
                     </button>
                 @endif
                 <a href="{{ route('home') }}" class="flex items-center gap-2" wire:navigate>
-                    <img src="/images/logo.png" alt="One Halal Global" class="h-9 w-auto">
+                    <img src="/images/brand-logo.png" alt="1Halal Store" class="h-9 w-auto">
                 </a>
+
+                {{-- Portal context pill: distinguishes Seller Hub vs Buyer Hub --}}
+                @auth
+                    @if (request()->routeIs('hub.*'))
+                        <span class="hidden sm:inline-flex items-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-50)] px-2.5 py-0.5 text-xs font-semibold text-[var(--hs-green-700)] border border-[var(--hs-green-200)]">
+                            {{ __('Seller Hub') }}
+                        </span>
+                    @elseif (request()->routeIs('account.*'))
+                        <span class="hidden sm:inline-flex items-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-info-50)] px-2.5 py-0.5 text-xs font-semibold text-[var(--hs-info-700)] border border-[var(--hs-info-200)]">
+                            {{ __('Buyer Hub') }}
+                        </span>
+                    @endif
+                @endauth
             </div>
 
             {{-- Right: Nav links + Auth (nav hidden on admin/hub) --}}
@@ -96,11 +109,21 @@
                             </div>
 
                             <div class="py-1">
-                                @if ($isSeller || (! $isAdmin && ! $isSeller))
-                                    <a href="{{ route('hub.dashboard') }}" wire:navigate @click="open = false"
+                                {{-- Buyer Hub: always available to any authenticated non-admin --}}
+                                @unless ($isAdmin)
+                                    <a href="{{ route('account.profile') }}" wire:navigate @click="open = false"
+                                       class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
+                                        <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>
+                                        {{ __('Buyer Hub') }}
+                                    </a>
+                                @endunless
+
+                                {{-- Seller Hub: only for users with the seller role --}}
+                                @if ($isSeller)
+                                    <a href="{{ route('hub.hub-dashboard') }}" wire:navigate @click="open = false"
                                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
                                         <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
-                                        {{ __('Company Hub') }}
+                                        {{ __('Seller Hub') }}
                                     </a>
                                 @endif
 

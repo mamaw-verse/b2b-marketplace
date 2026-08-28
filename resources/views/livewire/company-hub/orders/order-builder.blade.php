@@ -1,3 +1,12 @@
+@php
+    // Curated unit list (same source as <x-hs-unit-select>) for the per-row
+    // Alpine-bound select in the items table.
+    $unitGroups = collect(config('units', []))->groupBy('group');
+    // Read-only platform fee rates shown to the seller for transparency.
+    $commissionRate = \App\Models\PayoutSetting::getCommissionFeeRate();
+    $transactionFee = \App\Models\PayoutSetting::getTransactionFeeAmount();
+@endphp
+
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
@@ -29,6 +38,17 @@
                 </div>
             </section>
 
+            {{-- Billing Address --}}
+            <section class="py-6 border-b border-[var(--hs-neutral-100)]">
+                <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">Billing Address</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <flux:input wire:model="billingAddress1" label="Billing Address" class="md:col-span-3" />
+                    <flux:input wire:model="billingCity" label="City" />
+                    <flux:input wire:model="billingProvince" label="Province" />
+                    <flux:input wire:model="billingZipCode" label="Zip Code" />
+                </div>
+            </section>
+
             {{-- Shipping Address --}}
             <section class="py-6 border-b border-[var(--hs-neutral-100)]">
                 <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">Shipping Address</h2>
@@ -44,16 +64,70 @@
             <div x-data="{
                     items: @entangle('items'),
                     fees: @entangle('fees'),
-                    get itemsTotal() { return this.items.reduce((sum, i) => sum + (parseFloat(i.quantity || 0) * parseFloat(i.unit_price || 0)), 0) },
-                    get feesTotal() { return this.fees.reduce((sum, f) => sum + parseFloat(f.amount || 0), 0) },
-                    get grandTotal() { return this.itemsTotal + this.feesTotal },
-                 }">
+                    itemsTotal: 0,
+                    feesTotal: 0,
+                    grandTotal: 0,
+                    recalcTotal() {
+                        this.itemsTotal = this.items.reduce((sum, i) => sum + (parseFloat(i.quantity || 0) * parseFloat(i.unit_price || 0)), 0);
+                        this.feesTotal = this.fees.reduce((sum, f) => sum + parseFloat(f.amount || 0), 0);
+                        this.grandTotal = this.itemsTotal + this.feesTotal;
+                    },
+                    money(v) { return (parseFloat(v || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
+                    rowSubtotal(item) { return parseFloat(item.quantity || 0) * parseFloat(item.unit_price || 0); },
+                 }"
+                 x-init="
+                    recalcTotal();
+                    $watch('items', () => recalcTotal());
+                    $watch('fees', () => recalcTotal());
+                 "
+                 x-effect="recalcTotal()">
+
+                {{-- Product / variant search (S4.T17) --}}
+                <section class="py-6 border-b border-[var(--hs-neutral-100)]">
+                    <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">Add from Catalog</h2>
+                    <div class="relative max-w-md">
+                        <flux:input
+                            wire:model.live.debounce.300ms="productSearch"
+                            placeholder="Search products by name or SKU…"
+                            icon="magnifying-glass"
+                        />
+                        @if (mb_strlen(trim($productSearch)) >= 2)
+                            <div class="mt-2 border border-[var(--hs-neutral-200)] rounded-md divide-y divide-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)] max-h-64 overflow-auto">
+                                @forelse ($this->searchResults as $variant)
+                                    <button
+                                        type="button"
+                                        wire:key="search-{{ $variant->id }}"
+                                        @click="
+                                            items.push({
+                                                description: @js(($variant->product->name ?? '') . ' — ' . ($variant->description ?? $variant->sku)),
+                                                quantity: {{ (int) ($variant->minimum_order_quantity ?: 1) }},
+                                                unit: @js($variant->unit ?? 'pcs'),
+                                                unit_price: {{ (float) $variant->price }},
+                                                variant_id: {{ $variant->id }},
+                                                variant_snapshot: null
+                                            });
+                                            $wire.set('productSearch', '');
+                                        "
+                                        class="w-full text-left px-3 py-2 text-sm hover:bg-[var(--hs-neutral-50)] flex items-center justify-between"
+                                    >
+                                        <span class="text-[var(--hs-neutral-900)]">{{ $variant->product->name ?? '—' }}
+                                            <span class="text-[var(--hs-neutral-500)]">· {{ $variant->sku }}</span>
+                                        </span>
+                                        <span class="text-[var(--hs-neutral-600)] tabular-nums">{{ number_format((float) $variant->price, 2) }} / {{ $variant->unit }}</span>
+                                    </button>
+                                @empty
+                                    <p class="px-3 py-2 text-sm text-[var(--hs-neutral-500)]">No matching products.</p>
+                                @endforelse
+                            </div>
+                        @endif
+                    </div>
+                </section>
 
                 {{-- Order Items --}}
                 <section class="py-6 border-b border-[var(--hs-neutral-100)]">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)]">Items</h2>
-                        <button type="button" @click="items.push({description:'', quantity:1, unit:'pcs', unit_price:0})" class="text-sm text-[var(--hs-green-700)] hover:underline">+ Add Item</button>
+                        <button type="button" @click="items.push({description:'', quantity:1, unit:'pcs', unit_price:0, variant_id:null, variant_snapshot:null})" class="text-sm text-[var(--hs-green-700)] hover:underline">+ Add Item</button>
                     </div>
 
                     <template x-if="items.length">
@@ -68,12 +142,35 @@
                     </template>
 
                     <template x-for="(item, index) in items" :key="index">
-                        <div class="grid grid-cols-12 gap-2 mb-2 items-center">
+                        <div class="grid grid-cols-12 gap-2 mb-2 items-start">
                             <div class="col-span-4"><input x-model="item.description" placeholder="Description" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-2"><input x-model="item.quantity" type="number" min="0" step="0.01" placeholder="Qty" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-2"><input x-model="item.unit" placeholder="Unit" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-2"><input x-model="item.unit_price" type="number" min="0" step="0.01" placeholder="Unit Price" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-1 text-right text-sm text-[var(--hs-neutral-700)] tabular-nums" x-text="(parseFloat(item.quantity||0) * parseFloat(item.unit_price||0)).toFixed(2)"></div>
+                            <div class="col-span-2">
+                                <input
+                                    x-model.number="item.quantity"
+                                    type="number"
+                                    step="1"
+                                    min="1"
+                                    placeholder="Qty"
+                                    @input="if (item.quantity !== '' && item.quantity < 1) item.quantity = 1"
+                                    :class="(item.quantity === '' || item.quantity < 1) ? '!border-red-500 !ring-1 !ring-red-500' : ''"
+                                    class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]"
+                                />
+                                <p x-show="item.quantity === '' || item.quantity < 1" x-cloak class="mt-1 text-xs text-[var(--hs-danger-500)]">Min 1</p>
+                            </div>
+                            <div class="col-span-2">
+                                {{-- Unit dropdown from curated units (S4.T15) --}}
+                                <select x-model="item.unit" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]">
+                                    @foreach ($unitGroups as $groupName => $groupUnits)
+                                        <optgroup label="{{ $groupName }}">
+                                            @foreach ($groupUnits as $unit)
+                                                <option value="{{ $unit['value'] }}">{{ $unit['label'] }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-span-2"><input x-model.number="item.unit_price" type="number" min="0" step="0.01" placeholder="Unit Price" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                            <div class="col-span-1 text-right text-sm text-[var(--hs-neutral-700)] tabular-nums pt-2" x-text="money(rowSubtotal(item))"></div>
                             <div class="col-span-1 flex justify-end">
                                 <flux:button
                                     type="button"
@@ -111,7 +208,7 @@
                     <template x-for="(fee, index) in fees" :key="index">
                         <div class="grid grid-cols-12 gap-2 mb-2 items-center">
                             <div class="col-span-6"><input x-model="fee.label" placeholder="Fee Label" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-4"><input x-model="fee.amount" type="number" min="0" step="0.01" placeholder="Amount" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                            <div class="col-span-4"><input x-model.number="fee.amount" type="number" min="0" step="0.01" placeholder="Amount" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
                             <div class="col-span-2 flex justify-end">
                                 <flux:button
                                     type="button"
@@ -131,16 +228,32 @@
                     </template>
                 </section>
 
+                {{-- Platform fee rates (read-only, from PayoutSetting) --}}
+                <section class="py-6 border-b border-[var(--hs-neutral-100)]">
+                    <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-3">Platform Fees</h2>
+                    <div class="rounded-lg bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-100)] p-4 space-y-1.5">
+                        <div class="flex justify-between text-[13px]">
+                            <span class="text-[var(--hs-neutral-600)]">Commission rate</span>
+                            <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ number_format($commissionRate * 100, 2) }}%</span>
+                        </div>
+                        <div class="flex justify-between text-[13px]">
+                            <span class="text-[var(--hs-neutral-600)]">Transaction fee</span>
+                            <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ number_format($transactionFee, 2) }}</span>
+                        </div>
+                        <p class="text-[12px] text-[var(--hs-neutral-500)] pt-1">These platform fees are applied at payout and are not editable here.</p>
+                    </div>
+                </section>
+
                 {{-- Totals: server-computed figures once $order exists, live Alpine figures otherwise --}}
                 <section class="pt-6 text-right space-y-1">
-                    @if ($order)
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Items: {{ $order->currency }} {{ number_format((float) $order->items_total, 2) }}</p>
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Fees: {{ $order->currency }} {{ number_format((float) $order->fees_total, 2) }}</p>
-                        <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: {{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</p>
+                    @if ($this->order)
+                        <p class="text-sm text-[var(--hs-neutral-600)]">Items: {{ $this->order->currency }} {{ number_format((float) $this->order->items_total, 2) }}</p>
+                        <p class="text-sm text-[var(--hs-neutral-600)]">Fees: {{ $this->order->currency }} {{ number_format((float) $this->order->fees_total, 2) }}</p>
+                        <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: {{ $this->order->currency }} {{ number_format((float) $this->order->order_total, 2) }}</p>
                     @else
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Items: <span x-text="itemsTotal.toFixed(2)"></span></p>
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Fees: <span x-text="feesTotal.toFixed(2)"></span></p>
-                        <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: <span x-text="grandTotal.toFixed(2)"></span></p>
+                        <p class="text-sm text-[var(--hs-neutral-600)]">Items: <span x-text="money(itemsTotal)"></span></p>
+                        <p class="text-sm text-[var(--hs-neutral-600)]">Fees: <span x-text="money(feesTotal)"></span></p>
+                        <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: <span x-text="money(grandTotal)"></span></p>
                     @endif
                 </section>
             </div>

@@ -80,15 +80,36 @@
                         {{ __('Unfortunately, your application was rejected.') }}
                     </p>
                     @if ($adminNotes)
-                        <div class="mt-6 mx-auto max-w-md p-4 bg-red-50 border border-red-100 rounded-lg text-left text-sm text-red-800">
+                        <div class="mt-6 mx-auto max-w-md p-4 bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] rounded-lg text-left text-sm text-[var(--hs-danger-700)]">
                             <strong>{{ __('Reason:') }}</strong> {{ $adminNotes }}
                         </div>
                     @endif
+
+                    <div class="mt-6">
+                        <flux:button wire:click="reapply" variant="primary">
+                            {{ __('Re-apply') }}
+                        </flux:button>
+                    </div>
                 </div>
             @else
                 @if ($onboardingStatus === 'requires_revision')
-                    <div class="mb-6 rounded-[var(--hs-radius-card)] bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
+                    <div class="mb-6 rounded-[var(--hs-radius-card)] bg-[var(--hs-warning-50)] border border-[var(--hs-warning-200)] p-4 text-sm text-[var(--hs-warning-700)]">
                         <strong>{{ __('Revision Required:') }}</strong> {{ $adminNotes }}
+                    </div>
+                @endif
+
+                {{-- Friendly validation error summary --}}
+                @if ($errors->any())
+                    <div class="mb-6 rounded-[var(--hs-radius-card)] bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] p-4 text-sm text-[var(--hs-danger-700)]">
+                        <p class="font-semibold">{{ __('Please fix the following before continuing:') }}</p>
+                        <ul class="mt-2 list-disc list-inside space-y-1">
+                            @foreach ($errors->keys() as $errorKey)
+                                <li>
+                                    <span class="font-medium">{{ $this->fieldLabels[$errorKey] ?? \Illuminate\Support\Str::headline(\Illuminate\Support\Str::afterLast($errorKey, '.')) }}:</span>
+                                    {{ $errors->first($errorKey) }}
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 @endif
 

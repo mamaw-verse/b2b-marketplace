@@ -26,4 +26,20 @@ return [
     */
     'auto_accept_days' => (int) env('MARKETPLACE_AUTO_ACCEPT_DAYS', 7),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Flags
+    |--------------------------------------------------------------------------
+    |
+    | Feature flags to enable/disable optional functionality.
+    |
+    */
+    'features' => [
+        /*
+         | Payouts feature (Phase 4). Set to true once payout migrations are
+         | finalized. Replaces Schema::hasTable anti-pattern.
+         */
+        'payouts_enabled' => (bool) env('MARKETPLACE_PAYOUTS_ENABLED', true),
+    ],
+
 ];

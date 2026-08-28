@@ -190,16 +190,24 @@
                     @endif
                 </div>
 
-                {{-- ── Fee Calculator ────────────────────────────────────────── --}}
-                <div class="border-t border-[var(--hs-neutral-100)] pt-6">
-                    <livewire:company-hub.profit-calculator />
-                </div>
-
                 {{-- ── Form Actions ──────────────────────────────────────────── --}}
-                <div class="flex items-center gap-3 border-t border-[var(--hs-neutral-100)] pt-6">
+                <div class="flex flex-wrap items-center gap-3 border-t border-[var(--hs-neutral-100)] pt-6">
                     <flux:button type="submit" variant="primary">
                         {{ $product ? 'Update Product' : 'Create Product' }}
                     </flux:button>
+
+                    @if ($product)
+                        @if ($product->status === 'archived')
+                            <flux:button type="button" variant="filled" wire:click="publish" wire:loading.attr="disabled">
+                                {{ __('Publish') }}
+                            </flux:button>
+                        @else
+                            <flux:button type="button" variant="ghost" wire:click="archive" wire:loading.attr="disabled">
+                                {{ __('Archive') }}
+                            </flux:button>
+                        @endif
+                    @endif
+
                     <flux:button variant="ghost" href="{{ route('hub.products.index') }}" wire:navigate>
                         Cancel
                     </flux:button>

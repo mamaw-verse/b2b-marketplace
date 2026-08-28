@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Account\Orders;
 
 use App\Models\Order;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -18,7 +18,7 @@ final class OrderDetail extends Component
 
     public function mount(Order $order): void
     {
-        abort_unless($order->buyer_user_id === Auth::id(), 403);
+        Gate::authorize('view', $order);
         $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes', 'shop']);
     }
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'One Halal Global' }}</title>
+    <title>{{ $title ?? '1Halal Store' }}</title>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -29,7 +29,10 @@
             <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 {{-- Brand --}}
                 <div>
-                    <img src="/images/logo.png" alt="One Halal Global" class="h-8 w-auto brightness-0 invert opacity-90">
+                    <div class="flex items-center gap-3">
+                        <img src="/images/brand-logo.png" alt="1Halal Store" class="h-8 w-auto brightness-0 invert opacity-90">
+                        <img src="/images/halal-stamp.png" alt="Halal Certified" class="h-12 w-auto">
+                    </div>
                     <p class="mt-3 text-sm text-[var(--hs-neutral-400)] leading-relaxed">
                         The verified halal B2B directory connecting certified manufacturers, processors and suppliers with buyers across the value chain.
                     </p>
@@ -68,7 +71,7 @@
         <div class="border-t border-white/10">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
                 <p class="text-center text-xs text-[var(--hs-neutral-500)]">
-                    &copy; {{ date('Y') }} One Halal Global. {{ __('All rights reserved.') }}
+                    &copy; {{ date('Y') }} 1Halal Store. {{ __('All rights reserved.') }}
                 </p>
             </div>
         </div>

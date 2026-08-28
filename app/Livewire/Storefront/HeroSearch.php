@@ -15,7 +15,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.storefront')]
-#[Title('One Halal Global — Discover Halal-Certified Companies & Products')]
+#[Title('1Halal Store — Discover Halal-Certified Companies & Products')]
 final class HeroSearch extends Component
 {
     public string $query = '';

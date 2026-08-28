@@ -7,7 +7,6 @@ namespace App\Livewire\CompanyHub\Earnings;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -85,7 +84,7 @@ final class EarningsOverview extends Component
 
     private function getPayoutItemsTotal(int $shopId): float
     {
-        if (! Schema::hasTable('payout_items') || ! Schema::hasTable('payouts')) {
+        if (! config('marketplace.features.payouts_enabled')) {
             return 0.00;
         }
 
@@ -102,7 +101,7 @@ final class EarningsOverview extends Component
 
     private function getCompletedPayoutsTotal(int $shopId): float
     {
-        if (! Schema::hasTable('payouts')) {
+        if (! config('marketplace.features.payouts_enabled')) {
             return 0.00;
         }
 
@@ -124,7 +123,7 @@ final class EarningsOverview extends Component
             ->where('orders.status', 'completed')
             ->where('ledger_entries.type', 'escrow_hold');
 
-        if (Schema::hasTable('payout_items')) {
+        if (config('marketplace.features.payouts_enabled')) {
             try {
                 $query->whereNotExists(function ($sub) {
                     $sub->select(DB::raw(1))
@@ -141,7 +140,7 @@ final class EarningsOverview extends Component
 
     private function getTotalFeesPaid(int $shopId): float
     {
-        if (! Schema::hasTable('payout_items') || ! Schema::hasTable('payouts')) {
+        if (! config('marketplace.features.payouts_enabled')) {
             return 0.00;
         }
 

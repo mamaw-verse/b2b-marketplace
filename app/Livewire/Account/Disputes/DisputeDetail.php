@@ -7,7 +7,7 @@ namespace App\Livewire\Account\Disputes;
 use App\Events\DisputeEscalated;
 use App\Models\Dispute;
 use App\Models\Order;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -22,7 +22,7 @@ final class DisputeDetail extends Component
 
     public function mount(Order $order, Dispute $dispute): void
     {
-        abort_unless($order->buyer_user_id === Auth::id(), 403);
+        Gate::authorize('view', $order);
         $this->order = $order;
         $this->dispute = $dispute;
     }

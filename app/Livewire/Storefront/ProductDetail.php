@@ -17,7 +17,15 @@ final class ProductDetail extends Component
     public function mount(Product $product): void
     {
         $this->product = $product;
-        $this->product->load(['variants', 'gallery', 'documents', 'categories', 'shop']);
+        $this->product->load([
+            // Only published variants are shown publicly; archived variants
+            // must never appear on the storefront (uses the existing scope).
+            'variants' => fn ($query) => $query->published(),
+            'gallery',
+            'documents',
+            'categories',
+            'shop',
+        ]);
     }
 
     public function render(): View

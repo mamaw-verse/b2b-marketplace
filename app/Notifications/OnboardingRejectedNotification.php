@@ -34,7 +34,7 @@ final class OnboardingRejectedNotification extends Notification implements Shoul
             ->line("Unfortunately, your onboarding application for **{$storefrontName}** has been rejected.")
             ->when($this->onboarding->admin_notes, fn (MailMessage $mail) => $mail->line('**Reason:** '.$this->onboarding->admin_notes))
             ->line('If you believe this is in error, please contact support.')
-            ->action('View Application', url('/hub/onboarding'));
+            ->action('View Application', route('hub.onboarding'));
     }
 
     /** @return array<string, mixed> */
@@ -48,7 +48,7 @@ final class OnboardingRejectedNotification extends Notification implements Shoul
             'storefront_name' => $storefrontName,
             'admin_notes' => $this->onboarding->admin_notes,
             'message' => "Your onboarding application for {$storefrontName} has been rejected.",
-            'url' => url('/hub/onboarding'),
+            'url' => route('hub.onboarding'),
         ];
     }
 

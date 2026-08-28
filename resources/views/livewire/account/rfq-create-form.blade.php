@@ -48,20 +48,20 @@
                     @error('description') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- Attachments --}}
+                {{-- Attachment --}}
                 <div>
-                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1.5">{{ __('Attachments (optional)') }}</label>
-                    <p class="text-xs text-[var(--hs-neutral-500)] mb-2">{{ __('Attach spec sheets, artwork, or reference documents. Max 5 files, 10MB each.') }}</p>
+                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1.5">{{ __('Attachment (optional)') }}</label>
+                    <p class="text-xs text-[var(--hs-neutral-500)] mb-2">{{ __('Attach a spec sheet, artwork, or reference document. PDF, Word, or image. Max 10MB. New selection replaces previous.') }}</p>
 
                     <div class="rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-50)] px-4 py-4">
                         <input
                             type="file"
-                            wire:model="attachments"
-                            multiple
+                            wire:model="attachment"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
                             class="block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]"
                         />
                     </div>
-                    @error('attachments.*') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('attachment') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Info --}}

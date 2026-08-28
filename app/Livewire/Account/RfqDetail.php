@@ -26,14 +26,36 @@ final class RfqDetail extends Component
 
     public ?int $confirmingRejectQuotationId = null;
 
+    public ?int $confirmingAwardQuotationId = null;
+
+    /** @var array<int, bool> */
+    public array $expandedQuotations = [];
+
     public function mount(Rfq $rfq): void
     {
         Gate::authorize('view', $rfq);
         $this->rfq = $rfq;
     }
 
-    public function awardQuotation(int $quotationId): void
+    public function toggleQuotation(int $quotationId): void
     {
+        $this->expandedQuotations[$quotationId] = ! ($this->expandedQuotations[$quotationId] ?? false);
+    }
+
+    public function confirmAwardQuotation(int $quotationId): void
+    {
+        $this->confirmingAwardQuotationId = $quotationId;
+        \Flux\Flux::modal('confirm-award-quotation')->show();
+    }
+
+    public function awardQuotation(?int $quotationId = null): void
+    {
+        $quotationId = $quotationId ?? $this->confirmingAwardQuotationId;
+
+        if (! $quotationId) {
+            return;
+        }
+
         $quotation = Quotation::findOrFail($quotationId);
         Gate::authorize('award', $quotation);
 
@@ -96,6 +118,17 @@ final class RfqDetail extends Component
 
             return;
         }
+
+        // S4.T9: cascade — close every recipient seller that is not already in a
+        // terminal state (no_bid) and has not had a quotation awarded, so they no
+        // longer see this as an open RFQ. NOTE: the rfq_recipient_status enum has
+        // no 'awarded' value (awarding lives on the quotation), so we express the
+        // "not awarded" exclusion via the quotations relation rather than a status
+        // literal, which Postgres would reject.
+        $this->rfq->recipients()
+            ->where('status', '!=', 'no_bid')
+            ->whereDoesntHave('quotations', fn ($q) => $q->where('status', 'awarded'))
+            ->update(['status' => 'closed']);
 
         $this->showCloseConfirmation = false;
         $this->rfq->refresh();

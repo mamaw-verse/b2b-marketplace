@@ -101,12 +101,26 @@
                             <flux:table.cell align="end">
                                 <div class="flex justify-end gap-1">
 
+                                    @if ($product->status === 'published')
+                                        <flux:button
+                                            variant="ghost"
+                                            size="sm"
+                                            icon="arrow-top-right-on-square"
+                                            href="{{ route('storefront.product', $product) }}"
+                                            target="_blank"
+                                            tooltip="{{ __('View Live') }}"
+                                        >
+                                            {{ __('View Live') }}
+                                        </flux:button>
+                                    @endif
+
                                     <flux:button
                                         variant="ghost"
                                         size="sm"
                                         icon="pencil"
                                         href="{{ route('hub.products.edit', $product) }}"
                                         wire:navigate
+                                        tooltip="{{ __('Edit') }}"
                                     />
 
                                     <flux:button
@@ -116,6 +130,7 @@
                                             ? 'archive-box'
                                             : 'arrow-up-circle'"
                                         wire:click="confirmToggleStatus({{ $product->id }}, '{{ $product->status === 'published' ? 'archive' : 'publish' }}')"
+                                        tooltip="{{ $product->status === 'published' ? __('Archive') : __('Publish') }}"
                                     />
 
                                 </div>

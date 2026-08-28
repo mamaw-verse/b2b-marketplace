@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -20,9 +21,11 @@ use Livewire\Component;
 #[Title('Quotation Builder')]
 final class QuotationBuilder extends Component
 {
-    public ?Quotation $quotation = null;
+    #[Locked]
+    public ?int $quotationId = null;
 
-    public RfqRecipient $rfqRecipient;
+    #[Locked]
+    public int $rfqRecipientId;
 
     public string $notes = '';
 
@@ -30,6 +33,7 @@ final class QuotationBuilder extends Component
      * Each item:
      * {
      *   variant_id: int|null,
+     *   product_id: int|null,
      *   description: string,
      *   quantity: string,
      *   unit: string,
@@ -42,18 +46,31 @@ final class QuotationBuilder extends Component
 
     public ?int $confirmingRemoveItemIndex = null;
 
+    #[Computed]
+    public function rfqRecipient(): RfqRecipient
+    {
+        return RfqRecipient::findOrFail($this->rfqRecipientId);
+    }
+
+    #[Computed]
+    public function quotation(): ?Quotation
+    {
+        return $this->quotationId ? Quotation::with('items')->find($this->quotationId) : null;
+    }
+
     public function mount(RfqRecipient $rfqRecipient, ?Quotation $quotation = null): void
     {
         Gate::authorize('view', $rfqRecipient);
 
-        $this->rfqRecipient = $rfqRecipient;
+        $this->rfqRecipientId = $rfqRecipient->id;
 
         if ($quotation?->exists) {
             Gate::authorize('update', $quotation);
-            $this->quotation = $quotation;
+            $this->quotationId = $quotation->id;
             $this->notes = $quotation->notes ?? '';
             $this->items = $quotation->items->map(fn ($item) => [
                 'variant_id' => $item->variant_id,
+                'product_id' => $item->product_id,
                 'description' => $item->description,
                 'quantity' => (string) $item->quantity,
                 'unit' => $item->unit,
@@ -70,6 +87,7 @@ final class QuotationBuilder extends Component
     {
         $this->items[] = [
             'variant_id' => null,
+            'product_id' => null,
             'description' => '',
             'quantity' => '',
             'unit' => '',
@@ -115,6 +133,7 @@ final class QuotationBuilder extends Component
         if (! $variantId) {
             $this->items[$index] = [
                 'variant_id' => null,
+                'product_id' => null,
                 'description' => '',
                 'quantity' => $this->items[$index]['quantity'] ?? '',
                 'unit' => '',
@@ -126,7 +145,7 @@ final class QuotationBuilder extends Component
 
         $variant = ProductVariant::with('product')
             ->where('id', $variantId)
-            ->whereHas('product', fn ($q) => $q->where('shop_id', $this->rfqRecipient->shop_id))
+            ->whereHas('product', fn ($q) => $q->where('shop_id', $this->rfqRecipient()->shop_id))
             ->first();
 
         if (! $variant) {
@@ -143,6 +162,8 @@ final class QuotationBuilder extends Component
 
         $this->items[$index] = [
             'variant_id' => $variant->id,
+            // S8.T1-step3: auto-resolve the owning product from the selected variant.
+            'product_id' => $variant->product_id,
             'description' => $description,
             'quantity' => (string) $variant->minimum_order_quantity,
             'unit' => $variant->unit,
@@ -154,18 +175,24 @@ final class QuotationBuilder extends Component
     {
         $this->validate();
 
-        DB::transaction(function () {
-            if ($this->quotation) {
-                $this->quotation->update(['notes' => $this->notes ?: null]);
-                $this->quotation->items()->delete();
+        $rfqRecipient = $this->rfqRecipient();
+
+        DB::transaction(function () use ($rfqRecipient) {
+            $quotation = $this->quotation();
+
+            if ($quotation) {
+                $quotation->update(['notes' => $this->notes ?: null]);
+                $quotation->items()->delete();
             } else {
-                $this->quotation = Quotation::create([
-                    'rfq_id' => $this->rfqRecipient->rfq_id,
-                    'rfq_recipient_id' => $this->rfqRecipient->id,
+                $quotation = Quotation::create([
+                    'rfq_id' => $rfqRecipient->rfq_id,
+                    'rfq_recipient_id' => $rfqRecipient->id,
                     'status' => 'draft',
                     'notes' => $this->notes ?: null,
                     'currency' => 'PHP',
                 ]);
+                $this->quotationId = $quotation->id;
+                unset($this->quotation); // Reset computed cache
             }
 
             $totalAmount = 0;
@@ -174,8 +201,19 @@ final class QuotationBuilder extends Component
                 $subtotal = round((float) $item['quantity'] * (float) $item['unit_price'], 2);
                 $totalAmount += $subtotal;
 
-                $this->quotation->items()->create([
-                    'variant_id' => $item['variant_id'] ?: null,
+                $variantId = $item['variant_id'] ?: null;
+
+                // S8.T1-step3: resolve the owning product from the linked variant.
+                // Prefer the value carried in item data (set by selectVariant), but
+                // fall back to a lookup so the FK is always correct when a variant is set.
+                $productId = $item['product_id'] ?? null;
+                if ($variantId && ! $productId) {
+                    $productId = ProductVariant::whereKey($variantId)->value('product_id');
+                }
+
+                $quotation->items()->create([
+                    'variant_id' => $variantId,
+                    'product_id' => $variantId ? $productId : null,
                     'description' => $item['description'],
                     'quantity' => $item['quantity'],
                     'unit' => $item['unit'],
@@ -185,7 +223,7 @@ final class QuotationBuilder extends Component
                 ]);
             }
 
-            $this->quotation->update(['total_amount' => $totalAmount]);
+            $quotation->update(['total_amount' => $totalAmount]);
         });
 
         \Flux\Flux::toast('Draft saved.', variant: 'success');
@@ -201,7 +239,9 @@ final class QuotationBuilder extends Component
     {
         $this->saveDraft();
 
-        if (! $this->quotation || $this->quotation->items()->count() === 0) {
+        $quotation = $this->quotation();
+
+        if (! $quotation || $quotation->items()->count() === 0) {
             $this->addError('items', 'At least one line item is required.');
 
             return;
@@ -210,29 +250,29 @@ final class QuotationBuilder extends Component
         // Capture variant snapshots on all items that have a variant_id
         $this->captureVariantSnapshots();
 
-        $buyerProfile = $this->quotation->rfq->user->buyerProfile;
+        $buyerProfile = $quotation->rfq->user->buyerProfile;
         $buyerSnapshot = $buyerProfile
             ? $buyerProfile->toSnapshot()
-            : $this->quotation->rfq->buyer_snapshot;
+            : $quotation->rfq->buyer_snapshot;
 
-        $this->quotation->update([
+        $quotation->update([
             'status' => 'submitted',
             'submitted_at' => now(),
             'valid_until' => now()->addDays(14),
             'buyer_snapshot' => $buyerSnapshot,
         ]);
 
-        $this->quotation->recalculateTotal();
-        $this->quotation->rfqRecipient->touchActivity();
-        $this->quotation->rfq->touchActivity();
+        $quotation->recalculateTotal();
+        $quotation->rfqRecipient->touchActivity();
+        $quotation->rfq->touchActivity();
 
-        QuotationSubmitted::dispatch($this->quotation->fresh());
+        QuotationSubmitted::dispatch($quotation->fresh());
 
         \Flux\Flux::modal('submit-quotation-confirm')->close();
 
         \Flux\Flux::toast('Quotation submitted successfully.', variant: 'success');
 
-        $this->redirect(route('hub.rfqs.show', $this->rfqRecipient), navigate: true);
+        $this->redirect(route('hub.rfqs.show', $this->rfqRecipient()), navigate: true);
     }
 
     public function confirmWithdraw(): void
@@ -242,18 +282,20 @@ final class QuotationBuilder extends Component
 
     public function withdrawQuotation(): void
     {
-        if (! $this->quotation || ! $this->quotation->isSubmitted()) {
+        $quotation = $this->quotation();
+
+        if (! $quotation || ! $quotation->isSubmitted()) {
             return;
         }
 
-        Gate::authorize('withdraw', $this->quotation);
+        Gate::authorize('withdraw', $quotation);
 
-        $this->quotation->update(['status' => 'withdrawn']);
-        $this->quotation->rfq->touchActivity();
+        $quotation->update(['status' => 'withdrawn']);
+        $quotation->rfq->touchActivity();
 
         \Flux\Flux::toast('Quotation withdrawn.', variant: 'warning');
 
-        $this->redirect(route('hub.rfqs.show', $this->rfqRecipient), navigate: true);
+        $this->redirect(route('hub.rfqs.show', $this->rfqRecipient()), navigate: true);
     }
 
     /**
@@ -267,7 +309,7 @@ final class QuotationBuilder extends Component
     {
         return ProductVariant::with('product')
             ->whereHas('product', fn ($q) => $q
-                ->where('shop_id', $this->rfqRecipient->shop_id)
+                ->where('shop_id', $this->rfqRecipient()->shop_id)
                 ->where('status', 'published')
             )
             ->where('status', 'published')
@@ -300,7 +342,7 @@ final class QuotationBuilder extends Component
             'items.*.description' => ['required', 'string', 'max:500'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit' => ['required', 'string', 'max:30'],
-            'items.*.unit_price' => ['required', 'numeric', 'gt:0'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
         ];
     }
 
@@ -333,7 +375,9 @@ final class QuotationBuilder extends Component
      */
     private function captureVariantSnapshots(): void
     {
-        $variantIds = $this->quotation->items()
+        $quotation = $this->quotation();
+
+        $variantIds = $quotation->items()
             ->whereNotNull('variant_id')
             ->pluck('variant_id', 'id');
 
@@ -353,7 +397,7 @@ final class QuotationBuilder extends Component
                 continue;
             }
 
-            $this->quotation->items()
+            $quotation->items()
                 ->where('id', $itemId)
                 ->update(['variant_snapshot' => $variant->toQuotationSnapshot()]);
         }

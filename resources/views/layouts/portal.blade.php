@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'One Halal Global' }}</title>
+    <title>{{ $title ?? '1Halal Store' }}</title>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -20,12 +20,19 @@
         $user = auth()->user();
         $hasCompanyAccount = $user?->hasRole('seller') || $user?->shop()->exists();
 
+        // Detect the active portal from the current route first so that
+        // /account/* pages always render the buyer (account) nav — even for
+        // users who also own a shop. Falls back to hub for company accounts.
         if ($user?->hasRole('admin')) {
             $portal = 'admin';
+        } elseif (request()->routeIs('account.*')) {
+            $portal = 'account';
+        } elseif (request()->routeIs('hub.*')) {
+            $portal = 'hub';
         } elseif ($hasCompanyAccount) {
             $portal = 'hub';
-        } elseif (! isset($portal) || ! in_array($portal, ['hub', 'account'])) {
-            $portal = 'hub';
+        } elseif (! isset($portal) || ! in_array($portal, ['hub', 'account'], true)) {
+            $portal = 'account';
         }
     @endphp
     @include('partials.portal-header')
@@ -53,7 +60,7 @@
     <footer class="border-t border-[var(--hs-neutral-200)] mt-auto">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
             <p class="text-center text-xs text-[var(--hs-neutral-500)]">
-                &copy; {{ date('Y') }} One Halal Global. {{ __('All rights reserved.') }}
+                &copy; {{ date('Y') }} 1Halal Store. {{ __('All rights reserved.') }}
             </p>
         </div>
     </footer>

@@ -93,9 +93,11 @@
                     </div>
                     <div>
                         <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">Value Chain Positions</p>
-                        <div class="mt-1">
+                        <div class="mt-2 flex flex-wrap gap-1.5">
                             @if(is_array($onboarding->value_chain_positions) && count($onboarding->value_chain_positions) > 0)
-                                <x-hs-value-chain :steps="$onboarding->value_chain_positions" :compact="true" />
+                                @foreach($onboarding->value_chain_positions as $pos)
+                                    <x-hs-badge variant="tag" :label="ucfirst(str_replace('_', ' ', $pos))" />
+                                @endforeach
                             @else
                                 <p class="text-sm text-[var(--hs-neutral-900)]">—</p>
                             @endif
@@ -228,6 +230,13 @@
             @if (in_array($onboarding->status, ['pending', 'submitted', 'requires_revision']))
                 <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-5">
                     <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-4">Decision</h3>
+
+                    @error('approve')
+                        <div class="mb-4 rounded-[var(--hs-radius-card)] bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] p-3 text-sm text-[var(--hs-danger-700)]">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                     <div class="space-y-2">
                         <flux:modal.trigger name="approve-onboarding-confirm">
                             <flux:button variant="primary" icon="check" class="w-full">

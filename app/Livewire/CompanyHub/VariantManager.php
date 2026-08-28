@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Livewire\Forms\VariantForm;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -15,7 +17,8 @@ use Livewire\Component;
 #[Title('Manage Variants')]
 final class VariantManager extends Component
 {
-    public Product $product;
+    #[Locked]
+    public int $productId;
 
     /** @var array<int, array<string, mixed>> */
     public array $variants = [];
@@ -24,25 +27,7 @@ final class VariantManager extends Component
 
     public bool $showVariantModal = false;
 
-    /** Null means creating a new variant; int is the DB id being edited. */
-    public ?int $editingVariantId = null;
-
-    public string $draftSku = '';
-
-    public string $draftPrice = '';
-
-    public string $draftMoq = '1';
-
-    public string $draftUnit = '';
-
-    public string $draftLeadTime = '';
-
-    public string $draftPackSize = '';
-
-    public string $draftStatus = 'archived';
-
-    /** @var array<string, mixed> */
-    public array $draftAttributes = [];
+    public VariantForm $form;
 
     // ── Quantity breaks modal ─────────────────────────────────────────────────
 
@@ -55,16 +40,20 @@ final class VariantManager extends Component
 
     // ── Confirm dialogs ────────────────────────────────────────────────────────
 
-    public ?int $confirmingVariantId = null;
-
     public ?int $confirmingBreakIndex = null;
 
     // ─────────────────────────────────────────────────────────────────────────
 
+    #[Computed]
+    public function product(): Product
+    {
+        return Product::findOrFail($this->productId);
+    }
+
     public function mount(Product $product): void
     {
         $this->authorize('update', $product);
-        $this->product = $product;
+        $this->productId = $product->id;
         $this->loadVariants();
     }
 
@@ -72,15 +61,7 @@ final class VariantManager extends Component
 
     public function openAddVariant(): void
     {
-        $this->editingVariantId = null;
-        $this->draftSku = '';
-        $this->draftPrice = '';
-        $this->draftMoq = '1';
-        $this->draftUnit = '';
-        $this->draftLeadTime = '';
-        $this->draftPackSize = '';
-        $this->draftStatus = 'archived';
-        $this->draftAttributes = $this->blankAttributes();
+        $this->form->setForCreate($this->blankAttributes());
         $this->resetValidation();
         $this->showVariantModal = true;
     }
@@ -93,38 +74,20 @@ final class VariantManager extends Component
             return;
         }
 
-        $this->editingVariantId = $variantId;
-        $this->draftSku = $variant['sku'];
-        $this->draftPrice = (string) $variant['price'];
-        $this->draftMoq = (string) $variant['minimum_order_quantity'];
-        $this->draftUnit = $variant['unit'];
-        $this->draftLeadTime = (string) ($variant['lead_time_days'] ?? '');
-        $this->draftPackSize = $variant['pack_size'] ?? '';
-        $this->draftStatus = $variant['status'];
-        $this->draftAttributes = array_merge($this->blankAttributes(), $variant['attributes'] ?? []);
+        $this->form->setForEdit($variant, $this->blankAttributes());
         $this->resetValidation();
         $this->showVariantModal = true;
     }
 
     public function saveVariant(): void
     {
-        $this->validateVariantDraft();
+        $this->form->validate();
 
-        $data = [
-            'product_id' => $this->product->id,
-            'sku' => $this->draftSku,
-            'price' => $this->draftPrice,
-            'minimum_order_quantity' => (int) $this->draftMoq,
-            'unit' => $this->draftUnit,
-            'lead_time_days' => $this->draftLeadTime !== '' ? (int) $this->draftLeadTime : null,
-            'pack_size' => $this->draftPackSize ?: null,
-            'status' => $this->draftStatus,
-            'attributes' => $this->draftAttributes,
-        ];
+        $data = $this->form->toVariantData($this->product()->id);
 
-        if ($this->editingVariantId) {
-            ProductVariant::where('id', $this->editingVariantId)
-                ->where('product_id', $this->product->id)
+        if ($this->form->editingVariantId) {
+            ProductVariant::where('id', $this->form->editingVariantId)
+                ->where('product_id', $this->product()->id)
                 ->update($data);
             $message = 'Variant updated.';
         } else {
@@ -138,31 +101,10 @@ final class VariantManager extends Component
         \Flux\Flux::toast($message, variant: 'success');
     }
 
-    public function removeVariant(): void
-    {
-        if ($this->confirmingVariantId === null) {
-            return;
-        }
-
-        ProductVariant::where('id', $this->confirmingVariantId)
-            ->where('product_id', $this->product->id)
-            ->delete();
-
-        $this->confirmingVariantId = null;
-        $this->loadVariants();
-        \Flux\Flux::toast('Variant removed.', variant: 'warning');
-    }
-
-    public function confirmRemoveVariant(int $variantId): void
-    {
-        $this->confirmingVariantId = $variantId;
-        \Flux\Flux::modal('confirm-remove-variant')->show();
-    }
-
     public function toggleStatus(int $variantId): void
     {
         $variant = ProductVariant::where('id', $variantId)
-            ->where('product_id', $this->product->id)
+            ->where('product_id', $this->product()->id)
             ->firstOrFail();
 
         $variant->update([
@@ -219,7 +161,7 @@ final class VariantManager extends Component
 
         if ($this->editingBreaksVariantId) {
             ProductVariant::where('id', $this->editingBreaksVariantId)
-                ->where('product_id', $this->product->id)
+                ->where('product_id', $this->product()->id)
                 ->update(['quantity_breaks' => $breaks]);
 
             $this->loadVariants();
@@ -240,7 +182,7 @@ final class VariantManager extends Component
     #[Computed]
     public function mergedAttributeSchema(): array
     {
-        $schema = $this->product->variant_attributes_schema ?? [];
+        $schema = $this->product()->variant_attributes_schema ?? [];
 
         // Normalize schema: if it's a numeric array OR uses attr_* keys from uniqid,
         // convert to associative using label as key
@@ -277,30 +219,6 @@ final class VariantManager extends Component
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
-    private function validateVariantDraft(): void
-    {
-        $prefix = 'draft';
-
-        $this->validate([
-            'draftSku' => ['required', 'string', 'max:100'],
-            'draftPrice' => ['required', 'numeric', 'min:0'],
-            'draftMoq' => ['required', 'integer', 'min:1'],
-            'draftUnit' => ['required', 'string', 'max:30'],
-            'draftLeadTime' => ['nullable', 'integer', 'min:0'],
-            'draftPackSize' => ['nullable', 'string', 'max:100'],
-            'draftStatus' => ['required', 'in:published,archived'],
-            'draftAttributes' => ['array'],
-        ], [], [
-            'draftSku' => 'SKU',
-            'draftPrice' => 'Price',
-            'draftMoq' => 'Minimum order quantity',
-            'draftUnit' => 'Unit',
-            'draftLeadTime' => 'Lead time',
-            'draftPackSize' => 'Pack size',
-            'draftStatus' => 'Status',
-        ]);
-    }
-
     /**
      * Build a blank attributes map keyed by schema key.
      *
@@ -313,7 +231,7 @@ final class VariantManager extends Component
 
     private function loadVariants(): void
     {
-        $this->variants = $this->product->variants()
+        $this->variants = $this->product()->variants()
             ->orderBy('created_at')
             ->get()
             ->map(fn (ProductVariant $v) => [

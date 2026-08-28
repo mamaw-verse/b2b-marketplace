@@ -259,6 +259,35 @@
             </div>
         </section>
 
+        {{-- ── Country Portals — Coming Soon ─────────────────── --}}
+        <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl sm:text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">
+                    More Halal business portals are coming soon.
+                </h2>
+                <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] max-w-2xl mx-auto">
+                    We are expanding our network to connect halal businesses across new markets. Stay tuned as we launch dedicated portals for more countries.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                @foreach ([
+                    ['name' => 'India',    'flag' => 'india',    'emoji' => '🇮🇳'],
+                    ['name' => 'Vietnam',  'flag' => 'vietnam',  'emoji' => '🇻🇳'],
+                    ['name' => 'Thailand', 'flag' => 'thailand', 'emoji' => '🇹🇭'],
+                    ['name' => 'Nigeria',  'flag' => 'nigeria',  'emoji' => '🇳🇬'],
+                ] as $portal)
+                    <div class="flex flex-col items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-5 text-center shadow-[var(--hs-shadow-sm)]">
+                        <span class="text-4xl" aria-hidden="true">{{ $portal['emoji'] }}</span>
+                        <p class="text-sm font-semibold text-[var(--hs-neutral-800)]">{{ $portal['name'] }}</p>
+                        <span class="inline-flex items-center rounded-full bg-[var(--hs-neutral-100)] px-3 py-1 text-xs font-medium text-[var(--hs-neutral-500)]">
+                            {{ __('Coming Soon') }}
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
         {{-- ── Why Trust Us / CTA Banner ─────────────────────── --}}
         <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
             <div class="relative overflow-hidden rounded-2xl bg-[var(--hs-green-950)] px-5 sm:px-8 py-10 sm:py-12 text-center">

@@ -10,7 +10,6 @@ use App\Models\Shop;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 final class AnalyticsController extends Controller
 {
@@ -37,7 +36,7 @@ final class AnalyticsController extends Controller
         $totalTransactionFeesCollected = 0.0;
         $totalCommissionFeesCollected = 0.0;
 
-        if (Schema::hasTable('payouts')) {
+        if (config('marketplace.features.payouts_enabled')) {
             $totalPayoutsDisbursed = (float) DB::table('payouts')
                 ->where('status', 'completed')
                 ->whereBetween('completed_at', [$from, $to])

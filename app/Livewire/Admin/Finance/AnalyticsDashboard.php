@@ -7,7 +7,6 @@ namespace App\Livewire\Admin\Finance;
 use App\Models\Order;
 use App\Models\Shop;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -64,7 +63,7 @@ final class AnalyticsDashboard extends Component
         $totalTransactionFees = 0.0;
         $totalCommissionFees = 0.0;
 
-        if (Schema::hasTable('payouts')) {
+        if (config('marketplace.features.payouts_enabled')) {
             $totalPayoutsDisbursed = (float) DB::table('payouts')
                 ->where('status', 'completed')
                 ->whereBetween('completed_at', [$from, $to])

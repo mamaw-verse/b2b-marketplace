@@ -9,8 +9,11 @@ use App\Models\Order;
 use App\Models\PaymentAttempt;
 use App\Services\DltPaymentService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use RuntimeException;
@@ -19,7 +22,8 @@ use RuntimeException;
 #[Title('Pay Order')]
 final class PaymentPage extends Component
 {
-    public Order $order;
+    #[Locked]
+    public int $orderId;
 
     // State
     public string $step = 'brands'; // brands | card_form | ewallet_form | processing | success | failed
@@ -73,12 +77,17 @@ final class PaymentPage extends Component
     // Response
     public ?string $paymentStatus = null;
 
+    #[Computed]
+    public function order(): Order
+    {
+        return Order::with(['items', 'fees', 'shop'])->findOrFail($this->orderId);
+    }
+
     public function mount(Order $order): void
     {
-        abort_unless($order->buyer_user_id === Auth::id(), 403);
-        abort_unless($order->status === 'pending_payment', 404);
+        Gate::authorize('pay', $order);
 
-        $this->order = $order->load(['items', 'fees', 'shop']);
+        $this->orderId = $order->id;
 
         // Pre-fill payor from order snapshot
         $this->firstName = explode(' ', $order->customer_contact_name ?? '')[0] ?? '';
@@ -148,8 +157,9 @@ final class PaymentPage extends Component
         ]);
 
         // Guard: re-check order has not been recalled/cancelled
-        $this->order->refresh();
-        if ($this->order->status !== 'pending_payment') {
+        $order = $this->order();
+        $order->refresh();
+        if ($order->status !== 'pending_payment') {
             $this->step = 'failed';
             $this->errorMessage = 'This order is no longer awaiting payment. It may have been recalled or cancelled.';
 
@@ -159,8 +169,8 @@ final class PaymentPage extends Component
         $this->step = 'processing';
         $this->errorMessage = null;
 
-        $paymentTerm = $this->order->paymentTerms()->first();
-        $merchantTxnId = Str::limit('order'.$this->order->id.Str::random(30), 50, '');
+        $paymentTerm = $order->paymentTerms()->first();
+        $merchantTxnId = Str::limit('order'.$order->id.Str::random(30), 50, '');
 
         $attempt = PaymentAttempt::create([
             'order_payment_term_id' => $paymentTerm->id,
@@ -175,12 +185,12 @@ final class PaymentPage extends Component
                 'is_card_payment' => true,
                 'time_offset' => '+08:00',
                 'channel' => 1,
-                'amount' => number_format((float) $this->order->order_total, 2, '.', ''),
+                'amount' => number_format((float) $order->order_total, 2, '.', ''),
                 'currency' => 'PHP',
                 'payment_brand' => $this->selectedBrand['value'],
                 'payment_brand_code' => $this->selectedBrand['code'],
-                'product_name' => Str::limit($this->order->items()->first()?->description ?? 'Order #'.$this->order->id, 100, ''),
-                'product_description' => 'Order #'.$this->order->id.' payment',
+                'product_name' => Str::limit($order->items()->first()?->description ?? 'Order #'.$order->id, 100, ''),
+                'product_description' => 'Order #'.$order->id.' payment',
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
                 'email' => $this->email,
@@ -211,8 +221,8 @@ final class PaymentPage extends Component
                     'browser_java_enabled' => false,
                     'accept_content' => 'text/html',
                 ],
-                'success_url' => route('orders.payment.success', ['order' => $this->order->id, 'attempt' => $attempt->id]),
-                'failure_url' => route('orders.payment.failure', ['order' => $this->order->id, 'attempt' => $attempt->id]),
+                'success_url' => route('orders.payment.success', ['order' => $order->id, 'attempt' => $attempt->id]),
+                'failure_url' => route('orders.payment.failure', ['order' => $order->id, 'attempt' => $attempt->id]),
             ]);
 
             $paymentData = $result['data'] ?? [];
@@ -225,8 +235,7 @@ final class PaymentPage extends Component
             ]);
 
             if ($paymentStatus === 'PAID') {
-                (new ProcessOrderPaymentAction)->execute($attempt, $this->order);
-                $this->order->refresh();
+                (new ProcessOrderPaymentAction)->execute($attempt, $order);
                 $this->step = 'success';
             } elseif ($paymentStatus === 'PENDING') {
                 // Card payment pending — rare, show pending state
@@ -266,16 +275,17 @@ final class PaymentPage extends Component
         $this->errorMessage = null;
 
         // Guard: re-check order has not been recalled/cancelled
-        $this->order->refresh();
-        if ($this->order->status !== 'pending_payment') {
+        $order = $this->order();
+        $order->refresh();
+        if ($order->status !== 'pending_payment') {
             $this->step = 'failed';
             $this->errorMessage = 'This order is no longer awaiting payment. It may have been recalled or cancelled.';
 
             return;
         }
 
-        $paymentTerm = $this->order->paymentTerms()->first();
-        $merchantTxnId = Str::limit('order'.$this->order->id.Str::random(30), 50, '');
+        $paymentTerm = $order->paymentTerms()->first();
+        $merchantTxnId = Str::limit('order'.$order->id.Str::random(30), 50, '');
 
         $attempt = PaymentAttempt::create([
             'order_payment_term_id' => $paymentTerm->id,
@@ -290,12 +300,12 @@ final class PaymentPage extends Component
                 'is_card_payment' => false,
                 'time_offset' => '+08:00',
                 'channel' => 1,
-                'amount' => number_format((float) $this->order->order_total, 2, '.', ''),
+                'amount' => number_format((float) $order->order_total, 2, '.', ''),
                 'currency' => 'PHP',
                 'payment_brand' => $this->selectedBrand['value'],
                 'payment_brand_code' => $this->selectedBrand['code'],
-                'product_name' => Str::limit($this->order->items()->first()?->description ?? 'Order #'.$this->order->id, 100, ''),
-                'product_description' => 'Order #'.$this->order->id.' payment',
+                'product_name' => Str::limit($order->items()->first()?->description ?? 'Order #'.$order->id, 100, ''),
+                'product_description' => 'Order #'.$order->id.' payment',
                 'first_name' => $this->firstName,
                 'last_name' => $this->lastName,
                 'email' => $this->email,
@@ -306,8 +316,8 @@ final class PaymentPage extends Component
                 'state_province_region' => $this->province,
                 'country_code' => $this->countryCode,
                 'postal_code' => $this->postalCode,
-                'success_url' => route('orders.payment.success', ['order' => $this->order->id, 'attempt' => $attempt->id]),
-                'failure_url' => route('orders.payment.failure', ['order' => $this->order->id, 'attempt' => $attempt->id]),
+                'success_url' => route('orders.payment.success', ['order' => $order->id, 'attempt' => $attempt->id]),
+                'failure_url' => route('orders.payment.failure', ['order' => $order->id, 'attempt' => $attempt->id]),
             ]);
 
             $paymentData = $result['data'] ?? [];

@@ -15,6 +15,35 @@ Route::livewire('/companies/{shop}', 'storefront.company-profile')->name('storef
 Route::livewire('/products', 'storefront.product-directory')->name('storefront.products');
 Route::livewire('/products/{product}', 'storefront.product-detail')->name('storefront.product');
 
+/*
+| Media viewer.
+| Documents attached to a PUBLISHED product are public (Q2: accessible to all,
+| even unauthenticated users). Any other media requires an authenticated admin
+| or the original uploader.
+*/
+Route::get('media/{media}/view', function (App\Models\Media $media) {
+    $isPublicProductDocument = $media->products()
+        ->where('status', 'published')
+        ->exists();
+
+    if (! $isPublicProductDocument) {
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        if (! $user->hasRole('admin') && $media->uploaded_by_id !== $user->id) {
+            abort(403);
+        }
+    }
+
+    return Illuminate\Support\Facades\Storage::disk('s3')->response(
+        $media->storage_path,
+        $media->original_filename
+    );
+})->name('media.view');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('redirect', function () {
         $user = auth()->user();
@@ -29,18 +58,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         return redirect()->route('hub.onboarding');
     })->name('dashboard');
-
-    Route::get('media/{media}/view', function (App\Models\Media $media) {
-        $user = auth()->user();
-        if (! $user->hasRole('admin') && $media->uploaded_by_id !== $user->id) {
-            abort(403);
-        }
-
-        return Illuminate\Support\Facades\Storage::disk('s3')->response(
-            $media->storage_path,
-            $media->original_filename
-        );
-    })->name('media.view');
 });
 
 /*
@@ -49,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->group(function () {
+    Route::livewire('dashboard', 'account.dashboard')->name('dashboard');
     Route::livewire('profile', 'account.buyer-profile-form')->name('profile');
     Route::livewire('rfqs', 'account.rfq-list')->name('rfqs.index');
     Route::livewire('rfqs/create', 'account.rfq-create-form')->name('rfqs.create');
@@ -62,6 +80,9 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->gr
 
     // Payment History (buyer)
     Route::livewire('payments', 'account.payment-history')->name('payments');
+
+    // Notifications (full-page list)
+    Route::livewire('notifications', 'shared.notification-list')->name('notifications.index');
 
     // Disputes (buyer)
     Route::livewire('orders/{order}/dispute/create', 'account.disputes.dispute-form')->name('orders.dispute.create');
@@ -83,6 +104,7 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
         return redirect()->route('hub.onboarding');
     })->name('dashboard');
     Route::livewire('onboarding', 'company-hub.onboarding-wizard')->name('onboarding');
+    Route::livewire('shop/profile', 'company-hub.shop-profile-form')->name('shop.profile');
 
     // Product management
     Route::livewire('products', 'company-hub.product-list')->name('products.index');

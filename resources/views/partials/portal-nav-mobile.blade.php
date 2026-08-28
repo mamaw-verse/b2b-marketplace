@@ -49,14 +49,16 @@
         {{-- Drawer header --}}
         <div class="flex items-center justify-between border-b border-[var(--hs-neutral-200)] px-5 py-4">
             <div class="min-w-0">
-                @if ($isOnboarded)
+                @if ($isOnboarded && ($portal ?? 'hub') === 'hub')
                     <p class="truncate text-base font-semibold text-[var(--hs-neutral-900)]">{{ $shop->storefront_name }}</p>
                     <p class="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--hs-neutral-500)]">
                         <span class="inline-block size-1.5 rounded-full bg-[var(--hs-green-600)]"></span>
                         {{ __('Live on the directory') }}
                     </p>
                 @else
-                    <p class="truncate text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Company Hub') }}</p>
+                    <p class="truncate text-base font-semibold text-[var(--hs-neutral-900)]">
+                        {{ ($portal ?? 'hub') === 'account' ? __('Buyer Hub') : __('Company Hub') }}
+                    </p>
                     <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">{{ $user?->email }}</p>
                 @endif
             </div>

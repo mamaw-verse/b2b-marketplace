@@ -69,7 +69,18 @@
                     @elseif ($doc['scan_status'] === 'clean')
                         <flux:icon name="check-circle" class="size-5 text-green-500" />
                     @elseif ($doc['scan_status'] === 'pending')
-                        <flux:icon name="clock" class="size-5 text-yellow-500" />
+                        {{-- Auto-poll only while this document is still scanning --}}
+                        <div wire:poll.5s="refreshDocumentStatuses" class="flex items-center gap-2">
+                            <flux:icon name="clock" class="size-5 text-yellow-500" />
+                            <flux:button
+                                wire:click="resetDocument('{{ $type }}')"
+                                variant="ghost"
+                                size="sm"
+                                icon="arrow-path"
+                            >
+                                {{ __('Re-upload') }}
+                            </flux:button>
+                        </div>
                     @endif
                 </div>
             </div>

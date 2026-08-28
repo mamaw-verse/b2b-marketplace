@@ -45,9 +45,14 @@
                                     class="h-full w-full object-cover"
                                 />
                             </div>
-                            <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100 rounded-[var(--hs-radius-card)]">
-                                <flux:button variant="ghost" size="sm" icon="trash" class="text-white" wire:click="confirmRemoveImage({{ $item->id }})" />
-                            </div>
+                            <button
+                                type="button"
+                                wire:click="confirmRemoveImage({{ $item->id }})"
+                                aria-label="Remove image"
+                                class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white text-xs opacity-0 transition group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
+                            >
+                                <flux:icon name="x-mark" variant="mini" class="size-3.5" />
+                            </button>
                             <div class="absolute top-2 left-2">
                                 <span class="inline-flex items-center justify-center size-6 rounded-full bg-[var(--hs-neutral-0)]/90 text-xs font-bold text-[var(--hs-neutral-700)] shadow-sm">
                                     {{ $loop->iteration }}

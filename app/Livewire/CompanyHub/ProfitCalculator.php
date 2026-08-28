@@ -6,7 +6,6 @@ namespace App\Livewire\CompanyHub;
 
 use App\Models\PayoutSetting;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -33,7 +32,7 @@ final class ProfitCalculator extends Component
         }
 
         // If order has a payout_items row, show actual recorded fees
-        if ($orderId && Schema::hasTable('payout_items')) {
+        if ($orderId && config('marketplace.features.payouts_enabled')) {
             $payoutItem = DB::table('payout_items')
                 ->where('order_id', $orderId)
                 ->first();

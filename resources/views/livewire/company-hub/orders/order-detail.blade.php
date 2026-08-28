@@ -198,6 +198,65 @@
                             </div>
                         @endif
                     </section>
+
+                    {{-- Disputes Section — full history: status, reason, resolution, timestamps --}}
+                    @if ($order->disputes->isNotEmpty())
+                        <section class="pt-6 border-t border-[var(--hs-neutral-100)]">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)]">
+                                    {{ __('Disputes') }}
+                                    <span class="text-[var(--hs-neutral-400)] font-normal normal-case tracking-normal">· {{ $order->disputes->count() }}</span>
+                                </h2>
+                            </div>
+
+                            <div class="space-y-3">
+                                @foreach ($order->disputes as $dispute)
+                                    <div class="rounded-lg border border-[var(--hs-neutral-200)] p-4">
+                                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                                            <div class="flex items-center gap-2">
+                                                <x-hs-status-pill :status="$dispute->status" />
+                                                <span class="text-[13px] text-[var(--hs-neutral-700)] font-medium">{{ str_replace('_', ' ', ucfirst($dispute->type)) }}</span>
+                                            </div>
+                                            <span class="text-[12px] text-[var(--hs-neutral-500)]">
+                                                {{ __('Opened') }} {{ $dispute->created_at?->format('M d, Y H:i') }}
+                                                @if ($dispute->openedBy)
+                                                    · {{ $dispute->openedBy->first_name }} {{ $dispute->openedBy->last_name }}
+                                                @endif
+                                            </span>
+                                        </div>
+
+                                        <p class="mt-2.5 text-[13.5px] text-[var(--hs-neutral-700)] leading-relaxed">{{ $dispute->reason }}</p>
+
+                                        @if ($dispute->resolution_type)
+                                            <div class="mt-3 pt-3 border-t border-[var(--hs-neutral-100)] text-[13px] text-[var(--hs-neutral-600)] space-y-1">
+                                                <div class="flex justify-between">
+                                                    <span class="text-[var(--hs-neutral-500)]">{{ __('Resolution') }}</span>
+                                                    <span class="text-[var(--hs-neutral-900)] font-medium">{{ str_replace('_', ' ', ucfirst($dispute->resolution_type)) }}</span>
+                                                </div>
+                                                @if ($dispute->resolution_amount !== null)
+                                                    <div class="flex justify-between">
+                                                        <span class="text-[var(--hs-neutral-500)]">{{ __('Refund amount') }}</span>
+                                                        <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ $order->currency }} {{ number_format((float) $dispute->resolution_amount, 2) }}</span>
+                                                    </div>
+                                                @endif
+                                                @if ($dispute->resolution_notes)
+                                                    <p class="text-[var(--hs-neutral-600)]">{{ $dispute->resolution_notes }}</p>
+                                                @endif
+                                                @if ($dispute->resolved_at)
+                                                    <p class="text-[12px] text-[var(--hs-neutral-500)]">
+                                                        {{ __('Resolved') }} {{ $dispute->resolved_at->format('M d, Y H:i') }}
+                                                        @if ($dispute->resolvedBy)
+                                                            · {{ $dispute->resolvedBy->first_name }} {{ $dispute->resolvedBy->last_name }}
+                                                        @endif
+                                                    </p>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
                 </div>
 
                 {{-- SIDEBAR — single tinted panel, NOT white/bordered like the outer card --}}

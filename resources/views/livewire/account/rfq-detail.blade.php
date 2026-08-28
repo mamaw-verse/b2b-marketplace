@@ -84,42 +84,72 @@
                                     @endif
                                 </div>
 
-                                {{-- Line items --}}
-                                <div class="overflow-x-auto rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)]">
-                                    <table class="w-full text-xs">
-                                        <thead>
-                                            <tr class="text-left text-[var(--hs-neutral-500)] bg-[var(--hs-neutral-50)]">
-                                                <th class="px-3 py-2 font-medium">{{ __('Item') }}</th>
-                                                <th class="px-3 py-2 font-medium text-right">{{ __('Qty') }}</th>
-                                                <th class="px-3 py-2 font-medium">{{ __('Unit') }}</th>
-                                                <th class="px-3 py-2 font-medium text-right">{{ __('Price') }}</th>
-                                                <th class="px-3 py-2 font-medium text-right">{{ __('Subtotal') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="text-[var(--hs-neutral-700)] divide-y divide-[var(--hs-neutral-100)]">
-                                            @foreach ($quotation->items as $item)
-                                                <tr>
-                                                    <td class="px-3 py-1.5">{{ $item->description }}</td>
-                                                    <td class="px-3 py-1.5 text-right">{{ $item->quantity }}</td>
-                                                    <td class="px-3 py-1.5">{{ $item->unit }}</td>
-                                                    <td class="px-3 py-1.5 text-right">{{ number_format((float) $item->unit_price, 2) }}</td>
-                                                    <td class="px-3 py-1.5 text-right font-medium">{{ number_format((float) $item->subtotal, 2) }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                {{-- Line items summary --}}
+                                <div class="mt-2 text-xs text-[var(--hs-neutral-500)]">
+                                    {{ $quotation->items->count() }} {{ Str::plural('item', $quotation->items->count()) }}
+                                    @if ($quotation->notes)
+                                        <span class="text-[var(--hs-neutral-300)]">·</span> {{ Str::limit($quotation->notes, 60) }}
+                                    @endif
                                 </div>
 
-                                @if ($quotation->notes)
-                                    <p class="mt-2 text-xs text-[var(--hs-neutral-500)]">{{ $quotation->notes }}</p>
+                                @if ($quotation->items->isNotEmpty())
+                                    <div class="mt-2">
+                                        <button
+                                            type="button"
+                                            wire:click="toggleQuotation({{ $quotation->id }})"
+                                            class="inline-flex items-center gap-1 text-xs font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)]"
+                                        >
+                                            <flux:icon
+                                                :name="($expandedQuotations[$quotation->id] ?? false) ? 'chevron-up' : 'chevron-down'"
+                                                variant="mini"
+                                                class="size-3.5"
+                                            />
+                                            {{ ($expandedQuotations[$quotation->id] ?? false) ? __('Hide details') : __('View details') }}
+                                        </button>
+
+                                        @if ($expandedQuotations[$quotation->id] ?? false)
+                                            <div class="mt-2 overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)]">
+                                                <table class="w-full text-xs">
+                                                    <thead class="bg-[var(--hs-neutral-50)] text-[var(--hs-neutral-500)]">
+                                                        <tr>
+                                                            <th class="px-3 py-2 text-left font-medium">{{ __('Item') }}</th>
+                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Qty') }}</th>
+                                                            <th class="px-3 py-2 text-left font-medium">{{ __('Unit') }}</th>
+                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Price') }}</th>
+                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Subtotal') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-[var(--hs-neutral-100)]">
+                                                        @foreach ($quotation->items as $item)
+                                                            <tr class="text-[var(--hs-neutral-700)]">
+                                                                <td class="px-3 py-2">{{ $item->description }}</td>
+                                                                <td class="px-3 py-2 text-right tabular-nums">{{ $item->quantity }}</td>
+                                                                <td class="px-3 py-2">{{ $item->unit }}</td>
+                                                                <td class="px-3 py-2 text-right tabular-nums">{{ number_format((float) $item->unit_price, 2) }}</td>
+                                                                <td class="px-3 py-2 text-right font-medium tabular-nums text-[var(--hs-neutral-900)]">{{ number_format((float) $item->subtotal, 2) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            @if ($quotation->notes)
+                                                <div class="mt-3 text-sm text-[var(--hs-neutral-700)]">
+                                                    <strong>{{ __('Notes:') }}</strong>
+                                                    <p class="mt-1 whitespace-pre-wrap">{{ $quotation->notes }}</p>
+                                                </div>
+                                            @endif
+                                        @endif
+                                    </div>
                                 @endif
 
                                 {{-- Actions for submitted quotations --}}
                                 @if ($quotation->isSubmitted() && $rfq->isOpen())
                                     <div class="mt-3 pt-3 border-t border-[var(--hs-neutral-100)] flex items-center gap-2">
-                                        <flux:button variant="primary" size="xs" icon="check" wire:click="awardQuotation({{ $quotation->id }})">
-                                            {{ __('Award') }}
-                                        </flux:button>
+                                        <flux:modal.trigger name="confirm-award-quotation">
+                                            <flux:button variant="primary" size="xs" icon="check" wire:click="confirmAwardQuotation({{ $quotation->id }})">
+                                                {{ __('Award') }}
+                                            </flux:button>
+                                        </flux:modal.trigger>
                                         <flux:button
                                             variant="ghost"
                                             size="xs"
@@ -194,6 +224,21 @@
         <x-slot name="action">
             <flux:button variant="danger" wire:click="rejectQuotation" wire:loading.attr="disabled">
                 {{ __('Reject') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
+
+    {{-- Award Quotation Confirmation --}}
+    <x-hs-confirm
+        name="confirm-award-quotation"
+        title="Award Quotation"
+        message="Award this quotation? The seller will be notified and an order will be created."
+        variant="primary"
+        confirmText="Award"
+    >
+        <x-slot name="action">
+            <flux:button variant="primary" wire:click="awardQuotation" wire:loading.attr="disabled">
+                {{ __('Award') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

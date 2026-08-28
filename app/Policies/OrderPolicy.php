@@ -63,6 +63,15 @@ final class OrderPolicy
     }
 
     /**
+     * Buyer can pay a pending_payment order they own.
+     */
+    public function pay(User $user, Order $order): bool
+    {
+        return $user->id === $order->buyer_user_id
+            && $order->status === 'pending_payment';
+    }
+
+    /**
      * Seller can cancel a paid order before fulfilment starts.
      * "Before fulfilment starts" = no fulfilment exists, or fulfilment exists with status 'pending' and hasn't shipped.
      */

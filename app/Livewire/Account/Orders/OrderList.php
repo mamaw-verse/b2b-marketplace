@@ -26,13 +26,45 @@ final class OrderList extends Component
         $this->resetPage();
     }
 
+    public function confirmReceived(int $orderId): void
+    {
+        $order = Order::where('buyer_user_id', Auth::id())->findOrFail($orderId);
+
+        $order->update(['status' => 'completed']);
+        $order->fulfilments()->update(['status' => 'delivered']);
+
+        if ($order->shop->user) {
+            $order->shop->user->notify(new \App\Notifications\OrderCompletedNotification($order));
+        }
+
+        \Flux\Flux::toast('Order confirmed as received.', variant: 'success');
+    }
+
+    #[Computed]
+    public function tabCounts(): array
+    {
+        $buyerId = Auth::id();
+
+        $baseQuery = Order::where('buyer_user_id', $buyerId);
+
+        return [
+            'to_pay' => (clone $baseQuery)->where('status', 'pending_payment')->count(),
+            'to_ship' => (clone $baseQuery)->where('status', 'paid')
+                ->where(fn ($q) => $q->whereDoesntHave('fulfilments')->orWhereHas('fulfilments', fn ($f) => $f->where('status', 'pending')))->count(),
+            'to_receive' => (clone $baseQuery)->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered']))->count(),
+            'completed' => (clone $baseQuery)->where('status', 'completed')->count(),
+            'cancelled' => (clone $baseQuery)->where('status', 'cancelled')->count(),
+            'disputed' => (clone $baseQuery)->whereHas('disputes', fn ($d) => $d->whereNotIn('status', ['resolved_refunded', 'resolved_denied', 'withdrawn']))->count(),
+        ];
+    }
+
     #[Computed]
     public function orders(): LengthAwarePaginator
     {
         $buyerId = Auth::id();
 
         $query = Order::where('buyer_user_id', $buyerId)
-            ->with('shop')
+            ->with(['shop', 'items'])
             ->orderByDesc('created_at');
 
         match ($this->tab) {
@@ -41,6 +73,7 @@ final class OrderList extends Component
                 ->where(fn ($q) => $q->whereDoesntHave('fulfilments')->orWhereHas('fulfilments', fn ($f) => $f->where('status', 'pending'))),
             'to_receive' => $query->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered'])),
             'completed' => $query->where('status', 'completed'),
+            'cancelled' => $query->where('status', 'cancelled'),
             'disputed' => $query->whereHas('disputes', fn ($d) => $d->whereNotIn('status', ['resolved_refunded', 'resolved_denied', 'withdrawn'])),
             default => null,
         };

@@ -35,8 +35,8 @@
                     @endif
 
                     @if (in_array($rfqRecipient->status, ['reviewed', 'in_progress']))
-                        <flux:button variant="ghost" wire:click="openDeclineModal" size="sm" class="ml-auto text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)] hover:text-[var(--hs-danger-700)]">
-                            {{ __('Decline') }}
+                        <flux:button variant="ghost" wire:click="openCloseModal" size="sm" class="ml-auto text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)] hover:text-[var(--hs-danger-700)]">
+                            {{ __('Close') }}
                         </flux:button>
                     @endif
                 </div>
@@ -151,6 +151,66 @@
                                     @endif
                                 </div>
 
+                                {{-- S4.T11: expandable line item detail + withdraw --}}
+                                @if ($quotation->items->isNotEmpty())
+                                    <div class="mt-2">
+                                        <button
+                                            type="button"
+                                            wire:click="toggleQuotation({{ $quotation->id }})"
+                                            class="inline-flex items-center gap-1 text-xs font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)]"
+                                        >
+                                            <flux:icon
+                                                :name="($expandedQuotations[$quotation->id] ?? false) ? 'chevron-up' : 'chevron-down'"
+                                                variant="mini"
+                                                class="size-3.5"
+                                            />
+                                            {{ ($expandedQuotations[$quotation->id] ?? false) ? __('Hide details') : __('View details') }}
+                                        </button>
+
+                                        @if ($expandedQuotations[$quotation->id] ?? false)
+                                            <div class="mt-2 overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)]">
+                                                <table class="w-full text-xs">
+                                                    <thead class="bg-[var(--hs-neutral-50)] text-[var(--hs-neutral-500)]">
+                                                        <tr>
+                                                            <th class="px-3 py-2 text-left font-medium">{{ __('Description') }}</th>
+                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Qty') }}</th>
+                                                            <th class="px-3 py-2 text-left font-medium">{{ __('Unit') }}</th>
+                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Unit Price') }}</th>
+                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Subtotal') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-[var(--hs-neutral-100)]">
+                                                        @foreach ($quotation->items as $item)
+                                                            <tr class="text-[var(--hs-neutral-700)]">
+                                                                <td class="px-3 py-2">{{ $item->description }}</td>
+                                                                <td class="px-3 py-2 text-right tabular-nums">{{ rtrim(rtrim(number_format((float) $item->quantity, 2), '0'), '.') }}</td>
+                                                                <td class="px-3 py-2">{{ $item->unit }}</td>
+                                                                <td class="px-3 py-2 text-right tabular-nums">₱{{ number_format((float) $item->unit_price, 2) }}</td>
+                                                                <td class="px-3 py-2 text-right font-medium tabular-nums text-[var(--hs-neutral-900)]">₱{{ number_format((float) $item->subtotal, 2) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                {{-- S4.T11: withdraw a submitted quotation --}}
+                                @if ($quotation->status === 'submitted')
+                                    <div class="mt-3 pt-3 border-t border-[var(--hs-neutral-100)]">
+                                        <flux:button
+                                            variant="ghost"
+                                            size="xs"
+                                            icon="arrow-uturn-left"
+                                            wire:click="confirmWithdrawQuotation({{ $quotation->id }})"
+                                            class="text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)] hover:text-[var(--hs-danger-700)]"
+                                        >
+                                            {{ __('Withdraw') }}
+                                        </flux:button>
+                                    </div>
+                                @endif
+
                                 {{-- Actions for draft quotations --}}
                                 @if ($quotation->isDraft())
                                     <div class="mt-3 pt-3 border-t border-[var(--hs-neutral-100)]">
@@ -241,29 +301,44 @@
         </div>
     </div>
 
-    {{-- Decline Modal --}}
-    <flux:modal name="decline-rfq" wire:model="showDeclineModal">
+    {{-- Close Modal --}}
+    <flux:modal name="close-rfq" wire:model="showCloseModal">
         <div class="space-y-4">
-            <flux:heading size="lg">{{ __('Decline RFQ') }}</flux:heading>
+            <flux:heading size="lg">{{ __('Close RFQ') }}</flux:heading>
             <p class="text-sm text-[var(--hs-neutral-600)]">
-                {{ __('Are you sure you want to decline this request? This action cannot be undone.') }}
+                {{ __('Are you sure you want to close this request? Any submitted quotations will be withdrawn and the buyer will be notified. This action cannot be undone.') }}
             </p>
 
             <flux:textarea
-                wire:model="declineReason"
+                wire:model="closeReason"
                 label="Reason (optional)"
                 placeholder="e.g., We cannot fulfil this volume within the requested timeline."
                 rows="3"
             />
 
             <div class="flex items-center gap-3">
-                <flux:button variant="danger" wire:click="decline">
-                    {{ __('Confirm Decline') }}
+                <flux:button variant="danger" wire:click="closeRfq">
+                    {{ __('Confirm Close') }}
                 </flux:button>
-                <flux:button variant="ghost" wire:click="$set('showDeclineModal', false)">
+                <flux:button variant="ghost" wire:click="$set('showCloseModal', false)">
                     {{ __('Cancel') }}
                 </flux:button>
             </div>
         </div>
     </flux:modal>
+
+    {{-- S4.T11: Withdraw Quotation Confirmation --}}
+    <x-hs-confirm
+        name="confirm-withdraw-quotation"
+        title="Withdraw Quotation"
+        message="Withdraw this quotation? The buyer will be notified and can no longer award it."
+        variant="danger"
+        confirmText="Withdraw"
+    >
+        <x-slot name="action">
+            <flux:button variant="danger" wire:click="withdrawQuotation" wire:loading.attr="disabled">
+                {{ __('Withdraw') }}
+            </flux:button>
+        </x-slot>
+    </x-hs-confirm>
 </div>

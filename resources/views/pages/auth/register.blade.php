@@ -44,28 +44,56 @@
         />
 
         <!-- Password -->
-        <flux:input
-            name="password"
-            :label="__('Create password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('At least 8 characters')"
-            passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-            viewable
-        />
+        <flux:field>
+            <flux:label>{{ __('Create password') }}</flux:label>
+            <div x-data="{ show: false }" class="relative">
+                <input
+                    name="password"
+                    :type="show ? 'text' : 'password'"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('At least 8 characters') }}"
+                    passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                    class="w-full rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
+                />
+                <button
+                    type="button"
+                    @click="show = !show"
+                    :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
+                >
+                    <flux:icon.eye x-show="!show" class="size-5" />
+                    <flux:icon.eye-slash x-show="show" x-cloak class="size-5" />
+                </button>
+            </div>
+            <flux:error name="password" />
+        </flux:field>
 
         <!-- Confirm Password -->
-        <flux:input
-            name="password_confirmation"
-            :label="__('Confirm password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Confirm password')"
-            passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-            viewable
-        />
+        <flux:field>
+            <flux:label>{{ __('Confirm password') }}</flux:label>
+            <div x-data="{ show: false }" class="relative">
+                <input
+                    name="password_confirmation"
+                    :type="show ? 'text' : 'password'"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Confirm password') }}"
+                    passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                    class="w-full rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
+                />
+                <button
+                    type="button"
+                    @click="show = !show"
+                    :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
+                >
+                    <flux:icon.eye x-show="!show" class="size-5" />
+                    <flux:icon.eye-slash x-show="show" x-cloak class="size-5" />
+                </button>
+            </div>
+            <flux:error name="password_confirmation" />
+        </flux:field>
 
         <flux:button type="submit" variant="primary" class="!w-full" data-test="register-user-button">
             {{ __('Create account') }}

@@ -6,6 +6,7 @@ paths:
   - resources/views/components/hs-modal.blade.php
   - 'resources/views/components/hs-confirm*'
   - 'resources/views/components/hs-alert*'
+  - resources/views/components/hs-unit-select.blade.php
 ---
 
 # Components
@@ -27,3 +28,6 @@ The action slot in hs-confirm is wrapped in `<div x-on:click="$flux.modal('{{ $n
 
 ## hs-alert is a MODAL component — never use for inline flash messages
 hs-alert is built on flux:modal and requires a `name` prop. It is NOT an inline alert/banner. For inline flash messages or status banners, use plain styled divs with design tokens (e.g., `bg-[var(--hs-success-50)] border border-[var(--hs-success-200)] text-[var(--hs-success-700)]`). Never substitute hs-alert where you need an inline notification.
+
+## hs-unit-select must hydrate FROM the Livewire value, not just on first render
+The component syncs Alpine → Livewire via $wire.set(). It ALSO must sync Livewire → Alpine: it has a hydrateFrom(val) method and $watch('$wire.<model>') plus a one-time hydrateFrom($wire.get(...)) in x-init. Without this, editing a record (e.g. variant edit modal) leaves the unit select blank because the component's x-data initialized with an empty value before the form was populated. Do not remove the $wire watcher/hydrate logic. Applies to every consumer (variant-manager, order-builder).

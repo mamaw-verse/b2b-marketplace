@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Jobs\IndexProductJob;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
@@ -149,6 +150,33 @@ final class ProductForm extends Component
         \Flux\Flux::toast($this->product ? 'Product updated.' : 'Product created.', variant: 'success');
 
         $this->redirect(route('hub.products.edit', $product), navigate: true);
+    }
+
+    /**
+     * Publish the product and trigger Typesense indexing.
+     */
+    public function publish(): void
+    {
+        abort_unless($this->product !== null, 403);
+        $this->authorize('update', $this->product);
+
+        $this->product->update(['status' => 'published']);
+        IndexProductJob::dispatch($this->product->id)->afterCommit();
+
+        \Flux\Flux::toast(__('Product published.'), variant: 'success');
+    }
+
+    /**
+     * Archive the product and remove it from the search index.
+     */
+    public function archive(): void
+    {
+        abort_unless($this->product !== null, 403);
+        $this->authorize('update', $this->product);
+
+        $this->product->update(['status' => 'archived']);
+
+        \Flux\Flux::toast(__('Product archived.'), variant: 'success');
     }
 
     /**

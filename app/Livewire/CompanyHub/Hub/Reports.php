@@ -7,7 +7,6 @@ namespace App\Livewire\CompanyHub\Hub;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -65,7 +64,7 @@ final class Reports extends Component
         // Payout metrics (graceful fallback)
         $totalEarned = 0.0;
         $totalReleased = 0.0;
-        if (Schema::hasTable('payout_items') && Schema::hasTable('payouts')) {
+        if (config('marketplace.features.payouts_enabled')) {
             $totalEarned = (float) DB::table('payout_items')
                 ->join('payouts', 'payouts.id', '=', 'payout_items.payout_id')
                 ->join('orders', 'orders.id', '=', 'payout_items.order_id')
@@ -88,7 +87,7 @@ final class Reports extends Component
             ->where('orders.status', 'completed')
             ->where('ledger_entries.type', 'escrow_hold');
 
-        if (Schema::hasTable('payout_items')) {
+        if (config('marketplace.features.payouts_enabled')) {
             $pendingQuery->whereNotExists(function ($sub) {
                 $sub->select(DB::raw(1))
                     ->from('payout_items')

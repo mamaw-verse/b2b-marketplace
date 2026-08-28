@@ -11,7 +11,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 final class HubEarningsController extends Controller
@@ -72,7 +71,7 @@ final class HubEarningsController extends Controller
      */
     private function getPayoutItemsTotal(int $shopId): float
     {
-        if (! Schema::hasTable('payout_items') || ! Schema::hasTable('payouts')) {
+        if (! config('marketplace.features.payouts_enabled')) {
             return 0.00;
         }
 
@@ -92,7 +91,7 @@ final class HubEarningsController extends Controller
      */
     private function getCompletedPayoutsTotal(int $shopId): float
     {
-        if (! Schema::hasTable('payouts')) {
+        if (! config('marketplace.features.payouts_enabled')) {
             return 0.00;
         }
 
@@ -118,7 +117,7 @@ final class HubEarningsController extends Controller
             ->where('orders.status', 'completed')
             ->where('ledger_entries.type', 'escrow_hold');
 
-        if (Schema::hasTable('payout_items')) {
+        if (config('marketplace.features.payouts_enabled')) {
             try {
                 $query->whereNotExists(function ($sub) {
                     $sub->select(DB::raw(1))
@@ -138,7 +137,7 @@ final class HubEarningsController extends Controller
      */
     private function getTotalFeesPaid(int $shopId): float
     {
-        if (! Schema::hasTable('payout_items') || ! Schema::hasTable('payouts')) {
+        if (! config('marketplace.features.payouts_enabled')) {
             return 0.00;
         }
 

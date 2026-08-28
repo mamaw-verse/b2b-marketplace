@@ -34,7 +34,7 @@ final class OnboardingRevisionRequestedNotification extends Notification impleme
             ->line("Your onboarding application for **{$storefrontName}** requires some changes before it can be approved.")
             ->when($this->onboarding->admin_notes, fn (MailMessage $mail) => $mail->line('**Feedback:** '.$this->onboarding->admin_notes))
             ->line('Please review the feedback and update your application.')
-            ->action('Update Application', url('/hub/onboarding'));
+            ->action('Update Application', route('hub.onboarding'));
     }
 
     /** @return array<string, mixed> */
@@ -48,7 +48,7 @@ final class OnboardingRevisionRequestedNotification extends Notification impleme
             'storefront_name' => $storefrontName,
             'admin_notes' => $this->onboarding->admin_notes,
             'message' => "Your onboarding application for {$storefrontName} requires revision.",
-            'url' => url('/hub/onboarding'),
+            'url' => route('hub.onboarding'),
         ];
     }
 

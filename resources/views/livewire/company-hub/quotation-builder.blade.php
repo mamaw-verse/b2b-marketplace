@@ -4,10 +4,10 @@
         {{-- Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">
-                {{ $quotation ? __('Edit Quotation') : __('New Quotation') }}
+                {{ $this->quotation ? __('Edit Quotation') : __('New Quotation') }}
             </h1>
             <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">
-                {{ __('RFQ:') }} <span class="font-medium text-[var(--hs-neutral-700)]">{{ $rfqRecipient->rfq->title }}</span>
+                {{ __('RFQ:') }} <span class="font-medium text-[var(--hs-neutral-700)]">{{ $this->rfqRecipient->rfq->title }}</span>
             </p>
         </div>
 
@@ -40,9 +40,8 @@
                                         <flux:select
                                             wire:model="items.{{ $index }}.variant_id"
                                             x-on:change="$wire.selectVariant({{ $index }}, $event.target.value ? parseInt($event.target.value) : null)"
-                                            placeholder="From catalogue (optional)…"
+                                            placeholder="Select a product variant…"
                                         >
-                                            <flux:select.option value="">— Freeform item —</flux:select.option>
                                             @foreach ($this->shopVariants as $v)
                                                 <flux:select.option value="{{ $v['id'] }}">
                                                     {{ $v['label'] }} · ₱{{ number_format((float) $v['price'], 2) }}/{{ $v['unit'] }}
@@ -219,11 +218,11 @@
                     <flux:button type="button" variant="primary" wire:click="confirmSubmit" wire:loading.attr="disabled">
                         {{ __('Submit Quotation') }}
                     </flux:button>
-                    <flux:button variant="ghost" href="{{ route('hub.rfqs.show', $rfqRecipient) }}" wire:navigate>
+                    <flux:button variant="ghost" href="{{ route('hub.rfqs.show', $this->rfqRecipient) }}" wire:navigate>
                         {{ __('Cancel') }}
                     </flux:button>
 
-                    @if ($quotation?->isSubmitted())
+                    @if ($this->quotation?->isSubmitted())
                         <flux:button
                             type="button"
                             variant="ghost"

@@ -50,7 +50,18 @@
                         type="file"
                     />
                     @if (!empty($certificate['media_id']))
-                        <flux:text class="mt-1 text-green-600">{{ __('File already uploaded') }}</flux:text>
+                        @php
+                            $certFilename = $certificate['filename'] ?? '';
+                            $certExt = $certFilename ? pathinfo($certFilename, PATHINFO_EXTENSION) : '';
+                            $certBase = $certFilename ? pathinfo($certFilename, PATHINFO_FILENAME) : '';
+                            $certDisplay = $certFilename
+                                ? \Illuminate\Support\Str::limit($certBase, 20, '…') . ($certExt ? '.' . $certExt : '')
+                                : __('File already uploaded');
+                        @endphp
+                        <flux:text class="mt-1 flex items-center gap-1 text-green-600">
+                            <flux:icon name="check-circle" variant="mini" class="size-4 shrink-0" />
+                            <span class="truncate" title="{{ $certFilename ?: __('File already uploaded') }}">{{ $certDisplay }}</span>
+                        </flux:text>
                     @endif
                 </div>
             </div>

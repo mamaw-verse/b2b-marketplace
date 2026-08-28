@@ -19,15 +19,33 @@
     x-data="{
         selected: '{{ $initSelected }}',
         custom: '{{ $initCustom }}',
+        knownValues: @js($values),
         get isOther() { return this.selected === 'other'; },
         sync() {
             const val = this.selected === 'other' ? this.custom : this.selected;
             @if ($wireModel)
                 $wire.set('{{ $wireModel }}', val);
             @endif
+        },
+        hydrateFrom(val) {
+            // Sync Alpine state FROM the Livewire value (e.g. when the form is
+            // populated for editing after this component has already rendered).
+            val = val ?? '';
+            const isKnown = this.knownValues.includes(val) && val !== 'other';
+            const nextSelected = (val && !isKnown) ? 'other' : (val || '');
+            const nextCustom = (!isKnown && val !== '' && val !== 'other') ? val : '';
+            if (nextSelected !== this.selected) { this.selected = nextSelected; }
+            if (nextCustom !== this.custom) { this.custom = nextCustom; }
         }
     }"
-    x-init="$watch('selected', () => sync()); $watch('custom', () => { if (selected === 'other') sync(); })"
+    x-init="
+        $watch('selected', () => sync());
+        $watch('custom', () => { if (selected === 'other') sync(); });
+        @if ($wireModel)
+            $watch('$wire.{{ $wireModel }}', (val) => hydrateFrom(val));
+            hydrateFrom($wire.get('{{ $wireModel }}'));
+        @endif
+    "
 >
     @if ($label)
         <label class="block mb-2 text-sm font-medium text-[var(--hs-neutral-700)]">

@@ -9,8 +9,10 @@ use App\Jobs\IndexShopJob;
 use App\Models\Shop;
 use App\Models\ShopCertificate;
 use App\Models\ShopOnboarding;
+use App\Models\ShopOnboardingCertificate;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 final class ApproveOnboardingAction
@@ -22,6 +24,15 @@ final class ApproveOnboardingAction
     {
         if ($onboarding->status === 'approved') {
             throw new RuntimeException('Onboarding has already been approved.');
+        }
+
+        // Every attached certificate must have an uploaded file before approval.
+        $onboarding->loadMissing('certificates');
+
+        if ($onboarding->certificates->contains(fn (ShopOnboardingCertificate $cert): bool => $cert->media_id === null)) {
+            throw ValidationException::withMessages([
+                'approve' => 'Cannot approve: one or more certificates are missing an uploaded file.',
+            ]);
         }
 
         $shop = DB::transaction(function () use ($onboarding, $admin): Shop {
@@ -67,6 +78,18 @@ final class ApproveOnboardingAction
             foreach ($onboarding->documents as $document) {
                 $shop->documents()->attach($document->id, ['is_verified' => true]);
             }
+
+            // Sync product categories (stored as a comma-separated list of IDs)
+            // onto the shop via the shop_categories pivot.
+            $categoryIds = collect(explode(',', (string) $onboarding->product_categories))
+                ->map(fn (string $value): string => mb_trim($value))
+                ->filter(fn (string $value): bool => $value !== '' && ctype_digit($value))
+                ->map(fn (string $value): int => (int) $value)
+                ->unique()
+                ->values()
+                ->all();
+
+            $shop->categories()->sync($categoryIds);
 
             // Update onboarding record
             $onboarding->update([

@@ -1,5 +1,5 @@
 <div>
-    @include('livewire.company-hub.partials.product-tabs')
+    @include('livewire.company-hub.partials.product-tabs', ['product' => $this->product])
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
 
@@ -24,7 +24,7 @@
                     <flux:icon name="information-circle" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-neutral-400)]" />
                     <span>
                         No product options are defined yet.
-                        <a href="{{ route('hub.products.edit', $product) }}" wire:navigate class="underline font-medium text-[var(--hs-neutral-700)]">
+                        <a href="{{ route('hub.products.edit', $this->product) }}" wire:navigate class="underline font-medium text-[var(--hs-neutral-700)]">
                             Set them on the Basic Info tab
                         </a>
                         so each variant can carry the right attributes (e.g. Size, Cut, Weight).
@@ -66,13 +66,6 @@
                                 size="sm"
                                 icon="pencil-square"
                                 wire:click="openEditVariant({{ $variant['id'] }})"
-                            />
-                            <flux:button
-                                variant="ghost"
-                                size="sm"
-                                icon="trash"
-                                wire:click="confirmRemoveVariant({{ $variant['id'] }})"
-                                class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
                             />
                         </div>
                     </div>
@@ -135,7 +128,7 @@
     {{-- ── Add / Edit Variant Modal ─────────────────────────────────────── --}}
     <x-hs-modal
         model="showVariantModal"
-        :title="$editingVariantId ? 'Edit Variant' : 'Add Variant'"
+        :title="$form->editingVariantId ? 'Edit Variant' : 'Add Variant'"
         subtitle="Fill in the details below. The variant is saved immediately when you click Save."
         size="lg"
     >
@@ -145,15 +138,15 @@
             <div class="flex gap-3">
                 <div class="flex-1">
                     <flux:input
-                        wire:model="draftSku"
+                        wire:model="form.sku"
                         label="SKU"
                         placeholder="e.g. PROD-001-S"
                         required
                     />
-                    @error('draftSku') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('form.sku') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
                 <div class="w-36">
-                    <flux:select wire:model="draftStatus" label="Status">
+                    <flux:select wire:model="form.status" label="Status">
                         <flux:select.option value="archived">Archived</flux:select.option>
                         <flux:select.option value="published">Published</flux:select.option>
                     </flux:select>
@@ -164,7 +157,7 @@
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <flux:input
-                        wire:model="draftPrice"
+                        wire:model="form.price"
                         label="Price (₱)"
                         type="number"
                         step="0.01"
@@ -172,27 +165,27 @@
                         placeholder="0.00"
                         required
                     />
-                    @error('draftPrice') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('form.price') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <flux:input
-                        wire:model="draftMoq"
+                        wire:model="form.moq"
                         label="Min. Order Qty"
                         type="number"
                         min="1"
                         placeholder="1"
                         required
                     />
-                    @error('draftMoq') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('form.moq') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <x-hs-unit-select
-                        wire-model="draftUnit"
-                        :value="$draftUnit"
+                        wire-model="form.unit"
+                        :value="$form->unit"
                         label="Unit"
                         required
                     />
-                    @error('draftUnit') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('form.unit') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -200,21 +193,21 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <flux:input
-                        wire:model="draftLeadTime"
+                        wire:model="form.leadTime"
                         label="Lead Time (days)"
                         type="number"
                         min="0"
                         placeholder="e.g. 7"
                     />
-                    @error('draftLeadTime') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('form.leadTime') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <flux:input
-                        wire:model="draftPackSize"
+                        wire:model="form.packSize"
                         label="Pack Size"
                         placeholder="e.g. 12 × 1 kg"
                     />
-                    @error('draftPackSize') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    @error('form.packSize') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -232,7 +225,7 @@
                                     @endif
                                 </label>
                                 @if (($attrConfig['type'] ?? 'text') === 'select' && ! empty($attrConfig['options']))
-                                    <flux:select wire:model="draftAttributes.{{ $attrKey }}">
+                                    <flux:select wire:model="form.attributes.{{ $attrKey }}">
                                         <flux:select.option value="">Select…</flux:select.option>
                                         @foreach (array_map('trim', explode(',', $attrConfig['options'])) as $option)
                                             <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
@@ -240,14 +233,14 @@
                                     </flux:select>
                                 @elseif (($attrConfig['type'] ?? '') === 'number')
                                     <flux:input
-                                        wire:model="draftAttributes.{{ $attrKey }}"
+                                        wire:model="form.attributes.{{ $attrKey }}"
                                         type="number"
                                         step="any"
                                         placeholder="Enter value"
                                     />
                                 @else
                                     <flux:input
-                                        wire:model="draftAttributes.{{ $attrKey }}"
+                                        wire:model="form.attributes.{{ $attrKey }}"
                                         placeholder="Enter value"
                                     />
                                 @endif
@@ -265,7 +258,7 @@
                     Cancel
                 </flux:button>
                 <flux:button variant="primary" wire:click="saveVariant" wire:loading.attr="disabled">
-                    {{ $editingVariantId ? 'Update Variant' : 'Save Variant' }}
+                    {{ $form->editingVariantId ? 'Update Variant' : 'Save Variant' }}
                 </flux:button>
             </div>
         </x-slot>
@@ -332,20 +325,6 @@
             </div>
         </x-slot>
     </x-hs-modal>
-
-    <x-hs-confirm
-        name="confirm-remove-variant"
-        title="Remove Variant"
-        message="Remove this variant permanently?"
-        variant="danger"
-        confirmText="Remove"
-    >
-        <x-slot name="action">
-            <flux:button variant="danger" wire:click="removeVariant" wire:loading.attr="disabled">
-                Remove
-            </flux:button>
-        </x-slot>
-    </x-hs-confirm>
 
     <x-hs-confirm
         name="confirm-remove-quantity-break"

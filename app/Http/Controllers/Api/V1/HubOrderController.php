@@ -129,24 +129,30 @@ final class HubOrderController extends Controller
             // Full replace items if key present
             if (array_key_exists('items', $validated)) {
                 $order->items()->delete();
+
+                $itemRows = [];
                 foreach ($validated['items'] as $index => $item) {
-                    $subtotal = round((float) $item['quantity'] * (float) $item['unit_price'], 2);
-                    $order->items()->create([
+                    $itemRows[] = [
                         'description' => $item['description'],
                         'quantity' => $item['quantity'],
                         'unit' => $item['unit'],
                         'unit_price' => $item['unit_price'],
-                        'subtotal' => $subtotal,
+                        'subtotal' => round((float) $item['quantity'] * (float) $item['unit_price'], 2),
                         'sort_order' => $index,
-                    ]);
+                    ];
+                }
+
+                if ($itemRows !== []) {
+                    $order->items()->createMany($itemRows);
                 }
             }
 
             // Full replace fees if key present
             if (array_key_exists('fees', $validated)) {
                 $order->fees()->delete();
-                foreach ($validated['fees'] as $fee) {
-                    $order->fees()->create($fee);
+
+                if ($validated['fees'] !== []) {
+                    $order->fees()->createMany($validated['fees']);
                 }
             }
 

@@ -7,24 +7,32 @@ namespace App\Livewire\Account\Disputes;
 use App\Events\DisputeOpened;
 use App\Models\Dispute;
 use App\Models\Order;
+use App\Services\MediaUploadService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.portal', ['portal' => 'account'])]
 #[Title('Open Dispute')]
 final class DisputeForm extends Component
 {
+    use WithFileUploads;
+
     public Order $order;
 
     public string $type = 'refund_only';
 
     public string $reason = '';
 
+    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    public array $disputePhotos = [];
+
     public function mount(Order $order): void
     {
-        abort_unless($order->buyer_user_id === Auth::id(), 403);
+        Gate::authorize('view', $order);
         $this->order = $order;
     }
 
@@ -33,6 +41,8 @@ final class DisputeForm extends Component
         $this->validate([
             'type' => 'required|in:return_refund,refund_only',
             'reason' => 'required|string|max:2000',
+            'disputePhotos' => ['nullable', 'array', 'max:5'],
+            'disputePhotos.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf'],
         ]);
 
         $status = $this->type === 'return_refund' ? 'awaiting_return' : 'open';
@@ -44,6 +54,17 @@ final class DisputeForm extends Component
             'status' => $status,
             'reason' => $this->reason,
         ]);
+
+        // Upload and attach photos
+        if (! empty($this->disputePhotos)) {
+            $mediaService = app(MediaUploadService::class);
+            $mediaIds = [];
+            foreach ($this->disputePhotos as $photo) {
+                $media = $mediaService->store($photo, Auth::id(), 'dispute_photo');
+                $mediaIds[] = $media->id;
+            }
+            $dispute->photos()->attach($mediaIds);
+        }
 
         DisputeOpened::dispatch($dispute);
 
