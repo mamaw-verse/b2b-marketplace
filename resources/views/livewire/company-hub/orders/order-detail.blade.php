@@ -179,7 +179,7 @@
                                 @foreach ($order->items as $item)
                                     <tr>
                                         <td class="py-3 text-[var(--hs-neutral-900)] font-medium">{{ $item->description }}</td>
-                                        <td class="py-3 text-right text-[var(--hs-neutral-700)] tabular-nums">{{ $item->quantity }} {{ $item->unit }}</td>
+                                        <td class="py-3 text-right text-[var(--hs-neutral-700)] tabular-nums">{{ (int) $item->quantity }} {{ $item->unit }}</td>
                                         <td class="py-3 text-right text-[var(--hs-neutral-700)]">{{ number_format((float) $item->unit_price, 2) }}</td>
                                         <td class="py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums">{{ number_format((float) $item->subtotal, 2) }}</td>
                                     </tr>

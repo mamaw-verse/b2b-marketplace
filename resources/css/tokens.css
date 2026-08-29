@@ -2,54 +2,61 @@
  * Halal B2B Marketplace — Design System Tokens
  *
  * Brand palette, neutrals, semantic colors, typography, spacing, radius, elevation, and motion.
- * Extracted from the marketing/reference page per PRD §8.
+ *
+ * Brand colors updated per new palette spec:
+ *   Primary Base     — Deep Emerald Green  #00312B  (brand headers, primary buttons, dark surfaces)
+ *   Accent/Secondary — Vibrant Gold Yellow #EEC900  (highlights, badges, CTAs on dark green)
+ *   Neutral Light    — Soft Off-White      #EFEFEF  (card backgrounds, light surface fills, borders)
+ *   Neutral Dark     — Canvas Black        #000000  (high-contrast text, outer margins, dark mode)
  *
  * Usage: these CSS custom properties are consumed by Tailwind via @theme in app.css.
  */
 
 :root {
     /* ===========================
-       BRAND — Halal Emerald Green
+       BRAND — Deep Emerald Green
+       (scale built around #00312B as the 600/"Primary" step)
        =========================== */
-    --hs-green-50: #ECFDF5;
-    --hs-green-100: #D1FAE5;
-    --hs-green-200: #A7F3D0;
-    --hs-green-300: #6EE7B7;
-    --hs-green-400: #34D399;
-    --hs-green-500: #10B981;
-    --hs-green-600: #158A5A; /* Primary */
-    --hs-green-700: #117A4C;
-    --hs-green-800: #0D5E3A;
-    --hs-green-900: #083D26;
-    --hs-green-950: #05291B; /* Deep forest — hero/footer/dark surfaces */
+    --hs-green-50: #F2F5F4;
+    --hs-green-100: #D9E0DF;
+    --hs-green-200: #B3C1BF;
+    --hs-green-300: #8CA2A0;
+    --hs-green-400: #597875;
+    --hs-green-500: #26504B;
+    --hs-green-600: #00312B; /* Primary — Deep Emerald Green */
+    --hs-green-700: #002924;
+    --hs-green-800: #00221E;
+    --hs-green-900: #001B18;
+    --hs-green-950: #001311; /* Deep forest — hero/footer/dark surfaces */
 
     /* ===========================
-       ACCENT — Gold (restrained, export/premium cues)
+       ACCENT — Vibrant Gold Yellow
+       (scale built around #EEC900 as the 500 step)
        =========================== */
-    --hs-gold-100: #FEF9E7;
-    --hs-gold-200: #FCF0C3;
-    --hs-gold-300: #F9E08E;
-    --hs-gold-400: #E8C548;
-    --hs-gold-500: #C9A24B; /* Export/premium accent */
-    --hs-gold-600: #A8842E;
-    --hs-gold-700: #86681F;
-    --hs-gold-800: #6B5219;
-    --hs-gold-900: #4A3810;
+    --hs-gold-100: #FDFAE6;
+    --hs-gold-200: #FBF1BF;
+    --hs-gold-300: #F7E78C;
+    --hs-gold-400: #F3D94D;
+    --hs-gold-500: #EEC900; /* Accent — Vibrant Gold Yellow */
+    --hs-gold-600: #CAAB00;
+    --hs-gold-700: #A68D00;
+    --hs-gold-800: #836F00;
+    --hs-gold-900: #5F5000;
 
     /* ===========================
-       NEUTRALS — Slightly green-tinted
+       NEUTRALS — Soft Off-White to Canvas Black
        =========================== */
     --hs-neutral-0: #FFFFFF;
-    --hs-neutral-50: #F8FAF9;
-    --hs-neutral-100: #F1F5F3;
-    --hs-neutral-200: #E2E8E5;
-    --hs-neutral-300: #C8D1CC;
-    --hs-neutral-400: #9CA8A2;
-    --hs-neutral-500: #6B7A73;
-    --hs-neutral-600: #4A5650;
-    --hs-neutral-700: #374240;
-    --hs-neutral-800: #242D2A;
-    --hs-neutral-900: #121917;
+    --hs-neutral-50: #EFEFEF;  /* Soft Off-White — card/surface fills */
+    --hs-neutral-100: #E0E0E0;
+    --hs-neutral-200: #C7C7C7;
+    --hs-neutral-300: #A8A8A8;
+    --hs-neutral-400: #8A8A8A;
+    --hs-neutral-500: #6B6B6B;
+    --hs-neutral-600: #4D4D4D;
+    --hs-neutral-700: #333333;
+    --hs-neutral-800: #1A1A1A;
+    --hs-neutral-900: #000000; /* Canvas Black */
 
     /* ===========================
        SEMANTIC COLORS
@@ -134,11 +141,11 @@
     /* ===========================
        ELEVATION / SHADOWS
        =========================== */
-    --hs-shadow-xs: 0 1px 2px rgba(5, 41, 27, 0.05);
-    --hs-shadow-sm: 0 1px 2px rgba(5,41,27,0.06);
-    --hs-shadow-md: 0 4px 14px rgba(5,41,27,0.08);
-    --hs-shadow-lg: 0 12px 32px rgba(5,41,27,0.14);
-    --hs-shadow-xl: 0 20px 25px rgba(5, 41, 27, 0.08), 0 8px 10px rgba(5, 41, 27, 0.04);
+    --hs-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --hs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --hs-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+    --hs-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.14);
+    --hs-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.08), 0 8px 10px rgba(0, 0, 0, 0.04);
 
     /* ===========================
        MOTION / TRANSITIONS
@@ -161,18 +168,18 @@
 }
 
 .dark {
-    /* Calibrated Neutrals for Dark Mode */
-    --hs-neutral-0: #1A2421;   /* Elevated Card Surface */
-    --hs-neutral-50: #121917;  /* Deep Page Background */
-    --hs-neutral-100: #242D2A; /* Subtle Hover State / Secondary bg */
-    --hs-neutral-200: #2A3632; /* Subtle Borders */
-    --hs-neutral-300: #374240; /* Prominent Borders / Dividers */
-    --hs-neutral-400: #4A5650; /* Muted Icon / Disabled Text */
-    --hs-neutral-500: #6B7A73; /* Placeholder Text */
-    --hs-neutral-600: #9CA8A2; /* Muted Text */
-    --hs-neutral-700: #C8D1CC; /* Tertiary Text */
-    --hs-neutral-800: #E2E8E5; /* Secondary Text */
-    --hs-neutral-900: #F8FAF9; /* Primary High-Contrast Text */
+    /* Calibrated Neutrals for Dark Mode — Canvas Black to Soft Off-White */
+    --hs-neutral-0: #1A1A1A;   /* Elevated Card Surface */
+    --hs-neutral-50: #000000;  /* Deep Page Background — Canvas Black */
+    --hs-neutral-100: #1A1A1A; /* Subtle Hover State / Secondary bg */
+    --hs-neutral-200: #262626; /* Subtle Borders */
+    --hs-neutral-300: #333333; /* Prominent Borders / Dividers */
+    --hs-neutral-400: #4D4D4D; /* Muted Icon / Disabled Text */
+    --hs-neutral-500: #6B6B6B; /* Placeholder Text */
+    --hs-neutral-600: #8A8A8A; /* Muted Text */
+    --hs-neutral-700: #A8A8A8; /* Tertiary Text */
+    --hs-neutral-800: #C7C7C7; /* Secondary Text */
+    --hs-neutral-900: #EFEFEF; /* Primary High-Contrast Text — Soft Off-White */
 
     /* Calibrated Shadows for Dark Mode (Pure Black based) */
     --hs-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -181,13 +188,13 @@
     --hs-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.7);
     --hs-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6), 0 8px 10px rgba(0, 0, 0, 0.4);
 
-    /* Brand Colors - Adjusting deep greens for readability on dark surfaces */
-    --hs-green-50: #05291B;  /* Was light green, now deep forest for dark bg */
-    --hs-green-100: #083D26;
-    --hs-green-200: #0D5E3A;
-    --hs-green-700: #34D399; /* Map dark text greens to a brighter readable green (400) */
-    --hs-green-800: #6EE7B7; /* Map deeper text greens to (300) */
-    --hs-green-900: #A7F3D0; /* Map darkest text greens to (200) */
+    /* Brand Colors - deep greens for dark bg, brighter greens mapped for readable text */
+    --hs-green-50: #001311;  /* Was light green, now deep forest for dark bg */
+    --hs-green-100: #001B18;
+    --hs-green-200: #00221E;
+    --hs-green-700: #8CA2A0; /* Map dark text greens to a brighter readable green (300) */
+    --hs-green-800: #B3C1BF; /* Map deeper text greens to (200) */
+    --hs-green-900: #D9E0DF; /* Map darkest text greens to (100) */
 
     /* Semantic Backgrounds */
     --hs-success-50: #05291B;

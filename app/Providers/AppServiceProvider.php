@@ -22,6 +22,13 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(\App\Services\DltPaymentService::class);
 
+        // Route the notification "mail" channel through our channel that
+        // prepends a shared Arabic salutation addressed to the recipient.
+        $this->app->bind(
+            \Illuminate\Notifications\Channels\MailChannel::class,
+            \App\Notifications\Channels\ArabicGreetingMailChannel::class,
+        );
+
         $this->app->singleton(
             \App\Contracts\DltDisbursementServiceInterface::class,
             fn () => config('services.dlt.disbursement_enabled', false)

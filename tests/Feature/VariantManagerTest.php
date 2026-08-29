@@ -141,3 +141,84 @@ test('the variant list does not render a delete confirmation modal', function ()
         ->assertDontSeeHtml('confirm-remove-variant')
         ->assertDontSee('confirmRemoveVariant');
 });
+
+// ── Unit field alignment in the add/edit variant modal ───────────────────────
+
+test('the unit field matches flux field metrics so it lines up with price and moq', function () {
+    // Regression: hs-unit-select renders its own label/control instead of using
+    // flux:input, so its metrics must mirror flux's — an inline-flex label with
+    // leading-tight and an 8px gap. A plain block label with the default
+    // line-height pushes the select ~3px below its flux siblings in the row.
+    Livewire::test(VariantManager::class, ['product' => $this->product])
+        ->call('openAddVariant')
+        // The unit cell uses the same grid gap-2 field layout as a flux field
+        // (label + control) so its box top lines up with Price and MOQ.
+        ->assertSeeHtml('class="grid gap-2"')
+        ->assertSeeHtml('inline-flex items-center text-sm font-medium leading-tight')
+        // The select must suppress the browser's square focus outline so the
+        // rounded green ring matches the input radius.
+        ->assertSeeHtml('appearance-none')
+        ->assertSeeHtml('focus:outline-none');
+});
+
+test('the add/edit variant modal cannot be dismissed by clicking outside', function () {
+    // Prevents losing in-progress variant edits from a stray background click.
+    // Flux maps :dismissible="false" to the disable-click-outside attribute.
+    // The Quantity Breaks modal stays dismissible (default).
+    Livewire::test(VariantManager::class, ['product' => $this->product])
+        ->call('openAddVariant')
+        ->assertSeeHtml('disable-click-outside');
+});
+
+test('the unit field renders as sibling grid cells that expand to 4 columns only for custom units', function () {
+    // layout="grid" makes the root display:contents so the select and the
+    // custom-unit input become sibling grid cells. The row is 3 columns by
+    // default and only becomes 4 when the chosen unit is custom ("Other"), so
+    // Min. Order Qty never shifts down for standard units.
+    Livewire::test(VariantManager::class, ['product' => $this->product])
+        ->call('openAddVariant')
+        ->assertSeeHtml('class="contents"')
+        ->assertSeeHtml("isCustomUnit ? 'grid-cols-4' : 'grid-cols-3'");
+});
+
+// ── Status toggle is an explicit action button, not the badge ────────────────
+
+test('toggleStatus flips a variant between published and archived', function () {
+    $variant = ProductVariant::factory()->create([
+        'product_id' => $this->product->id,
+        'status' => 'published',
+    ]);
+
+    Livewire::test(VariantManager::class, ['product' => $this->product])
+        ->call('toggleStatus', $variant->id);
+
+    expect($variant->fresh()->status)->toBe('archived');
+});
+
+test('the status pill is display-only and toggling is a tooltip icon button', function () {
+    // The pill used to be wrapped in a <button wire:click="toggleStatus"> which
+    // was confusing. Status changes now go through a dedicated icon button with
+    // a Publish/Archive tooltip, matching the product-list actions.
+    $variant = ProductVariant::factory()->create([
+        'product_id' => $this->product->id,
+        'status' => 'published',
+    ]);
+
+    Livewire::test(VariantManager::class, ['product' => $this->product])
+        ->assertOk()
+        // Published variant offers an Archive action.
+        ->assertSeeHtml('tooltip="Archive"')
+        ->assertSeeHtml('wire:click="toggleStatus('.$variant->id.')"')
+        // The pill itself no longer wraps the toggle in a clickable button.
+        ->assertDontSeeHtml('<button wire:click="toggleStatus');
+});
+
+test('an archived variant offers a Publish toggle', function () {
+    ProductVariant::factory()->create([
+        'product_id' => $this->product->id,
+        'status' => 'archived',
+    ]);
+
+    Livewire::test(VariantManager::class, ['product' => $this->product])
+        ->assertSeeHtml('tooltip="Publish"');
+});

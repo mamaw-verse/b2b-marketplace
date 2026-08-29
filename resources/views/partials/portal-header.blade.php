@@ -4,7 +4,11 @@
     $isStorefront = ! $isAdminOrHub;
     $user = auth()->user();
     $isAdmin = $user?->hasRole('admin');
-    $isSeller = $user?->hasRole('seller');
+    $shop = $user?->shop;
+    // Seller access is driven by an approved (active) shop, not the Spatie role.
+    // Onboarding approval sets shops.status = 'active' but does not assign a role,
+    // so gating on shop status keeps the header in sync with the sidebar.
+    $isSeller = $shop?->status === 'active';
 @endphp
 <header class="sticky top-0 z-50 border-b border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]/80 backdrop-blur-md">
     {{-- Auth user ID for Echo notification channel (safe to expose — it's the PK, not a secret) --}}
@@ -15,8 +19,14 @@
         <div class="flex h-16 items-center justify-between">
 
             {{-- Left: Hamburger (portal mobile only) + Logo --}}
+            @php
+                // Show the mobile-nav trigger on every portal page (admin, seller hub,
+                // buyer hub and shared settings pages). $portal is only set by the
+                // portal layout, so storefront pages never render the hamburger.
+                $isPortal = $isAdminOrHub || request()->routeIs('account.*') || isset($portal);
+            @endphp
             <div class="flex items-center gap-2 shrink-0">
-                @if ($isAdminOrHub)
+                @if ($isPortal)
                     <button
                         x-data
                         @click="window.dispatchEvent(new CustomEvent('toggle-portal-nav'))"
@@ -26,20 +36,38 @@
                         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                     </button>
                 @endif
-                <a href="{{ route('home') }}" class="flex items-center gap-2" wire:navigate>
+                <a href="{{ route('home') }}" class="flex items-center gap-2 mr-1" wire:navigate>
                     <img src="/images/brand-logo.png" alt="1Halal Store" class="h-9 w-auto">
                 </a>
 
-                {{-- Portal context pill: distinguishes Seller Hub vs Buyer Hub --}}
+                {{-- Portal context: company name + hub label, divided from the logo.
+                     Uses the layout-computed $portal so shared pages (e.g. /settings/*)
+                     keep the hub the user came from instead of flipping to Buyer Hub. --}}
                 @auth
-                    @if (request()->routeIs('hub.*'))
-                        <span class="hidden sm:inline-flex items-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-50)] px-2.5 py-0.5 text-xs font-semibold text-[var(--hs-green-700)] border border-[var(--hs-green-200)]">
-                            {{ __('Seller Hub') }}
-                        </span>
-                    @elseif (request()->routeIs('account.*'))
-                        <span class="hidden sm:inline-flex items-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-info-50)] px-2.5 py-0.5 text-xs font-semibold text-[var(--hs-info-700)] border border-[var(--hs-info-200)]">
-                            {{ __('Buyer Hub') }}
-                        </span>
+                    @if (($portal ?? null) === 'hub' || request()->routeIs('hub.*'))
+                        <div class="hidden sm:flex items-center gap-3 pl-1">
+                            <span class="h-8 w-px bg-[var(--hs-neutral-200)]"></span>
+                            <div class="flex flex-col leading-tight">
+                                <span class="text-base font-bold text-[var(--hs-green-600)] truncate max-w-[240px]">
+                                    {{ $shop?->storefront_name ?? __('Seller Hub') }}
+                                </span>
+                                <span class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">
+                                    {{ __('Seller Hub') }}
+                                </span>
+                            </div>
+                        </div>
+                    @elseif (($portal ?? null) === 'account' || request()->routeIs('account.*'))
+                        <div class="hidden sm:flex items-center gap-3 pl-1">
+                            <span class="h-8 w-px bg-[var(--hs-neutral-200)]"></span>
+                            <div class="flex flex-col leading-tight">
+                                <span class="text-base font-bold text-[var(--hs-green-600)] truncate max-w-[240px]">
+                                    {{ trim($user->first_name . ' ' . $user->last_name) }}
+                                </span>
+                                <span class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">
+                                    {{ __('Buyer Hub') }}
+                                </span>
+                            </div>
+                        </div>
                     @endif
                 @endauth
             </div>
@@ -47,7 +75,7 @@
             {{-- Right: Nav links + Auth (nav hidden on admin/hub) --}}
             <div class="flex items-center gap-1">
 
-                @if ($isStorefront)
+                @unless ($isPortal)
                     <nav class="hidden sm:flex items-center mr-4">
                         <a
                             href="{{ route('storefront.companies') }}"
@@ -72,7 +100,7 @@
                             {{ __('Products') }}
                         </a>
                     </nav>
-                @endif
+                @endunless
 
                 @auth
                     <livewire:shared.notification-bell />
@@ -111,14 +139,14 @@
                             <div class="py-1">
                                 {{-- Buyer Hub: always available to any authenticated non-admin --}}
                                 @unless ($isAdmin)
-                                    <a href="{{ route('account.profile') }}" wire:navigate @click="open = false"
+                                    <a href="{{ route('account.dashboard') }}" wire:navigate @click="open = false"
                                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
                                         <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>
                                         {{ __('Buyer Hub') }}
                                     </a>
                                 @endunless
 
-                                {{-- Seller Hub: only for users with the seller role --}}
+                                {{-- Seller Hub: shown once the user has an approved (active) shop --}}
                                 @if ($isSeller)
                                     <a href="{{ route('hub.hub-dashboard') }}" wire:navigate @click="open = false"
                                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
@@ -169,7 +197,7 @@
         </div>
 
         {{-- Mobile storefront nav row (sm:hidden, only shown on storefront pages) --}}
-        @if ($isStorefront)
+        @unless ($isPortal)
             <div class="flex sm:hidden border-t border-[var(--hs-neutral-100)] px-4 py-1.5 gap-1">
                 <a
                     href="{{ route('storefront.companies') }}"
@@ -194,6 +222,6 @@
                     {{ __('Products') }}
                 </a>
             </div>
-        @endif
+        @endunless
     </div>
 </header>

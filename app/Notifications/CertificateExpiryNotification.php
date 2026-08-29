@@ -64,7 +64,7 @@ final class CertificateExpiryNotification extends Notification implements Should
             ? "Halal certificate {$registrationNumber} has expired."
             : "Halal certificate {$registrationNumber} expires in {$this->daysUntilExpiry} days.";
 
-        $url = url('/hub/onboarding');
+        $url = url('/account/onboarding');
 
         return [
             'type' => $this->daysUntilExpiry <= 0 ? 'certificate_expired' : 'certificate_expiring',

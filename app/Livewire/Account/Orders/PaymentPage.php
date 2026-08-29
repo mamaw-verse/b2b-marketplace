@@ -360,6 +360,8 @@ final class PaymentPage extends Component
 
     public function render()
     {
-        return view('livewire.account.orders.payment-page');
+        return view('livewire.account.orders.payment-page', [
+            'order' => $this->order,
+        ]);
     }
 }

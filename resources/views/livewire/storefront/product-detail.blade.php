@@ -50,7 +50,11 @@
 
         // RFQ CTA
         $ctaHref = auth()->check()
-            ? route('account.rfqs.create', ['shop_id' => $product->shop?->id, 'title' => $product->name])
+            ? route('account.rfqs.create', [
+                'shop_id' => $product->shop?->id,
+                'product_id' => $product->id,
+                'title' => $product->name,
+            ])
             : route('login');
         $ctaLabel = auth()->check() ? __('Request Quote') : __('Log in to Request Quote');
         $ctaAttrs = auth()->check() ? 'wire:navigate' : '';

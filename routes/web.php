@@ -53,10 +53,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
 
         if ($user->shop && $user->shop->status === 'active') {
-            return redirect()->route('hub.products.index');
+            return redirect()->route('hub.hub-dashboard');
         }
 
-        return redirect()->route('hub.onboarding');
+        // Buyers (and users mid-onboarding) land on their account dashboard.
+        // Becoming a seller is an opt-in action from the portal, not the default.
+        return redirect()->route('account.dashboard');
     })->name('dashboard');
 });
 
@@ -68,6 +70,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->group(function () {
     Route::livewire('dashboard', 'account.dashboard')->name('dashboard');
     Route::livewire('profile', 'account.buyer-profile-form')->name('profile');
+    // Seller onboarding application (buyer applies to become a seller)
+    Route::livewire('onboarding', 'company-hub.onboarding-wizard')->name('onboarding');
+
     Route::livewire('rfqs', 'account.rfq-list')->name('rfqs.index');
     Route::livewire('rfqs/create', 'account.rfq-create-form')->name('rfqs.create');
     Route::livewire('rfqs/{rfq}', 'account.rfq-detail')->name('rfqs.show');
@@ -98,12 +103,11 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::get('/', function () {
         $user = auth()->user();
         if ($user->shop && $user->shop->status === 'active') {
-            return redirect()->route('hub.products.index');
+            return redirect()->route('hub.hub-dashboard');
         }
 
-        return redirect()->route('hub.onboarding');
+        return redirect()->route('account.onboarding');
     })->name('dashboard');
-    Route::livewire('onboarding', 'company-hub.onboarding-wizard')->name('onboarding');
     Route::livewire('shop/profile', 'company-hub.shop-profile-form')->name('shop.profile');
 
     // Product management

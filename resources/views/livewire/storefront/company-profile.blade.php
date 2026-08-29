@@ -2,6 +2,7 @@
     {{-- Dark Header Band --}}
     <section class="bg-[var(--hs-green-950)] py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
                 <x-hs-avatar :initials="strtoupper(mb_substr($shop->storefront_name, 0, 2))" size="lg" class="shrink-0" />
                 <div class="min-w-0">
@@ -27,6 +28,21 @@
                         </div>
                     @endif
                 </div>
+            </div>
+
+            {{-- Owner-only: shortcut to edit the shop profile in the Seller Hub --}}
+            @auth
+                @if ($shop->user_id === auth()->id())
+                    <a
+                        href="{{ route('hub.shop.profile') }}"
+                        wire:navigate
+                        class="inline-flex shrink-0 items-center gap-2 rounded-[var(--hs-radius-pill)] bg-[var(--hs-neutral-0)]/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-[var(--hs-neutral-0)]/25 transition hover:bg-[var(--hs-neutral-0)]/20"
+                    >
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+                        {{ __('Edit shop profile') }}
+                    </a>
+                @endif
+            @endauth
             </div>
         </div>
     </section>

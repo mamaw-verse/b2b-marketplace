@@ -56,3 +56,86 @@ test('validation fails when required fields are cleared', function () {
             'city' => 'required',
         ]);
 });
+
+test('the form hydrates the previously hidden onboarding fields', function () {
+    $this->shop->update([
+        'registered_business_name' => 'Acme Foods Inc',
+        'business_structure' => 'corporation',
+        'value_chain_positions' => ['manufacturing', 'distribution'],
+        'capabilities' => ['packaging', 'exporting'],
+    ]);
+
+    $category = App\Models\Category::factory()->create();
+    $this->shop->categories()->sync([$category->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->assertOk()
+        ->assertSet('registered_business_name', 'Acme Foods Inc')
+        ->assertSet('business_structure', 'corporation')
+        ->assertSet('value_chain_positions', ['manufacturing', 'distribution'])
+        ->assertSet('capabilities', ['packaging', 'exporting'])
+        ->assertSet('product_categories', [$category->id]);
+});
+
+test('saving persists value chain, capabilities, and categories', function () {
+    $category = App\Models\Category::factory()->create();
+
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->set('registered_business_name', 'Renamed Co')
+        ->set('business_structure', 'partnership')
+        ->set('value_chain_positions', ['farm', 'processing'])
+        ->set('capabilities', ['cold_storage'])
+        ->set('product_categories', [$category->id])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $this->shop->refresh();
+
+    expect($this->shop->registered_business_name)->toBe('Renamed Co')
+        ->and($this->shop->business_structure)->toBe('partnership')
+        ->and($this->shop->value_chain_positions)->toBe(['farm', 'processing'])
+        ->and($this->shop->capabilities)->toBe(['cold_storage'])
+        ->and($this->shop->categories->pluck('id')->all())->toBe([$category->id]);
+});
+
+test('the read-only verified details show legal identifiers and certificates', function () {
+    $this->shop->update([
+        'dti_sec_number' => 'SEC-2024-00001',
+        'tax_identification_number' => '123-456-789-000',
+    ]);
+
+    $media = App\Models\Media::factory()->create([
+        'original_filename' => 'halal-cert.pdf',
+        'uploaded_by_id' => $this->seller->id,
+    ]);
+
+    App\Models\ShopCertificate::create([
+        'shop_id' => $this->shop->id,
+        'certification_body' => 'IDCP',
+        'registration_number' => 'REG-001',
+        'expiry_date' => now()->addYear(),
+        'status' => 'active',
+        'media_id' => $media->id,
+        'is_verified' => true,
+    ]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->assertOk()
+        ->assertSee('SEC-2024-00001')
+        ->assertSee('123-456-789-000')
+        ->assertSee(__('Verified Compliance Details'))
+        ->assertSee('REG-001');
+});
+
+test('invalid enum values for the new fields are rejected', function () {
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->set('business_structure', 'not_a_structure')
+        ->set('value_chain_positions', ['bogus_position'])
+        ->set('capabilities', ['bogus_capability'])
+        ->call('save')
+        ->assertHasErrors(['business_structure', 'value_chain_positions.0', 'capabilities.0']);
+});

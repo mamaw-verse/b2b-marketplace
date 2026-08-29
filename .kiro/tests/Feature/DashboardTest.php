@@ -15,12 +15,12 @@ test('guests are redirected to the login page', function () {
     $response->assertRedirect(route('login'));
 });
 
-test('authenticated users are redirected to hub onboarding', function () {
+test('authenticated users are redirected to account onboarding', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     $response = $this->get('/redirect');
-    $response->assertRedirect(route('hub.onboarding'));
+    $response->assertRedirect(route('account.onboarding'));
 });
 
 test('admin users are redirected to admin console', function () {

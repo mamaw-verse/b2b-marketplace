@@ -1,4 +1,11 @@
-<div>
+{{--
+    While any document is still scanning, poll every 5s so the Scan Status
+    column updates on its own. The `documents` computed re-queries on each
+    poll, so a bare wire:poll is enough to pick up the job's result. Polling
+    stops automatically once hasPendingDocuments is false, so a settled list
+    is idle.
+--}}
+<div @if ($this->hasPendingDocuments) wire:poll.5s @endif>
     @include('livewire.company-hub.partials.product-tabs')
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
@@ -28,6 +35,14 @@
                     </div>
                 @endif
             </div>
+
+            {{-- Live status line so the user knows the page is checking on its own --}}
+            @if ($this->hasPendingDocuments)
+                <div class="mb-4 flex items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] px-4 py-2.5 text-sm text-[var(--hs-warning-700)]" aria-live="polite">
+                    <flux:icon name="arrow-path" class="size-4 shrink-0 animate-spin" />
+                    {{ __('Checking scan status automatically…') }}
+                </div>
+            @endif
 
             {{-- Documents table --}}
             <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">

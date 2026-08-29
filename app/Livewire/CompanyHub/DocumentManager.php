@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Models\Media;
 use App\Models\Product;
 use App\Services\MediaUploadService;
 use Illuminate\Database\Eloquent\Collection;
@@ -46,6 +47,8 @@ final class DocumentManager extends Component
         }
 
         $this->reset('newDocuments');
+        unset($this->documents, $this->hasPendingDocuments);
+
         \Flux\Flux::toast('Documents uploaded successfully.', variant: 'success');
     }
 
@@ -64,16 +67,31 @@ final class DocumentManager extends Component
         $this->product->documents()->detach($this->confirmingDocumentId);
 
         $this->confirmingDocumentId = null;
+        unset($this->documents, $this->hasPendingDocuments);
+
         \Flux\Flux::toast('Document removed.', variant: 'success');
     }
 
     /**
-     * @return Collection<int, \App\Models\Media>
+     * @return Collection<int, Media>
      */
     #[Computed]
     public function documents(): Collection
     {
         return $this->product->documents()->orderByDesc('created_at')->get();
+    }
+
+    /**
+     * Whether any attached document is still awaiting its antivirus scan.
+     * Drives the table's auto-refresh: the view polls only while this is true
+     * and goes idle once every document has settled (clean/infected).
+     */
+    #[Computed]
+    public function hasPendingDocuments(): bool
+    {
+        return $this->documents->contains(
+            fn (Media $document): bool => $document->scan_status === 'pending'
+        );
     }
 
     public function render()

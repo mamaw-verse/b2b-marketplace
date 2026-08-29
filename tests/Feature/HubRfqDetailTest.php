@@ -10,6 +10,7 @@ use App\Models\RfqRecipient;
 use App\Models\Shop;
 use App\Models\User;
 use App\Notifications\QuotationWithdrawnNotification;
+use App\Notifications\RfqNoBidNotification;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -54,6 +55,54 @@ test('closeRfq marks the recipient no_bid with the close reason', function () {
         'status' => 'no_bid',
         'decline_reason' => 'Cannot fulfil this volume.',
     ]);
+
+    // The parent RFQ must also close so the buyer view reflects the terminal state.
+    $this->assertDatabaseHas('rfqs', [
+        'id' => $this->rfq->id,
+        'status' => 'closed',
+    ]);
+    expect($this->rfq->fresh()->closed_at)->not->toBeNull();
+
+    Notification::assertSentTo(
+        $this->buyer,
+        RfqNoBidNotification::class,
+        fn (RfqNoBidNotification $n) => $n->reason === 'seller_closed'
+    );
+});
+
+test('closeRfq does not close the parent RFQ when a quotation was already awarded', function () {
+    Notification::fake();
+
+    Quotation::factory()->create([
+        'rfq_id' => $this->rfq->id,
+        'rfq_recipient_id' => $this->recipient->id,
+        'status' => 'awarded',
+    ]);
+
+    Livewire::actingAs($this->seller)
+        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
+        ->call('closeRfq');
+
+    $this->assertDatabaseHas('rfqs', [
+        'id' => $this->rfq->id,
+        'status' => 'open',
+    ]);
+});
+
+test('closeRfq notifies the buyer even when no quotation was submitted', function () {
+    Notification::fake();
+
+    Livewire::actingAs($this->seller)
+        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
+        ->call('closeRfq');
+
+    // No quotation to withdraw, but the buyer still learns the seller closed it.
+    Notification::assertNotSentTo($this->buyer, QuotationWithdrawnNotification::class);
+    Notification::assertSentTo(
+        $this->buyer,
+        RfqNoBidNotification::class,
+        fn (RfqNoBidNotification $n) => $n->reason === 'seller_closed'
+    );
 });
 
 test('closeRfq withdraws submitted quotations and notifies the buyer', function () {

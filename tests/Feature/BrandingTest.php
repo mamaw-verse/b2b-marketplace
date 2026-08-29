@@ -43,7 +43,6 @@ test('the auth dropdown shows only Buyer Hub for a non-seller buyer', function (
         ->assertDontSee('Seller Hub');
 });
 
-
 test('storefront homepage shows country portals coming soon section', function () {
     $this->get(route('home'))
         ->assertOk()
@@ -52,5 +51,10 @@ test('storefront homepage shows country portals coming soon section', function (
         ->assertSee('India')
         ->assertSee('Vietnam')
         ->assertSee('Thailand')
-        ->assertSee('Nigeria');
+        ->assertSee('Nigeria')
+        ->assertSee('Connect with Indian Halal producers, manufacturers, exporters and buyers.')
+        ->assertSee('/images/countries/india.jpg', false)
+        ->assertSee('/images/countries/vietnam.jpg', false)
+        ->assertSee('/images/countries/thailand.jpg', false)
+        ->assertSee('/images/countries/nigeria.jpg', false);
 });

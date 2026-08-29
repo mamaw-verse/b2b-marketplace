@@ -12,6 +12,7 @@ use App\Events\QuotationRejected;
 use App\Models\Quotation;
 use App\Models\Rfq;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -28,8 +29,9 @@ final class RfqDetail extends Component
 
     public ?int $confirmingAwardQuotationId = null;
 
-    /** @var array<int, bool> */
-    public array $expandedQuotations = [];
+    public bool $showQuotationDetail = false;
+
+    public ?int $viewingQuotationId = null;
 
     public function mount(Rfq $rfq): void
     {
@@ -37,14 +39,32 @@ final class RfqDetail extends Component
         $this->rfq = $rfq;
     }
 
-    public function toggleQuotation(int $quotationId): void
+    public function viewQuotation(int $quotationId): void
     {
-        $this->expandedQuotations[$quotationId] = ! ($this->expandedQuotations[$quotationId] ?? false);
+        $this->viewingQuotationId = $quotationId;
+        unset($this->viewingQuotation);
+        $this->showQuotationDetail = true;
+    }
+
+    /**
+     * The quotation currently displayed in the detail modal.
+     */
+    #[Computed]
+    public function viewingQuotation(): ?Quotation
+    {
+        if (! $this->viewingQuotationId) {
+            return null;
+        }
+
+        return $this->rfq->quotations
+            ->where('status', '!=', 'draft')
+            ->firstWhere('id', $this->viewingQuotationId);
     }
 
     public function confirmAwardQuotation(int $quotationId): void
     {
         $this->confirmingAwardQuotationId = $quotationId;
+        $this->showQuotationDetail = false;
         \Flux\Flux::modal('confirm-award-quotation')->show();
     }
 
@@ -77,6 +97,7 @@ final class RfqDetail extends Component
     public function confirmRejectQuotation(int $quotationId): void
     {
         $this->confirmingRejectQuotationId = $quotationId;
+        $this->showQuotationDetail = false;
         \Flux\Flux::modal('confirm-reject-quotation')->show();
     }
 

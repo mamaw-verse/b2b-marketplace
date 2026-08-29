@@ -266,23 +266,38 @@
                     More Halal business portals are coming soon.
                 </h2>
                 <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] max-w-2xl mx-auto">
-                    We are expanding our network to connect halal businesses across new markets. Stay tuned as we launch dedicated portals for more countries.
+                    The 1HALALSTORE network is expanding. New country portals are coming soon, connecting local businesses with buyers and partners across established and emerging Halal markets.
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ([
-                    ['name' => 'India',    'flag' => 'india',    'emoji' => '🇮🇳'],
-                    ['name' => 'Vietnam',  'flag' => 'vietnam',  'emoji' => '🇻🇳'],
-                    ['name' => 'Thailand', 'flag' => 'thailand', 'emoji' => '🇹🇭'],
-                    ['name' => 'Nigeria',  'flag' => 'nigeria',  'emoji' => '🇳🇬'],
+                    ['name' => 'India',    'flag' => 'india',    'emoji' => '🇮🇳', 'tagline' => 'Connect with Indian Halal producers, manufacturers, exporters and buyers.'],
+                    ['name' => 'Vietnam',  'flag' => 'vietnam',  'emoji' => '🇻🇳', 'tagline' => 'Discover Halal products and business opportunities from Vietnam.'],
+                    ['name' => 'Thailand', 'flag' => 'thailand', 'emoji' => '🇹🇭', 'tagline' => "Explore Thailand's growing Halal food, manufacturing and trade ecosystem."],
+                    ['name' => 'Nigeria',  'flag' => 'nigeria',  'emoji' => '🇳🇬', 'tagline' => "Find businesses and products from one of Africa's largest Halal markets."],
                 ] as $portal)
-                    <div class="flex flex-col items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-5 text-center shadow-[var(--hs-shadow-sm)]">
-                        <span class="text-4xl" aria-hidden="true">{{ $portal['emoji'] }}</span>
-                        <p class="text-sm font-semibold text-[var(--hs-neutral-800)]">{{ $portal['name'] }}</p>
-                        <span class="inline-flex items-center rounded-full bg-[var(--hs-neutral-100)] px-3 py-1 text-xs font-medium text-[var(--hs-neutral-500)]">
-                            {{ __('Coming Soon') }}
-                        </span>
+                    <div class="group relative overflow-hidden rounded-[var(--hs-radius-card)] shadow-[var(--hs-shadow-md)] aspect-[1/1] sm:aspect-[1/1]">
+                        <img
+                            src="/images/countries/{{ $portal['flag'] }}.jpg"
+                            alt=""
+                            class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105"
+                            loading="lazy"
+                            decoding="async"
+                        />
+                        {{-- Hero-matched dark green tint --}}
+                        <div class="absolute inset-0 bg-gradient-to-b from-[rgba(5,41,27,0.55)] via-[rgba(5,41,27,0.78)] to-[rgba(5,41,27,0.92)]"></div>
+                        <div class="relative flex h-full flex-col justify-between p-5 sm:p-6 text-left">
+                            <div>
+                                <span class="text-2xl" aria-hidden="true">{{ $portal['emoji'] }}</span>
+                                <h3 class="mt-3 text-xl font-bold text-white font-[var(--hs-font-display)]">{{ $portal['name'] }}</h3>
+                                <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-300)]">{{ $portal['tagline'] }}</p>
+                            </div>
+                            <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--hs-gold-400)]">
+                                {{ __('Coming Soon') }}
+                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                            </span>
+                        </div>
                     </div>
                 @endforeach
             </div>

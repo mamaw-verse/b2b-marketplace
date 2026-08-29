@@ -85,7 +85,7 @@ A B2B Halal Marketplace application built with Laravel.
 ### Test Flow 2: Company Onboarding (as Seller)
 
 1. Login at http://localhost/login
-2. Navigate to http://localhost/hub/onboarding
+2. Navigate to http://localhost/account/onboarding
 3. Complete the 5-step wizard:
    - **Step 1**: Business name, structure, DTI/SEC number, TIN, address
    - **Step 2**: Product categories, FDA LTO, lead time, export readiness

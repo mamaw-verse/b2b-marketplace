@@ -2,14 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Events\OrderSubmittedForPayment;
 use App\Livewire\CompanyHub\Orders\OrderBuilder;
 use App\Models\BuyerProfile;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
 use App\Models\User;
+use App\Notifications\OrderPendingPaymentNotification;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -94,4 +99,46 @@ test('searchResults returns empty for short query', function () {
         ->set('productSearch', 'a');
 
     expect($component->instance()->searchResults())->toHaveCount(0);
+});
+
+test('submitting an order notifies the buyer by email and in-app notification', function () {
+    Notification::fake();
+
+    $buyer = User::factory()->create();
+
+    $order = Order::factory()->create([
+        'shop_id' => $this->shop->id,
+        'buyer_user_id' => $buyer->id,
+        'status' => 'draft',
+    ]);
+
+    OrderItem::factory()->create([
+        'order_id' => $order->id,
+        'quantity' => 1,
+        'unit_price' => '100.00',
+        'subtotal' => '100.00',
+    ]);
+
+    Livewire::actingAs($this->seller)
+        ->test(OrderBuilder::class, ['order' => $order])
+        ->call('submit');
+
+    Notification::assertSentTo($buyer, OrderPendingPaymentNotification::class);
+});
+
+test('OrderSubmittedForPayment event triggers mail and database notification channels', function () {
+    $buyer = User::factory()->create();
+
+    $order = Order::factory()->create([
+        'shop_id' => $this->shop->id,
+        'buyer_user_id' => $buyer->id,
+        'status' => 'pending_payment',
+    ]);
+
+    Event::dispatch(new OrderSubmittedForPayment($order));
+
+    $this->assertDatabaseHas('notifications', [
+        'notifiable_id' => $buyer->id,
+        'type' => OrderPendingPaymentNotification::class,
+    ]);
 });

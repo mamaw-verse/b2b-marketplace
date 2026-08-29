@@ -14,20 +14,20 @@
     --font-display: var(--hs-font-display);
     --font-body: var(--hs-font-body);
 
-    /* Zinc neutrals (tinted to Halal Emerald for Flux UI compatibility) */
-    --color-zinc-50: #F8FAF9;
-    --color-zinc-100: #F1F5F3;
-    --color-zinc-200: #E2E8E5;
-    --color-zinc-300: #C8D1CC;
-    --color-zinc-400: #9CA8A2;
-    --color-zinc-500: #6B7A73;
-    --color-zinc-600: #4A5650;
-    --color-zinc-700: #374240;
-    --color-zinc-800: #242D2A;
-    --color-zinc-900: #121917;
-    --color-zinc-950: #05291B;
+    /* Zinc neutrals (grayscale, anchored to Soft Off-White / Canvas Black for Flux UI compatibility) */
+    --color-zinc-50: #EFEFEF;
+    --color-zinc-100: #E0E0E0;
+    --color-zinc-200: #C7C7C7;
+    --color-zinc-300: #A8A8A8;
+    --color-zinc-400: #8A8A8A;
+    --color-zinc-500: #6B6B6B;
+    --color-zinc-600: #4D4D4D;
+    --color-zinc-700: #333333;
+    --color-zinc-800: #1A1A1A;
+    --color-zinc-900: #0D0D0D;
+    --color-zinc-950: #000000;
 
-    /* Brand — Halal Emerald Green */
+    /* Brand — Deep Emerald Green */
     --color-green-50: var(--hs-green-50);
     --color-green-100: var(--hs-green-100);
     --color-green-200: var(--hs-green-200);

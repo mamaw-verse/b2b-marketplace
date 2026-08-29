@@ -185,7 +185,14 @@ final class CreateOrderAction
     }
 
     /**
-     * Resolve description, unit, and unit_price from a quotation item using snapshot/variant/freeform fallback.
+     * Resolve unit and unit_price from a quotation item using snapshot/variant/freeform fallback.
+     *
+     * The description is always taken directly from the quotation item itself — it's
+     * the full, human-composed text (e.g. "Product Name — variant desc") built by
+     * QuotationBuilder::selectVariant(). The variant/snapshot 'description' fields
+     * only hold the variant's own raw description fragment, not that composed text,
+     * so they must never be used to override it (this previously caused order item
+     * descriptions to mismatch their quotation item).
      *
      * @return array{description: string, unit: string, unit_price: string}
      */
@@ -194,7 +201,7 @@ final class CreateOrderAction
         // Priority 1: variant_snapshot is non-null
         if ($quotationItem->variant_snapshot !== null) {
             return [
-                'description' => $quotationItem->variant_snapshot['description'] ?? $quotationItem->description,
+                'description' => $quotationItem->description,
                 'unit' => $quotationItem->variant_snapshot['unit'] ?? $quotationItem->unit,
                 'unit_price' => (string) ($quotationItem->variant_snapshot['unit_price'] ?? $quotationItem->unit_price),
             ];
@@ -206,7 +213,7 @@ final class CreateOrderAction
 
             if ($variant) {
                 return [
-                    'description' => $variant->description ?? $quotationItem->description,
+                    'description' => $quotationItem->description,
                     'unit' => $variant->unit,
                     'unit_price' => (string) $variant->price,
                 ];

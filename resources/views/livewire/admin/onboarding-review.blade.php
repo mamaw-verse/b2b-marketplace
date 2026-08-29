@@ -12,8 +12,14 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {{-- Main Content (2 cols) --}}
+    {{--
+        xl:items-start stops the grid from stretching the sidebar column to match
+        the (much taller) main column's height — required for xl:sticky below to
+        actually have room to stick within.
+    --}}
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3 xl:items-start">
+        {{-- Main Content (2 cols) — every card in this column shares the same width,
+             including the two table cards that used to break out to full width. --}}
         <div class="xl:col-span-2 space-y-6">
             {{-- Business Information --}}
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
@@ -118,7 +124,9 @@
                 </div>
             </div>
 
-            {{-- Certificates --}}
+            {{-- Halal Certificates — moved back into the main column. The
+                 overflow-x-auto wrapper already handles wide table content,
+                 so this card doesn't need to break the grid to avoid clipping. --}}
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
                 <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
                     <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Halal Certificates</h2>
@@ -159,7 +167,7 @@
                 </div>
             </div>
 
-            {{-- Documents --}}
+            {{-- Uploaded Documents — moved back into the main column, same reasoning. --}}
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
                 <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
                     <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Uploaded Documents</h2>
@@ -199,8 +207,11 @@
             </div>
         </div>
 
-        {{-- Decision Panel (sidebar) --}}
-        <div class="space-y-6">
+        {{-- Decision Panel (sidebar) — now sticky, so Applicant info + the
+             Approve/Revise/Reject actions stay in view as the admin scrolls
+             through the (now longer) main column instead of scrolling out of
+             sight after Production & Capabilities. --}}
+        <div class="space-y-6 xl:sticky xl:top-6">
             {{-- Applicant Info --}}
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-5">
                 <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-4">Applicant</h3>

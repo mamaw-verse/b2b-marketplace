@@ -42,9 +42,7 @@
                     <div class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-[var(--hs-neutral-100)]">
                         <span class="font-mono text-sm font-semibold tracking-tight text-[var(--hs-neutral-900)]">{{ $variant['sku'] }}</span>
 
-                        <button wire:click="toggleStatus({{ $variant['id'] }})" class="cursor-pointer">
-                            <x-hs-status-pill :status="$variant['status']" />
-                        </button>
+                        <x-hs-status-pill :status="$variant['status']" />
 
                         <div class="ml-auto flex items-center gap-0.5">
                             <flux:button
@@ -61,11 +59,22 @@
 
                             <div class="w-px h-5 bg-[var(--hs-neutral-200)] mx-1"></div>
 
+                            {{-- Publish / archive toggle as an explicit icon button (mirrors
+                                 product-list): the status pill is now display-only. --}}
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                :icon="$variant['status'] === 'published' ? 'archive-box' : 'arrow-up-circle'"
+                                wire:click="toggleStatus({{ $variant['id'] }})"
+                                tooltip="{{ $variant['status'] === 'published' ? __('Archive') : __('Publish') }}"
+                            />
+
                             <flux:button
                                 variant="ghost"
                                 size="sm"
                                 icon="pencil-square"
                                 wire:click="openEditVariant({{ $variant['id'] }})"
+                                tooltip="{{ __('Edit') }}"
                             />
                         </div>
                     </div>
@@ -130,7 +139,8 @@
         model="showVariantModal"
         :title="$form->editingVariantId ? 'Edit Variant' : 'Add Variant'"
         subtitle="Fill in the details below. The variant is saved immediately when you click Save."
-        size="lg"
+        size="xl"
+        :dismissible="false"
     >
         <div class="space-y-4">
 
@@ -153,8 +163,24 @@
                 </div>
             </div>
 
-            {{-- Price + MOQ + Unit --}}
-            <div class="grid grid-cols-3 gap-3">
+            {{-- Price + Unit + MOQ. hs-unit-select uses layout="grid": its select
+                 and custom-unit inputs render as two sibling grid cells (root is
+                 display:contents). The row is 3 columns normally and expands to 4
+                 only when "Other" is chosen, so the custom-unit input gets its own
+                 column without pushing MOQ down. The column count is driven by the
+                 live unit value: a value that isn't a known unit means custom.
+                 @js(...) reuses the same config('units') source as the select. --}}
+            <div
+                x-data="{
+                    knownUnits: @js(collect(config('units', []))->pluck('value')->all()),
+                    get isCustomUnit() {
+                        const v = $wire.get('form.unit');
+                        return !!v && !this.knownUnits.includes(v);
+                    },
+                }"
+                :class="isCustomUnit ? 'grid-cols-4' : 'grid-cols-3'"
+                class="grid gap-3"
+            >
                 <div>
                     <flux:input
                         wire:model="form.price"
@@ -167,6 +193,15 @@
                     />
                     @error('form.price') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
+
+                <x-hs-unit-select
+                    wire-model="form.unit"
+                    :value="$form->unit"
+                    label="Unit"
+                    layout="grid"
+                    required
+                />
+
                 <div>
                     <flux:input
                         wire:model="form.moq"
@@ -178,16 +213,8 @@
                     />
                     @error('form.moq') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
-                <div>
-                    <x-hs-unit-select
-                        wire-model="form.unit"
-                        :value="$form->unit"
-                        label="Unit"
-                        required
-                    />
-                    @error('form.unit') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                </div>
             </div>
+            @error('form.unit') <p class="-mt-2 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
 
             {{-- Lead time + Pack size --}}
             <div class="grid grid-cols-2 gap-3">

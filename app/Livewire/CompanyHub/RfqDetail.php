@@ -7,6 +7,8 @@ namespace App\Livewire\CompanyHub;
 use App\Models\Quotation;
 use App\Models\RfqRecipient;
 use App\Notifications\QuotationWithdrawnNotification;
+use App\Notifications\RfqNoBidNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -70,31 +72,61 @@ final class RfqDetail extends Component
     /**
      * S4.T10: Close (no_bid) this RFQ with an optional reason.
      *
-     * Also withdraws any still-submitted quotations and notifies the buyer,
-     * since closing means the seller is no longer pursuing this request.
+     * Mirrors the buyer-side close: withdraws any still-submitted quotations and
+     * always notifies the buyer that the seller has closed the RFQ, regardless of
+     * whether a quotation existed, since the seller is no longer pursuing it.
      */
     public function closeRfq(): void
     {
         Gate::authorize('decline', $this->rfqRecipient);
 
-        $this->rfqRecipient->update([
-            'status' => 'no_bid',
-            'decline_reason' => $this->closeReason ?: null,
-            'last_activity_at' => now(),
-        ]);
+        $submitted = DB::transaction(function () {
+            $this->rfqRecipient->update([
+                'status' => 'no_bid',
+                'decline_reason' => $this->closeReason ?: null,
+                'last_activity_at' => now(),
+            ]);
 
-        // Withdraw any submitted quotations and notify the buyer per each.
-        $submitted = $this->rfqRecipient->quotations()
-            ->where('status', 'submitted')
-            ->get();
+            // Withdraw any submitted quotations owned by this recipient.
+            $submitted = $this->rfqRecipient->quotations()
+                ->where('status', 'submitted')
+                ->get();
 
+            foreach ($submitted as $quotation) {
+                $quotation->update(['status' => 'withdrawn']);
+            }
+
+            // Phase 1 has a single recipient per RFQ, so a seller close means no
+            // seller is pursuing the request. Close the parent RFQ too (unless a
+            // quotation was already awarded) so the buyer view reflects the same
+            // terminal state as a buyer-initiated close and can no longer act on it.
+            $rfq = $this->rfqRecipient->rfq;
+
+            $hasAwarded = $rfq->quotations()->where('status', 'awarded')->exists();
+
+            if (! $rfq->isClosed() && ! $hasAwarded) {
+                $rfq->update([
+                    'status' => 'closed',
+                    'closed_at' => now(),
+                    'last_activity_at' => now(),
+                ]);
+            }
+
+            return $submitted;
+        });
+
+        // Notify the buyer per withdrawn quotation (outside the transaction).
         foreach ($submitted as $quotation) {
-            $quotation->update(['status' => 'withdrawn']);
             $this->notifyBuyerOfWithdrawal($quotation);
         }
 
-        $this->rfqRecipient->rfq->touchActivity();
         $this->rfqRecipient->refresh();
+
+        // Always notify the buyer that the seller closed this RFQ, so the close
+        // has the same visible effect as a buyer-initiated close even when the
+        // seller never submitted a quotation.
+        $buyer = $this->rfqRecipient->rfq->user;
+        $buyer?->notify(new RfqNoBidNotification($this->rfqRecipient, reason: 'seller_closed'));
 
         $this->showCloseModal = false;
 

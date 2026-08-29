@@ -405,3 +405,204 @@ test('submit is a no-op when the application is already submitted', function () 
     // Status unchanged — the guard prevented resubmission.
     expect($onboarding->fresh()->status)->toBe('submitted');
 });
+
+test('goToStep navigates to the given step within bounds', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->set('currentStep', 4)
+        ->call('goToStep', 2)
+        ->assertSet('currentStep', 2);
+});
+
+test('goToStep ignores out-of-range steps', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->set('currentStep', 3)
+        ->call('goToStep', 0)
+        ->assertSet('currentStep', 3)
+        ->call('goToStep', 99)
+        ->assertSet('currentStep', 3);
+});
+
+test('stepForErrorKey maps field keys and prefixes to the correct step', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    $component = Livewire::test(OnboardingWizard::class)->instance();
+
+    expect($component->stepForErrorKey('form.registered_business_name'))->toBe(1)
+        ->and($component->stepForErrorKey('form.export_readiness_status'))->toBe(2)
+        ->and($component->stepForErrorKey('certificates.0.certification_body'))->toBe(3)
+        ->and($component->stepForErrorKey('certificateFiles.1'))->toBe(3)
+        ->and($component->stepForErrorKey('documents'))->toBe(5)
+        ->and($component->stepForErrorKey('unknown.key'))->toBeNull();
+});
+
+test('hasPendingDocuments reflects whether any uploaded document is still scanning', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    $component = Livewire::test(OnboardingWizard::class);
+
+    // No documents yet — nothing pending.
+    expect($component->instance()->hasPendingDocuments())->toBeFalse();
+
+    // A pending document makes the checklist "pending".
+    $component->set('uploadedDocuments', [
+        'business_permit' => ['media_id' => 1, 'filename' => 'permit.pdf', 'scan_status' => 'pending'],
+        'dti_sec_certificate' => ['media_id' => 2, 'filename' => 'dti.pdf', 'scan_status' => 'clean'],
+    ]);
+    expect($component->instance()->hasPendingDocuments())->toBeTrue();
+
+    // Once everything is settled (clean/infected), polling should stop.
+    $component->set('uploadedDocuments', [
+        'business_permit' => ['media_id' => 1, 'filename' => 'permit.pdf', 'scan_status' => 'clean'],
+        'dti_sec_certificate' => ['media_id' => 2, 'filename' => 'dti.pdf', 'scan_status' => 'infected'],
+    ]);
+    expect($component->instance()->hasPendingDocuments())->toBeFalse();
+});
+
+test('the wizard renders its error summary without referencing undefined properties', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    // Trigger step 1 validation errors, then confirm the full component view
+    // (including the error summary that calls stepForErrorKey) renders cleanly.
+    Livewire::test(OnboardingWizard::class)
+        ->set('form.registered_business_name', '')
+        ->set('form.storefront_name', '')
+        ->call('nextStep')
+        ->assertHasErrors('form.registered_business_name')
+        ->assertOk()
+        ->assertSee(__('Please fix the following before continuing:'));
+});
+
+test('a verified document can be replaced when the application requires revision', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $onboarding = ShopOnboarding::create([
+        'user_id' => $seller->id,
+        'registered_business_name' => 'Revision Co',
+        'storefront_name' => 'Revision Shop',
+        'business_structure' => 'corporation',
+        'dti_sec_number' => 'SEC-R',
+        'tax_identification_number' => 'TIN-R',
+        'country_code' => 'PH',
+        'export_readiness_status' => 'never_exported',
+        'status' => 'requires_revision',
+    ]);
+
+    // A document that already passed scanning (the state after a prior submit).
+    $media = Media::factory()->create([
+        'original_filename' => 'permit.pdf',
+        'extension' => 'pdf',
+        'scan_status' => 'clean',
+        'description' => 'business_permit',
+        'uploaded_by_id' => $seller->id,
+    ]);
+
+    $onboarding->documents()->attach($media->id);
+
+    $this->actingAs($seller);
+
+    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 5);
+
+    // The verified document loads and step 5 offers a way to replace it.
+    expect($component->get('uploadedDocuments'))->toHaveKey('business_permit');
+    $component->assertSee(__('Replace'));
+
+    // Replacing detaches the media and re-opens the slot for a fresh upload.
+    $component->call('resetDocument', 'business_permit');
+
+    expect($component->get('uploadedDocuments'))->not->toHaveKey('business_permit');
+    $this->assertDatabaseMissing('shop_onboarding_documents', [
+        'onboarding_id' => $onboarding->id,
+        'media_id' => $media->id,
+    ]);
+});
+
+test('a rejected application can replace its verified documents after re-applying', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $onboarding = ShopOnboarding::create([
+        'user_id' => $seller->id,
+        'registered_business_name' => 'Rejected Co',
+        'storefront_name' => 'Rejected Shop',
+        'business_structure' => 'corporation',
+        'dti_sec_number' => 'SEC-RJ',
+        'tax_identification_number' => 'TIN-RJ',
+        'country_code' => 'PH',
+        'export_readiness_status' => 'never_exported',
+        'status' => 'rejected',
+        'admin_notes' => 'Documents unclear.',
+    ]);
+
+    $media = Media::factory()->create([
+        'original_filename' => 'dti.pdf',
+        'extension' => 'pdf',
+        'scan_status' => 'clean',
+        'description' => 'dti_sec_certificate',
+        'uploaded_by_id' => $seller->id,
+    ]);
+
+    $onboarding->documents()->attach($media->id);
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->assertSet('onboardingStatus', 'rejected')
+        // Re-apply re-opens the wizard; documents remain attached and replaceable.
+        ->call('reapply')
+        ->assertSet('onboardingStatus', 'pending')
+        ->set('currentStep', 5)
+        ->assertSee(__('Replace'))
+        ->call('resetDocument', 'dti_sec_certificate')
+        ->assertDontSee($media->original_filename);
+
+    $this->assertDatabaseMissing('shop_onboarding_documents', [
+        'onboarding_id' => $onboarding->id,
+        'media_id' => $media->id,
+    ]);
+});
+
+test('the revision-required banner prominently shows the reviewer notes', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    ShopOnboarding::create([
+        'user_id' => $seller->id,
+        'registered_business_name' => 'Banner Co',
+        'storefront_name' => 'Banner Shop',
+        'business_structure' => 'corporation',
+        'dti_sec_number' => 'SEC-B',
+        'tax_identification_number' => 'TIN-B',
+        'country_code' => 'PH',
+        'export_readiness_status' => 'never_exported',
+        'status' => 'requires_revision',
+        'admin_notes' => 'Please re-upload a clearer DTI certificate.',
+    ]);
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->assertSet('onboardingStatus', 'requires_revision')
+        ->assertSee(__('Revision Required'))
+        ->assertSee(__('Reviewer notes'))
+        ->assertSee('Please re-upload a clearer DTI certificate.');
+});

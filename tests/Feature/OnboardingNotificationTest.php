@@ -34,16 +34,16 @@ test('approved notification links to the hub dashboard route', function () {
         ->and($data['url'])->not->toContain('/hub/shop');
 });
 
-test('rejected notification links to the hub onboarding route', function () {
+test('rejected notification links to the account onboarding route', function () {
     $data = (new OnboardingRejectedNotification($this->onboarding))->toArray($this->user);
 
-    expect($data['url'])->toBe(route('hub.onboarding'));
+    expect($data['url'])->toBe(route('account.onboarding'));
 });
 
-test('revision requested notification links to the hub onboarding route', function () {
+test('revision requested notification links to the account onboarding route', function () {
     $data = (new OnboardingRevisionRequestedNotification($this->onboarding))->toArray($this->user);
 
-    expect($data['url'])->toBe(route('hub.onboarding'));
+    expect($data['url'])->toBe(route('account.onboarding'));
 });
 
 test('onboarding mail renders the 1Halal Store brand logo in the header', function () {

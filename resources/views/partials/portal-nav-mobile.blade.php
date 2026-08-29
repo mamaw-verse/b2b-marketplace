@@ -49,17 +49,15 @@
         {{-- Drawer header --}}
         <div class="flex items-center justify-between border-b border-[var(--hs-neutral-200)] px-5 py-4">
             <div class="min-w-0">
-                @if ($isOnboarded && ($portal ?? 'hub') === 'hub')
-                    <p class="truncate text-base font-semibold text-[var(--hs-neutral-900)]">{{ $shop->storefront_name }}</p>
-                    <p class="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--hs-neutral-500)]">
-                        <span class="inline-block size-1.5 rounded-full bg-[var(--hs-green-600)]"></span>
-                        {{ __('Live on the directory') }}
-                    </p>
+                @if (($portal ?? 'hub') === 'account')
+                    <p class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">{{ __('Buyer Hub') }}</p>
+                    <p class="mt-0.5 truncate text-base font-bold text-[var(--hs-green-600)]">{{ trim($user->first_name . ' ' . $user->last_name) }}</p>
+                @elseif ($isOnboarded)
+                    <p class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">{{ __('Seller Hub') }}</p>
+                    <p class="mt-0.5 truncate text-base font-bold text-[var(--hs-green-600)]">{{ $shop->storefront_name }}</p>
                 @else
-                    <p class="truncate text-base font-semibold text-[var(--hs-neutral-900)]">
-                        {{ ($portal ?? 'hub') === 'account' ? __('Buyer Hub') : __('Company Hub') }}
-                    </p>
-                    <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">{{ $user?->email }}</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">{{ __('Seller Hub') }}</p>
+                    <p class="mt-0.5 truncate text-base font-bold text-[var(--hs-green-600)]">{{ __('Company Hub') }}</p>
                 @endif
             </div>
             <button

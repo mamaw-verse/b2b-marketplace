@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Livewire\Account;
 
 use App\Events\RfqCreated;
+use App\Models\Product;
 use App\Models\Rfq;
 use App\Models\Shop;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -24,6 +26,13 @@ final class RfqCreateForm extends Component
     #[Url]
     public ?int $shop_id = null;
 
+    /**
+     * The product the buyer came from, used purely as visual reference on the form.
+     * RFQs are not persisted against a product, so this is never saved.
+     */
+    #[Url]
+    public ?int $product_id = null;
+
     #[Url]
     public string $title = '';
 
@@ -32,14 +41,38 @@ final class RfqCreateForm extends Component
     /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
     public $attachment = null;
 
+    /**
+     * Set once the RFQ is persisted. Drives the in-place success state instead of
+     * redirecting, so the buyer keeps their place in the storefront.
+     */
+    #[Locked]
+    public ?int $submittedRfqId = null;
+
+    #[Locked]
+    public string $submittedTitle = '';
+
     public function mount(): void
     {
         // Buyer profile is no longer required before rendering the form.
         // The submit() action still validates the profile exists before saving.
     }
 
+    /**
+     * Discard the staged temporary upload so the buyer can pick a different file.
+     */
+    public function clearAttachment(): void
+    {
+        $this->attachment = null;
+        $this->resetErrorBag('attachment');
+    }
+
     public function submit(): void
     {
+        // The component is no longer torn down by a redirect, so refuse a second save.
+        if ($this->submittedRfqId !== null) {
+            return;
+        }
+
         $this->validate();
 
         $user = Auth::user();
@@ -97,17 +130,29 @@ final class RfqCreateForm extends Component
 
         RfqCreated::dispatch($rfq);
 
-        \Flux\Flux::toast('RFQ submitted! You can track it under My RFQs.', variant: 'success');
-
-        $this->redirect(route('account.rfqs.show', $rfq), navigate: true);
+        // Stay on the page and swap the form for an in-place confirmation.
+        $this->submittedRfqId = $rfq->id;
+        $this->submittedTitle = $rfq->title;
+        $this->reset(['description', 'attachment']);
     }
 
     public function render()
     {
-        $shop = $this->shop_id ? Shop::find($this->shop_id) : null;
+        $shop = $this->shop_id
+            ? Shop::with('certificates')->where('status', 'active')->find($this->shop_id)
+            : null;
+
+        // Only surface the reference product when it is published and actually
+        // belongs to the shop this RFQ is addressed to.
+        $product = $shop && $this->product_id
+            ? Product::published()
+                ->where('shop_id', $shop->id)
+                ->find($this->product_id)
+            : null;
 
         return view('livewire.account.rfq-create-form', [
             'shop' => $shop,
+            'product' => $product,
         ]);
     }
 

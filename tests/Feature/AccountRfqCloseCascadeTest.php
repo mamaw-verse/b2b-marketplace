@@ -85,3 +85,22 @@ test('closing an RFQ does not close recipients whose quotation was awarded', fun
         'status' => 'awarded',
     ]);
 });
+
+test('the buyer view shows the seller close notice and reason', function () {
+    $recipient = makeRecipient($this->rfq, 'no_bid');
+    $recipient->update(['decline_reason' => 'Cannot fulfil this volume within the timeline.']);
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->assertSee('The seller closed this RFQ.')
+        ->assertSee('Cannot fulfil this volume within the timeline.');
+});
+
+test('the buyer view shows the close notice without a reason when none was given', function () {
+    makeRecipient($this->rfq, 'no_bid');
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->assertSee('The seller closed this RFQ.')
+        ->assertDontSee('Reason:');
+});

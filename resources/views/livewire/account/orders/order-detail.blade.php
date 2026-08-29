@@ -14,7 +14,10 @@
         <div class="px-8 pt-7 pb-6">
             <div class="flex items-start justify-between gap-6 flex-wrap">
                 <div>
-                    <h1 class="text-[22px] font-[650] tracking-[-0.01em] text-[var(--hs-neutral-900)]">Order #{{ $order->id }}</h1>
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-[22px] font-[650] tracking-[-0.01em] text-[var(--hs-neutral-900)]">Order #{{ $order->id }}</h1>
+                        <x-hs-status-pill :status="$order->status" />
+                    </div>
                     <p class="text-sm text-[var(--hs-neutral-500)] mt-1">{{ $order->shop->storefront_name }}</p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -34,7 +37,6 @@
                             <flux:button size="sm" variant="primary">Confirm Receipt</flux:button>
                         </flux:modal.trigger>
                     @endif
-                    <x-hs-status-pill :status="$order->status" />
                 </div>
             </div>
         </div>
@@ -48,10 +50,10 @@
 
         {{-- Body: Two-column grid --}}
         <div class="px-8 pb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 items-start">
+            <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-8 items-start">
 
                 {{-- MAIN COLUMN — flat sections separated by hairline dividers --}}
-                <div>
+                <div class="min-w-0">
 
                     {{-- Fulfilment Section --}}
                     @if ($order->fulfilments->isNotEmpty() || in_array($order->status, ['paid', 'completed', 'refunded']))
@@ -201,37 +203,44 @@
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)]">{{ __('Items') }}</h2>
                         </div>
-                        <table class="w-full border-collapse text-[13.5px]">
+                        <table class="w-full table-fixed border-collapse text-[13.5px]">
                             <thead>
                                 <tr>
                                     <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Description') }}</th>
-                                    <th class="text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Qty') }}</th>
-                                    <th class="text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Unit price') }}</th>
-                                    <th class="text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Subtotal') }}</th>
+                                    <th class="w-24 text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Qty') }}</th>
+                                    <th class="w-28 text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Unit price') }}</th>
+                                    <th class="w-28 text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Subtotal') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($order->items as $item)
                                     <tr>
                                         <td class="py-3 text-[var(--hs-neutral-900)] font-medium">{{ $item->description }}</td>
-                                        <td class="py-3 text-right text-[var(--hs-neutral-700)] tabular-nums">{{ $item->quantity }} {{ $item->unit }}</td>
+                                        <td class="py-3 text-right text-[var(--hs-neutral-700)] tabular-nums">{{ number_format((float) $item->quantity, 0) }} {{ $item->unit }}</td>
                                         <td class="py-3 text-right text-[var(--hs-neutral-700)]">{{ number_format((float) $item->unit_price, 2) }}</td>
                                         <td class="py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums">{{ number_format((float) $item->subtotal, 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
+                            @if ($order->fees->isNotEmpty())
+                                <tfoot>
+                                    @foreach ($order->fees as $fee)
+                                        @php $borderClass = $loop->first ? 'border-t border-[var(--hs-neutral-100)]' : ''; @endphp
+                                        <tr class="bg-[var(--hs-neutral-50)]">
+                                            <td class="py-2 text-[var(--hs-neutral-500)] italic {{ $borderClass }}">
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    <flux:icon name="receipt-percent" variant="mini" class="size-3.5 text-[var(--hs-neutral-400)]" />
+                                                    {{ $fee->label }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2 {{ $borderClass }}"></td>
+                                            <td class="py-2 {{ $borderClass }}"></td>
+                                            <td class="py-2 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic {{ $borderClass }}">{{ number_format((float) $fee->amount, 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tfoot>
+                            @endif
                         </table>
-
-                        @if ($order->fees->isNotEmpty())
-                            <div class="mt-4 pt-3 border-t border-[var(--hs-neutral-100)]">
-                                @foreach ($order->fees as $fee)
-                                    <div class="flex justify-between text-[13.5px] py-1.5">
-                                        <span class="text-[var(--hs-neutral-600)]">{{ $fee->label }}</span>
-                                        <span class="text-[var(--hs-neutral-900)] font-semibold tabular-nums">{{ number_format((float) $fee->amount, 2) }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
                     </section>
                 </div>
 

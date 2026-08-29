@@ -9,13 +9,8 @@
 
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ $orderId ? 'Edit Order #' . $orderId : 'New Order' }}</h1>
-            <div class="flex gap-2">
-                <flux:button variant="ghost" href="{{ route('hub.orders.index') }}" wire:navigate>Cancel</flux:button>
-                <flux:button wire:click="save">Save Draft</flux:button>
-                <flux:button variant="primary" wire:click="confirmSubmit">Submit for Payment</flux:button>
-            </div>
         </div>
 
         @if (session('error'))
@@ -60,17 +55,24 @@
                 </div>
             </section>
 
-            {{-- Items, Fees & Totals share one Alpine scope so the total can update live --}}
+            {{-- Items, Fees & Totals share one Alpine scope so the total (and the --}}
+            {{-- payout estimate derived from it) can update live as the seller types. --}}
             <div x-data="{
                     items: @entangle('items'),
                     fees: @entangle('fees'),
                     itemsTotal: 0,
                     feesTotal: 0,
                     grandTotal: 0,
+                    commissionRate: {{ (float) $commissionRate }},
+                    transactionFee: {{ (float) $transactionFee }},
+                    commissionAmount: 0,
+                    netPayout: 0,
                     recalcTotal() {
                         this.itemsTotal = this.items.reduce((sum, i) => sum + (parseFloat(i.quantity || 0) * parseFloat(i.unit_price || 0)), 0);
                         this.feesTotal = this.fees.reduce((sum, f) => sum + parseFloat(f.amount || 0), 0);
                         this.grandTotal = this.itemsTotal + this.feesTotal;
+                        this.commissionAmount = this.grandTotal * this.commissionRate;
+                        this.netPayout = Math.max(0, this.grandTotal - this.commissionAmount - this.transactionFee);
                     },
                     money(v) { return (parseFloat(v || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
                     rowSubtotal(item) { return parseFloat(item.quantity || 0) * parseFloat(item.unit_price || 0); },
@@ -150,8 +152,9 @@
                                     type="number"
                                     step="1"
                                     min="1"
+                                    inputmode="numeric"
                                     placeholder="Qty"
-                                    @input="if (item.quantity !== '' && item.quantity < 1) item.quantity = 1"
+                                    @input="item.quantity = item.quantity === '' ? '' : Math.max(1, Math.trunc(item.quantity))"
                                     :class="(item.quantity === '' || item.quantity < 1) ? '!border-red-500 !ring-1 !ring-red-500' : ''"
                                     class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]"
                                 />
@@ -228,34 +231,54 @@
                     </template>
                 </section>
 
-                {{-- Platform fee rates (read-only, from PayoutSetting) --}}
-                <section class="py-6 border-b border-[var(--hs-neutral-100)]">
-                    <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-3">Platform Fees</h2>
-                    <div class="rounded-lg bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-100)] p-4 space-y-1.5">
-                        <div class="flex justify-between text-[13px]">
-                            <span class="text-[var(--hs-neutral-600)]">Commission rate</span>
-                            <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ number_format($commissionRate * 100, 2) }}%</span>
+                {{-- Payout Estimate — mirrors the quotation builder's simulator so sellers --}}
+                {{-- see the same breakdown when building an order. Values are computed --}}
+                {{-- live in Alpine (recalcTotal) so they track items/fees as they're edited. --}}
+                <section class="py-6 border-b border-[var(--hs-neutral-100)]" x-show="grandTotal > 0" x-cloak>
+                    <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <flux:icon name="calculator" variant="mini" class="size-4 text-[var(--hs-neutral-500)]" />
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">Payout Estimate</h3>
                         </div>
-                        <div class="flex justify-between text-[13px]">
-                            <span class="text-[var(--hs-neutral-600)]">Transaction fee</span>
-                            <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ number_format($transactionFee, 2) }}</span>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--hs-neutral-600)]">Order Total</span>
+                                <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums" x-text="money(grandTotal)"></span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--hs-neutral-600)]">Commission ({{ number_format($commissionRate * 100, 1) }}%)</span>
+                                <span class="font-medium text-[var(--hs-neutral-700)] tabular-nums" x-text="'−' + money(commissionAmount)"></span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--hs-neutral-600)]">Transaction Fee</span>
+                                <span class="font-medium text-[var(--hs-neutral-700)] tabular-nums" x-text="'−' + money(transactionFee)"></span>
+                            </div>
+                            <div class="pt-2 mt-1 border-t border-[var(--hs-neutral-200)] flex justify-between text-sm">
+                                <span class="font-semibold text-[var(--hs-neutral-900)]">Estimated Payout</span>
+                                <span class="font-bold text-[var(--hs-green-700)] tabular-nums" x-text="money(netPayout)"></span>
+                            </div>
                         </div>
-                        <p class="text-[12px] text-[var(--hs-neutral-500)] pt-1">These platform fees are applied at payout and are not editable here.</p>
+                        <p class="mt-2.5 text-xs text-[var(--hs-neutral-400)]">Based on current platform rates. Actual payout calculated after order completion.</p>
                     </div>
                 </section>
 
-                {{-- Totals: server-computed figures once $order exists, live Alpine figures otherwise --}}
+                {{-- Totals: always driven by the live Alpine figures so they update as --}}
+                {{-- items/fees are edited, without waiting for a server round-trip. The --}}
+                {{-- entangled items/fees arrays are seeded from the order on load, so --}}
+                {{-- this stays accurate immediately after save too. --}}
                 <section class="pt-6 text-right space-y-1">
-                    @if ($this->order)
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Items: {{ $this->order->currency }} {{ number_format((float) $this->order->items_total, 2) }}</p>
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Fees: {{ $this->order->currency }} {{ number_format((float) $this->order->fees_total, 2) }}</p>
-                        <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: {{ $this->order->currency }} {{ number_format((float) $this->order->order_total, 2) }}</p>
-                    @else
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Items: <span x-text="money(itemsTotal)"></span></p>
-                        <p class="text-sm text-[var(--hs-neutral-600)]">Fees: <span x-text="money(feesTotal)"></span></p>
-                        <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: <span x-text="money(grandTotal)"></span></p>
-                    @endif
+                    <p class="text-sm text-[var(--hs-neutral-600)]">Items: {{ $this->order?->currency ?? 'PHP' }} <span x-text="money(itemsTotal)"></span></p>
+                    <p class="text-sm text-[var(--hs-neutral-600)]">Fees: {{ $this->order?->currency ?? 'PHP' }} <span x-text="money(feesTotal)"></span></p>
+                    <p class="text-lg font-bold text-[var(--hs-neutral-900)]">Total: {{ $this->order?->currency ?? 'PHP' }} <span x-text="money(grandTotal)"></span></p>
                 </section>
+            </div>
+
+            {{-- Actions — right-aligned with the primary action last, matching --}}
+            {{-- the other hub forms (quotation builder, shop profile, payout). --}}
+            <div class="flex flex-wrap items-center gap-3 pt-6 mt-6 border-t border-[var(--hs-neutral-100)]">
+                <flux:button variant="ghost" href="{{ route('hub.orders.index') }}" wire:navigate>Cancel</flux:button>
+                <flux:button class="ml-auto" wire:click="save">Save Draft</flux:button>
+                <flux:button variant="primary" wire:click="confirmSubmit">Submit for Payment</flux:button>
             </div>
         </div>
     </div>

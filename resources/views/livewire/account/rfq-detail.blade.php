@@ -18,6 +18,27 @@
                 </div>
             </div>
 
+            {{-- Seller closed the RFQ: show notice + reason when available --}}
+            @php $closedRecipient = $rfq->recipients->firstWhere('status', 'no_bid'); @endphp
+            @if ($closedRecipient)
+                <div class="px-6 py-4 border-b border-[var(--hs-neutral-100)]">
+                    <div class="flex items-start gap-3 rounded-[var(--hs-radius-card)] bg-[var(--hs-warning-50)] border border-[var(--hs-warning-200)] p-3.5">
+                        <flux:icon name="x-circle" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-warning-500)]" />
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-[var(--hs-warning-700)]">
+                                {{ __('The seller closed this RFQ.') }}
+                            </p>
+                            @if ($closedRecipient->decline_reason)
+                                <p class="mt-1 text-sm text-[var(--hs-warning-700)]">
+                                    <span class="font-medium">{{ __('Reason:') }}</span>
+                                    {{ $closedRecipient->decline_reason }}
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Close RFQ Action --}}
             @if ($rfq->isOpen())
                 <div class="px-6 py-3 border-b border-[var(--hs-neutral-100)]">
@@ -64,103 +85,37 @@
                     <div class="space-y-3">
                         @foreach ($visibleQuotations as $quotation)
                             <div @class([
-                                'rounded-[var(--hs-radius-card)] border p-4',
+                                'flex items-center gap-3 rounded-[var(--hs-radius-card)] border px-4 py-3',
                                 'border-[var(--hs-success-200)] bg-[var(--hs-success-50)]' => $quotation->status === 'awarded',
                                 'border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]' => $quotation->status === 'rejected',
                                 'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' => $quotation->status === 'withdrawn',
                                 'border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]' => in_array($quotation->status, ['submitted', 'not_awarded', 'expired']),
                             ])>
-                                <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="text-base font-bold text-[var(--hs-neutral-900)]">
                                             {{ $quotation->currency }} {{ number_format((float) $quotation->total_amount, 2) }}
                                         </span>
                                         <x-hs-status-pill :status="$quotation->status" />
                                     </div>
-                                    @if ($quotation->valid_until)
-                                        <span class="text-xs text-[var(--hs-neutral-500)] shrink-0 whitespace-nowrap">
+                                    <p class="mt-0.5 flex items-center gap-1 text-xs text-[var(--hs-neutral-500)]">
+                                        {{ $quotation->items->count() }} {{ Str::plural('item', $quotation->items->count()) }}
+                                        @if ($quotation->valid_until)
+                                            <span class="text-[var(--hs-neutral-300)]">·</span>
                                             {{ __('Valid until') }} {{ $quotation->valid_until->format('M d, Y') }}
-                                        </span>
-                                    @endif
-                                </div>
-
-                                {{-- Line items summary --}}
-                                <div class="mt-2 text-xs text-[var(--hs-neutral-500)]">
-                                    {{ $quotation->items->count() }} {{ Str::plural('item', $quotation->items->count()) }}
-                                    @if ($quotation->notes)
-                                        <span class="text-[var(--hs-neutral-300)]">·</span> {{ Str::limit($quotation->notes, 60) }}
-                                    @endif
-                                </div>
-
-                                @if ($quotation->items->isNotEmpty())
-                                    <div class="mt-2">
-                                        <button
-                                            type="button"
-                                            wire:click="toggleQuotation({{ $quotation->id }})"
-                                            class="inline-flex items-center gap-1 text-xs font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)]"
-                                        >
-                                            <flux:icon
-                                                :name="($expandedQuotations[$quotation->id] ?? false) ? 'chevron-up' : 'chevron-down'"
-                                                variant="mini"
-                                                class="size-3.5"
-                                            />
-                                            {{ ($expandedQuotations[$quotation->id] ?? false) ? __('Hide details') : __('View details') }}
-                                        </button>
-
-                                        @if ($expandedQuotations[$quotation->id] ?? false)
-                                            <div class="mt-2 overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)]">
-                                                <table class="w-full text-xs">
-                                                    <thead class="bg-[var(--hs-neutral-50)] text-[var(--hs-neutral-500)]">
-                                                        <tr>
-                                                            <th class="px-3 py-2 text-left font-medium">{{ __('Item') }}</th>
-                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Qty') }}</th>
-                                                            <th class="px-3 py-2 text-left font-medium">{{ __('Unit') }}</th>
-                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Price') }}</th>
-                                                            <th class="px-3 py-2 text-right font-medium">{{ __('Subtotal') }}</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody class="divide-y divide-[var(--hs-neutral-100)]">
-                                                        @foreach ($quotation->items as $item)
-                                                            <tr class="text-[var(--hs-neutral-700)]">
-                                                                <td class="px-3 py-2">{{ $item->description }}</td>
-                                                                <td class="px-3 py-2 text-right tabular-nums">{{ $item->quantity }}</td>
-                                                                <td class="px-3 py-2">{{ $item->unit }}</td>
-                                                                <td class="px-3 py-2 text-right tabular-nums">{{ number_format((float) $item->unit_price, 2) }}</td>
-                                                                <td class="px-3 py-2 text-right font-medium tabular-nums text-[var(--hs-neutral-900)]">{{ number_format((float) $item->subtotal, 2) }}</td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            @if ($quotation->notes)
-                                                <div class="mt-3 text-sm text-[var(--hs-neutral-700)]">
-                                                    <strong>{{ __('Notes:') }}</strong>
-                                                    <p class="mt-1 whitespace-pre-wrap">{{ $quotation->notes }}</p>
-                                                </div>
-                                            @endif
                                         @endif
-                                    </div>
-                                @endif
+                                    </p>
+                                </div>
 
-                                {{-- Actions for submitted quotations --}}
-                                @if ($quotation->isSubmitted() && $rfq->isOpen())
-                                    <div class="mt-3 pt-3 border-t border-[var(--hs-neutral-100)] flex items-center gap-2">
-                                        <flux:modal.trigger name="confirm-award-quotation">
-                                            <flux:button variant="primary" size="xs" icon="check" wire:click="confirmAwardQuotation({{ $quotation->id }})">
-                                                {{ __('Award') }}
-                                            </flux:button>
-                                        </flux:modal.trigger>
-                                        <flux:button
-                                            variant="ghost"
-                                            size="xs"
-                                            icon="x-mark"
-                                            wire:click="confirmRejectQuotation({{ $quotation->id }})"
-                                            class="text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)]"
-                                        >
-                                            {{ __('Reject') }}
-                                        </flux:button>
-                                    </div>
-                                @endif
+                                <flux:button
+                                    variant="ghost"
+                                    size="xs"
+                                    icon="eye"
+                                    wire:click="viewQuotation({{ $quotation->id }})"
+                                    class="shrink-0"
+                                >
+                                    {{ __('View') }}
+                                </flux:button>
                             </div>
                         @endforeach
                     </div>
@@ -194,6 +149,104 @@
             </div>
         @endif
     </div>
+
+    {{-- Quotation Detail Modal --}}
+    <x-hs-modal
+        name="quotation-detail"
+        model="showQuotationDetail"
+        :title="__('Quotation Detail')"
+        size="lg"
+    >
+        @php $viewingQuotation = $this->viewingQuotation; @endphp
+        @if ($viewingQuotation)
+            <div class="space-y-5">
+                {{-- Summary --}}
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-lg font-bold text-[var(--hs-neutral-900)]">
+                            {{ $viewingQuotation->currency }} {{ number_format((float) $viewingQuotation->total_amount, 2) }}
+                        </span>
+                        <x-hs-status-pill :status="$viewingQuotation->status" />
+                    </div>
+                    @if ($viewingQuotation->valid_until)
+                        <span class="text-xs text-[var(--hs-neutral-500)] shrink-0 whitespace-nowrap">
+                            {{ __('Valid until') }} {{ $viewingQuotation->valid_until->format('M d, Y') }}
+                        </span>
+                    @endif
+                </div>
+
+                <p class="text-xs text-[var(--hs-neutral-500)]">
+                    {{ $viewingQuotation->items->count() }} {{ Str::plural('item', $viewingQuotation->items->count()) }}
+                </p>
+
+                {{-- Line items --}}
+                <div class="overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)]">
+                    <table class="w-full text-xs">
+                        <thead class="bg-[var(--hs-neutral-50)] text-[var(--hs-neutral-500)]">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium">{{ __('Item') }}</th>
+                                <th class="px-3 py-2 text-right font-medium">{{ __('Qty') }}</th>
+                                <th class="px-3 py-2 text-left font-medium">{{ __('Unit') }}</th>
+                                <th class="px-3 py-2 text-right font-medium">{{ __('Price') }}</th>
+                                <th class="px-3 py-2 text-right font-medium">{{ __('Subtotal') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--hs-neutral-100)]">
+                            @foreach ($viewingQuotation->items as $item)
+                                <tr class="text-[var(--hs-neutral-700)]">
+                                    <td class="px-3 py-2">{{ $item->description }}</td>
+                                    <td class="px-3 py-2 text-right tabular-nums">{{ $item->quantity + 0 }}</td>
+                                    <td class="px-3 py-2">{{ $item->unit }}</td>
+                                    <td class="px-3 py-2 text-right tabular-nums">{{ number_format((float) $item->unit_price, 2) }}</td>
+                                    <td class="px-3 py-2 text-right font-medium tabular-nums text-[var(--hs-neutral-900)]">{{ number_format((float) $item->subtotal, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="border-t border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
+                            <tr>
+                                <td colspan="4" class="px-3 py-2 text-right font-medium text-[var(--hs-neutral-600)]">{{ __('Total') }}</td>
+                                <td class="px-3 py-2 text-right font-bold tabular-nums text-[var(--hs-neutral-900)]">
+                                    {{ $viewingQuotation->currency }} {{ number_format((float) $viewingQuotation->total_amount, 2) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                {{-- Notes --}}
+                @if ($viewingQuotation->notes)
+                    <div class="text-sm text-[var(--hs-neutral-700)]">
+                        <strong>{{ __('Notes:') }}</strong>
+                        <p class="mt-1 whitespace-pre-wrap">{{ $viewingQuotation->notes }}</p>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        <x-slot name="footer">
+            <div class="flex items-center justify-between gap-3">
+                <flux:button variant="ghost" wire:click="$set('showQuotationDetail', false)">
+                    {{ __('Close') }}
+                </flux:button>
+
+                @if ($viewingQuotation && $viewingQuotation->isSubmitted() && $rfq->isOpen())
+                    <div class="flex items-center gap-2">
+                        <flux:button
+                            variant="ghost"
+                            icon="x-mark"
+                            wire:click="confirmRejectQuotation({{ $viewingQuotation->id }})"
+                            class="text-[var(--hs-danger-600)] hover:bg-[var(--hs-danger-50)]"
+                        >
+                            {{ __('Reject') }}
+                        </flux:button>
+                        <flux:button variant="primary" icon="check" wire:click="confirmAwardQuotation({{ $viewingQuotation->id }})">
+                            {{ __('Award') }}
+                        </flux:button>
+                    </div>
+                @endif
+            </div>
+        </x-slot>
+    </x-hs-modal>
 
     {{-- Close RFQ Confirmation Modal --}}
     <flux:modal name="close-rfq" wire:model="showCloseConfirmation">

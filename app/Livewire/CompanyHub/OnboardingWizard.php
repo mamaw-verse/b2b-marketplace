@@ -64,6 +64,36 @@ final class OnboardingWizard extends Component
         'documents' => 'Required Documents',
     ];
 
+    /**
+     * Maps a validation error key (or its prefix) to the wizard step it
+     * belongs to, so the error summary can offer a "jump to step" link.
+     *
+     * @var array<string, int>
+     */
+    public const array STEP_FOR_FIELD = [
+        'form.registered_business_name' => 1,
+        'form.storefront_name' => 1,
+        'form.business_structure' => 1,
+        'form.dti_sec_number' => 1,
+        'form.tax_identification_number' => 1,
+        'form.phone' => 1,
+        'form.email' => 1,
+        'form.address_1' => 1,
+        'form.address_2' => 1,
+        'form.city' => 1,
+        'form.province' => 1,
+        'form.zip_code' => 1,
+        'form.product_categories' => 2,
+        'form.fda_lto_number' => 2,
+        'form.average_production_lead_time' => 2,
+        'form.export_readiness_status' => 2,
+        'certificates' => 3,
+        'certificateFiles' => 3,
+        'form.value_chain_positions' => 4,
+        'form.capabilities' => 4,
+        'documents' => 5,
+    ];
+
     public int $currentStep = 1;
 
     public string $onboardingStatus = '';
@@ -130,6 +160,18 @@ final class OnboardingWizard extends Component
     {
         if ($this->currentStep > 1) {
             $this->currentStep--;
+        }
+    }
+
+    /**
+     * Jump directly to a step. Used by the validation-error summary so the
+     * user can navigate to the field a hidden error refers to. Does not
+     * re-run/save the current step, since the intent is to correct errors.
+     */
+    public function goToStep(int $step): void
+    {
+        if ($step >= 1 && $step <= self::TOTAL_STEPS) {
+            $this->currentStep = $step;
         }
     }
 
@@ -218,7 +260,7 @@ final class OnboardingWizard extends Component
 
         session()->flash('message', 'Your onboarding application has been submitted for review.');
 
-        $this->redirect(route('hub.onboarding'));
+        $this->redirect(route('account.onboarding'));
     }
 
     public function addCertificate(): void
@@ -363,6 +405,39 @@ final class OnboardingWizard extends Component
     public function fieldLabels(): array
     {
         return self::FIELD_LABELS;
+    }
+
+    /**
+     * Whether any uploaded document is still awaiting its security scan.
+     * Drives the checklist's auto-refresh: the view polls only while this is
+     * true, and stops once every document is clean/infected (settled).
+     */
+    #[Computed]
+    public function hasPendingDocuments(): bool
+    {
+        foreach ($this->uploadedDocuments as $document) {
+            if (($document['scan_status'] ?? null) === 'pending') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Resolve the wizard step number for a given validation error key.
+     * Falls back to the key's prefix (e.g. "certificates.0.body" → "certificates")
+     * and returns null when the key can't be mapped to a step.
+     */
+    public function stepForErrorKey(string $errorKey): ?int
+    {
+        if (isset(self::STEP_FOR_FIELD[$errorKey])) {
+            return self::STEP_FOR_FIELD[$errorKey];
+        }
+
+        $prefix = \Illuminate\Support\Str::before($errorKey, '.');
+
+        return self::STEP_FOR_FIELD[$prefix] ?? null;
     }
 
     public function render()

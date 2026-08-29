@@ -1,9 +1,10 @@
 @props([
-    'name'     => null,
-    'model'    => null,
-    'title'    => null,
-    'subtitle' => null,
-    'size'     => 'md',   // sm | md | lg | xl | 2xl
+    'name'        => null,
+    'model'       => null,
+    'title'       => null,
+    'subtitle'    => null,
+    'size'        => 'md',   // sm | md | lg | xl | 2xl
+    'dismissible' => true,   // false — disable closing by clicking outside the modal
 ])
 
 @php
@@ -20,6 +21,7 @@ $widthClass = $widths[$size] ?? $widths['md'];
 <flux:modal
     name="{{ $name }}"
     wire:model="{{ $model }}"
+    :dismissible="$dismissible"
     class="{{ $widthClass }} !p-0"
 >
     <div class="flex flex-col max-h-[85vh]">

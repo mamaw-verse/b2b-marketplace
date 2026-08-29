@@ -11,6 +11,8 @@ use App\Models\Quotation;
 use App\Models\RfqRecipient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\MessageBag;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -45,6 +47,18 @@ final class QuotationBuilder extends Component
     public array $items = [];
 
     public ?int $confirmingRemoveItemIndex = null;
+
+    /**
+     * Per-item field error flags mirrored for the Blade view's Alpine-controlled
+     * inputs (description, unit, custom unit). Those live inside wire:ignore
+     * subtrees, so Livewire cannot morph the server-rendered $errors->has() red
+     * ring onto them; instead the view binds the ring to this reactive array.
+     *
+     * Shape: [itemIndex => ['description' => bool, 'unit' => bool]]
+     *
+     * @var array<int, array<string, bool>>
+     */
+    public array $itemFieldErrors = [];
 
     #[Computed]
     public function rfqRecipient(): RfqRecipient
@@ -140,6 +154,8 @@ final class QuotationBuilder extends Component
                 'unit_price' => '',
             ];
 
+            $this->clearItemErrors($index);
+
             return;
         }
 
@@ -169,11 +185,15 @@ final class QuotationBuilder extends Component
             'unit' => $variant->unit,
             'unit_price' => (string) $variant->price,
         ];
+
+        // Picking a variant fills every required field for this row, so clear any
+        // stale validation errors/red rings it was showing beforehand.
+        $this->clearItemErrors($index);
     }
 
     public function saveDraft(): void
     {
-        $this->validate();
+        $this->validateItems();
 
         $rfqRecipient = $this->rfqRecipient();
 
@@ -231,7 +251,7 @@ final class QuotationBuilder extends Component
 
     public function confirmSubmit(): void
     {
-        $this->validate();
+        $this->validateItems();
         \Flux\Flux::modal('submit-quotation-confirm')->show();
     }
 
@@ -366,6 +386,63 @@ final class QuotationBuilder extends Component
         }
 
         return $messages;
+    }
+
+    /**
+     * Clear validation errors (and the mirrored wire:ignore-field flags) for one
+     * item row — used when selecting a variant resolves what was previously
+     * missing, so the seller isn't left staring at a stale error/red ring.
+     */
+    private function clearItemErrors(int $index): void
+    {
+        $this->resetErrorBag([
+            "items.{$index}.description",
+            "items.{$index}.quantity",
+            "items.{$index}.unit",
+            "items.{$index}.unit_price",
+        ]);
+
+        $this->itemFieldErrors[$index] = [
+            'description' => false,
+            'unit' => false,
+        ];
+    }
+
+    /**
+     * Validate and, whatever the outcome, refresh the per-item error flags so the
+     * view's Alpine-controlled (wire:ignore) fields can show/clear the red ring.
+     * Re-throws the validation exception so the normal error flow is preserved.
+     */
+    private function validateItems(): void
+    {
+        try {
+            $this->validate();
+        } catch (ValidationException $e) {
+            $this->refreshItemFieldErrors($e->validator->errors());
+
+            throw $e;
+        }
+
+        // Validation passed — clear any stale flags.
+        $this->refreshItemFieldErrors();
+    }
+
+    /**
+     * Rebuild $itemFieldErrors for the fields that render inside wire:ignore
+     * subtrees, from the given message bag (defaults to empty = all valid).
+     */
+    private function refreshItemFieldErrors(?MessageBag $errors = null): void
+    {
+        $flags = [];
+
+        foreach (array_keys($this->items) as $index) {
+            $flags[$index] = [
+                'description' => (bool) $errors?->has("items.{$index}.description"),
+                'unit' => (bool) $errors?->has("items.{$index}.unit"),
+            ];
+        }
+
+        $this->itemFieldErrors = $flags;
     }
 
     /**

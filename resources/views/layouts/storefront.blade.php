@@ -30,7 +30,7 @@
                 {{-- Brand --}}
                 <div>
                     <div class="flex items-center gap-3">
-                        <img src="/images/brand-logo.png" alt="1Halal Store" class="h-8 w-auto brightness-0 invert opacity-90">
+                        <img src="/images/brand-logo.png" alt="1Halal Store" class="h-12 w-auto opacity-90">
                         <img src="/images/halal-stamp.png" alt="Halal Certified" class="h-12 w-auto">
                     </div>
                     <p class="mt-3 text-sm text-[var(--hs-neutral-400)] leading-relaxed">

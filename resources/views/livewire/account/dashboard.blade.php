@@ -7,7 +7,7 @@
             <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Track your orders and purchases at a glance.') }}</p>
         </div>
         @unless ($this->hasShop)
-            <a href="{{ route('hub.onboarding') }}" wire:navigate
+            <a href="{{ route('account.onboarding') }}" wire:navigate
                class="inline-flex items-center justify-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--hs-green-700)] transition shadow-[var(--hs-shadow-sm)]">
                 {{ __('Start Selling') }}
             </a>

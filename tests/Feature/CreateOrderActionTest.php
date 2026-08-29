@@ -76,3 +76,38 @@ test('order items prefer variant_snapshot unit and unit_price when present', fun
     expect($orderItem->unit)->toBe('box')
         ->and((string) $orderItem->unit_price)->toBe('99.99');
 });
+
+test('order item description always copies the quotation item description, never the variant/snapshot description', function () {
+    $buyer = User::factory()->create();
+    $seller = User::factory()->create();
+    $shop = Shop::factory()->create(['user_id' => $seller->id, 'status' => 'active']);
+
+    $rfq = Rfq::factory()->create(['user_id' => $buyer->id]);
+    $recipient = RfqRecipient::factory()->create(['rfq_id' => $rfq->id, 'shop_id' => $shop->id]);
+    $quotation = Quotation::factory()->awarded()->create([
+        'rfq_id' => $rfq->id,
+        'rfq_recipient_id' => $recipient->id,
+    ]);
+
+    // Snapshot carries a different 'description' than the quotation item's own
+    // composed description — the order item must keep the quotation item's text.
+    QuotationItem::factory()->create([
+        'quotation_id' => $quotation->id,
+        'variant_id' => null,
+        'variant_snapshot' => [
+            'description' => 'Raw variant description fragment',
+            'unit' => 'box',
+            'unit_price' => '99.99',
+        ],
+        'description' => 'Halal Coconut Flour — Raw variant description fragment',
+        'quantity' => 2,
+        'unit' => 'kg',
+        'unit_price' => '10.00',
+        'sort_order' => 0,
+    ]);
+
+    $result = (new CreateOrderAction)->execute($shop, $quotation->id);
+
+    $orderItem = $result['order']->items->first();
+    expect($orderItem->description)->toBe('Halal Coconut Flour — Raw variant description fragment');
+});

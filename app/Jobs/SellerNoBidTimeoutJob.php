@@ -39,7 +39,7 @@ final class SellerNoBidTimeoutJob implements ShouldQueue
             // Notify the buyer that the seller did not respond
             $buyer = $recipient->rfq->user;
             if ($buyer) {
-                $buyer->notify(new RfqNoBidNotification($recipient));
+                $buyer->notify(new RfqNoBidNotification($recipient, reason: 'timeout'));
             }
 
             $count++;
