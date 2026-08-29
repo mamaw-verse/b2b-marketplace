@@ -33,7 +33,20 @@ Route::get('media/{media}/view', function (App\Models\Media $media) {
             abort(403);
         }
 
-        if (! $user->hasRole('admin') && $media->uploaded_by_id !== $user->id) {
+        $isAdminOrUploader = $user->hasRole('admin') || $media->uploaded_by_id === $user->id;
+
+        // Dispute photos must be viewable by BOTH parties of the dispute, not just
+        // the uploader: the buyer uploads them, but the seller needs to see them to
+        // resolve the case. Allow either the buyer or the shop owner of any order
+        // whose dispute references this media.
+        $isDisputeParty = $media->disputes()
+            ->whereHas('order', fn ($q) => $q
+                ->where('buyer_user_id', $user->id)
+                ->orWhereHas('shop', fn ($s) => $s->where('user_id', $user->id))
+            )
+            ->exists();
+
+        if (! $isAdminOrUploader && ! $isDisputeParty) {
             abort(403);
         }
     }
@@ -89,9 +102,8 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->gr
     // Notifications (full-page list)
     Route::livewire('notifications', 'shared.notification-list')->name('notifications.index');
 
-    // Disputes (buyer)
-    Route::livewire('orders/{order}/dispute/create', 'account.disputes.dispute-form')->name('orders.dispute.create');
-    Route::livewire('orders/{order}/dispute/{dispute}', 'account.disputes.dispute-detail')->name('orders.dispute.show');
+    // Disputes (buyer) — creation and viewing are modals on the order detail page
+    // (DisputeForm / DisputeDetail components), not standalone pages.
 });
 
 /*

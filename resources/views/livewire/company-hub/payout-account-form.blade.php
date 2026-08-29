@@ -15,9 +15,9 @@
             <div class="px-6 pt-5">
                 <div @class([
                     'inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--hs-radius-pill)] text-sm font-medium',
-                    'bg-amber-50 text-amber-700 ring-1 ring-amber-200' => $verification_status === 'pending',
-                    'bg-green-50 text-green-700 ring-1 ring-green-200' => $verification_status === 'verified',
-                    'bg-red-50 text-red-700 ring-1 ring-red-200' => $verification_status === 'rejected',
+                    'bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)] ring-1 ring-[var(--hs-warning-200)]' => $verification_status === 'pending',
+                    'bg-[var(--hs-success-50)] text-[var(--hs-success-700)] ring-1 ring-[var(--hs-success-200)]' => $verification_status === 'verified',
+                    'bg-[var(--hs-danger-50)] text-[var(--hs-danger-700)] ring-1 ring-[var(--hs-danger-200)]' => $verification_status === 'rejected',
                 ])>
                     @if ($verification_status === 'pending')
                         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
@@ -26,7 +26,7 @@
                         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                         {{ __('Verified') }}
                         @if ($verified_at)
-                            <span class="text-xs text-green-600">{{ $verified_at }}</span>
+                            <span class="text-xs text-[var(--hs-success-700)]">{{ $verified_at }}</span>
                         @endif
                     @elseif ($verification_status === 'rejected')
                         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
@@ -35,9 +35,9 @@
                 </div>
 
                 @if ($verification_status === 'rejected' && $rejection_reason)
-                    <div class="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg">
-                        <p class="text-sm font-medium text-red-800">{{ __('Rejection Reason:') }}</p>
-                        <p class="mt-1 text-sm text-red-700">{{ $rejection_reason }}</p>
+                    <div class="mt-3 p-3 bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] rounded-lg">
+                        <p class="text-sm font-medium text-[var(--hs-danger-800)]">{{ __('Rejection Reason:') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-danger-700)]">{{ $rejection_reason }}</p>
                     </div>
                 @endif
             </div>
@@ -45,8 +45,8 @@
 
         <div class="p-6">
             @if (session()->has('success'))
-                <div class="mb-6 p-3 bg-green-50 border border-green-100 rounded-lg">
-                    <p class="text-sm text-green-700">{{ session('success') }}</p>
+                <div class="mb-6 p-3 bg-[var(--hs-success-50)] border border-[var(--hs-success-200)] rounded-lg">
+                    <p class="text-sm text-[var(--hs-success-700)]">{{ session('success') }}</p>
                 </div>
             @endif
 

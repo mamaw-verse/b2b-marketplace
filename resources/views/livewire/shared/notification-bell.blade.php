@@ -67,7 +67,7 @@
                     <div @class([
                         'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full',
                         'bg-[var(--hs-info-50)] text-[var(--hs-info-700)]' => $type === 'new_message',
-                        'bg-[var(--hs-success-50)] text-[var(--hs-success-700)]' => in_array($type, ['quotation_submitted', 'quotation_awarded']),
+                        'bg-[var(--hs-green-50)] text-[var(--hs-green-700)]' => in_array($type, ['quotation_submitted', 'quotation_awarded']),
                         'bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]' => in_array($type, ['rfq_received', 'certificate_expiring']),
                         'bg-[var(--hs-danger-50)] text-[var(--hs-danger-700)]' => in_array($type, ['quotation_rejected', 'quotation_withdrawn', 'certificate_expired']),
                         'bg-[var(--hs-neutral-100)] text-[var(--hs-neutral-600)]' => !in_array($type, ['new_message', 'quotation_submitted', 'quotation_awarded', 'rfq_received', 'certificate_expiring', 'quotation_rejected', 'quotation_withdrawn', 'certificate_expired']),

@@ -34,12 +34,18 @@ final class ResolveDisputeAction
             ];
         }
 
-        // For return_refund type, require status = return_received
-        if ($dispute->type === 'return_refund' && $dispute->status !== 'return_received') {
+        // For a return_refund dispute, a refund (full/partial) may only be issued
+        // once the returned goods have been confirmed received. A denial, however,
+        // can be issued at any point — a seller must be able to reject a bogus
+        // return claim without first accepting a return that may never arrive.
+        if ($dispute->type === 'return_refund'
+            && $resolutionType !== 'denied'
+            && $dispute->status !== 'return_received'
+        ) {
             return [
                 'success' => false,
                 'dispute' => $dispute,
-                'error' => 'Return must be confirmed before resolving a return_refund dispute.',
+                'error' => 'Confirm the return has been received before issuing a refund.',
             ];
         }
 
@@ -105,9 +111,11 @@ final class ResolveDisputeAction
                     'note' => "Dispute resolution: {$resolutionType}",
                 ]);
 
-                // If partial refund, create payout for remainder
+                // If partial refund, create payout for remainder. Use the same
+                // commission source as escrow/payout and the quotation/order payout
+                // estimates (PayoutSetting) so the basis is consistent app-wide.
                 if ($resolutionType === 'partial_refund') {
-                    $commissionRate = (float) config('marketplace.commission_rate', 0.01);
+                    $commissionRate = \App\Models\PayoutSetting::getCommissionFeeRate();
                     $remainder = (float) $lockedOrder->order_total - $actualAmount;
                     $payout = round($remainder * (1 - $commissionRate), 2);
 

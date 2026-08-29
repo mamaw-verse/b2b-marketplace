@@ -5,9 +5,9 @@ $styles = [
     'halal' => 'bg-[var(--hs-green-600)] text-white',
     'gold' => 'bg-[var(--hs-gold-500)]/15 text-[var(--hs-gold-700)] border border-[var(--hs-gold-400)]',
     'tag' => 'bg-[var(--hs-neutral-100)] text-[var(--hs-neutral-700)] border border-[var(--hs-neutral-200)]',
-    'warning' => 'bg-[var(--hs-warning-50)] text-amber-700 border border-amber-200',
-    'danger' => 'bg-[var(--hs-danger-50)] text-red-700 border border-red-200',
-    'info' => 'bg-[var(--hs-info-50)] text-blue-700 border border-blue-200',
+    'warning' => 'bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)] border border-[var(--hs-warning-200)]',
+    'danger' => 'bg-[var(--hs-danger-50)] text-[var(--hs-danger-700)] border border-[var(--hs-danger-200)]',
+    'info' => 'bg-[var(--hs-info-50)] text-[var(--hs-info-700)] border border-[var(--hs-info-200)]',
     'neutral' => 'bg-[var(--hs-neutral-100)] text-[var(--hs-neutral-600)]',
 ];
 @endphp

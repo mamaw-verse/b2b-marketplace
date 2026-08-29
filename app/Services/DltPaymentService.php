@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use RuntimeException;
 
@@ -38,15 +39,19 @@ final class DltPaymentService
             return $cached;
         }
 
-        $response = $this->http
-            ->baseUrl($this->baseUrl())
-            ->asJson()
-            ->acceptJson()
-            ->post('/oauth/token', [
-                'grant_type' => 'client_credentials',
-                'client_id' => config('services.dlt.client_id'),
-                'client_secret' => config('services.dlt.client_secret'),
-            ]);
+        try {
+            $response = $this->http
+                ->baseUrl($this->baseUrl())
+                ->asJson()
+                ->acceptJson()
+                ->post('/oauth/token', [
+                    'grant_type' => 'client_credentials',
+                    'client_id' => config('services.dlt.client_id'),
+                    'client_secret' => config('services.dlt.client_secret'),
+                ]);
+        } catch (ConnectionException $e) {
+            throw $this->unreachable($e);
+        }
 
         if ($response->failed()) {
             throw new RuntimeException('DLT OAuth token request failed: '.$response->body());
@@ -73,11 +78,15 @@ final class DltPaymentService
     {
         $token = $this->getBearerToken();
 
-        $response = $this->authorized($token)
-            ->get($this->baseUrl().'/api/v1/collection/apn/brands', [
-                'merchant_account_id' => config('services.dlt.merchant_account_id'),
-                'service_code' => config('services.dlt.service_code'),
-            ]);
+        try {
+            $response = $this->authorized($token)
+                ->get($this->baseUrl().'/api/v1/collection/apn/brands', [
+                    'merchant_account_id' => config('services.dlt.merchant_account_id'),
+                    'service_code' => config('services.dlt.service_code'),
+                ]);
+        } catch (ConnectionException $e) {
+            throw $this->unreachable($e);
+        }
 
         $this->throwIfFailed($response);
 
@@ -108,8 +117,12 @@ final class DltPaymentService
         $payload['merchant_account_id'] = config('services.dlt.merchant_account_id');
         $payload['service_code'] = config('services.dlt.service_code');
 
-        $response = $this->authorized($token)
-            ->post($this->baseUrl().'/api/v1/collection/apn/submit', $payload);
+        try {
+            $response = $this->authorized($token)
+                ->post($this->baseUrl().'/api/v1/collection/apn/submit', $payload);
+        } catch (ConnectionException $e) {
+            throw $this->unreachable($e);
+        }
 
         $this->throwIfFailed($response);
 
@@ -130,18 +143,22 @@ final class DltPaymentService
     ): array {
         $token = $this->getBearerToken();
 
-        $response = $this->authorized($token)
-            ->post($this->baseUrl().'/api/v1/quick-link/session', [
-                'service_code' => config('services.dlt.service_code'),
-                'merchant_account_id' => config('services.dlt.merchant_account_id'),
-                'merchant_transaction_id' => $merchantTransactionId,
-                'amount' => round($amount, 2),
-                'currency' => 'PHP',
-                'product_name' => $productName,
-                'quantity' => 1,
-                'success_url' => $successUrl,
-                'failure_url' => $failureUrl,
-            ]);
+        try {
+            $response = $this->authorized($token)
+                ->post($this->baseUrl().'/api/v1/quick-link/session', [
+                    'service_code' => config('services.dlt.service_code'),
+                    'merchant_account_id' => config('services.dlt.merchant_account_id'),
+                    'merchant_transaction_id' => $merchantTransactionId,
+                    'amount' => round($amount, 2),
+                    'currency' => 'PHP',
+                    'product_name' => $productName,
+                    'quantity' => 1,
+                    'success_url' => $successUrl,
+                    'failure_url' => $failureUrl,
+                ]);
+        } catch (ConnectionException $e) {
+            throw $this->unreachable($e);
+        }
 
         if ($response->failed()) {
             throw new RuntimeException('DLT Quick Link session creation failed: '.$response->body());
@@ -176,10 +193,14 @@ final class DltPaymentService
     {
         $token = $this->getBearerToken();
 
-        $response = $this->authorized($token)
-            ->get($this->baseUrl().'/api/v1/quick-link/session', [
-                'token' => $sessionToken,
-            ]);
+        try {
+            $response = $this->authorized($token)
+                ->get($this->baseUrl().'/api/v1/quick-link/session', [
+                    'token' => $sessionToken,
+                ]);
+        } catch (ConnectionException $e) {
+            throw $this->unreachable($e);
+        }
 
         if ($response->failed()) {
             throw new RuntimeException('DLT Get Quick Link session failed: '.$response->body());
@@ -202,6 +223,17 @@ final class DltPaymentService
     private function baseUrl(): string
     {
         return mb_rtrim(config('services.dlt.base_url', 'https://checkout.dxp.dtic.com.ph'), '/');
+    }
+
+    /**
+     * Translate a low-level HTTP connection failure (DNS resolution, timeout,
+     * TLS handshake, network down) into the RuntimeException the callers
+     * already handle, so the gateway being unreachable never surfaces as an
+     * unhandled 500.
+     */
+    private function unreachable(ConnectionException $e): RuntimeException
+    {
+        return new RuntimeException('DLT payment gateway is unreachable: '.$e->getMessage(), 0, $e);
     }
 
     /**

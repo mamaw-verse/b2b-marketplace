@@ -7,7 +7,9 @@ namespace App\Livewire\CompanyHub\Fulfilment;
 use App\Events\OrderDelivered;
 use App\Events\OrderShipped;
 use App\Models\Fulfilment;
+use App\Models\FulfilmentItem;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 final class FulfilmentPanel extends Component
@@ -51,13 +53,27 @@ final class FulfilmentPanel extends Component
             'trackingUrl.url' => 'Please enter a valid URL (e.g. https://...).',
         ]);
 
-        $this->fulfilment = Fulfilment::create([
-            'order_id' => $this->order->id,
-            'status' => 'pending',
-            'carrier' => $this->carrier,
-            'tracking_code' => $this->trackingCode,
-            'tracking_url' => $this->trackingUrl,
-        ]);
+        $this->fulfilment = DB::transaction(function (): Fulfilment {
+            $fulfilment = Fulfilment::create([
+                'order_id' => $this->order->id,
+                'status' => 'pending',
+                'carrier' => $this->carrier,
+                'tracking_code' => $this->trackingCode,
+                'tracking_url' => $this->trackingUrl,
+            ]);
+
+            // Default fulfilment to the full order — one fulfilment item per order
+            // line, each shipping the order item's full quantity.
+            foreach ($this->order->items as $orderItem) {
+                FulfilmentItem::create([
+                    'fulfilment_id' => $fulfilment->id,
+                    'order_item_id' => $orderItem->id,
+                    'quantity' => $orderItem->quantity,
+                ]);
+            }
+
+            return $fulfilment;
+        });
 
         session()->flash('success', 'Fulfilment created.');
     }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -67,6 +68,14 @@ final class Dispute extends Model
     public function photos(): BelongsToMany
     {
         return $this->belongsToMany(Media::class, 'dispute_media');
+    }
+
+    /**
+     * The specific order items (and quantities) the buyer flagged for this dispute.
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(DisputeItem::class);
     }
 
     /**

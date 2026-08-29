@@ -7,6 +7,13 @@
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 
+/* Exclude agent/AI documentation from Tailwind's automatic content scan.
+   These markdown files contain literal placeholder classes such as
+   `bg-[var(--hs-*)]` that generate invalid CSS (Unexpected token '*'). */
+@source not '../../.ai';
+@source not '../../.claude';
+@source not '../../.kiro';
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {

@@ -1,5 +1,5 @@
 <div x-data x-on:redirect-to-payment.window="window.location.href = $event.detail.url">
-    <div class="max-w-2xl mx-auto space-y-4">
+    <div class="space-y-4">
         {{-- Order Summary Header --}}
         <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-5">
             <div class="flex items-center justify-between">
@@ -192,9 +192,9 @@
 
         {{-- Step: Success --}}
         @elseif ($step === 'success')
-            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-success-200)] shadow-[var(--hs-shadow-sm)] p-8 text-center">
-                <div class="mx-auto w-16 h-16 rounded-full bg-[var(--hs-success-50)] flex items-center justify-center mb-4">
-                    <svg class="size-8 text-[var(--hs-success-700)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-green-200)] shadow-[var(--hs-shadow-sm)] p-8 text-center">
+                <div class="mx-auto w-16 h-16 rounded-full bg-[var(--hs-green-50)] flex items-center justify-center mb-4">
+                    <svg class="size-8 text-[var(--hs-green-700)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                 </div>
                 <h2 class="text-xl font-bold text-[var(--hs-neutral-900)]">Payment Successful!</h2>
                 <p class="text-sm text-[var(--hs-neutral-600)] mt-2">Your order has been paid and the seller has been notified.</p>

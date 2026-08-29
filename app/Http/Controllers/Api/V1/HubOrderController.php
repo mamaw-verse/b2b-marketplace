@@ -260,6 +260,8 @@ final class HubOrderController extends Controller
             }
         });
 
+        \App\Events\OrderCancelled::dispatch($order->fresh());
+
         return response()->json([
             'data' => new OrderResource($order->fresh()),
         ]);

@@ -55,4 +55,12 @@ final class Media extends Model
     {
         return $this->belongsToMany(Product::class, 'product_documents');
     }
+
+    /**
+     * Disputes that attach this media as a supporting photo.
+     */
+    public function disputes(): BelongsToMany
+    {
+        return $this->belongsToMany(Dispute::class, 'dispute_media');
+    }
 }

@@ -7,6 +7,7 @@ namespace App\Livewire\Account\Orders;
 use App\Models\Order;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -22,6 +23,13 @@ final class OrderDetail extends Component
         $this->order = $order->load(['items', 'fees', 'fulfilments', 'disputes', 'shop']);
     }
 
+    #[On('dispute-opened')]
+    #[On('dispute-updated')]
+    public function refreshOrder(): void
+    {
+        $this->order = $this->order->fresh(['items', 'fees', 'fulfilments', 'disputes', 'shop']);
+    }
+
     public function cancel(): void
     {
         if ($this->order->status !== 'pending_payment') {
@@ -30,6 +38,9 @@ final class OrderDetail extends Component
 
         $this->order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
         $this->order->refresh();
+
+        \App\Events\OrderCancelled::dispatch($this->order);
+
         session()->flash('success', 'Order cancelled.');
     }
 

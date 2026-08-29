@@ -119,4 +119,13 @@ final class OrderPolicy
         return $user->id === $order->shop->user_id
             && $order->status === 'draft';
     }
+
+    /**
+     * Seller who owns the shop can act on a dispute for this order
+     * (confirm return, resolve, escalate). Independent of order status.
+     */
+    public function manageDispute(User $user, Order $order): bool
+    {
+        return $user->id === $order->shop->user_id;
+    }
 }

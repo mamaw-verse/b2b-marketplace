@@ -50,6 +50,31 @@ final class OrderQueue extends Component
             ->get();
     }
 
+    /**
+     * Per-tab order counts for the tab badges. Keys match the tab keys used in the view.
+     *
+     * @return array<string, int>
+     */
+    #[Computed]
+    public function tabCounts(): array
+    {
+        $shop = Auth::user()->shop;
+
+        if (! $shop) {
+            return ['all' => 0, 'draft' => 0, 'pending_payment' => 0, 'to_fulfil' => 0, 'disputed' => 0];
+        }
+
+        $baseQuery = Order::where('shop_id', $shop->id);
+
+        return [
+            'all' => (clone $baseQuery)->count(),
+            'draft' => (clone $baseQuery)->where('status', 'draft')->count(),
+            'pending_payment' => (clone $baseQuery)->where('status', 'pending_payment')->count(),
+            'to_fulfil' => (clone $baseQuery)->where('status', 'paid')->count(),
+            'disputed' => (clone $baseQuery)->whereHas('disputes', fn ($q) => $q->whereNotIn('status', ['resolved_refunded', 'resolved_denied', 'withdrawn']))->count(),
+        ];
+    }
+
     #[Computed]
     public function orders(): LengthAwarePaginator
     {

@@ -11,12 +11,15 @@
                     <button
                         wire:click="$set('tab', '{{ $key }}')"
                         @class([
-                            'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition',
+                            'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition flex items-center gap-2',
                             'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm' => $tab === $key,
                             'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)]' => $tab !== $key,
                         ])
                     >
                         {{ $label }}
+                        @if ($this->tabCounts[$key] > 0)
+                            <flux:badge size="sm" color="zinc">{{ $this->tabCounts[$key] }}</flux:badge>
+                        @endif
                     </button>
                 @endforeach
             </div>

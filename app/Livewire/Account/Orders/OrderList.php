@@ -51,8 +51,9 @@ final class OrderList extends Component
             'to_pay' => (clone $baseQuery)->where('status', 'pending_payment')->count(),
             'to_ship' => (clone $baseQuery)->where('status', 'paid')
                 ->where(fn ($q) => $q->whereDoesntHave('fulfilments')->orWhereHas('fulfilments', fn ($f) => $f->where('status', 'pending')))->count(),
-            'to_receive' => (clone $baseQuery)->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered']))->count(),
-            'completed' => (clone $baseQuery)->where('status', 'completed')->count(),
+            'to_receive' => (clone $baseQuery)->whereNotIn('status', ['completed', 'cancelled', 'refunded'])
+                ->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered']))->count(),
+            'completed' => (clone $baseQuery)->whereIn('status', ['completed', 'refunded'])->count(),
             'cancelled' => (clone $baseQuery)->where('status', 'cancelled')->count(),
             'disputed' => (clone $baseQuery)->whereHas('disputes', fn ($d) => $d->whereNotIn('status', ['resolved_refunded', 'resolved_denied', 'withdrawn']))->count(),
         ];
@@ -64,15 +65,16 @@ final class OrderList extends Component
         $buyerId = Auth::id();
 
         $query = Order::where('buyer_user_id', $buyerId)
-            ->with(['shop', 'items'])
+            ->with(['shop', 'items', 'fulfilments.fulfilmentItems'])
             ->orderByDesc('created_at');
 
         match ($this->tab) {
             'to_pay' => $query->where('status', 'pending_payment'),
             'to_ship' => $query->where('status', 'paid')
                 ->where(fn ($q) => $q->whereDoesntHave('fulfilments')->orWhereHas('fulfilments', fn ($f) => $f->where('status', 'pending'))),
-            'to_receive' => $query->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered'])),
-            'completed' => $query->where('status', 'completed'),
+            'to_receive' => $query->whereNotIn('status', ['completed', 'cancelled', 'refunded'])
+                ->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered'])),
+            'completed' => $query->whereIn('status', ['completed', 'refunded']),
             'cancelled' => $query->where('status', 'cancelled'),
             'disputed' => $query->whereHas('disputes', fn ($d) => $d->whereNotIn('status', ['resolved_refunded', 'resolved_denied', 'withdrawn'])),
             default => null,

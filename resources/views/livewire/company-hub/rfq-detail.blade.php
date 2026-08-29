@@ -83,7 +83,7 @@
                         @foreach ($rfqRecipient->quotations as $quotation)
                             <div @class([
                                 'rounded-[var(--hs-radius-card)] border p-4',
-                                'border-[var(--hs-success-200)] bg-[var(--hs-success-50)]' => $quotation->status === 'awarded',
+                                'border-[var(--hs-green-200)] bg-[var(--hs-green-50)]' => $quotation->status === 'awarded',
                                 'border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]' => $quotation->status === 'rejected',
                                 'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' => $quotation->status === 'withdrawn',
                                 'border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]' => in_array($quotation->status, ['draft', 'submitted', 'not_awarded', 'expired']),
@@ -102,12 +102,12 @@
 
                                 {{-- Status-specific feedback messages --}}
                                 @if ($quotation->status === 'awarded')
-                                    <div class="flex items-center gap-1.5 mt-2 text-sm text-[var(--hs-success-700)]">
+                                    <div class="flex items-center gap-1.5 mt-2 text-sm text-[var(--hs-green-700)]">
                                         <flux:icon name="check-circle" variant="mini" class="shrink-0" />
                                         {{ __('Buyer awarded this quotation. Proceed to next steps.') }}
                                     </div>
                                     {{-- Create Order action --}}
-                                    <div class="mt-3 pt-3 border-t border-[var(--hs-success-200)]">
+                                    <div class="mt-3 pt-3 border-t border-[var(--hs-green-200)]">
                                         @if ($quotation->order)
                                             <flux:button variant="ghost" size="xs" icon="eye" href="{{ route('hub.orders.show', $quotation->order) }}" wire:navigate>
                                                 {{ __('View Order #') }}{{ $quotation->order->id }}

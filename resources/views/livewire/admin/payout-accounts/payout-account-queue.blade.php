@@ -62,9 +62,9 @@
                             <flux:table.cell class="py-0">
                                 <span @class([
                                     'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                    'bg-amber-50 text-amber-700' => $account->verification_status === 'pending',
-                                    'bg-green-50 text-green-700' => $account->verification_status === 'verified',
-                                    'bg-red-50 text-red-700' => $account->verification_status === 'rejected',
+                                    'bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]' => $account->verification_status === 'pending',
+                                    'bg-[var(--hs-success-50)] text-[var(--hs-success-700)]' => $account->verification_status === 'verified',
+                                    'bg-[var(--hs-danger-50)] text-[var(--hs-danger-700)]' => $account->verification_status === 'rejected',
                                 ])>
                                     {{ ucfirst($account->verification_status) }}
                                 </span>

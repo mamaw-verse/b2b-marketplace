@@ -86,7 +86,7 @@
                         @foreach ($visibleQuotations as $quotation)
                             <div @class([
                                 'flex items-center gap-3 rounded-[var(--hs-radius-card)] border px-4 py-3',
-                                'border-[var(--hs-success-200)] bg-[var(--hs-success-50)]' => $quotation->status === 'awarded',
+                                'border-[var(--hs-green-200)] bg-[var(--hs-green-50)]' => $quotation->status === 'awarded',
                                 'border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]' => $quotation->status === 'rejected',
                                 'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' => $quotation->status === 'withdrawn',
                                 'border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]' => in_array($quotation->status, ['submitted', 'not_awarded', 'expired']),

@@ -135,7 +135,7 @@
                                 class="{{ $isThreadActive ? 'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' : 'border-transparent text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-800)]' }} flex h-10 shrink-0 items-center gap-1.5 border-b-2 px-3 text-xs font-semibold transition"
                             >
                                 @if ($orderForTab && $needsAttention)
-                                    <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                    <span class="size-1.5 rounded-full bg-[var(--hs-warning-500)]"></span>
                                 @elseif ($orderForTab && $isResolved)
                                     <svg class="size-3 text-[var(--hs-green-700)]" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                                 @elseif ($thread->rfq_id)

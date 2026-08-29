@@ -8,10 +8,10 @@
     </div>
 
     {{-- Single outer page card — the ONLY white/bordered/shadowed container --}}
-    <div class="bg-[var(--hs-neutral-0)] rounded-[16px] border border-[var(--hs-neutral-200)] shadow-[0_1px_2px_rgba(20,22,30,.04)] overflow-hidden">
+    <div class="bg-[var(--hs-neutral-0)] rounded-[20px] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-md)] overflow-hidden">
 
         {{-- Header --}}
-        <div class="px-8 pt-7 pb-6">
+        <div class="px-8 pt-7 pb-6 border-b border-[var(--hs-neutral-100)]">
             <div class="flex items-start justify-between gap-6 flex-wrap">
                 <div>
                     <div class="flex items-center gap-2.5">
@@ -23,7 +23,7 @@
                 <div class="flex items-center gap-3">
                     @if (($order->fulfilments->first()?->status === 'delivered' || $order->status === 'completed') && ! in_array($order->status, ['refunded', 'cancelled']))
                         @if ($order->disputes->isEmpty() || $order->disputes->every(fn ($d) => in_array($d->status, ['resolved_refunded', 'resolved_denied', 'withdrawn'])))
-                            <flux:button size="sm" variant="ghost" href="{{ route('account.orders.dispute.create', $order) }}" wire:navigate>Open Dispute</flux:button>
+                            <flux:button size="sm" variant="ghost" x-on:click="$dispatch('open-dispute-modal')">Open Dispute</flux:button>
                         @endif
                     @endif
                     @if ($order->status === 'pending_payment')
@@ -41,19 +41,18 @@
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="mx-8 mb-4 p-3 bg-[var(--hs-success-50)] border border-[var(--hs-success-200)] rounded-lg text-sm text-[var(--hs-success-700)]">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="mx-8 mb-4 p-3 bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] rounded-lg text-sm text-[var(--hs-danger-700)]">{{ session('error') }}</div>
-        @endif
+        {{-- Body: Two-column grid — tinted summary panel bleeds full-height on the right --}}
+        <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_300px] items-stretch">
 
-        {{-- Body: Two-column grid --}}
-        <div class="px-8 pb-8">
-            <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-8 items-start">
+            {{-- MAIN COLUMN — flat sections separated by hairline dividers --}}
+            <div class="min-w-0 px-8 pb-8 pt-6">
 
-                {{-- MAIN COLUMN — flat sections separated by hairline dividers --}}
-                <div class="min-w-0">
+                    @if (session('success'))
+                        <div class="mb-6 p-3 bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] rounded-lg text-sm text-[var(--hs-green-700)]">{{ session('success') }}</div>
+                    @endif
+                    @if (session('error'))
+                        <div class="mb-6 p-3 bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] rounded-lg text-sm text-[var(--hs-danger-700)]">{{ session('error') }}</div>
+                    @endif
 
                     {{-- Fulfilment Section --}}
                     @if ($order->fulfilments->isNotEmpty() || in_array($order->status, ['paid', 'completed', 'refunded']))
@@ -118,7 +117,7 @@
                                             — <span class="font-bold text-[var(--hs-neutral-900)]">{{ $fulfilment->tracking_code }}</span>
                                         @endif
                                         @if ($fulfilment->tracking_url)
-                                            <a href="{{ $fulfilment->tracking_url }}" target="_blank" rel="noopener" class="ml-2 font-semibold text-[#157a46] hover:underline">{{ __('Track →') }}</a>
+                                            <a href="{{ $fulfilment->tracking_url }}" target="_blank" rel="noopener" class="ml-2 font-semibold text-[var(--hs-green-700)] hover:underline">{{ __('Track →') }}</a>
                                         @endif
                                     </div>
                                 @endif
@@ -190,7 +189,7 @@
                                         <p class="text-sm text-[var(--hs-neutral-700)] mt-1">{{ str_replace('_', ' ', ucfirst($activeDispute->type)) }} — <x-hs-status-pill :status="$activeDispute->status" /></p>
                                         <p class="text-xs text-[var(--hs-neutral-500)] mt-1 line-clamp-1">{{ $activeDispute->reason }}</p>
                                     </div>
-                                    <flux:button size="sm" href="{{ route('account.orders.dispute.show', [$order, $activeDispute]) }}" wire:navigate>
+                                    <flux:button size="sm" x-on:click="$dispatch('open-dispute-detail-modal', { disputeId: {{ $activeDispute->id }} })">
                                         View Dispute
                                     </flux:button>
                                 </div>
@@ -225,83 +224,108 @@
                             @if ($order->fees->isNotEmpty())
                                 <tfoot>
                                     @foreach ($order->fees as $fee)
-                                        @php $borderClass = $loop->first ? 'border-t border-[var(--hs-neutral-100)]' : ''; @endphp
-                                        <tr class="bg-[var(--hs-neutral-50)]">
-                                            <td class="py-2 text-[var(--hs-neutral-500)] italic {{ $borderClass }}">
+                                        {{-- Shading removed — fee rows now read as plain table rows,
+                                             only the first keeps a top border to separate from items. --}}
+                                        <tr @if ($loop->first) class="border-t border-[var(--hs-neutral-100)]" @endif>
+                                            <td class="py-2 text-[var(--hs-neutral-500)] italic">
                                                 <span class="inline-flex items-center gap-1.5">
                                                     <flux:icon name="receipt-percent" variant="mini" class="size-3.5 text-[var(--hs-neutral-400)]" />
                                                     {{ $fee->label }}
                                                 </span>
                                             </td>
-                                            <td class="py-2 {{ $borderClass }}"></td>
-                                            <td class="py-2 {{ $borderClass }}"></td>
-                                            <td class="py-2 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic {{ $borderClass }}">{{ number_format((float) $fee->amount, 2) }}</td>
+                                            <td class="py-2"></td>
+                                            <td class="py-2"></td>
+                                            <td class="py-2 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic">{{ number_format((float) $fee->amount, 2) }}</td>
                                         </tr>
                                     @endforeach
                                 </tfoot>
                             @endif
                         </table>
                     </section>
-                </div>
 
-                {{-- SIDEBAR — single tinted panel, NOT white/bordered like the outer card --}}
-                <div class="bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-100)] rounded-[var(--hs-radius-card)] overflow-hidden">
-                    {{-- Order Total block --}}
-                    <div class="p-5">
-                        <div class="text-right">
-                            <p class="text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">{{ __('Order total') }}</p>
-                            <p class="text-[26px] font-bold tracking-[-0.01em] text-[var(--hs-neutral-900)] tabular-nums mt-1">
-                                <span class="text-sm font-semibold text-[var(--hs-neutral-400)] mr-1">{{ $order->currency }}</span>{{ number_format((float) $order->order_total, 2) }}
-                            </p>
-                        </div>
-                        <div class="mt-3.5 pt-3 border-t border-[var(--hs-neutral-200)] space-y-1">
-                            <div class="flex justify-between text-[13px]">
-                                <span class="text-[var(--hs-neutral-500)]">{{ __('Subtotal') }}</span>
-                                <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ number_format((float) $order->items_total, 2) }}</span>
-                            </div>
-                            <div class="flex justify-between text-[13px]">
-                                <span class="text-[var(--hs-neutral-500)]">{{ __('Fees') }}</span>
-                                <span class="text-[var(--hs-neutral-900)] font-medium tabular-nums">{{ number_format((float) ($order->fees_total ?? 0), 2) }}</span>
-                            </div>
-                            @php $refundedAmount = $order->ledgerEntries->where('type', 'refund')->sum('amount'); @endphp
-                            @if ($refundedAmount > 0)
-                                <div class="flex justify-between text-[13px]">
-                                    <span class="text-[var(--hs-neutral-500)]">{{ __('Refunded') }}</span>
-                                    <span class="text-[var(--hs-danger-700)] font-medium tabular-nums">−{{ number_format((float) $refundedAmount, 2) }}</span>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    {{-- Customer & Shipping block — same panel, separated by internal divider --}}
-                    <div class="p-5 border-t border-[var(--hs-neutral-200)]">
-                        <p class="text-[13.5px] font-semibold text-[var(--hs-neutral-900)]">{{ $order->customer_contact_name }}</p>
-                        <p class="text-[13px] text-[var(--hs-neutral-600)] leading-relaxed">{{ $order->customer_contact_email }}</p>
-                        @if ($order->customer_contact_phone)
-                            <p class="text-[13px] text-[var(--hs-neutral-600)]">{{ $order->customer_contact_phone }}</p>
-                        @endif
-
-                        <div class="mt-3.5 pt-3.5 border-t border-[var(--hs-neutral-200)]">
-                            <p class="text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold mb-1.5">{{ __('Shipping') }}</p>
-                            <p class="text-[13.5px] text-[var(--hs-neutral-800)] leading-relaxed">{{ $order->shipping_address_1 }}</p>
-                            @if ($order->shipping_address_2)
-                                <p class="text-[13.5px] text-[var(--hs-neutral-600)] leading-relaxed">{{ $order->shipping_address_2 }}</p>
-                            @endif
-                            <p class="text-[13.5px] text-[var(--hs-neutral-600)]">{{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_zip_code }}</p>
-                        </div>
-                    </div>
-                </div>
+                    {{-- Reviews Section (completed orders only) --}}
+                    @if ($order->status === 'completed')
+                        <section class="pt-6 mt-6 border-t border-[var(--hs-neutral-100)]">
+                            <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">{{ __('Reviews') }}</h2>
+                            <livewire:account.orders.review-form :order="$order" />
+                        </section>
+                    @endif
             </div>
 
-            {{-- Reviews Section (completed orders only) — full width below the grid --}}
-            @if ($order->status === 'completed')
-                <section class="pt-6 mt-6 border-t border-[var(--hs-neutral-100)]">
-                    <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">{{ __('Reviews') }}</h2>
-                    <livewire:account.orders.review-form :order="$order" />
-                </section>
-            @endif
+            {{-- SIDEBAR — tinted panel bleeding to the card's edges, separated from the
+                 main column by its own left border (matches the header hairline). --}}
+            <div class="bg-[var(--hs-neutral-50)] border-t md:border-t-0 md:border-l border-[var(--hs-neutral-100)] px-6 py-6 flex flex-col gap-6">
+                    {{-- Summary breakdown — Subtotal/Fees up top, Total due below a dashed rule --}}
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between text-[13px]">
+                            <span class="text-[var(--hs-neutral-500)]">{{ __('Subtotal') }}</span>
+                            <span class="text-[var(--hs-neutral-900)] font-semibold tabular-nums">{{ number_format((float) $order->items_total, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between text-[13px]">
+                            <span class="text-[var(--hs-neutral-500)]">{{ __('Fees') }}</span>
+                            <span class="text-[var(--hs-neutral-900)] font-semibold tabular-nums">{{ number_format((float) ($order->fees_total ?? 0), 2) }}</span>
+                        </div>
+                        @php $refundedAmount = $order->ledgerEntries->where('type', 'refund')->sum('amount'); @endphp
+                        @if ($refundedAmount > 0)
+                            <div class="flex justify-between text-[13px]">
+                                <span class="text-[var(--hs-neutral-500)]">{{ __('Refunded') }}</span>
+                                <span class="text-[var(--hs-danger-700)] font-semibold tabular-nums">−{{ number_format((float) $refundedAmount, 2) }}</span>
+                            </div>
+                        @endif
+
+                        <div class="mt-3 pt-4 border-t border-dashed border-[var(--hs-neutral-200)] flex items-baseline justify-between">
+                            <span class="text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">{{ __('Total due') }}</span>
+                            <p class="text-[26px] font-bold tracking-[-0.01em] text-[var(--hs-neutral-900)] tabular-nums leading-none">
+                                <span class="text-sm font-semibold text-[var(--hs-neutral-400)] mr-1 align-[3px]">{{ $order->currency }}</span>{{ number_format((float) $order->order_total, 2) }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Contact block — separated by a solid hairline --}}
+                    <div class="pt-5 border-t border-[var(--hs-neutral-200)]">
+                        <p class="text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold mb-2">{{ __('Contact') }}</p>
+                        <p class="text-[13.5px] font-bold text-[var(--hs-neutral-900)]">{{ $order->customer_contact_name }}</p>
+                        <p class="mt-1.5 flex items-start gap-2 text-[13px] text-[var(--hs-neutral-600)] leading-relaxed">
+                            <flux:icon name="envelope" variant="mini" class="size-3.5 mt-0.5 text-[var(--hs-neutral-400)] shrink-0" />
+                            {{ $order->customer_contact_email }}
+                        </p>
+                        @if ($order->customer_contact_phone)
+                            <p class="mt-1.5 flex items-start gap-2 text-[13px] text-[var(--hs-neutral-600)]">
+                                <flux:icon name="phone" variant="mini" class="size-3.5 mt-0.5 text-[var(--hs-neutral-400)] shrink-0" />
+                                {{ $order->customer_contact_phone }}
+                            </p>
+                        @endif
+                    </div>
+
+                    {{-- Shipping block --}}
+                    <div class="pt-5 border-t border-[var(--hs-neutral-200)]">
+                        <p class="text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold mb-2">{{ __('Shipping') }}</p>
+                        <p class="flex items-start gap-2 text-[13.5px] text-[var(--hs-neutral-800)] leading-relaxed">
+                            <flux:icon name="map-pin" variant="mini" class="size-3.5 mt-0.5 text-[var(--hs-neutral-400)] shrink-0" />
+                            <span>
+                                {{ $order->shipping_address_1 }}
+                                @if ($order->shipping_address_2)
+                                    <br>{{ $order->shipping_address_2 }}
+                                @endif
+                                <br>{{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_zip_code }}
+                            </span>
+                        </p>
+                    </div>
+            </div>
         </div>
     </div>
+
+    {{-- Open Dispute Modal (opened via the 'open-dispute-modal' browser event) --}}
+    @if (($order->fulfilments->first()?->status === 'delivered' || $order->status === 'completed') && ! in_array($order->status, ['refunded', 'cancelled']))
+        @if ($order->disputes->isEmpty() || $order->disputes->every(fn ($d) => in_array($d->status, ['resolved_refunded', 'resolved_denied', 'withdrawn'])))
+            <livewire:account.disputes.dispute-form :order="$order" :key="'dispute-form-'.$order->id" />
+        @endif
+    @endif
+
+    {{-- View Dispute Modal (opened via the 'open-dispute-detail-modal' browser event) --}}
+    @if ($order->disputes->isNotEmpty())
+        <livewire:account.disputes.dispute-detail :order="$order" :key="'dispute-detail-'.$order->id" />
+    @endif
 
     {{-- Cancel Confirmation Modal --}}
     <x-hs-confirm
