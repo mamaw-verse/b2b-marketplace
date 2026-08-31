@@ -17,7 +17,7 @@
                     <thead><tr class="border-b border-[var(--hs-neutral-100)]">
                         <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)]">Shop</th>
                         <th class="text-center py-3 px-2 text-[var(--hs-neutral-600)]">Eligible Orders</th>
-                        <th class="text-right py-3 px-2 text-[var(--hs-neutral-600)]">Releasable Amount</th>
+                        <th class="text-right py-3 px-2 text-[var(--hs-neutral-600)]">Net Releasable</th>
                         <th class="py-3 px-2"></th>
                     </tr></thead>
                     <tbody>
@@ -44,7 +44,7 @@
         <x-hs-confirm
             name="confirm-create-batch-{{ $seller['shop_id'] }}"
             title="Create Payout Batch"
-            message="Create a payout batch for {{ $seller['shop_name'] }}? This will bundle {{ $seller['eligible_orders_count'] }} eligible order(s) totalling ₱{{ number_format($seller['releasable_amount'], 2) }} (before fees)."
+            message="Create a payout batch for {{ $seller['shop_name'] }}? This will bundle {{ $seller['eligible_orders_count'] }} eligible order(s) for a net disbursement of ₱{{ number_format($seller['releasable_amount'], 2) }} (after transaction & commission fees)."
             variant="primary"
             confirmText="Create Batch"
         >

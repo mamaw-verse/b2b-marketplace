@@ -33,7 +33,7 @@ function createEligibleSetup(float $orderTotal = 1000.00): array
         'completed_at' => now()->subDays(10),
     ]);
 
-    LedgerEntry::factory()->payout()->create([
+    LedgerEntry::factory()->escrowHold()->create([
         'order_id' => $order->id,
         'amount' => $orderTotal,
     ]);
@@ -101,7 +101,7 @@ test('seller payout account not verified is not eligible', function () {
         'completed_at' => now()->subDays(10),
     ]);
 
-    LedgerEntry::factory()->payout()->create([
+    LedgerEntry::factory()->escrowHold()->create([
         'order_id' => $order->id,
         'amount' => 1000.00,
     ]);
@@ -123,7 +123,7 @@ test('total below minimum payout threshold cannot create batch', function () {
         'completed_at' => now()->subDays(10),
     ]);
 
-    LedgerEntry::factory()->payout()->create([
+    LedgerEntry::factory()->escrowHold()->create([
         'order_id' => $order->id,
         'amount' => 100.00,
     ]);
@@ -305,12 +305,13 @@ test('seller cannot see another sellers payouts', function () {
         ->assertStatus(403);
 });
 
-test('balance endpoint returns correct releasable amount', function () {
+test('balance endpoint returns correct net releasable amount', function () {
     $setup = createEligibleSetup(2000.00);
 
+    // Net = escrowed 2000.00 - transaction fee 15.00 - commission (2000 * 0.03 = 60.00) = 1925.00
     $this->actingAs($setup['seller'])
         ->getJson('/api/v1/hub/payouts/balance')
         ->assertOk()
-        ->assertJsonPath('data.releasable_amount', '2000.00')
+        ->assertJsonPath('data.releasable_amount', '1925.00')
         ->assertJsonPath('data.eligible_orders_count', 1);
 });

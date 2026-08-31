@@ -68,9 +68,14 @@ final class CreatePayoutBatchAction
         $itemsData = [];
 
         foreach ($eligibleOrders as $order) {
-            // Get the payout ledger entry for this order (the escrowed amount)
+            // Release the ESCROW_HOLD entry, per Phase 4 requirements §2.2:
+            // the batch groups escrow_hold entries and deducts fees from the
+            // gross escrowed amount. The Phase 3 `payout` ledger entry is
+            // notional (already net of a reporting commission) and must NOT be
+            // used here — summing it would double-count commission and mislink
+            // payout_items.ledger_entry_id.
             $ledgerEntry = LedgerEntry::where('order_id', $order->id)
-                ->where('type', 'payout')
+                ->where('type', 'escrow_hold')
                 ->first();
 
             if (! $ledgerEntry) {
@@ -106,7 +111,7 @@ final class CreatePayoutBatchAction
 
         if (empty($itemsData)) {
             throw ValidationException::withMessages([
-                'orders' => ['No eligible orders with payout ledger entries found.'],
+                'orders' => ['No eligible orders with escrow_hold ledger entries found.'],
             ]);
         }
 

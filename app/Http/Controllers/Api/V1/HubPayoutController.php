@@ -64,6 +64,8 @@ final class HubPayoutController extends Controller
         }
 
         $disputeHoldDays = PayoutSetting::getDisputeHoldDays();
+        $transactionFeeAmount = PayoutSetting::getTransactionFeeAmount();
+        $commissionFeeRate = PayoutSetting::getCommissionFeeRate();
 
         $eligibleOrders = Order::where('shop_id', $shop->id)
             ->where('status', 'completed')
@@ -74,22 +76,36 @@ final class HubPayoutController extends Controller
             })
             ->pluck('id');
 
-        $totalReleasable = '0.00';
+        // Net releasable = sum over each order's escrow_hold (gross) entry minus
+        // the flat transaction fee and percentage commission — the same basis as
+        // CreatePayoutBatchAction. Do NOT sum ledger_entries.type = 'payout'
+        // (notional, already net of reporting commission) per requirements §3.4.
+        $netReleasable = 0.0;
+        $releasableOrderCount = 0;
+
         if ($eligibleOrders->isNotEmpty()) {
-            $totalReleasable = number_format(
-                (float) LedgerEntry::whereIn('order_id', $eligibleOrders)
-                    ->where('type', 'payout')
-                    ->sum('amount'),
-                2,
-                '.',
-                '',
-            );
+            $escrowEntries = LedgerEntry::whereIn('order_id', $eligibleOrders)
+                ->where('type', 'escrow_hold')
+                ->get();
+
+            foreach ($escrowEntries as $entry) {
+                $escrowed = (float) $entry->amount;
+                $commissionFee = round($escrowed * $commissionFeeRate, 2, PHP_ROUND_HALF_UP);
+                $net = round($escrowed - $transactionFeeAmount - $commissionFee, 2);
+
+                if ($net <= 0) {
+                    continue;
+                }
+
+                $netReleasable = round($netReleasable + $net, 2);
+                $releasableOrderCount++;
+            }
         }
 
         return response()->json([
             'data' => [
-                'releasable_amount' => $totalReleasable,
-                'eligible_orders_count' => $eligibleOrders->count(),
+                'releasable_amount' => number_format($netReleasable, 2, '.', ''),
+                'eligible_orders_count' => $releasableOrderCount,
                 'minimum_threshold' => number_format(PayoutSetting::getMinimumPayoutThreshold(), 2, '.', ''),
             ],
         ]);

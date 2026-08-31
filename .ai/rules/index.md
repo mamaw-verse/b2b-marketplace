@@ -5,6 +5,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | Applies to | Rule file |
 | --- | --- |
 | app/Livewire/CompanyHub/Fulfilment/**, resources/views/livewire/account/orders/** | .ai/rules/account-orders.md |
+| app/Actions/{CreatePayoutBatchAction,ConfirmReceiptAction,ResolveDisputeAction}.php | .ai/rules/actions.md |
 | app/**/*.php | .ai/rules/app.md |
 | app/Livewire/CompanyHub/Orders/OrderBuilder.php | .ai/rules/company-hub-orders.md |
 | app/Livewire/CompanyHub/**, app/Livewire/CompanyHub/OnboardingWizard.php | .ai/rules/company-hub.md |

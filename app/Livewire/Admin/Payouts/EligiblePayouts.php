@@ -24,6 +24,8 @@ final class EligiblePayouts extends Component
     {
         $disputeHoldDays = PayoutSetting::getDisputeHoldDays();
         $minimumThreshold = PayoutSetting::getMinimumPayoutThreshold();
+        $transactionFeeAmount = PayoutSetting::getTransactionFeeAmount();
+        $commissionFeeRate = PayoutSetting::getCommissionFeeRate();
 
         $accounts = SellerPayoutAccount::where('verification_status', 'verified')
             ->with('shop')
@@ -45,19 +47,40 @@ final class EligiblePayouts extends Component
                 continue;
             }
 
-            $totalReleasable = (float) LedgerEntry::whereIn('order_id', $eligibleOrders)
-                ->where('type', 'payout')
-                ->sum('amount');
+            // Compute the NET releasable exactly as CreatePayoutBatchAction will:
+            // from each order's escrow_hold (gross) entry, minus the flat
+            // transaction fee and the percentage commission fee. We must NOT sum
+            // ledger_entries.type = 'payout' here — that entry is notional and
+            // summing it double-counts commission (Phase 4 requirements §3.4).
+            $escrowEntries = LedgerEntry::whereIn('order_id', $eligibleOrders)
+                ->where('type', 'escrow_hold')
+                ->get();
 
-            if ($totalReleasable < $minimumThreshold) {
+            $netReleasable = 0.0;
+            $releasableOrderCount = 0;
+
+            foreach ($escrowEntries as $entry) {
+                $escrowed = (float) $entry->amount;
+                $commissionFee = round($escrowed * $commissionFeeRate, 2, PHP_ROUND_HALF_UP);
+                $net = round($escrowed - $transactionFeeAmount - $commissionFee, 2);
+
+                if ($net <= 0) {
+                    continue;
+                }
+
+                $netReleasable = round($netReleasable + $net, 2);
+                $releasableOrderCount++;
+            }
+
+            if ($releasableOrderCount === 0 || $netReleasable < $minimumThreshold) {
                 continue;
             }
 
             $eligible->push([
                 'shop_id' => $account->shop_id,
                 'shop_name' => $account->shop->storefront_name,
-                'eligible_orders_count' => $eligibleOrders->count(),
-                'releasable_amount' => $totalReleasable,
+                'eligible_orders_count' => $releasableOrderCount,
+                'releasable_amount' => $netReleasable,
             ]);
         }
 
