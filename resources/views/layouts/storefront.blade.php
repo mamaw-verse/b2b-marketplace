@@ -122,14 +122,14 @@
     <footer class="bg-[var(--hs-green-950)] text-white mt-auto">
         {{-- Top grid: brand + 3 link columns --}}
         <div class="border-b border-white/[0.08]">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 pb-12">
-                <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16 pb-8 sm:pb-12">
+                <div class="grid grid-cols-1 gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
 
                     {{-- Brand column --}}
-                    <div class="text-center sm:text-left">
+                    <div class="text-center sm:text-left col-span-1 sm:col-span-2 lg:col-span-1">
                         <div class="flex items-center justify-center sm:justify-start gap-3 mb-4">
-                            <img src="/images/brand-logo.png" alt="1Halal Store" class="h-12 w-auto opacity-90">
-                            <img src="/images/halal-stamp.png" alt="Halal Certified" class="h-12 w-auto">
+                            <img src="/images/brand-logo.png" alt="1Halal Store" class="h-10 sm:h-12 w-auto opacity-90">
+                            <img src="/images/halal-stamp.png" alt="Halal Certified" class="h-10 sm:h-12 w-auto">
                         </div>
                         <p class="text-sm text-white/55 leading-relaxed max-w-[34ch] mx-auto sm:mx-0">
                             Your halal supply-chain marketplace — connecting farmers, producers, certifiers, logistics providers, retailers and consumers in one trusted ecosystem.
@@ -138,8 +138,8 @@
 
                     {{-- Platform --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-4">Platform</h4>
-                        <ul class="grid gap-[11px]">
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">Platform</h4>
+                        <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="{{ route('home') }}#who-we-serve" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Who We Serve') }}</a></li>
                             <li><a href="{{ route('home') }}#what-we-offer" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('What We Offer') }}</a></li>
                             <li><a href="{{ route('home') }}#supply-chain" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Supply Chain') }}</a></li>
@@ -150,8 +150,8 @@
 
                     {{-- Company --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-4">Company</h4>
-                        <ul class="grid gap-[11px]">
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">Company</h4>
+                        <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('About Us') }}</a></li>
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Events & Training') }}</a></li>
@@ -160,8 +160,8 @@
 
                     {{-- Get Started --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-4">Get Started</h4>
-                        <ul class="grid gap-[11px]">
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">Get Started</h4>
+                        <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="{{ route('register') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('List Your Business') }}</a></li>
                             <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Find Suppliers') }}</a></li>
                             <li><a href="{{ route('login') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Seller Login') }}</a></li>
@@ -173,27 +173,27 @@
         </div>
 
         {{-- Bottom bar: trust badges + copyright --}}
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
             <div class="flex flex-col items-center gap-5 sm:flex-row sm:justify-between sm:gap-4">
 
                 {{-- Trust badges --}}
-                <div class="flex flex-wrap justify-center sm:justify-start gap-5">
+                <div class="grid grid-cols-2 gap-x-4 gap-y-4 w-full sm:flex sm:w-auto sm:flex-wrap sm:justify-start sm:gap-5">
                     @foreach ([
                         ['icon' => 'check-badge',       'label' => 'Halal Certification Support'],
                         ['icon' => 'globe-alt',          'label' => 'Market Access Global & Local'],
                         ['icon' => 'arrow-trending-up',  'label' => 'Business Growth Solutions'],
                         ['icon' => 'shield-check',       'label' => 'Trusted Halal Ecosystem'],
                     ] as $badge)
-                        <div class="flex items-center gap-2.5">
-                            <div class="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-white/[0.06] text-[var(--hs-gold-400)]">
-                                <flux:icon :icon="$badge['icon']" class="size-[17px]" />
+                        <div class="flex items-center gap-2 sm:gap-2.5">
+                            <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-[9px] bg-white/[0.06] text-[var(--hs-gold-400)]">
+                                <flux:icon :icon="$badge['icon']" class="size-[15px] sm:size-[17px]" />
                             </div>
-                            <span class="text-[0.78rem] font-semibold text-white/75 max-w-[14ch]">{{ $badge['label'] }}</span>
+                            <span class="text-[0.72rem] sm:text-[0.78rem] font-semibold text-white/75 max-w-[14ch] leading-snug">{{ $badge['label'] }}</span>
                         </div>
                     @endforeach
                 </div>
 
-                <span class="text-[0.78rem] text-white/40 text-center sm:text-right">
+                <span class="text-[0.72rem] sm:text-[0.78rem] text-white/40 text-center sm:text-right">
                     &copy; {{ date('Y') }} 1HalalStore.com — {{ __('All rights reserved.') }}
                 </span>
             </div>
