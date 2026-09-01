@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1HalalStore.com — Your Halal Supply-Chain Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;0,800;0,900;1,400..700&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   0. DESIGN TOKENS
+   ============================================================ */
+:root{
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  /* Zinc neutrals */
+  --color-zinc-50:#EFEFEF;  --color-zinc-100:#E0E0E0; --color-zinc-200:#C7C7C7;
+  --color-zinc-300:#A8A8A8; --color-zinc-400:#8A8A8A; --color-zinc-500:#6B6B6B;
+  --color-zinc-600:#4D4D4D; --color-zinc-700:#333333; --color-zinc-800:#1A1A1A;
+  --color-zinc-900:#0D0D0D; --color-zinc-950:#000000;
+
+  /* Brand — Deep Emerald Green */
+  --color-green-50:#EAF4EE;  --color-green-100:#CDE6D8; --color-green-200:#A0CFB6;
+  --color-green-300:#6EB58F; --color-green-400:#469A6E; --color-green-500:#2C8055;
+  --color-green-600:#1E6B45; --color-green-700:#175636; --color-green-800:#123F27;
+  --color-green-900:#0C2B1A; --color-green-950:#071C11;
+
+  /* Gold accent */
+  --color-gold-100:#FBF0D2; --color-gold-200:#F6E0A3; --color-gold-300:#F0CC6C;
+  --color-gold-400:#E9B940; --color-gold-500:#D9A324; --color-gold-600:#B3831A;
+  --color-gold-700:#8C6414; --color-gold-800:#664810; --color-gold-900:#432F0A;
+
+  /* Semantic */
+  --color-success-50:#EAF7EE; --color-success-500:#2F9E5B; --color-success-700:#1F6B3E;
+  --color-warning-50:#FDF5E7; --color-warning-500:#DDA02A; --color-warning-700:#94690F;
+  --color-danger-50:#FBEAEA;  --color-danger-500:#D64545;  --color-danger-700:#932E2E;
+  --color-info-50:#EAF2FB;    --color-info-500:#2F73C7;    --color-info-700:#204E8A;
+
+  /* Spacing */
+  --spacing-hs-1:4px;  --spacing-hs-2:8px;  --spacing-hs-3:12px; --spacing-hs-4:16px;
+  --spacing-hs-5:20px; --spacing-hs-6:24px; --spacing-hs-8:32px; --spacing-hs-10:40px;
+  --spacing-hs-12:48px; --spacing-hs-16:64px; --spacing-hs-20:80px; --spacing-hs-24:96px;
+
+  /* Radius */
+  --radius-xs:4px; --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  --radius-xl:20px; --radius-2xl:28px; --radius-pill:999px;
+  --radius-card:18px; --radius-panel:24px; --radius-tag:6px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(7,28,17,.06);
+  --shadow-sm: 0 2px 6px rgba(7,28,17,.08);
+  --shadow-md: 0 8px 20px rgba(7,28,17,.10);
+  --shadow-lg: 0 16px 40px rgba(7,28,17,.14);
+  --shadow-xl: 0 28px 60px rgba(7,28,17,.20);
+  --shadow-hs-sm: var(--shadow-sm);
+  --shadow-hs-md: var(--shadow-md);
+  --shadow-hs-lg: var(--shadow-lg);
+
+  --color-accent: var(--color-green-600);
+  --color-accent-content: var(--color-green-600);
+  --color-accent-foreground: #FFFFFF;
+}
+
+/* ============================================================
+   1. RESET & BASE
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--font-body);
+  color:var(--color-zinc-800);
+  background:var(--color-zinc-50);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+ul{ list-style:none; }
+button{ font-family:inherit; cursor:pointer; }
+:focus-visible{ outline:2px solid var(--color-gold-500); outline-offset:3px; }
+.container{ width:100%; max-width:1240px; margin-inline:auto; padding-inline:var(--spacing-hs-6); }
+svg.icon{ width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+/* Type scale */
+h1,h2,h3,h4{ font-family:var(--font-display); color:var(--color-green-950); line-height:1.12; letter-spacing:-0.01em; }
+h1{ font-size:clamp(2.1rem, 1.55rem + 2.4vw, 3.4rem); font-weight:800; }
+h2{ font-size:clamp(1.6rem, 1.35rem + 1.1vw, 2.35rem); font-weight:800; }
+h3{ font-size:1.15rem; font-weight:700; }
+p{ color:var(--color-zinc-600); }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:.78rem; font-weight:700; letter-spacing:.02em;
+  color:var(--color-green-700); background:var(--color-green-50);
+  border:1px solid var(--color-green-100); padding:6px 14px 6px 10px;
+  border-radius:var(--radius-pill);
+}
+.eyebrow svg{ width:14px; height:14px; }
+
+/* ============================================================
+   2. BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 26px; border-radius:var(--radius-pill);
+  font-weight:700; font-size:.95rem; border:1px solid transparent;
+  transition:transform .16s ease, box-shadow .16s ease, background-color .16s ease;
+  white-space:nowrap;
+}
+.btn:hover{ transform:translateY(-2px); }
+.btn-primary{ background:var(--color-gold-500); color:var(--color-green-950); box-shadow:var(--shadow-md); }
+.btn-primary:hover{ background:var(--color-gold-400); }
+.btn-outline{ background:transparent; border-color:rgba(255,255,255,.35); color:#fff; }
+.btn-outline:hover{ background:rgba(255,255,255,.1); }
+.btn-ghost-dark{ background:var(--color-green-900); color:#fff; }
+.btn-ghost-dark:hover{ background:var(--color-green-800); }
+
+/* ============================================================
+   3. HEADER
+   ============================================================ */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(239,239,239,.85);
+  backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--color-zinc-100);
+}
+.site-header .container{ display:flex; align-items:center; justify-content:space-between; height:78px; gap:24px; }
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand img{ height:40px; width:40px; object-fit:contain; }
+.brand-word{ font-weight:900; font-size:1.15rem; color:var(--color-green-950); letter-spacing:-.01em; }
+.brand-word span{ color:var(--color-gold-600); }
+.main-nav{ display:flex; align-items:center; gap:32px; }
+.main-nav a{ font-size:.92rem; font-weight:600; color:var(--color-zinc-700); transition:color .15s; }
+.main-nav a:hover{ color:var(--color-green-700); }
+.header-cta{ display:flex; align-items:center; gap:12px; }
+.header-cta .btn{ padding:11px 20px; font-size:.85rem; }
+.btn-header-outline{ background:transparent; border:1.5px solid var(--color-green-700); color:var(--color-green-800); }
+.btn-header-outline:hover{ background:var(--color-green-50); }
+.nav-toggle{ display:none; }
+
+/* ============================================================
+   4. HERO
+   ============================================================ */
+.hero{
+  position:relative; overflow:hidden;
+  background:
+    radial-gradient(1100px 620px at 82% 15%, rgba(217,163,36,.16), transparent 60%),
+    linear-gradient(180deg, var(--color-green-950) 0%, var(--color-green-900) 55%, var(--color-green-800) 100%);
+  color:#fff;
+}
+.hero::before{
+  content:""; position:absolute; inset:0;
+  background:url('assets/globe_bg.png') center 30%/cover no-repeat;
+  opacity:.16; mix-blend-mode:screen;
+}
+.hero-inner{
+  position:relative; display:grid; grid-template-columns:1.05fr .95fr;
+  align-items:center; gap:56px;
+  padding-block:var(--spacing-hs-20) var(--spacing-hs-16);
+}
+.hero-copy .eyebrow{ background:rgba(217,163,36,.12); border-color:rgba(217,163,36,.35); color:var(--color-gold-300); }
+.hero-copy h1{ color:#fff; margin-top:18px; max-width:14ch; }
+.hero-copy h1 em{ font-style:normal; color:var(--color-gold-400); }
+.hero-copy p.lede{
+  margin-top:22px; color:rgba(255,255,255,.72); font-size:1.06rem; max-width:46ch;
+}
+.hero-actions{ display:flex; gap:14px; margin-top:34px; flex-wrap:wrap; }
+.hero-stats{ display:flex; gap:34px; margin-top:48px; flex-wrap:wrap; }
+.hero-stats div{ min-width:110px; }
+.hero-stats strong{ display:block; font-size:1.7rem; font-weight:800; color:#fff; }
+.hero-stats span{ font-size:.8rem; color:rgba(255,255,255,.55); }
+
+/* hero visual */
+.hero-visual{ position:relative; display:flex; align-items:center; justify-content:center; min-height:440px; }
+.hero-visual .ring{
+  position:absolute; width:390px; height:390px; border-radius:50%;
+  border:1px dashed rgba(255,255,255,.18);
+  animation:spin 46s linear infinite;
+}
+.hero-visual .ring.small{ width:300px; height:300px; animation-duration:34s; animation-direction:reverse; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){ .hero-visual .ring{ animation:none; } }
+
+.mark-glow{
+  position:absolute; width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle, rgba(217,163,36,.35), transparent 70%);
+  filter:blur(10px);
+}
+.hero-visual .mark{
+  position:relative; width:250px; height:250px;
+  filter:drop-shadow(0 20px 40px rgba(0,0,0,.45));
+}
+.hero-visual .mark img{ width:100%; height:100%; object-fit:contain; }
+
+.floating-card{
+  position:absolute; background:#fff; border-radius:var(--radius-card);
+  box-shadow:var(--shadow-xl); padding:12px 16px; display:flex; align-items:center; gap:12px;
+  color:var(--color-zinc-800);
+}
+.card-stamp{ top:6%; left:-6%; }
+.card-stamp img{ width:52px; height:52px; object-fit:contain; }
+.card-stamp .fc-title{ font-size:.78rem; font-weight:700; color:var(--color-green-800); }
+.card-stamp .fc-sub{ font-size:.72rem; color:var(--color-zinc-500); }
+
+.card-guru{ bottom:2%; right:-8%; flex-direction:column; align-items:flex-start; padding:0; overflow:hidden; width:190px; }
+.card-guru .photo-wrap{ width:100%; height:130px; background:linear-gradient(180deg, var(--color-gold-100), var(--color-zinc-100)); display:flex; align-items:flex-end; justify-content:center; overflow:hidden; }
+.card-guru img{ height:150px; width:auto; object-fit:contain; object-position:center bottom; }
+.card-guru .fc-body{ padding:12px 14px 14px; }
+.card-guru .fc-title{ font-size:.85rem; font-weight:800; color:var(--color-green-900); }
+.card-guru .fc-sub{ font-size:.68rem; font-weight:700; color:var(--color-gold-700); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+
+/* ============================================================
+   5. SECTION SHELL
+   ============================================================ */
+section{ padding-block:var(--spacing-hs-20); }
+.section-head{ max-width:640px; margin-bottom:var(--spacing-hs-12); }
+.section-head h2{ margin-top:14px; }
+.section-head p{ margin-top:14px; font-size:1.02rem; }
+.section-alt{ background:#fff; }
+
+/* ============================================================
+   6. WHO WE SERVE / WHAT WE OFFER  (two-column panel)
+   ============================================================ */
+.split-panels{ display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+.panel{
+  border-radius:var(--radius-panel); padding:36px;
+  border:1px solid var(--color-zinc-100);
+}
+.panel-serve{ background:var(--color-green-950); color:#fff; }
+.panel-offer{ background:#fff; box-shadow:var(--shadow-sm); }
+.panel-head{ display:flex; align-items:center; gap:12px; margin-bottom:26px; }
+.panel-head .ico{
+  width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.panel-serve .panel-head .ico{ background:rgba(217,163,36,.16); color:var(--color-gold-400); }
+.panel-offer .panel-head .ico{ background:var(--color-green-50); color:var(--color-green-700); }
+.panel-head h3{ font-size:1.2rem; }
+.panel-serve .panel-head h3{ color:#fff; }
+.panel-list{ display:grid; gap:4px; }
+.panel-list li{ display:flex; align-items:center; gap:14px; padding:13px 4px; border-bottom:1px solid; }
+.panel-serve .panel-list li{ border-color:rgba(255,255,255,.08); }
+.panel-offer .panel-list li{ border-color:var(--color-zinc-100); }
+.panel-list li:last-child{ border-bottom:none; }
+.panel-list .li-ico{
+  width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.panel-serve .li-ico{ background:rgba(255,255,255,.06); color:var(--color-gold-300); }
+.panel-offer .li-ico{ background:var(--color-green-50); color:var(--color-green-700); }
+.panel-list .li-text{ font-size:.94rem; font-weight:600; }
+.panel-serve .li-text{ color:rgba(255,255,255,.9); }
+.panel-offer .li-text{ color:var(--color-zinc-700); }
+.panel-list .li-ico svg{ width:18px; height:18px; }
+
+/* ============================================================
+   7. SUPPLY CHAIN FLOW
+   ============================================================ */
+.flow-badge{ text-align:center; margin-bottom:var(--spacing-hs-12); }
+.flow-badge .eyebrow{ margin:0 auto; }
+.flow-badge h2{ margin-top:16px; max-width:20ch; margin-inline:auto; }
+.flow-track{
+  display:grid; grid-template-columns:repeat(7, 1fr); gap:0;
+  position:relative;
+}
+.flow-track::before{
+  content:""; position:absolute; top:34px; left:60px; right:60px; height:2px;
+  background:repeating-linear-gradient(90deg, var(--color-green-200) 0 8px, transparent 8px 16px);
+  z-index:0;
+}
+.flow-step{ position:relative; z-index:1; text-align:center; padding-inline:8px; }
+.flow-step .step-circle{
+  width:68px; height:68px; border-radius:50%; margin-inline:auto;
+  background:#fff; border:2px solid var(--color-green-200);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--color-green-700); box-shadow:var(--shadow-sm);
+  transition:border-color .18s, transform .18s;
+}
+.flow-step:hover .step-circle{ border-color:var(--color-gold-500); color:var(--color-gold-600); transform:translateY(-4px); }
+.flow-step .step-num{
+  font-size:.68rem; font-weight:800; color:var(--color-gold-600); letter-spacing:.06em;
+  display:block; margin-top:16px;
+}
+.flow-step h4{ font-size:.88rem; font-weight:800; color:var(--color-green-950); margin-top:4px; }
+.flow-step p{ font-size:.76rem; margin-top:4px; color:var(--color-zinc-500); line-height:1.4; }
+.flow-arrow{ display:none; }
+
+/* ============================================================
+   8. VALUE STRIP
+   ============================================================ */
+.value-strip{
+  background:var(--color-green-50); border-top:1px solid var(--color-green-100);
+  border-bottom:1px solid var(--color-green-100);
+  padding-block:var(--spacing-hs-10);
+}
+.value-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:24px; }
+.value-item{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; }
+.value-item .ico{
+  width:52px; height:52px; border-radius:50%; background:#fff; box-shadow:var(--shadow-sm);
+  display:flex; align-items:center; justify-content:center; color:var(--color-green-700);
+}
+.value-item span{ font-size:.82rem; font-weight:700; color:var(--color-green-900); max-width:14ch; }
+
+/* ============================================================
+   9. CTA BAND
+   ============================================================ */
+.cta-band{
+  position:relative; overflow:hidden;
+  background:linear-gradient(120deg, var(--color-green-900), var(--color-green-950));
+  color:#fff; border-radius:var(--radius-2xl);
+  margin-inline:var(--spacing-hs-6);
+  padding:56px 48px;
+}
+.cta-band .container{ padding:0; max-width:none; }
+.cta-inner{ display:grid; grid-template-columns:1.2fr .8fr; gap:32px; align-items:center; }
+.cta-inner h2{ color:#fff; max-width:14ch; }
+.cta-inner p{ color:rgba(255,255,255,.65); margin-top:12px; max-width:42ch; }
+.cta-inner .btn-primary{ margin-top:24px; }
+.cta-right{ text-align:left; border-left:1px solid rgba(255,255,255,.15); padding-left:32px; }
+.cta-right h3{ color:#fff; font-size:1.05rem; }
+.cta-right p{ color:rgba(255,255,255,.6); font-size:.9rem; margin-top:8px; }
+.cta-right .locales{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+.cta-right .locales span{
+  font-size:.72rem; font-weight:700; letter-spacing:.03em; color:var(--color-gold-300);
+  border:1px solid rgba(217,163,36,.4); padding:5px 12px; border-radius:var(--radius-pill);
+}
+
+/* ============================================================
+   10. FOOTER
+   ============================================================ */
+footer{ background:var(--color-green-950); color:rgba(255,255,255,.7); }
+.footer-top{ padding-block:var(--spacing-hs-16) var(--spacing-hs-12); border-bottom:1px solid rgba(255,255,255,.08); }
+.footer-grid{ display:grid; grid-template-columns:1.4fr repeat(3, 1fr); gap:40px; }
+.footer-brand{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.footer-brand img{ height:38px; width:38px; }
+.footer-brand span{ font-weight:900; font-size:1.05rem; color:#fff; }
+.footer-brand span em{ font-style:normal; color:var(--color-gold-400); }
+.footer-col p{ color:rgba(255,255,255,.55); font-size:.9rem; max-width:34ch; }
+.footer-col h4{ color:#fff; font-size:.82rem; letter-spacing:.03em; margin-bottom:16px; }
+.footer-col ul{ display:grid; gap:11px; }
+.footer-col a{ font-size:.88rem; color:rgba(255,255,255,.62); transition:color .15s; }
+.footer-col a:hover{ color:var(--color-gold-300); }
+.footer-bottom{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  padding-block:var(--spacing-hs-6);
+}
+.footer-badges{ display:flex; gap:28px; flex-wrap:wrap; }
+.footer-badge{ display:flex; align-items:center; gap:10px; }
+.footer-badge .ico{
+  width:32px; height:32px; border-radius:9px; background:rgba(255,255,255,.06);
+  display:flex; align-items:center; justify-content:center; color:var(--color-gold-400);
+}
+.footer-badge span{ font-size:.78rem; font-weight:600; color:rgba(255,255,255,.75); max-width:14ch; }
+.footer-legal{ font-size:.78rem; color:rgba(255,255,255,.4); }
+
+/* ============================================================
+   11. RESPONSIVE
+   ============================================================ */
+@media (max-width: 980px){
+  .main-nav{ display:none; }
+  .hero-inner{ grid-template-columns:1fr; padding-block:var(--spacing-hs-16) var(--spacing-hs-10); }
+  .hero-visual{ min-height:360px; order:-1; }
+  .split-panels{ grid-template-columns:1fr; }
+  .flow-track{ grid-template-columns:repeat(4,1fr); row-gap:36px; }
+  .flow-track::before{ display:none; }
+  .value-grid{ grid-template-columns:repeat(3,1fr); row-gap:28px; }
+  .cta-inner{ grid-template-columns:1fr; }
+  .cta-right{ border-left:none; border-top:1px solid rgba(255,255,255,.15); padding-left:0; padding-top:24px; }
+  .footer-grid{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width: 620px){
+  .hero-copy h1{ max-width:none; }
+  .header-cta .btn-header-outline{ display:none; }
+  .flow-track{ grid-template-columns:repeat(2,1fr); }
+  .value-grid{ grid-template-columns:repeat(2,1fr); }
+  .footer-grid{ grid-template-columns:1fr; }
+  .cta-band{ padding:36px 24px; }
+  .floating-card{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     ICON SPRITE (hand-drawn, lucide-compatible stroke icon set)
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-4 3-9 11-11 1 8-2 12-4 15"/><path d="M4 13c3 0 6 1 8 5"/></symbol>
+    <symbol id="i-factory" viewBox="0 0 24 24"><path d="M3 20V9l6 4V9l6 4V6l6 4v10z"/><path d="M3 20h18"/><circle cx="7" cy="15.5" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-badge" viewBox="0 0 24 24"><path d="M12 2l2.4 1.6 2.8-.3 1 2.6 2.6 1-.3 2.8L22 12l-1.6 2.4.3 2.8-2.6 1-1 2.6-2.8-.3L12 22l-2.4-1.6-2.8.3-1-2.6-2.6-1 .3-2.8L2 12l1.6-2.4-.3-2.8 2.6-1 1-2.6 2.8.3z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-snowtruck" viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="9"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18.5" r="1.6"/><circle cx="17.5" cy="18.5" r="1.6"/><path d="M6 3v3M4.4 4.6l3.2 1.8M9.6 4.6 6.4 6.4" opacity=".55"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.3 10.4 16M17.2 7.3 13.6 16M7.2 6h9.6"/></symbol>
+    <symbol id="i-storefront" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9c0 1.7 1.3 3 3 3s3-1.3 3-3M9 9c0 1.7 1.3 3 3 3s3-1.3 3-3M15 9c0 1.7 1.3 3 3 3s3-1.3 3-3"/><path d="M9 20v-6h6v6"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 5.2a3.2 3.2 0 0 1 0 6.2M21.5 20c0-2.9-2-5.1-4.8-5.8"/></symbol>
+    <symbol id="i-directory" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.6-3 8-7 9-4-1-7-4.4-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 18h6a4 4 0 0 0 4-4V9a4 4 0 0 1 2-3.5"/></symbol>
+    <symbol id="i-plane-truck" viewBox="0 0 24 24"><path d="M2 13l20-9-6 9 6 9-9-4"/><path d="M6 12l3 2"/></symbol>
+    <symbol id="i-handshake" viewBox="0 0 24 24"><path d="M2 12l4-4 4 2 3-2 3 2 4-2 2 4"/><path d="M8 10l4 4 3-3M11 14l2 2"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12C12 8 9 6 5 6c0 4 3 6 7 6zM12 12c0-3 2-5 6-5 0 3.4-2.6 5-6 5z"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.5 4.2 5.6 4.2 9s-1.4 6.5-4.2 9c-2.8-2.5-4.2-5.6-4.2-9S9.2 5.5 12 3z"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M4.5 19.5l2-2M17.5 6.5l2-2"/></symbol>
+    <symbol id="i-recycle" viewBox="0 0 24 24"><path d="M7 19H4.8a2 2 0 0 1-1.7-3l1.6-2.7"/><path d="M9.3 4.5 7.7 7.2a2 2 0 0 0 0 2l1.2 2"/><path d="M14.7 4.5H17a2 2 0 0 1 1.8 3l-.9 1.5"/><path d="M18.6 13.5l1.4 2.5a2 2 0 0 1-1.7 3H15"/><path d="M9 19l-1.8 2M14 4.5l2-2M18 19l2 2" opacity="0"/><path d="M7 15l-2 4h4M17 15l2 4h-4M11 3l-2 3.5h4L11 3z"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-trending" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="site-header">
+  <div class="container">
+    <a href="#top" class="brand">
+      <img src="assets/halal_store_main_logo.png" alt="1HalalStore.com logo">
+      <span class="brand-word">1HALAL<span>STORE</span>.com</span>
+    </a>
+    <nav class="main-nav">
+      <a href="#who-we-serve">Who We Serve</a>
+      <a href="#what-we-offer">What We Offer</a>
+      <a href="#supply-chain">Supply Chain</a>
+      <a href="#join">Join Us</a>
+    </nav>
+    <div class="header-cta">
+      <a href="#" class="btn btn-header-outline">Sign in</a>
+      <a href="#join" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero" id="top">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <span class="eyebrow"><svg class="icon" viewBox="0 0 24 24"><use href="#i-shield-check"/></svg>MHCB-Verified Halal Marketplace</span>
+      <h1>We connect the entire halal supply chain, not just a storefront.</h1>
+      <p class="lede">1HalalStore.com is a B2B &amp; B2C marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.</p>
+      <div class="hero-actions">
+        <a href="#join" class="btn btn-primary">
+          <svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><use href="#i-arrow-right"/></svg>
+          Join the Movement
+        </a>
+        <a href="#supply-chain" class="btn btn-outline">
+          <svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><use href="#i-play"/></svg>
+          See How It Works
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>7</strong><span>Supply chain stages connected</span></div>
+        <div><strong>100%</strong><span>Halal-focused ecosystem</span></div>
+        <div><strong>B2B+B2C</strong><span>One marketplace, every player</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="ring"></div>
+      <div class="ring small"></div>
+      <div class="mark-glow"></div>
+      <div class="mark"><img src="assets/halal_store_main_logo.png" alt="1HalalStore G-mark"></div>
+      <div class="floating-card card-stamp">
+        <img src="assets/halal-stamp.png" alt="Maslaha Halal Certification Board Philippines seal">
+        <div>
+          <div class="fc-title">MHCB Certified</div>
+          <div class="fc-sub">Philippines</div>
+        </div>
+      </div>
+      <div class="floating-card card-guru">
+        <div class="photo-wrap"><img src="assets/ismail_abaya_phd.png" alt="Portrait of Ismail Abaya, PhD"></div>
+        <div class="fc-body">
+          <div class="fc-title">Ismail Abaya, PhD</div>
+          <div class="fc-sub">Halal Business Guru</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     WHO WE SERVE / WHAT WE OFFER
+     ============================================================ -->
+<section id="who-we-serve">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><svg class="icon" viewBox="0 0 24 24"><use href="#i-network"/></svg>A Trusted Halal Ecosystem</span>
+      <h2>Built on integrity, transparency &amp; technology.</h2>
+      <p>Every stakeholder in the halal economy has a place on the platform — and a reason to trust what happens next.</p>
+    </div>
+
+    <div class="split-panels">
+      <div class="panel panel-serve">
+        <div class="panel-head">
+          <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-users"/></svg></div>
+          <h3>Who We Serve</h3>
+        </div>
+        <ul class="panel-list">
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-leaf"/></svg></span><span class="li-text">Farmers &amp; Fisherfolk</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-factory"/></svg></span><span class="li-text">Producers &amp; Manufacturers</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-badge"/></svg></span><span class="li-text">Halal Certified Suppliers</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-snowtruck"/></svg></span><span class="li-text">Logistics &amp; Cold Chain Providers</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-network"/></svg></span><span class="li-text">Distributors &amp; Wholesalers</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-storefront"/></svg></span><span class="li-text">Retailers &amp; Halal Businesses</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-users"/></svg></span><span class="li-text">Consumers (B2C)</span></li>
+        </ul>
+      </div>
+
+      <div class="panel panel-offer" id="what-we-offer">
+        <div class="panel-head">
+          <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-bag"/></svg></div>
+          <h3>What We Offer</h3>
+        </div>
+        <ul class="panel-list">
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-directory"/></svg></span><span class="li-text">Halal-verified suppliers directory</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-bag"/></svg></span><span class="li-text">Products &amp; services sourcing (B2B &amp; B2C)</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-shield-check"/></svg></span><span class="li-text">Halal certification awareness &amp; support</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-route"/></svg></span><span class="li-text">Supply chain visibility &amp; traceability</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-plane-truck"/></svg></span><span class="li-text">Logistics &amp; export assistance</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-handshake"/></svg></span><span class="li-text">Business matching &amp; partnerships</span></li>
+          <li><span class="li-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-calendar"/></svg></span><span class="li-text">Halal events, training &amp; consultancy</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SUPPLY CHAIN FLOW
+     ============================================================ -->
+<section class="section-alt" id="supply-chain">
+  <div class="container">
+    <div class="flow-badge">
+      <span class="eyebrow"><svg class="icon" viewBox="0 0 24 24"><use href="#i-route"/></svg>End-to-End Traceability</span>
+      <h2>The halal supply chain we connect</h2>
+    </div>
+    <div class="flow-track">
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-sprout"/></svg></div>
+        <span class="step-num">STAGE 01</span>
+        <h4>Farm &amp; Source</h4>
+        <p>Sustainable &amp; ethical sourcing</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-factory"/></svg></div>
+        <span class="step-num">STAGE 02</span>
+        <h4>Process &amp; Produce</h4>
+        <p>Halal compliant production</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-badge"/></svg></div>
+        <span class="step-num">STAGE 03</span>
+        <h4>Certify &amp; Assure</h4>
+        <p>Halal certification &amp; QA</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-package"/></svg></div>
+        <span class="step-num">STAGE 04</span>
+        <h4>Pack &amp; Store</h4>
+        <p>Halal-safe packaging &amp; storage</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-snowtruck"/></svg></div>
+        <span class="step-num">STAGE 05</span>
+        <h4>Distribute &amp; Deliver</h4>
+        <p>Trusted logistics &amp; distribution</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-storefront"/></svg></div>
+        <span class="step-num">STAGE 06</span>
+        <h4>Retail &amp; Sell</h4>
+        <p>Halal retail &amp; business partners</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-circle"><svg class="icon" viewBox="0 0 24 24"><use href="#i-handshake"/></svg></div>
+        <span class="step-num">STAGE 07</span>
+        <h4>Consume &amp; Trust</h4>
+        <p>Confident halal consumers</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     VALUE STRIP
+     ============================================================ -->
+<div class="value-strip">
+  <div class="container">
+    <div class="value-grid">
+      <div class="value-item">
+        <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-shield-check"/></svg></div>
+        <span>100% Halal Focused</span>
+      </div>
+      <div class="value-item">
+        <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-globe"/></svg></div>
+        <span>Global Market Access</span>
+      </div>
+      <div class="value-item">
+        <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-cpu"/></svg></div>
+        <span>Digital Innovation</span>
+      </div>
+      <div class="value-item">
+        <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-users"/></svg></div>
+        <span>Community Empowerment</span>
+      </div>
+      <div class="value-item">
+        <div class="ico"><svg class="icon" viewBox="0 0 24 24"><use href="#i-recycle"/></svg></div>
+        <span>Sustainable &amp; Ethical Growth</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CTA BAND
+     ============================================================ -->
+<section id="join">
+  <div class="container">
+    <div class="cta-band">
+      <div class="cta-inner">
+        <div>
+          <span class="eyebrow" style="background:rgba(217,163,36,.14); border-color:rgba(217,163,36,.4); color:var(--color-gold-300)">
+            <svg class="icon" viewBox="0 0 24 24"><use href="#i-leaf"/></svg>Join the Halal Movement
+          </span>
+          <h2>Be part of the world's fastest-growing halal economy.</h2>
+          <p>Connect. Trade. Grow. Sustain. List your business or start sourcing verified halal products today.</p>
+          <a href="#" class="btn btn-primary">
+            <svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><use href="#i-search"/></svg>
+            www.1halalstore.com
+          </a>
+        </div>
+        <div class="cta-right">
+          <h3>Powering halal business from farm to plate</h3>
+          <p>Locally, regionally and globally — one connected marketplace for the entire supply chain.</p>
+          <div class="locales">
+            <span>Local</span>
+            <span>Regional</span>
+            <span>Global</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="container footer-top">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/halal_store_main_logo.png" alt="1HalalStore.com logo">
+          <span>1HALAL<em>STORE</em>.com</span>
+        </div>
+        <p>Your halal supply-chain marketplace — connecting farmers, producers, certifiers, logistics providers, retailers and consumers in one trusted ecosystem.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#who-we-serve">Who We Serve</a></li>
+          <li><a href="#what-we-offer">What We Offer</a></li>
+          <li><a href="#supply-chain">Supply Chain</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Halal Certification</a></li>
+          <li><a href="#">Events &amp; Training</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Get Started</h4>
+        <ul>
+          <li><a href="#join">List Your Business</a></li>
+          <li><a href="#join">Find Suppliers</a></li>
+          <li><a href="#">Contact Sales</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <div class="footer-badges">
+      <div class="footer-badge"><span class="ico"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-badge"/></svg></span><span>Halal Certification Support</span></div>
+      <div class="footer-badge"><span class="ico"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-globe"/></svg></span><span>Market Access Global &amp; Local</span></div>
+      <div class="footer-badge"><span class="ico"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-trending"/></svg></span><span>Business Growth Solutions</span></div>
+      <div class="footer-badge"><span class="ico"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-shield-check"/></svg></span><span>Trusted Halal Ecosystem</span></div>
+    </div>
+    <span class="footer-legal">© 2026 1HalalStore.com — All rights reserved.</span>
+  </div>
+</footer>
+
+</body>
+</html>

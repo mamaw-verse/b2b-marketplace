@@ -62,8 +62,9 @@ final class ProductGallery extends Model
             if (! $this->media?->storage_path) {
                 return null;
             }
-            return str_starts_with($this->media->storage_path, 'http') 
-                ? $this->media->storage_path 
+
+            return str_starts_with($this->media->storage_path, 'http')
+                ? $this->media->storage_path
                 : \Illuminate\Support\Facades\Storage::disk('s3')->url($this->media->storage_path);
         });
     }

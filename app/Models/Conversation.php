@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\ConversationFactory;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -66,7 +67,7 @@ final class Conversation extends Model
      */
     public function unreadCountFor(User $user): int
     {
-        $lastReadAt = \DB::table('conversation_reads')
+        $lastReadAt = DB::table('conversation_reads')
             ->where('conversation_id', $this->id)
             ->where('user_id', $user->id)
             ->value('last_read_at');
@@ -88,7 +89,7 @@ final class Conversation extends Model
      */
     public function markAsReadFor(User $user): void
     {
-        \DB::table('conversation_reads')->updateOrInsert(
+        DB::table('conversation_reads')->updateOrInsert(
             ['conversation_id' => $this->id, 'user_id' => $user->id],
             ['last_read_at' => now()],
         );

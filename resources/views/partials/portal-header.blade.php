@@ -36,7 +36,18 @@
                         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                     </button>
                 @endif
-                <a href="{{ route('home') }}" class="flex items-center gap-2 mr-1" wire:navigate>
+                @unless ($isPortal)
+                    {{-- Storefront mobile hamburger — opens the drawer defined in storefront.blade.php --}}
+                    <button
+                        @click="sfNav = true"
+                        class="sm:hidden flex size-9 items-center justify-center rounded-lg text-[var(--hs-neutral-600)] transition"
+                        aria-label="{{ __('Open menu') }}"
+                    >
+                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                    </button>
+                @endunless
+                {{-- Logo: hidden on mobile for storefront (drawer shows it), always shown on portal --}}
+                <a href="{{ route('home') }}" class="{{ $isPortal ? 'flex' : 'hidden sm:flex' }} items-center gap-2 mr-1" wire:navigate>
                     <img src="/images/brand-logo.png" alt="1Halal Store" class="h-9 w-auto">
                 </a>
 
@@ -99,6 +110,30 @@
                         >
                             {{ __('Products') }}
                         </a>
+
+                        {{-- Homepage anchor links — scroll in-page or navigate to home with hash --}}
+                        @foreach ([
+                            'who-we-serve'  => __('Who We Serve'),
+                            'what-we-offer' => __('What We Offer'),
+                            'supply-chain'  => __('Supply Chain'),
+                            'join'          => __('Join Us'),
+                        ] as $anchor => $label)
+                            <a
+                                href="{{ route('home') }}#{{ $anchor }}"
+                                x-data
+                                @click.prevent="
+                                    const target = document.getElementById('{{ $anchor }}');
+                                    if (target) {
+                                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    } else {
+                                        window.location.href = '{{ route('home') }}#{{ $anchor }}';
+                                    }
+                                "
+                                class="relative px-3 py-2 text-sm font-medium transition pb-[calc(0.5rem+2px)] text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]"
+                            >
+                                {{ $label }}
+                            </a>
+                        @endforeach
                     </nav>
                 @endunless
 
@@ -195,33 +230,5 @@
 
             </div>
         </div>
-
-        {{-- Mobile storefront nav row (sm:hidden, only shown on storefront pages) --}}
-        @unless ($isPortal)
-            <div class="flex sm:hidden border-t border-[var(--hs-neutral-100)] px-4 py-1.5 gap-1">
-                <a
-                    href="{{ route('storefront.companies') }}"
-                    wire:navigate
-                    @class([
-                        'flex-1 text-center rounded-lg px-3 py-1.5 text-sm font-medium transition',
-                        'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.companies') || request()->routeIs('storefront.company'),
-                        'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)]' => !(request()->routeIs('storefront.companies') || request()->routeIs('storefront.company')),
-                    ])
-                >
-                    {{ __('Companies') }}
-                </a>
-                <a
-                    href="{{ route('storefront.products') }}"
-                    wire:navigate
-                    @class([
-                        'flex-1 text-center rounded-lg px-3 py-1.5 text-sm font-medium transition',
-                        'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.products') || request()->routeIs('storefront.product'),
-                        'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)]' => !(request()->routeIs('storefront.products') || request()->routeIs('storefront.product')),
-                    ])
-                >
-                    {{ __('Products') }}
-                </a>
-            </div>
-        @endunless
     </div>
 </header>
