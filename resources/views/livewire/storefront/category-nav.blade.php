@@ -1,5 +1,5 @@
 <nav class="space-y-1">
-    <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-3 px-3">Categories</h3>
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-3 px-3">{{ __('Categories') }}</h3>
 
     <button
         wire:click="selectCategory(null)"
@@ -9,7 +9,7 @@
             'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => $selectedId !== null,
         ])
     >
-        All Categories
+        {{ __('All Categories') }}
     </button>
 
     @foreach ($this->categories as $category)

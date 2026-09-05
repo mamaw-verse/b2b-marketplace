@@ -12,7 +12,7 @@
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Documents</h1>
+                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Documents') }}</h1>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ $product->name }}</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
 
             {{-- Upload section --}}
             <div class="mb-6 rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-50)] p-6">
-                <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">Upload Documents</h3>
+                <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Upload Documents') }}</h3>
                 <div>
                     <input type="file" wire:model="newDocuments" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp" multiple class="block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]" />
                     @error('newDocuments.*') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -30,7 +30,7 @@
                 @if ($newDocuments)
                     <div class="mt-4">
                         <flux:button variant="primary" size="sm" wire:click="uploadDocuments">
-                            Upload {{ count($newDocuments) }} {{ count($newDocuments) === 1 ? 'Document' : 'Documents' }}
+                            {{ __('Upload :count :label', ['count' => count($newDocuments), 'label' => count($newDocuments) === 1 ? __('Document') : __('Documents')]) }}
                         </flux:button>
                     </div>
                 @endif
@@ -48,11 +48,11 @@
             <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
                 <flux:table>
                     <flux:table.columns>
-                        <flux:table.column>Filename</flux:table.column>
-                        <flux:table.column>Type</flux:table.column>
-                        <flux:table.column>Uploaded</flux:table.column>
-                        <flux:table.column>Scan Status</flux:table.column>
-                        <flux:table.column>Actions</flux:table.column>
+                        <flux:table.column>{{ __('Filename') }}</flux:table.column>
+                        <flux:table.column>{{ __('Type') }}</flux:table.column>
+                        <flux:table.column>{{ __('Uploaded') }}</flux:table.column>
+                        <flux:table.column>{{ __('Scan Status') }}</flux:table.column>
+                        <flux:table.column>{{ __('Actions') }}</flux:table.column>
                     </flux:table.columns>
 
                     <flux:table.rows>
@@ -73,7 +73,7 @@
                         @empty
                             <flux:table.row>
                                 <flux:table.cell colspan="5" class="text-center">
-                                    <x-hs-empty-state icon="document" title="No documents attached" subtitle="Upload documents for your product." />
+                                    <x-hs-empty-state icon="document" title="{{ __('No documents attached') }}" subtitle="{{ __('Upload documents for your product.') }}" />
                                 </flux:table.cell>
                             </flux:table.row>
                         @endforelse
@@ -86,10 +86,10 @@
     {{-- Remove Document Confirmation --}}
     <x-hs-confirm
         name="remove-document-confirm"
-        title="Remove Document"
-        message="Remove this document?"
+        title="{{ __('Remove Document') }}"
+        message="{{ __('Remove this document?') }}"
         variant="danger"
-        confirmText="Remove"
+        confirmText="{{ __('Remove') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="removeDocument" wire:loading.attr="disabled">

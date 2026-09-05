@@ -145,7 +145,7 @@
                                         <input
                                             x-model.debounce.300ms="description"
                                             type="text"
-                                            placeholder="e.g. Halal Coconut Flour 25 kg"
+                                            placeholder="{{ __('e.g. Halal Coconut Flour 25 kg') }}"
                                             class="{{ $fieldClasses }}"
                                             :class="descriptionError ? '{{ $invalidClasses }}' : ''"
                                         />
@@ -291,8 +291,8 @@
                 {{-- Notes --}}
                 <flux:textarea
                     wire:model="notes"
-                    label="Notes / Terms (optional)"
-                    placeholder="Pricing valid for monthly contract. MOQ applies. Lead time: 10 business days."
+                    label="{{ __('Notes / Terms (optional)') }}"
+                    placeholder="{{ __('Pricing valid for monthly contract. MOQ applies. Lead time: 10 business days.') }}"
                     rows="3"
                 />
 
@@ -330,10 +330,10 @@
     {{-- Submit Confirmation --}}
     <x-hs-confirm
         name="submit-quotation-confirm"
-        title="Submit Quotation"
-        message="Once submitted, this quotation cannot be edited. The buyer will see it immediately. You can withdraw it later if needed."
+        title="{{ __('Submit Quotation') }}"
+        message="{{ __('Once submitted, this quotation cannot be edited. The buyer will see it immediately. You can withdraw it later if needed.') }}"
         variant="warning"
-        confirmText="Confirm & Submit"
+        confirmText="{{ __('Confirm & Submit') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="submitQuotation" wire:loading.attr="disabled">
@@ -345,10 +345,10 @@
     {{-- Withdraw Confirmation --}}
     <x-hs-confirm
         name="withdraw-quotation-confirm"
-        title="Withdraw Quotation"
-        message="Withdraw this quotation? The buyer will no longer be able to award it."
+        title="{{ __('Withdraw Quotation') }}"
+        message="{{ __('Withdraw this quotation? The buyer will no longer be able to award it.') }}"
         variant="danger"
-        confirmText="Withdraw"
+        confirmText="{{ __('Withdraw') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="withdrawQuotation" wire:loading.attr="disabled">
@@ -360,10 +360,10 @@
     {{-- Remove Item Confirmation --}}
     <x-hs-confirm
         name="confirm-remove-quotation-item"
-        title="Remove Item"
-        message="Remove this quotation item?"
+        title="{{ __('Remove Item') }}"
+        message="{{ __('Remove this quotation item?') }}"
         variant="danger"
-        confirmText="Remove"
+        confirmText="{{ __('Remove') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="removeItem" wire:loading.attr="disabled">

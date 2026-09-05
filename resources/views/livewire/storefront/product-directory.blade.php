@@ -35,40 +35,40 @@
                 <span class="w-6 h-px bg-[var(--hs-gold-500)]"></span>
 
                 <span class="font-sans text-[11px] tracking-[2.2px] uppercase text-[var(--hs-gold-600)]">
-                    Verified Supplier Catalog — Philippines
+                    {{ __('Verified Supplier Catalog — Philippines') }}
                 </span>
             </div>
 
             {{-- Heading --}}
             <h1 class="font-[var(--hs-font-display)] font-semibold text-4xl sm:text-[46px] tracking-tight leading-tight text-[var(--hs-green-950)] mb-3">
-                Product Directory
+                {{ __('Product Directory') }}
             </h1>
 
             {{-- Description + Stats --}}
             <div class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[var(--hs-neutral-500)] text-sm mb-8 max-w-3xl">
                 <span>
-                    Browse halal-certified products sourced directly from audited suppliers.
+                    {{ __('Browse halal-certified products sourced directly from audited suppliers.') }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalProductCount }}
                     </b>
-                    products
+                    {{ __('products') }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalSupplierCount }}
                     </b>
-                    suppliers
+                    {{ __('suppliers') }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->categories->count() }}
                     </b>
-                    categories
+                    {{ __('categories') }}
                 </span>
             </div>
 
@@ -97,7 +97,7 @@
                     <input
                         wire:model.live.debounce.300ms="query"
                         type="search"
-                        placeholder="Search products..."
+                        placeholder="{{ __('Search products...') }}"
                         class="w-full rounded-[var(--hs-radius-pill)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] pl-10 pr-4 py-2.5 text-sm text-[var(--hs-neutral-900)] placeholder:text-[var(--hs-neutral-400)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent shadow-[var(--hs-shadow-sm)] transition"
                     />
 
@@ -142,7 +142,7 @@
                             'text-[var(--hs-neutral-500)] border-transparent hover:text-[var(--hs-neutral-800)]' => $categoryId !== null,
                         ])
                     >
-                        All
+                        {{ __('All') }}
 
                         <span
                             @class([
@@ -210,22 +210,22 @@
                         @if ($categoryId)
                             {{ $this->categories->firstWhere('id', $categoryId)?->name ?? 'Products' }}
                         @elseif (filled($query))
-                            Search results
+                            {{ __('Search results') }}
                         @else
-                            Latest Products
+                            {{ __('Latest Products') }}
                         @endif
                     </h2>
 
                     <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">
                         @if (filled($query))
-                            Products matching
+                            {{ __('Products matching') }}
                             <span class="font-medium text-[var(--hs-neutral-700)]">
                                 "{{ $query }}"
                             </span>
                         @elseif ($categoryId)
-                            Halal-certified products in this category
+                            {{ __('Halal-certified products in this category') }}
                         @else
-                            Halal-certified products ready to source
+                            {{ __('Halal-certified products ready to source') }}
                         @endif
                     </p>
                 </div>
@@ -261,8 +261,8 @@
             <div class="py-24">
                 <x-hs-empty-state
                     icon="package"
-                    title="No products found"
-                    subtitle="Try adjusting your search or selecting a different category."
+                    title="{{ __('No products found') }}"
+                    subtitle="{{ __('Try adjusting your search or selecting a different category.') }}"
                 />
             </div>
 

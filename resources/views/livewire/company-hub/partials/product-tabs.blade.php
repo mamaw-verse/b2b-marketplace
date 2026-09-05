@@ -2,7 +2,7 @@
     <div class="mb-6 border-b border-[var(--hs-neutral-200)]">
         <nav
             class="flex items-center gap-6 overflow-x-auto"
-            aria-label="Product navigation"
+            aria-label="{{ __('Product navigation') }}"
         >
 
             {{-- Basic Info --}}
@@ -20,7 +20,7 @@
                     variant="mini"
                     class="shrink-0"
                 />
-                <span>Basic Info</span>
+                <span>{{ __('Basic Info') }}</span>
             </a>
 
             {{-- Variants --}}
@@ -38,7 +38,7 @@
                     variant="mini"
                     class="shrink-0"
                 />
-                <span>Variants</span>
+                <span>{{ __('Variants') }}</span>
             </a>
 
             {{-- Gallery --}}
@@ -56,7 +56,7 @@
                     variant="mini"
                     class="shrink-0"
                 />
-                <span>Gallery</span>
+                <span>{{ __('Gallery') }}</span>
             </a>
 
             {{-- Documents --}}
@@ -74,7 +74,7 @@
                     variant="mini"
                     class="shrink-0"
                 />
-                <span>Documents</span>
+                <span>{{ __('Documents') }}</span>
             </a>
 
         </nav>

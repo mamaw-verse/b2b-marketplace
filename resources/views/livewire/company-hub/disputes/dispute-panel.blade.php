@@ -153,10 +153,10 @@
 
     <x-hs-confirm
         name="confirm-return"
-        title="Confirm Return"
-        message="Confirm you received the returned goods? This unlocks refund options and cannot be undone."
+        title="{{ __('Confirm Return') }}"
+        message="{{ __('Confirm you received the returned goods? This unlocks refund options and cannot be undone.') }}"
         variant="primary"
-        confirmText="Confirm Receipt"
+        confirmText="{{ __('Confirm Receipt') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="confirmReturn" wire:loading.attr="disabled">
@@ -167,10 +167,10 @@
 
     <x-hs-confirm
         name="confirm-resolve-dispute"
-        title="Resolve Dispute"
-        message="A full or partial refund moves money back to the buyer and marks the order refunded. Denying keeps the order completed with no refund. This cannot be undone."
+        title="{{ __('Resolve Dispute') }}"
+        message="{{ __('A full or partial refund moves money back to the buyer and marks the order refunded. Denying keeps the order completed with no refund. This cannot be undone.') }}"
         variant="warning"
-        confirmText="Confirm Resolution"
+        confirmText="{{ __('Confirm Resolution') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="resolve" wire:loading.attr="disabled">
@@ -181,10 +181,10 @@
 
     <x-hs-confirm
         name="confirm-escalate-dispute"
-        title="Escalate to Admin"
-        message="Escalate this dispute to admin? This cannot be undone."
+        title="{{ __('Escalate to Admin') }}"
+        message="{{ __('Escalate this dispute to admin? This cannot be undone.') }}"
         variant="warning"
-        confirmText="Escalate"
+        confirmText="{{ __('Escalate') }}"
     >
         <x-slot name="action">
             <flux:button variant="filled" wire:click="escalate" wire:loading.attr="disabled">

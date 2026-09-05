@@ -1,9 +1,9 @@
 @props([
     'name',
-    'title'      => 'Notice',
+    'title'      => __('Notice'),
     'message'    => '',
     'variant'    => 'info', // info | success | warning | danger
-    'buttonText' => 'OK',
+    'buttonText' => __('OK'),
 ])
 
 @php

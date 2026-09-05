@@ -139,16 +139,16 @@
                     <div class="text-center sm:text-left col-span-1 sm:col-span-2 lg:col-span-1">
                         <div class="flex items-center justify-center sm:justify-start gap-3 mb-4">
                             <img src="/images/brand-logo.png" alt="1Halal Store" class="h-10 sm:h-12 w-auto opacity-90">
-                            <img src="/images/halal-stamp.png" alt="Halal Certified" class="h-10 sm:h-12 w-auto">
+                            <img src="/images/halal-stamp.png" alt="{{ __('Halal Certified') }}" class="h-10 sm:h-12 w-auto">
                         </div>
                         <p class="text-sm text-white/55 leading-relaxed max-w-[34ch] mx-auto sm:mx-0">
-                            Your halal supply-chain marketplace — connecting farmers, producers, certifiers, logistics providers, retailers and consumers in one trusted ecosystem.
+                            {{ __('Your halal supply-chain marketplace — connecting farmers, producers, certifiers, logistics providers, retailers and consumers in one trusted ecosystem.') }}
                         </p>
                     </div>
 
                     {{-- Platform --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">Platform</h4>
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Platform') }}</h4>
                         <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="{{ route('home') }}#who-we-serve" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Who We Serve') }}</a></li>
                             <li><a href="{{ route('home') }}#what-we-offer" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('What We Offer') }}</a></li>
@@ -160,7 +160,7 @@
 
                     {{-- Company --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">Company</h4>
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Company') }}</h4>
                         <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('About Us') }}</a></li>
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
@@ -170,7 +170,7 @@
 
                     {{-- Get Started --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">Get Started</h4>
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Get Started') }}</h4>
                         <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="{{ route('register') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('List Your Business') }}</a></li>
                             <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Find Suppliers') }}</a></li>

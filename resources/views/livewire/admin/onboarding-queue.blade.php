@@ -2,19 +2,19 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Onboarding Queue</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Onboarding Queue') }}</h1>
         </div>
 
         {{-- Status filter tabs (pill style with counts) --}}
         <div class="px-4 sm:px-6 pt-5 pb-4 flex flex-wrap gap-1.5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
             @php
                 $tabs = [
-                    'all' => 'All',
-                    'submitted' => 'Submitted',
-                    'pending' => 'Pending',
-                    'requires_revision' => 'Requires Revision',
-                    'approved' => 'Approved',
-                    'rejected' => 'Rejected',
+                    'all' => __('All'),
+                    'submitted' => __('Submitted'),
+                    'pending' => __('Pending'),
+                    'requires_revision' => __('Requires Revision'),
+                    'approved' => __('Approved'),
+                    'rejected' => __('Rejected'),
                 ];
             @endphp
 
@@ -45,11 +45,11 @@
         <div class="overflow-hidden">
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>Business Name</flux:table.column>
-                    <flux:table.column>Applicant</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Submitted</flux:table.column>
-                    <flux:table.column>Actions</flux:table.column>
+                    <flux:table.column>{{ __('Business Name') }}</flux:table.column>
+                    <flux:table.column>{{ __('Applicant') }}</flux:table.column>
+                    <flux:table.column>{{ __('Status') }}</flux:table.column>
+                    <flux:table.column>{{ __('Submitted') }}</flux:table.column>
+                    <flux:table.column>{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -93,8 +93,8 @@
                             <flux:table.cell colspan="5" class="text-center">
                                 <x-hs-empty-state
                                     icon="folder"
-                                    title="No submissions"
-                                    subtitle="No onboarding submissions found for this status."
+                                    title="{{ __('No submissions') }}"
+                                    subtitle="{{ __('No onboarding submissions found for this status.') }}"
                                 />
                             </flux:table.cell>
                         </flux:table.row>

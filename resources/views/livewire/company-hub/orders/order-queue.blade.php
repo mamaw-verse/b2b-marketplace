@@ -7,7 +7,7 @@
 
         <div class="px-6 pt-5">
             <div class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-fit">
-                @foreach (['all' => 'All', 'draft' => 'Draft', 'pending_payment' => 'Pending Payment', 'to_fulfil' => 'To Fulfil', 'disputed' => 'Disputed'] as $key => $label)
+                @foreach (['all' => __('All'), 'draft' => __('Draft'), 'pending_payment' => __('Pending Payment'), 'to_fulfil' => __('To Fulfil'), 'disputed' => __('Disputed')] as $key => $label)
                     <button
                         wire:click="$set('tab', '{{ $key }}')"
                         @class([

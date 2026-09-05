@@ -3,16 +3,16 @@
 
         {{-- Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Reviews</h1>
-            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">Reviews from your customers on your shop and products.</p>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Reviews') }}</h1>
+            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Reviews from your customers on your shop and products.') }}</p>
         </div>
 
         {{-- Filters --}}
         <div class="px-6 py-3 border-b border-[var(--hs-neutral-100)] flex items-center gap-4">
             <flux:select wire:model.live="ratingFilter" size="sm" class="w-36">
-                <flux:select.option value="">All Ratings</flux:select.option>
+                <flux:select.option value="">{{ __('All Ratings') }}</flux:select.option>
                 @for($i = 5; $i >= 1; $i--)
-                    <flux:select.option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</flux:select.option>
+                    <flux:select.option value="{{ $i }}">{{ $i }} {{ __('Star') }}{{ $i > 1 ? 's' : '' }}</flux:select.option>
                 @endfor
             </flux:select>
         </div>
@@ -50,7 +50,7 @@
                                     </div>
                                     <div class="flex items-center gap-2 shrink-0">
                                         @if ($review->is_hidden)
-                                            <x-hs-badge variant="danger" label="Hidden" />
+                                            <x-hs-badge variant="danger" label="{{ __('Hidden') }}" />
                                         @endif
                                         <span class="text-xs text-[var(--hs-neutral-400)]">{{ $review->created_at->diffForHumans() }}</span>
                                     </div>
@@ -60,7 +60,7 @@
                                 @if ($review->body)
                                     <p class="mt-2 text-sm text-[var(--hs-neutral-700)] leading-relaxed">{{ $review->body }}</p>
                                 @else
-                                    <p class="mt-2 text-sm text-[var(--hs-neutral-400)] italic">Rating only — no comment.</p>
+                                    <p class="mt-2 text-sm text-[var(--hs-neutral-400)] italic">{{ __('Rating only — no comment.') }}</p>
                                 @endif
 
                                 {{-- Seller Response --}}
@@ -83,8 +83,8 @@
             <div class="px-6 py-16 text-center">
                 <x-hs-empty-state
                     icon="star"
-                    title="No reviews yet"
-                    subtitle="Reviews from your customers will appear here once they leave feedback on completed orders."
+                    title="{{ __('No reviews yet') }}"
+                    subtitle="{{ __('Reviews from your customers will appear here once they leave feedback on completed orders.') }}"
                 />
             </div>
         @endif

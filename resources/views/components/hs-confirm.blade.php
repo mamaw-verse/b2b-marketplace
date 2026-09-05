@@ -1,10 +1,10 @@
 @props([
     'name',
-    'title'       => 'Confirm',
-    'message'     => 'Are you sure you want to proceed?',
+    'title'       => __('Confirm'),
+    'message'     => __('Are you sure you want to proceed?'),
     'variant'     => 'primary', // primary | danger | warning
-    'confirmText' => 'Confirm',
-    'cancelText'  => 'Cancel',
+    'confirmText' => __('Confirm'),
+    'cancelText'  => __('Cancel'),
 ])
 
 @php

@@ -8,8 +8,8 @@
             @if ($rfqs->isEmpty())
                 <x-hs-empty-state
                     icon="document-magnifying-glass"
-                    title="No RFQs yet"
-                    description="Browse products and send a Request for Quotation to get started."
+                    title="{{ __('No RFQs yet') }}"
+                    description="{{ __('Browse products and send a Request for Quotation to get started.') }}"
                 />
             @else
                 <div class="space-y-3">

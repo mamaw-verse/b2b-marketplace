@@ -313,8 +313,8 @@
 
             <flux:textarea
                 wire:model="closeReason"
-                label="Reason (optional)"
-                placeholder="e.g., We cannot fulfil this volume within the requested timeline."
+                label="{{ __('Reason (optional)') }}"
+                placeholder="{{ __('e.g., We cannot fulfil this volume within the requested timeline.') }}"
                 rows="3"
             />
 
@@ -332,10 +332,10 @@
     {{-- S4.T11: Withdraw Quotation Confirmation --}}
     <x-hs-confirm
         name="confirm-withdraw-quotation"
-        title="Withdraw Quotation"
-        message="Withdraw this quotation? The buyer will be notified and can no longer award it."
+        title="{{ __('Withdraw Quotation') }}"
+        message="{{ __('Withdraw this quotation? The buyer will be notified and can no longer award it.') }}"
         variant="danger"
-        confirmText="Withdraw"
+        confirmText="{{ __('Withdraw') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="withdrawQuotation" wire:loading.attr="disabled">

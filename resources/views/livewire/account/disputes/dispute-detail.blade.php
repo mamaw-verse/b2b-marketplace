@@ -2,7 +2,7 @@
     <x-hs-modal
         name="open-dispute-detail-modal"
         model="show"
-        :title="'Dispute — ' . $order->order_number"
+        :title="__('Dispute') . ' — ' . $order->order_number"
         size="lg"
     >
         @if ($dispute)
@@ -95,17 +95,17 @@
         <x-slot name="footer">
             <div class="flex items-center justify-end gap-2">
                 <flux:modal.close>
-                    <flux:button variant="ghost">Close</flux:button>
+                    <flux:button variant="ghost">{{ __('Close') }}</flux:button>
                 </flux:modal.close>
 
                 @if ($dispute && ! in_array($dispute->status, ['resolved_refunded', 'resolved_denied', 'withdrawn']))
                     @if ($dispute->status !== 'escalated')
                         <flux:modal.trigger name="confirm-escalate-dispute">
-                            <flux:button size="sm">Escalate to Admin</flux:button>
+                            <flux:button size="sm">{{ __('Escalate to Admin') }}</flux:button>
                         </flux:modal.trigger>
                     @endif
                     <flux:modal.trigger name="confirm-withdraw-dispute">
-                        <flux:button size="sm" variant="danger">Withdraw</flux:button>
+                        <flux:button size="sm" variant="danger">{{ __('Withdraw') }}</flux:button>
                     </flux:modal.trigger>
                 @endif
             </div>
@@ -114,28 +114,28 @@
 
     <x-hs-confirm
         name="confirm-escalate-dispute"
-        title="Escalate to Admin"
-        message="Escalate to admin? This cannot be undone."
+        title="{{ __('Escalate to Admin') }}"
+        message="{{ __('Escalate to admin? This cannot be undone.') }}"
         variant="warning"
-        confirmText="Escalate"
+        confirmText="{{ __('Escalate') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="escalate" wire:loading.attr="disabled">
-                Escalate
+                {{ __('Escalate') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>
 
     <x-hs-confirm
         name="confirm-withdraw-dispute"
-        title="Withdraw Dispute"
-        message="Withdraw this dispute?"
+        title="{{ __('Withdraw Dispute') }}"
+        message="{{ __('Withdraw this dispute?') }}"
         variant="danger"
-        confirmText="Withdraw"
+        confirmText="{{ __('Withdraw') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="withdraw" wire:loading.attr="disabled">
-                Withdraw
+                {{ __('Withdraw') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

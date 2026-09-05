@@ -4,7 +4,7 @@
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">
-                Products
+                {{ __('Products') }}
             </h1>
 
             <flux:button
@@ -13,7 +13,7 @@
                 href="{{ route('hub.products.create') }}"
                 wire:navigate
             >
-                Add Product
+                {{ __('Add Product') }}
             </flux:button>
         </div>
 
@@ -29,7 +29,7 @@
                         'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)]' => $statusFilter !== '',
                     ])
                 >
-                    All
+                    {{ __('All') }}
                 </button>
 
                 <button
@@ -40,7 +40,7 @@
                         'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)]' => $statusFilter !== 'published',
                     ])
                 >
-                    Published
+                    {{ __('Published') }}
                 </button>
 
                 <button
@@ -51,7 +51,7 @@
                         'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)]' => $statusFilter !== 'archived',
                     ])
                 >
-                    Archived
+                    {{ __('Archived') }}
                 </button>
 
             </div>
@@ -62,11 +62,11 @@
             <flux:table>
 
                 <flux:table.columns>
-                    <flux:table.column>Name</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Variants</flux:table.column>
-                    <flux:table.column>Created</flux:table.column>
-                    <flux:table.column align="end">Actions</flux:table.column>
+                    <flux:table.column>{{ __('Name') }}</flux:table.column>
+                    <flux:table.column>{{ __('Status') }}</flux:table.column>
+                    <flux:table.column>{{ __('Variants') }}</flux:table.column>
+                    <flux:table.column>{{ __('Created') }}</flux:table.column>
+                    <flux:table.column align="end">{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -146,8 +146,8 @@
                             <flux:table.cell colspan="5" class="text-center">
                                 <x-hs-empty-state
                                     icon="package"
-                                    title="No products yet"
-                                    subtitle="Create your first product to get started."
+                                    title="{{ __('No products yet') }}"
+                                    subtitle="{{ __('Create your first product to get started.') }}"
                                 />
                             </flux:table.cell>
                         </flux:table.row>
@@ -163,10 +163,10 @@
     {{-- Archive Product Confirmation --}}
     <x-hs-confirm
         name="archive-product-confirm"
-        title="Archive Product"
-        message="Archive this product?"
+        title="{{ __('Archive Product') }}"
+        message="{{ __('Archive this product?') }}"
         variant="warning"
-        confirmText="Archive"
+        confirmText="{{ __('Archive') }}"
     >
         <x-slot name="action">
             <flux:button variant="filled" wire:click="toggleStatus" wire:loading.attr="disabled">
@@ -178,10 +178,10 @@
     {{-- Publish Product Confirmation --}}
     <x-hs-confirm
         name="publish-product-confirm"
-        title="Publish Product"
-        message="Publish this product?"
+        title="{{ __('Publish Product') }}"
+        message="{{ __('Publish this product?') }}"
         variant="primary"
-        confirmText="Publish"
+        confirmText="{{ __('Publish') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="toggleStatus" wire:loading.attr="disabled">

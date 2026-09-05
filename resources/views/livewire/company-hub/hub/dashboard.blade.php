@@ -1,7 +1,7 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between gap-4">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Seller Hub</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Seller Hub') }}</h1>
             @if ($this->shop && $this->shop->status === 'active')
                 <a href="{{ route('storefront.company', $this->shop) }}" wire:navigate
                    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)] transition">
@@ -15,17 +15,17 @@
                 $cards = [];
 
                 if (config('marketplace.features.seller_rfq_queue_enabled') || config('marketplace.features.admin_rfq_management_enabled')) {
-                    $cards[] = ['label' => 'New RFQs', 'count' => $counts['new_rfqs'] ?? 0, 'route' => 'hub.rfqs.index', 'color' => 'green'];
+                    $cards[] = ['label' => __('New RFQs'), 'count' => $counts['new_rfqs'] ?? 0, 'route' => 'hub.rfqs.index', 'color' => 'green'];
                 }
                 
                 if (config('marketplace.features.orders_enabled')) {
-                    $cards[] = ['label' => 'Orders In Progress', 'count' => $counts['orders_in_progress'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'blue'];
-                    $cards[] = ['label' => 'Unfulfilled', 'count' => $counts['unfulfilled_orders'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'warning'];
-                    $cards[] = ['label' => 'Draft Orders', 'count' => $counts['draft_orders'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'neutral'];
+                    $cards[] = ['label' => __('Orders In Progress'), 'count' => $counts['orders_in_progress'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'blue'];
+                    $cards[] = ['label' => __('Unfulfilled'), 'count' => $counts['unfulfilled_orders'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'warning'];
+                    $cards[] = ['label' => __('Draft Orders'), 'count' => $counts['draft_orders'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'neutral'];
                 }
                 
                 if (config('marketplace.features.disputes_enabled')) {
-                    $cards[] = ['label' => 'Open Disputes', 'count' => $counts['open_disputes'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'red'];
+                    $cards[] = ['label' => __('Open Disputes'), 'count' => $counts['open_disputes'] ?? 0, 'route' => 'hub.orders.index', 'color' => 'red'];
                 }
             @endphp
             @foreach ($cards as $card)
@@ -41,27 +41,27 @@
     <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
         @if(config('marketplace.features.subscriptions_enabled') && isset($counts['subscription']))
             <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
-                <h2 class="font-semibold text-[var(--hs-neutral-900)]">Subscription</h2>
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Plan: <span class="font-medium text-[var(--hs-neutral-900)]">{{ $counts['subscription']['plan_name'] ?? 'None' }}</span></p>
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Status: <span class="font-medium text-[var(--hs-neutral-900)] capitalize">{{ $counts['subscription']['status'] ?? 'Unknown' }}</span></p>
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Renewal: <span class="font-medium text-[var(--hs-neutral-900)]">{{ isset($counts['subscription']['renewal_date']) ? \Carbon\Carbon::parse($counts['subscription']['renewal_date'])->format('M j, Y') : 'N/A' }}</span></p>
+                <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Subscription') }}</h2>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Plan:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ $counts['subscription']['plan_name'] ?? 'None' }}</span></p>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Status:') }} <span class="font-medium text-[var(--hs-neutral-900)] capitalize">{{ $counts['subscription']['status'] ?? 'Unknown' }}</span></p>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Renewal:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ isset($counts['subscription']['renewal_date']) ? \Carbon\Carbon::parse($counts['subscription']['renewal_date'])->format('M j, Y') : 'N/A' }}</span></p>
             </div>
         @endif
 
         <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
-            <h2 class="font-semibold text-[var(--hs-neutral-900)]">Listings</h2>
-            <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Published: <span class="font-medium text-[var(--hs-neutral-900)]">{{ $counts['listings']['published'] ?? 0 }}</span></p>
-            <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Draft: <span class="font-medium text-[var(--hs-neutral-900)]">{{ $counts['listings']['draft'] ?? 0 }}</span></p>
-            <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Flagged/Unpublished: <span class="font-medium text-[var(--hs-neutral-900)]">{{ ($counts['listings']['flagged'] ?? 0) + ($counts['listings']['unpublished'] ?? 0) }}</span></p>
+            <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Listings') }}</h2>
+            <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Published:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ $counts['listings']['published'] ?? 0 }}</span></p>
+            <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Draft:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ $counts['listings']['draft'] ?? 0 }}</span></p>
+            <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Flagged/Unpublished:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ ($counts['listings']['flagged'] ?? 0) + ($counts['listings']['unpublished'] ?? 0) }}</span></p>
         </div>
 
         <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
-            <h2 class="font-semibold text-[var(--hs-neutral-900)]">Certification</h2>
+            <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Certification') }}</h2>
             @if(($counts['certification']['is_certified'] ?? false) == true)
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Status: <span class="font-medium text-[var(--hs-green-700)]">Certified</span></p>
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Expiry: <span class="font-medium text-[var(--hs-neutral-900)]">{{ isset($counts['certification']['expiry_date']) ? \Carbon\Carbon::parse($counts['certification']['expiry_date'])->format('M j, Y') : 'N/A' }}</span></p>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Status:') }} <span class="font-medium text-[var(--hs-green-700)]">{{ __('Certified') }}</span></p>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Expiry:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ isset($counts['certification']['expiry_date']) ? \Carbon\Carbon::parse($counts['certification']['expiry_date'])->format('M j, Y') : 'N/A' }}</span></p>
             @else
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">Status: <span class="font-medium text-[var(--hs-neutral-900)]">Not Certified</span></p>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Status:') }} <span class="font-medium text-[var(--hs-neutral-900)]">{{ __('Not Certified') }}</span></p>
             @endif
         </div>
     </div>
@@ -69,16 +69,16 @@
     @if ($this->shop && ! $this->certificationApplication)
         <div class="mt-4 flex flex-col gap-4 rounded-[var(--hs-radius-card)] border border-[var(--hs-green-200)] bg-[var(--hs-green-50)] p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h2 class="font-semibold text-[var(--hs-neutral-900)]">Interested in halal certification?</h2>
-                <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">Let us know and we will connect you with the appropriate external certification entity.</p>
+                <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Interested in halal certification?') }}</h2>
+                <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('Let us know and we will connect you with the appropriate external certification entity.') }}</p>
             </div>
             <flux:button href="{{ route('hub.certifications.index') }}" variant="primary" wire:navigate>
-                I'm Interested
+                {{ __("I'm Interested") }}
             </flux:button>
         </div>
     @elseif ($this->certificationApplication)
         <div class="mt-4 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
-            <p class="text-sm text-[var(--hs-neutral-700)]">Halal certification interest: <span class="font-semibold">{{ str($this->certificationApplication->status)->headline() }}</span></p>
+            <p class="text-sm text-[var(--hs-neutral-700)]">{{ __('Halal certification interest:') }} <span class="font-semibold">{{ str($this->certificationApplication->status)->headline() }}</span></p>
         </div>
     @endif
 </div>

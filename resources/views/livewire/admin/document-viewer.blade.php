@@ -9,7 +9,7 @@
 
             <div class="flex items-start justify-between gap-4 pe-10">
                 <div class="min-w-0">
-                    <flux:heading size="lg">Document Preview</flux:heading>
+                    <flux:heading size="lg">{{ __('Document Preview') }}</flux:heading>
                     <p class="mt-1 truncate text-sm text-[var(--hs-neutral-500)]">{{ $media?->original_filename }}</p>
                 </div>
                 <flux:button
@@ -21,7 +21,7 @@
                     rel="noopener noreferrer"
                     class="shrink-0"
                 >
-                    Open in new tab
+                    {{ __('Open in new tab') }}
                 </flux:button>
             </div>
 
@@ -30,15 +30,15 @@
                     <img src="{{ $documentPreviewUrl }}" alt="{{ $media->original_filename }}" class="max-h-[75vh] rounded">
                 </div>
             @else
-                <iframe src="{{ $documentPreviewUrl }}" class="h-[75vh] w-full rounded border border-[var(--hs-neutral-200)]" title="Document Preview"></iframe>
+                <iframe src="{{ $documentPreviewUrl }}" class="h-[75vh] w-full rounded border border-[var(--hs-neutral-200)]" title="{{ __('Document Preview') }}"></iframe>
             @endif
 
             <div class="flex justify-end">
-                <flux:button variant="ghost" wire:click="closeDocumentViewer">Close</flux:button>
+                <flux:button variant="ghost" wire:click="closeDocumentViewer">{{ __('Close') }}</flux:button>
             </div>
         @else
-            <flux:heading size="lg">Document Preview</flux:heading>
-            <flux:text>Loading document...</flux:text>
+            <flux:heading size="lg">{{ __('Document Preview') }}</flux:heading>
+            <flux:text>{{ __('Loading document...') }}</flux:text>
         @endif
     </div>
 </flux:modal>

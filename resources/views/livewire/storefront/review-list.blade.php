@@ -48,7 +48,7 @@
                                                     type="button"
                                                     wire:click="openReportModal({{ $review->id }})"
                                                     class="text-xs text-[var(--hs-neutral-400)] hover:text-[var(--hs-danger-500)] transition"
-                                                    title="Report this review"
+                                                    title="{{ __('Report this review') }}"
                                                 >
                                                     <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" /></svg>
                                                 </button>
@@ -61,7 +61,7 @@
                                 @if ($review->body)
                                     <p class="mt-2.5 text-sm text-[var(--hs-neutral-700)] leading-relaxed">{{ $review->body }}</p>
                                 @else
-                                    <p class="mt-2.5 text-sm text-[var(--hs-neutral-400)] italic">No comment provided.</p>
+                                    <p class="mt-2.5 text-sm text-[var(--hs-neutral-400)] italic">{{ __('No comment provided.') }}</p>
                                 @endif
 
                                 {{-- Seller Response --}}
@@ -69,7 +69,7 @@
                                     <div class="mt-3 rounded-lg bg-[var(--hs-green-50)] border border-[var(--hs-green-100)] px-4 py-3">
                                         <div class="flex items-center gap-1.5 mb-1">
                                             <svg class="size-3.5 text-[var(--hs-green-600)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                                            <p class="text-xs font-semibold text-[var(--hs-green-700)]">Seller Response</p>
+                                            <p class="text-xs font-semibold text-[var(--hs-green-700)]">{{ __('Seller Response') }}</p>
                                         </div>
                                         <p class="text-sm text-[var(--hs-green-800)] leading-relaxed">{{ $review->response->body }}</p>
                                     </div>
@@ -101,17 +101,17 @@
 
             {{-- Modal content --}}
             <div class="relative bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-xl w-full max-w-md p-6 space-y-4">
-                <h3 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Report Review</h3>
+                <h3 class="text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Report Review') }}</h3>
                 <p class="text-sm text-[var(--hs-neutral-600)]">
-                    Please tell us why you're reporting this review. Our moderation team will investigate.
+                    {{ __("Please tell us why you're reporting this review. Our moderation team will investigate.") }}
                 </p>
 
                 <div>
-                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1">Reason</label>
+                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1">{{ __('Reason') }}</label>
                     <textarea
                         wire:model="reportReason"
                         rows="3"
-                        placeholder="Describe why this review is inappropriate..."
+                        placeholder="{{ __('Describe why this review is inappropriate...') }}"
                         class="w-full rounded-[var(--hs-radius-md)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 text-sm text-[var(--hs-neutral-900)] placeholder:text-[var(--hs-neutral-400)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent"
                     ></textarea>
                     @error('reportReason') <p class="text-sm text-[var(--hs-danger-700)] mt-1">{{ $message }}</p> @enderror
@@ -119,10 +119,10 @@
 
                 <div class="flex justify-end gap-2 pt-2">
                     <flux:button variant="ghost" wire:click="$set('reportingReviewId', null)">
-                        Cancel
+                        {{ __('Cancel') }}
                     </flux:button>
                     <flux:button variant="danger" wire:click="submitReport">
-                        Submit Report
+                        {{ __('Submit Report') }}
                     </flux:button>
                 </div>
             </div>

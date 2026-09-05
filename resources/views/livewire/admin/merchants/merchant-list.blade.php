@@ -2,41 +2,41 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Sellers</h1>
-            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">Manage sellers across the marketplace.</p>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Sellers') }}</h1>
+            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Manage sellers across the marketplace.') }}</p>
         </div>
 
         {{-- Filters --}}
         <div class="px-4 sm:px-6 py-5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
             <div class="flex flex-col md:flex-row md:items-center gap-4">
                 <div class="flex-1">
-                    <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Search by name or email..." />
+                    <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search by name or email...') }}" />
                 </div>
                 
                 <div class="flex gap-2">
-                    <flux:select wire:model.live="statusFilter" class="w-40" placeholder="All Statuses">
-                        <flux:select.option value="active">Active</flux:select.option>
-                        <flux:select.option value="suspended">Suspended</flux:select.option>
-                        <flux:select.option value="onboarding">Onboarding</flux:select.option>
+                    <flux:select wire:model.live="statusFilter" class="w-40" placeholder="{{ __('All Statuses') }}">
+                        <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
+                        <flux:select.option value="suspended">{{ __('Suspended') }}</flux:select.option>
+                        <flux:select.option value="onboarding">{{ __('Onboarding') }}</flux:select.option>
                     </flux:select>
 
-                    <flux:select wire:model.live="countryFilter" class="w-40" placeholder="All Countries">
-                        <flux:select.option value="PH">Philippines</flux:select.option>
-                        <flux:select.option value="MY">Malaysia</flux:select.option>
-                        <flux:select.option value="ID">Indonesia</flux:select.option>
-                        <flux:select.option value="SA">Saudi Arabia</flux:select.option>
-                    </flux:select>
-                    
-                    <flux:select wire:model.live="subscriptionFilter" class="w-40" placeholder="Any Subscription">
-                        <flux:select.option value="trialing">Trialing</flux:select.option>
-                        <flux:select.option value="active">Active</flux:select.option>
-                        <flux:select.option value="lapsed">Lapsed</flux:select.option>
-                        <flux:select.option value="none">No Subscription</flux:select.option>
+                    <flux:select wire:model.live="countryFilter" class="w-40" placeholder="{{ __('All Countries') }}">
+                        <flux:select.option value="PH">{{ __('Philippines') }}</flux:select.option>
+                        <flux:select.option value="MY">{{ __('Malaysia') }}</flux:select.option>
+                        <flux:select.option value="ID">{{ __('Indonesia') }}</flux:select.option>
+                        <flux:select.option value="SA">{{ __('Saudi Arabia') }}</flux:select.option>
                     </flux:select>
 
-                    <flux:select wire:model.live="certificationFilter" class="w-44" placeholder="Any Certification">
-                        <flux:select.option value="certified">Halal Certified</flux:select.option>
-                        <flux:select.option value="not_certified">Not Certified</flux:select.option>
+                    <flux:select wire:model.live="subscriptionFilter" class="w-40" placeholder="{{ __('Any Subscription') }}">
+                        <flux:select.option value="trialing">{{ __('Trialing') }}</flux:select.option>
+                        <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
+                        <flux:select.option value="lapsed">{{ __('Lapsed') }}</flux:select.option>
+                        <flux:select.option value="none">{{ __('No Subscription') }}</flux:select.option>
+                    </flux:select>
+
+                    <flux:select wire:model.live="certificationFilter" class="w-44" placeholder="{{ __('Any Certification') }}">
+                        <flux:select.option value="certified">{{ __('Halal Certified') }}</flux:select.option>
+                        <flux:select.option value="not_certified">{{ __('Not Certified') }}</flux:select.option>
                     </flux:select>
                 </div>
             </div>
@@ -46,13 +46,13 @@
         <div class="overflow-hidden">
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>Storefront</flux:table.column>
-                    <flux:table.column>Country</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Subscription</flux:table.column>
-                    <flux:table.column>Certified</flux:table.column>
-                    <flux:table.column>Joined</flux:table.column>
-                    <flux:table.column class="text-right">Actions</flux:table.column>
+                    <flux:table.column>{{ __('Storefront') }}</flux:table.column>
+                    <flux:table.column>{{ __('Country') }}</flux:table.column>
+                    <flux:table.column>{{ __('Status') }}</flux:table.column>
+                    <flux:table.column>{{ __('Subscription') }}</flux:table.column>
+                    <flux:table.column>{{ __('Certified') }}</flux:table.column>
+                    <flux:table.column>{{ __('Joined') }}</flux:table.column>
+                    <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -74,27 +74,27 @@
                                         {{ ucfirst($merchant->latestSubscription->status) }}
                                     </flux:badge>
                                 @else
-                                    <span class="text-xs text-zinc-500">None</span>
+                                    <span class="text-xs text-zinc-500">{{ __('None') }}</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if($merchant->is_halal_certified)
-                                    <flux:badge color="green">Yes</flux:badge>
+                                    <flux:badge color="green">{{ __('Yes') }}</flux:badge>
                                 @else
-                                    <span class="text-xs text-zinc-500">No</span>
+                                    <span class="text-xs text-zinc-500">{{ __('No') }}</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>{{ $merchant->created_at->format('M d, Y') }}</flux:table.cell>
                             <flux:table.cell class="text-right">
                                 <flux:button variant="ghost" size="sm" href="{{ route('admin.merchants.show', $merchant) }}" wire:navigate>
-                                    View
+                                    {{ __('View') }}
                                 </flux:button>
                             </flux:table.cell>
                         </flux:table.row>
                     @empty
                         <flux:table.row>
                             <flux:table.cell colspan="7" class="text-center text-zinc-500 py-8">
-                                No merchants found matching your filters.
+                                {{ __('No merchants found matching your filters.') }}
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse

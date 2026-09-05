@@ -2,7 +2,7 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Payout Accounts</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Payout Accounts') }}</h1>
         </div>
 
         {{-- Status filter tabs --}}
@@ -25,7 +25,7 @@
             <div class="ml-auto w-64">
                 <flux:input
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search by shop name..."
+                    placeholder="{{ __('Search by shop name...') }}"
                     icon="magnifying-glass"
                     size="sm"
                 />
@@ -36,12 +36,12 @@
         <div class="overflow-hidden">
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>Shop</flux:table.column>
-                    <flux:table.column>Bank</flux:table.column>
-                    <flux:table.column>Account Holder</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Submitted</flux:table.column>
-                    <flux:table.column>Actions</flux:table.column>
+                    <flux:table.column>{{ __('Shop') }}</flux:table.column>
+                    <flux:table.column>{{ __('Bank') }}</flux:table.column>
+                    <flux:table.column>{{ __('Account Holder') }}</flux:table.column>
+                    <flux:table.column>{{ __('Status') }}</flux:table.column>
+                    <flux:table.column>{{ __('Submitted') }}</flux:table.column>
+                    <flux:table.column>{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -79,7 +79,7 @@
                                     <div class="flex gap-2">
                                         <flux:modal.trigger name="confirm-verify-account-{{ $account->id }}">
                                             <flux:button variant="primary" size="sm">
-                                                Verify
+                                                {{ __('Verify') }}
                                             </flux:button>
                                         </flux:modal.trigger>
                                         <flux:button
@@ -87,7 +87,7 @@
                                             size="sm"
                                             wire:click="openRejectModal({{ $account->id }})"
                                         >
-                                            Reject
+                                            {{ __('Reject') }}
                                         </flux:button>
                                     </div>
                                 @elseif ($account->verification_status === 'rejected')
@@ -104,8 +104,8 @@
                             <flux:table.cell colspan="6" class="text-center">
                                 <x-hs-empty-state
                                     icon="banknotes"
-                                    title="No payout accounts"
-                                    subtitle="No payout accounts found for this status."
+                                    title="{{ __('No payout accounts') }}"
+                                    subtitle="{{ __('No payout accounts found for this status.') }}"
                                 />
                             </flux:table.cell>
                         </flux:table.row>
@@ -124,15 +124,15 @@
     {{-- Rejection Modal --}}
     <flux:modal name="reject-payout-account">
         <div class="space-y-4">
-            <flux:heading size="lg">Reject Payout Account</flux:heading>
+            <flux:heading size="lg">{{ __('Reject Payout Account') }}</flux:heading>
             <p class="text-sm text-[var(--hs-neutral-600)]">
-                Please provide a reason for rejecting this payout account. The seller will be notified.
+                {{ __('Please provide a reason for rejecting this payout account. The seller will be notified.') }}
             </p>
 
             <flux:textarea
                 wire:model="rejectionReason"
-                label="Rejection Reason"
-                placeholder="Explain why this account is being rejected..."
+                label="{{ __('Rejection Reason') }}"
+                placeholder="{{ __('Explain why this account is being rejected...') }}"
                 rows="3"
                 required
             />
@@ -140,10 +140,10 @@
 
             <div class="flex justify-end gap-3 pt-2">
                 <flux:button variant="ghost" x-on:click="$flux.modal('reject-payout-account').close()">
-                    Cancel
+                    {{ __('Cancel') }}
                 </flux:button>
                 <flux:button variant="danger" wire:click="rejectAccount">
-                    Reject Account
+                    {{ __('Reject Account') }}
                 </flux:button>
             </div>
         </div>
@@ -153,14 +153,14 @@
     @foreach ($this->accounts->filter(fn ($a) => $a->verification_status === 'pending') as $account)
         <x-hs-confirm
             name="confirm-verify-account-{{ $account->id }}"
-            title="Verify Payout Account"
-            message="Are you sure you want to verify the payout account for {{ $account->shop?->storefront_name }}? This will allow the seller to receive payouts."
+            title="{{ __('Verify Payout Account') }}"
+            message="{{ __('Are you sure you want to verify the payout account for :shop? This will allow the seller to receive payouts.', ['shop' => $account->shop?->storefront_name]) }}"
             variant="primary"
-            confirmText="Verify Account"
+            confirmText="{{ __('Verify Account') }}"
         >
             <x-slot name="action">
                 <flux:button variant="primary" wire:click="verifyAccount({{ $account->id }})" wire:loading.attr="disabled">
-                    Verify Account
+                    {{ __('Verify Account') }}
                 </flux:button>
             </x-slot>
         </x-hs-confirm>

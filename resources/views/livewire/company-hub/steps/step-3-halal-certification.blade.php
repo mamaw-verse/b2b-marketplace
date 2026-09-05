@@ -186,10 +186,10 @@
 
     <x-hs-confirm
         name="confirm-remove-certificate"
-        title="Remove Certificate"
-        message="Remove this certificate?"
+        title="{{ __('Remove Certificate') }}"
+        message="{{ __('Remove this certificate?') }}"
         variant="danger"
-        confirmText="Remove"
+        confirmText="{{ __('Remove') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="removeCertificate" wire:loading.attr="disabled">

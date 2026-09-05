@@ -4,8 +4,8 @@
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Sponsored Content</h1>
-                <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">Manage tiered ad placements across the storefront.</p>
+                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Sponsored Content') }}</h1>
+                <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Manage tiered ad placements across the storefront.') }}</p>
             </div>
             <flux:button
                 href="{{ route('admin.sponsored-content.create') }}"
@@ -13,30 +13,30 @@
                 variant="primary"
                 icon="plus"
             >
-                New Content
+                {{ __('New Content') }}
             </flux:button>
         </div>
 
         {{-- Filters --}}
         <div class="px-4 sm:px-6 py-4 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                <flux:select wire:model.live="tierFilter" class="w-36" placeholder="All Tiers">
+                <flux:select wire:model.live="tierFilter" class="w-36" placeholder="{{ __('All Tiers') }}">
                     @foreach ($this->tiers as $tier)
                         <flux:select.option value="{{ $tier->id }}">{{ $tier->name }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model.live="statusFilter" class="w-40" placeholder="All Statuses">
-                    <flux:select.option value="active">Active now</flux:select.option>
-                    <flux:select.option value="scheduled">Scheduled</flux:select.option>
-                    <flux:select.option value="expired">Expired</flux:select.option>
-                    <flux:select.option value="inactive">Inactive</flux:select.option>
+                <flux:select wire:model.live="statusFilter" class="w-40" placeholder="{{ __('All Statuses') }}">
+                    <flux:select.option value="active">{{ __('Active now') }}</flux:select.option>
+                    <flux:select.option value="scheduled">{{ __('Scheduled') }}</flux:select.option>
+                    <flux:select.option value="expired">{{ __('Expired') }}</flux:select.option>
+                    <flux:select.option value="inactive">{{ __('Inactive') }}</flux:select.option>
                 </flux:select>
 
-                <flux:select wire:model.live="placementFilter" class="w-44" placeholder="All Placements">
-                    <flux:select.option value="homepage">Homepage</flux:select.option>
-                    <flux:select.option value="category_page">Category Page</flux:select.option>
-                    <flux:select.option value="search_results">Search Results</flux:select.option>
+                <flux:select wire:model.live="placementFilter" class="w-44" placeholder="{{ __('All Placements') }}">
+                    <flux:select.option value="homepage">{{ __('Homepage') }}</flux:select.option>
+                    <flux:select.option value="category_page">{{ __('Category Page') }}</flux:select.option>
+                    <flux:select.option value="search_results">{{ __('Search Results') }}</flux:select.option>
                 </flux:select>
             </div>
         </div>
@@ -45,12 +45,12 @@
         <div class="overflow-hidden">
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>Title</flux:table.column>
-                    <flux:table.column>Tier</flux:table.column>
-                    <flux:table.column>Placements</flux:table.column>
-                    <flux:table.column>Schedule</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column class="text-right">Actions</flux:table.column>
+                    <flux:table.column>{{ __('Title') }}</flux:table.column>
+                    <flux:table.column>{{ __('Tier') }}</flux:table.column>
+                    <flux:table.column>{{ __('Placements') }}</flux:table.column>
+                    <flux:table.column>{{ __('Schedule') }}</flux:table.column>
+                    <flux:table.column>{{ __('Status') }}</flux:table.column>
+                    <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -88,13 +88,13 @@
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if (! $item->is_active)
-                                    <flux:badge color="zinc">Inactive</flux:badge>
+                                    <flux:badge color="zinc">{{ __('Inactive') }}</flux:badge>
                                 @elseif ($item->starts_at->isFuture())
-                                    <flux:badge color="blue">Scheduled</flux:badge>
+                                    <flux:badge color="blue">{{ __('Scheduled') }}</flux:badge>
                                 @elseif ($item->ends_at->isPast())
-                                    <flux:badge color="zinc">Expired</flux:badge>
+                                    <flux:badge color="zinc">{{ __('Expired') }}</flux:badge>
                                 @else
-                                    <flux:badge color="green">Live</flux:badge>
+                                    <flux:badge color="green">{{ __('Live') }}</flux:badge>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell class="text-right">
@@ -126,8 +126,8 @@
                     @empty
                         <flux:table.row>
                             <flux:table.cell colspan="6" class="text-center py-12 text-[var(--hs-neutral-500)]">
-                                No sponsored content found.
-                                <a href="{{ route('admin.sponsored-content.create') }}" wire:navigate class="text-[var(--hs-green-600)] underline ml-1">Create your first entry.</a>
+                                {{ __('No sponsored content found.') }}
+                                <a href="{{ route('admin.sponsored-content.create') }}" wire:navigate class="text-[var(--hs-green-600)] underline ml-1">{{ __('Create your first entry.') }}</a>
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse
@@ -145,12 +145,12 @@
     {{-- Delete confirmation --}}
     <x-hs-confirm
         name="delete-confirm"
-        title="Delete Sponsored Content"
-        message="This will permanently remove this content and all its event records. This cannot be undone."
+        title="{{ __('Delete Sponsored Content') }}"
+        message="{{ __('This will permanently remove this content and all its event records. This cannot be undone.') }}"
         variant="danger"
     >
         <x-slot name="action">
-            <flux:button variant="danger" wire:click="delete" wire:loading.attr="disabled">Delete</flux:button>
+            <flux:button variant="danger" wire:click="delete" wire:loading.attr="disabled">{{ __('Delete') }}</flux:button>
         </x-slot>
     </x-hs-confirm>
 </div>

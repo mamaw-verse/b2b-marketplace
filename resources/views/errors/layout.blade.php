@@ -99,7 +99,7 @@
             <div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
                 <div class="flex items-center gap-3">
                     <img src="/images/brand-logo.png" alt="1Halal Store" class="h-7 w-auto opacity-80">
-                    <img src="/images/halal-stamp.png" alt="Halal Certified" class="h-7 w-auto opacity-80">
+                    <img src="/images/halal-stamp.png" alt="{{ __('Halal Certified') }}" class="h-7 w-auto opacity-80">
                 </div>
                 <span class="text-[0.75rem] text-white/40">
                     &copy; {{ date('Y') }} 1HalalStore.com — {{ __('All rights reserved.') }}

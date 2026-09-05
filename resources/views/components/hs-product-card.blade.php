@@ -14,7 +14,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
             <svg class="size-12 text-[var(--hs-neutral-300)]" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 0 0 2.25-2.25V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" /></svg>
         @endif
         <div class="absolute top-2 left-2">
-            <x-hs-badge variant="halal" label="Halal" />
+            <x-hs-badge variant="halal" label="{{ __('Halal') }}" />
         </div>
     </div>
 
@@ -34,7 +34,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
                     {{ $cheapestVariant->currency ?? 'PHP' }} {{ number_format((float)$cheapestVariant->price, 2) }}
                 </span>
                 <span class="text-xs text-[var(--hs-neutral-500)]">
-                    MOQ: {{ $cheapestVariant->minimum_order_quantity }} {{ $cheapestVariant->unit ?? 'pcs' }}
+                    {{ __('MOQ: :quantity :unit', ['quantity' => $cheapestVariant->minimum_order_quantity, 'unit' => $cheapestVariant->unit ?? 'pcs']) }}
                 </span>
             </div>
         @endif

@@ -172,7 +172,7 @@
             {{-- Badges --}}
             <div>
                 <div class="flex items-center gap-2 mb-3">
-                    <x-hs-badge variant="halal" label="Halal Certified" />
+                    <x-hs-badge variant="halal" label="{{ __('Halal Certified') }}" />
                     @foreach ($product->categories->take(2) as $category)
                         <x-hs-badge variant="tag" :label="$category->name" />
                     @endforeach

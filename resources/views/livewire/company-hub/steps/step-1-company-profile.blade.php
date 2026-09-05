@@ -36,7 +36,7 @@
     />
 
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <flux:select wire:model.blur="form.business_structure" :label="__('Business Structure')" placeholder="Select structure...">
+        <flux:select wire:model.blur="form.business_structure" :label="__('Business Structure')" placeholder="{{ __('Select structure...') }}">
             <flux:select.option value="sole_proprietorship">{{ __('Sole Proprietorship') }}</flux:select.option>
             <flux:select.option value="partnership">{{ __('Partnership') }}</flux:select.option>
             <flux:select.option value="corporation">{{ __('Corporation') }}</flux:select.option>

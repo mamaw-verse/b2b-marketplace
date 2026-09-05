@@ -87,7 +87,7 @@
 
         <div class="relative {{ $size === 'sm' ? 'w-28' : 'w-full' }}">
             <select x-model="selected" class="{{ $selectClasses }}">
-                <option value="">Select unit…</option>
+                <option value="">{{ __('Select unit…') }}</option>
                 @foreach ($groups as $groupName => $groupUnits)
                     <optgroup label="{{ $groupName }}">
                         @foreach ($groupUnits as $unit)
@@ -124,7 +124,7 @@
         <input
             x-model.debounce.300ms="custom"
             type="text"
-            placeholder="Custom unit"
+            placeholder="{{ __('Custom unit') }}"
             class="{{ $inputClasses }}"
         />
     </div>

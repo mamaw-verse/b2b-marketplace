@@ -2,9 +2,9 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Categories</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Categories') }}</h1>
             <flux:button variant="primary" icon="plus" href="{{ route('admin.categories.create') }}" wire:navigate>
-                Add Category
+                {{ __('Add Category') }}
             </flux:button>
         </div>
 
@@ -12,10 +12,10 @@
         <div class="overflow-x-auto">
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>Name</flux:table.column>
-                    <flux:table.column>Slug</flux:table.column>
-                    <flux:table.column>Description</flux:table.column>
-                    <flux:table.column align="end">Actions</flux:table.column>
+                    <flux:table.column>{{ __('Name') }}</flux:table.column>
+                    <flux:table.column>{{ __('Slug') }}</flux:table.column>
+                    <flux:table.column>{{ __('Description') }}</flux:table.column>
+                    <flux:table.column align="end">{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -36,7 +36,7 @@
                     @empty
                         <flux:table.row>
                             <flux:table.cell colspan="4" class="text-center">
-                                <x-hs-empty-state icon="folder" title="No categories yet" subtitle="Click 'Add Category' to create one." />
+                                <x-hs-empty-state icon="folder" title="{{ __('No categories yet') }}" subtitle="{{ __("Click 'Add Category' to create one.") }}" />
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse
@@ -48,14 +48,14 @@
     {{-- Delete Confirmation Modal --}}
     <x-hs-confirm
         name="confirm-delete-category"
-        title="Delete Category"
-        message="Are you sure you want to delete this category? This action cannot be undone."
+        title="{{ __('Delete Category') }}"
+        message="{{ __('Are you sure you want to delete this category? This action cannot be undone.') }}"
         variant="danger"
-        confirmText="Delete"
+        confirmText="{{ __('Delete') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="delete" wire:loading.attr="disabled">
-                Delete
+                {{ __('Delete') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

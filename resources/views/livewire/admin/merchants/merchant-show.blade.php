@@ -1,7 +1,7 @@
 <div>
     <div class="mb-6">
         <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route('admin.merchants.index') }}">Merchants</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ route('admin.merchants.index') }}">{{ __('Merchants') }}</flux:breadcrumbs.item>
             <flux:breadcrumbs.item>{{ $shop->storefront_name }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
     </div>
@@ -9,17 +9,17 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <flux:heading size="xl">{{ $shop->storefront_name }}</flux:heading>
-            <flux:subheading>Manage merchant details and status.</flux:subheading>
+            <flux:subheading>{{ __('Manage merchant details and status.') }}</flux:subheading>
         </div>
 
         <div class="flex gap-2">
             @if($shop->status === 'active')
                 <flux:modal.trigger name="confirm-suspend">
-                    <flux:button variant="danger">Suspend Merchant</flux:button>
+                    <flux:button variant="danger">{{ __('Suspend Merchant') }}</flux:button>
                 </flux:modal.trigger>
             @elseif($shop->status === 'suspended')
                 <flux:modal.trigger name="confirm-reactivate">
-                    <flux:button variant="primary">Reactivate Merchant</flux:button>
+                    <flux:button variant="primary">{{ __('Reactivate Merchant') }}</flux:button>
                 </flux:modal.trigger>
             @endif
         </div>
@@ -27,44 +27,44 @@
 
     <x-hs-confirm
         name="confirm-suspend"
-        title="Suspend Merchant"
-        message="Are you sure you want to suspend this merchant? Their products will be hidden from search."
+        title="{{ __('Suspend Merchant') }}"
+        message="{{ __('Are you sure you want to suspend this merchant? Their products will be hidden from search.') }}"
         variant="danger"
     >
         <x-slot name="action">
-            <flux:button variant="danger" wire:click="suspend" wire:loading.attr="disabled">Suspend</flux:button>
+            <flux:button variant="danger" wire:click="suspend" wire:loading.attr="disabled">{{ __('Suspend') }}</flux:button>
         </x-slot>
     </x-hs-confirm>
 
     <x-hs-confirm
         name="confirm-reactivate"
-        title="Reactivate Merchant"
-        message="Are you sure you want to reactivate this merchant?"
+        title="{{ __('Reactivate Merchant') }}"
+        message="{{ __('Are you sure you want to reactivate this merchant?') }}"
     >
         <x-slot name="action">
-            <flux:button variant="primary" wire:click="reactivate" wire:loading.attr="disabled">Reactivate</flux:button>
+            <flux:button variant="primary" wire:click="reactivate" wire:loading.attr="disabled">{{ __('Reactivate') }}</flux:button>
         </x-slot>
     </x-hs-confirm>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="space-y-6 md:col-span-2">
             <flux:card>
-                <flux:heading size="lg" class="mb-4">Overview</flux:heading>
+                <flux:heading size="lg" class="mb-4">{{ __('Overview') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Registered Business Name</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Registered Business Name') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->registered_business_name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Account Owner</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Account Owner') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->user->name }} ({{ $shop->user->email }})</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Location</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Location') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->city }}, {{ $shop->province }}, {{ $shop->country_code }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Status</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Status') }}</dt>
                         <dd class="mt-1">
                             <flux:badge color="{{ $shop->status === 'active' ? 'green' : ($shop->status === 'suspended' ? 'red' : 'zinc') }}">
                                 {{ ucfirst($shop->status) }}
@@ -76,12 +76,12 @@
 
             <flux:card>
                 <div class="flex items-center justify-between mb-4">
-                    <flux:heading size="lg">Products</flux:heading>
-                    <span class="text-sm text-zinc-500">{{ $this->products->count() }} total</span>
+                    <flux:heading size="lg">{{ __('Products') }}</flux:heading>
+                    <span class="text-sm text-zinc-500">{{ __(':count total', ['count' => $this->products->count()]) }}</span>
                 </div>
 
                 @if($this->products->isEmpty())
-                    <p class="text-sm text-zinc-500 py-4 text-center">This merchant has no products yet.</p>
+                    <p class="text-sm text-zinc-500 py-4 text-center">{{ __('This merchant has no products yet.') }}</p>
                 @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach($this->products as $product)
@@ -111,13 +111,13 @@
                                         >{{ $product->name }}</button>
                                         {{-- Status badge --}}
                                         @if($isTrashed)
-                                            <flux:badge color="red" size="sm" class="shrink-0">Deleted</flux:badge>
+                                            <flux:badge color="red" size="sm" class="shrink-0">{{ __('Deleted') }}</flux:badge>
                                         @elseif($product->moderation_status === 'admin_unpublished')
-                                            <flux:badge color="orange" size="sm" class="shrink-0">Unpublished</flux:badge>
+                                            <flux:badge color="orange" size="sm" class="shrink-0">{{ __('Unpublished') }}</flux:badge>
                                         @elseif($product->moderation_status === 'flagged')
-                                            <flux:badge color="yellow" size="sm" class="shrink-0">Flagged</flux:badge>
+                                            <flux:badge color="yellow" size="sm" class="shrink-0">{{ __('Flagged') }}</flux:badge>
                                         @elseif($isPublished)
-                                            <flux:badge color="green" size="sm" class="shrink-0">Published</flux:badge>
+                                            <flux:badge color="green" size="sm" class="shrink-0">{{ __('Published') }}</flux:badge>
                                         @else
                                             <flux:badge color="zinc" size="sm" class="shrink-0">{{ ucfirst($product->status) }}</flux:badge>
                                         @endif
@@ -134,7 +134,7 @@
                                     @if($cheapest)
                                         <p class="mt-1 text-xs font-semibold text-[var(--hs-green-700)]">
                                             {{ $cheapest->currency ?? 'PHP' }} {{ number_format((float) $cheapest->price, 2) }}
-                                            <span class="font-normal text-[var(--hs-neutral-500)]">· MOQ {{ $cheapest->minimum_order_quantity }} {{ $cheapest->unit ?? 'pcs' }}</span>
+                                            <span class="font-normal text-[var(--hs-neutral-500)]">{{ __('· MOQ :minimum_order_quantity :unit', ['minimum_order_quantity' => $cheapest->minimum_order_quantity, 'unit' => $cheapest->unit ?? 'pcs']) }}</span>
                                         </p>
                                     @endif
 
@@ -146,17 +146,17 @@
                                                target="_blank"
                                                class="inline-flex items-center gap-1 text-xs font-medium text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)] transition">
                                                 <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-                                                Live
+                                                {{ __('Live') }}
                                             </a>
                                         @else
-                                            <span class="text-xs text-[var(--hs-neutral-400)]">Not live</span>
+                                            <span class="text-xs text-[var(--hs-neutral-400)]">{{ __('Not live') }}</span>
                                         @endif
 
                                         {{-- Moderation link --}}
                                         <a href="{{ route('admin.products.moderation') }}?product_id={{ $product->id }}"
                                            wire:navigate
                                            class="text-xs text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)] transition">
-                                            Moderate
+                                            {{ __('Moderate') }}
                                         </a>
                                     </div>
                                 </div>
@@ -169,42 +169,42 @@
 
         <div class="space-y-6">
             <flux:card>
-                <flux:heading size="lg" class="mb-4">Subscription Status</flux:heading>
+                <flux:heading size="lg" class="mb-4">{{ __('Subscription Status') }}</flux:heading>
                 @if($shop->latestSubscription)
                     <div class="space-y-4">
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">Current Status</div>
+                            <div class="text-sm font-medium text-zinc-500">{{ __('Current Status') }}</div>
                             <flux:badge color="{{ in_array($shop->latestSubscription->status, ['active', 'trialing']) ? 'green' : 'zinc' }}" class="mt-1">
                                 {{ ucfirst($shop->latestSubscription->status) }}
                             </flux:badge>
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">Started</div>
+                            <div class="text-sm font-medium text-zinc-500">{{ __('Started') }}</div>
                             <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->latestSubscription->created_at->format('M d, Y') }}</div>
                         </div>
                     </div>
                 @else
-                    <div class="text-sm text-zinc-500">No subscription record found.</div>
+                    <div class="text-sm text-zinc-500">{{ __('No subscription record found.') }}</div>
                 @endif
             </flux:card>
 
             <flux:card>
-                <flux:heading size="lg" class="mb-4">Certification Status</flux:heading>
+                <flux:heading size="lg" class="mb-4">{{ __('Certification Status') }}</flux:heading>
                 <div class="space-y-4">
                     <div>
-                        <div class="text-sm font-medium text-zinc-500">Halal Certified</div>
+                        <div class="text-sm font-medium text-zinc-500">{{ __('Halal Certified') }}</div>
                         <div class="mt-1">
                             @if($shop->is_halal_certified)
-                                <flux:badge color="green">Yes</flux:badge>
+                                <flux:badge color="green">{{ __('Yes') }}</flux:badge>
                             @else
-                                <flux:badge color="zinc">No</flux:badge>
+                                <flux:badge color="zinc">{{ __('No') }}</flux:badge>
                             @endif
                         </div>
                     </div>
                     
                     @if($shop->is_halal_certified && $shop->certified_expiry_date)
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">Expiry Date</div>
+                            <div class="text-sm font-medium text-zinc-500">{{ __('Expiry Date') }}</div>
                             <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ \Carbon\Carbon::parse($shop->certified_expiry_date)->format('M d, Y') }}</div>
                         </div>
                     @endif
@@ -212,20 +212,20 @@
             </flux:card>
             
             <flux:card>
-                <flux:heading size="lg" class="mb-4">Onboarding History</flux:heading>
+                <flux:heading size="lg" class="mb-4">{{ __('Onboarding History') }}</flux:heading>
                 @if($shop->onboarding)
                     <div class="space-y-4">
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">Submitted</div>
+                            <div class="text-sm font-medium text-zinc-500">{{ __('Submitted') }}</div>
                             <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->onboarding->submitted_at?->format('M d, Y') ?? 'N/A' }}</div>
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">Approved</div>
+                            <div class="text-sm font-medium text-zinc-500">{{ __('Approved') }}</div>
                             <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->onboarding->approved_at?->format('M d, Y') ?? 'N/A' }}</div>
                         </div>
                     </div>
                 @else
-                    <div class="text-sm text-zinc-500">No onboarding record found.</div>
+                    <div class="text-sm text-zinc-500">{{ __('No onboarding record found.') }}</div>
                 @endif
             </flux:card>
         </div>
@@ -297,7 +297,7 @@
             {{-- Variants --}}
             @if($preview->variants->isNotEmpty())
                 <div class="mt-5">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-2">Variants</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-2">{{ __('Variants') }}</p>
                     <div class="divide-y divide-[var(--hs-neutral-100)] rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden">
                         @foreach($preview->variants as $variant)
                             <div class="flex items-center justify-between px-4 py-3 bg-[var(--hs-neutral-0)] text-sm">
@@ -314,7 +314,7 @@
                                         {{ $variant->currency ?? 'PHP' }} {{ number_format((float) $variant->price, 2) }}
                                     </span>
                                     <span class="text-[var(--hs-neutral-500)] ml-1">
-                                        &middot; MOQ {{ $variant->minimum_order_quantity }} {{ $variant->unit }}
+                                        {{ __('· MOQ :minimum_order_quantity :unit', ['minimum_order_quantity' => $variant->minimum_order_quantity, 'unit' => $variant->unit]) }}
                                     </span>
                                 </div>
                             </div>
@@ -325,12 +325,12 @@
 
             <div class="mt-6 flex justify-end">
                 <flux:modal.close>
-                    <flux:button variant="ghost">Close</flux:button>
+                    <flux:button variant="ghost">{{ __('Close') }}</flux:button>
                 </flux:modal.close>
             </div>
 
         @else
-            <div class="py-12 text-center text-sm text-[var(--hs-neutral-500)]">Loading…</div>
+            <div class="py-12 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('Loading…') }}</div>
         @endif
     </flux:modal>
 

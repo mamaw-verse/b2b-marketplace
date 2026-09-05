@@ -37,7 +37,7 @@
         />
     </div>
 
-    <flux:select wire:model.blur="form.export_readiness_status" :label="__('Export Readiness')" placeholder="Select status...">
+    <flux:select wire:model.blur="form.export_readiness_status" :label="__('Export Readiness')" placeholder="{{ __('Select status...') }}">
         <flux:select.option value="never_exported">{{ __('Never Exported') }}</flux:select.option>
         <flux:select.option value="exporting_regionally">{{ __('Exporting Regionally') }}</flux:select.option>
         <flux:select.option value="exporting_globally">{{ __('Exporting Globally') }}</flux:select.option>

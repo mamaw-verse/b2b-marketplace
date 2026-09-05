@@ -275,10 +275,10 @@
     {{-- Reject Quotation Confirmation --}}
     <x-hs-confirm
         name="confirm-reject-quotation"
-        title="Reject Quotation"
-        message="Reject this quotation? This cannot be undone."
+        title="{{ __('Reject Quotation') }}"
+        message="{{ __('Reject this quotation? This cannot be undone.') }}"
         variant="danger"
-        confirmText="Reject"
+        confirmText="{{ __('Reject') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="rejectQuotation" wire:loading.attr="disabled">
@@ -290,10 +290,10 @@
     {{-- Award Quotation Confirmation --}}
     <x-hs-confirm
         name="confirm-award-quotation"
-        title="Award Quotation"
-        message="Award this quotation? The seller will be notified and an order will be created."
+        title="{{ __('Award Quotation') }}"
+        message="{{ __('Award this quotation? The seller will be notified and an order will be created.') }}"
         variant="primary"
-        confirmText="Award"
+        confirmText="{{ __('Award') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="awardQuotation" wire:loading.attr="disabled">

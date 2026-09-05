@@ -14,12 +14,12 @@
                 <div class="flex items-start gap-3 p-3 rounded-lg bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-100)]">
                     <div class="flex-1">
                         @if ($editingReviewId === $shopReview->id)
-                            <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">Edit Seller Review</p>
+                            <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">{{ __('Edit Seller Review') }}</p>
                             <div class="flex items-center gap-1 mt-1">
                                 @for($i = 1; $i <= 5; $i++)
                                     <button type="button" wire:click="$set('editRating', {{ $i }})"
                                         class="text-xl transition {{ $editRating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}"
-                                        aria-label="Rate {{ $i }} stars">
+                                        aria-label="{{ __('Rate :i stars', ['i' => $i]) }}">
                                         ★
                                     </button>
                                 @endfor
@@ -28,17 +28,17 @@
                                 @endif
                             </div>
                             <div class="mt-2">
-                                <flux:textarea wire:model="editBody" placeholder="Update your review (optional)" rows="2" />
+                                <flux:textarea wire:model="editBody" placeholder="{{ __('Update your review (optional)') }}" rows="2" />
                             </div>
                             <div class="mt-2 flex gap-2">
-                                <flux:button wire:click="updateReview" variant="primary" size="xs">Save Changes</flux:button>
-                                <flux:button wire:click="cancelEdit" variant="ghost" size="xs">Cancel</flux:button>
+                                <flux:button wire:click="updateReview" variant="primary" size="xs">{{ __('Save Changes') }}</flux:button>
+                                <flux:button wire:click="cancelEdit" variant="ghost" size="xs">{{ __('Cancel') }}</flux:button>
                             </div>
                         @else
                             <div class="flex items-center justify-between">
-                                <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">Seller Review</p>
+                                <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">{{ __('Seller Review') }}</p>
                                 @unless($shopReview->response)
-                                    <button wire:click="editReview({{ $shopReview->id }})" class="text-xs text-[var(--hs-green-600)] hover:text-[var(--hs-green-700)] font-medium">Edit</button>
+                                    <button wire:click="editReview({{ $shopReview->id }})" class="text-xs text-[var(--hs-green-600)] hover:text-[var(--hs-green-700)] font-medium">{{ __('Edit') }}</button>
                                 @endunless
                             </div>
                             <div class="flex items-center gap-1 mt-1">
@@ -67,12 +67,12 @@
                     <div class="flex items-start gap-3 p-3 rounded-lg bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-100)]">
                         <div class="flex-1">
                             @if ($editingReviewId === $productReview->id)
-                                <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">Edit Product: {{ $product->name }}</p>
+                                <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">{{ __('Edit Product: :name', ['name' => $product->name]) }}</p>
                                 <div class="flex items-center gap-1 mt-1">
                                     @for($i = 1; $i <= 5; $i++)
                                         <button type="button" wire:click="$set('editRating', {{ $i }})"
                                             class="text-xl transition {{ $editRating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}"
-                                            aria-label="Rate {{ $i }} stars">
+                                            aria-label="{{ __('Rate :i stars', ['i' => $i]) }}">
                                             ★
                                         </button>
                                     @endfor
@@ -81,17 +81,17 @@
                                     @endif
                                 </div>
                                 <div class="mt-2">
-                                    <flux:textarea wire:model="editBody" placeholder="Update your review (optional)" rows="2" />
+                                    <flux:textarea wire:model="editBody" placeholder="{{ __('Update your review (optional)') }}" rows="2" />
                                 </div>
                                 <div class="mt-2 flex gap-2">
-                                    <flux:button wire:click="updateReview" variant="primary" size="xs">Save Changes</flux:button>
-                                    <flux:button wire:click="cancelEdit" variant="ghost" size="xs">Cancel</flux:button>
+                                    <flux:button wire:click="updateReview" variant="primary" size="xs">{{ __('Save Changes') }}</flux:button>
+                                    <flux:button wire:click="cancelEdit" variant="ghost" size="xs">{{ __('Cancel') }}</flux:button>
                                 </div>
                             @else
                                 <div class="flex items-center justify-between">
-                                    <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">Product: {{ $product->name }}</p>
+                                    <p class="text-xs font-semibold text-[var(--hs-neutral-500)]">{{ __('Product: :name', ['name' => $product->name]) }}</p>
                                     @unless($productReview->response)
-                                        <button wire:click="editReview({{ $productReview->id }})" class="text-xs text-[var(--hs-green-600)] hover:text-[var(--hs-green-700)] font-medium">Edit</button>
+                                        <button wire:click="editReview({{ $productReview->id }})" class="text-xs text-[var(--hs-green-600)] hover:text-[var(--hs-green-700)] font-medium">{{ __('Edit') }}</button>
                                     @endunless
                                 </div>
                                 <div class="flex items-center gap-1 mt-1">
@@ -127,7 +127,7 @@
     {{-- Show "Write a Review" button only if not all reviews are submitted --}}
     @if ($order->status === 'completed' && !$hasAllReviews && !$showForm)
         <flux:button wire:click="openForm" variant="primary" size="sm">
-            {{ $hasAnyReview ? 'Add More Reviews' : 'Write a Review' }}
+            {{ $hasAnyReview ? __('Add More Reviews') : __('Write a Review') }}
         </flux:button>
     @endif
 
@@ -141,17 +141,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {{-- Left Column: Seller Review --}}
                 <div class="space-y-3">
-                    <h4 class="text-sm font-semibold text-[var(--hs-neutral-700)]">Rate the Seller</h4>
+                    <h4 class="text-sm font-semibold text-[var(--hs-neutral-700)]">{{ __('Rate the Seller') }}</h4>
                     <p class="text-xs text-[var(--hs-neutral-500)]">{{ $order->shop->storefront_name }}</p>
 
                     @if ($shopReview)
-                        <p class="text-xs text-[var(--hs-neutral-500)] italic">Already reviewed ✓</p>
+                        <p class="text-xs text-[var(--hs-neutral-500)] italic">{{ __('Already reviewed') }} ✓</p>
                     @else
                         <div class="flex items-center gap-1">
                             @for($i = 1; $i <= 5; $i++)
                                 <button type="button" wire:click="$set('shopRating', {{ $i }})"
                                     class="text-2xl transition {{ $shopRating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}"
-                                    aria-label="Rate seller {{ $i }} stars">
+                                    aria-label="{{ __('Rate seller :i stars', ['i' => $i]) }}">
                                     ★
                                 </button>
                             @endfor
@@ -160,7 +160,7 @@
                             @endif
                         </div>
                         @if($shopRating > 0)
-                            <flux:textarea wire:model="shopBody" placeholder="Share your experience with this seller (optional)" rows="3" />
+                            <flux:textarea wire:model="shopBody" placeholder="{{ __('Share your experience with this seller (optional)') }}" rows="3" />
                         @endif
                     @endif
                 </div>
@@ -170,17 +170,17 @@
                     @foreach ($reviewableProducts as $product)
                             @php $existingProductReview = $existingReviews->where('reviewable_type', App\Models\Product::class)->where('reviewable_id', $product->id)->first(); @endphp
                             <div class="space-y-3">
-                                <h4 class="text-sm font-semibold text-[var(--hs-neutral-700)]">Rate Product</h4>
+                                <h4 class="text-sm font-semibold text-[var(--hs-neutral-700)]">{{ __('Rate Product') }}</h4>
                                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ $product->name }}</p>
 
                                 @if ($existingProductReview)
-                                    <p class="text-xs text-[var(--hs-neutral-500)] italic">Already reviewed ✓</p>
+                                    <p class="text-xs text-[var(--hs-neutral-500)] italic">{{ __('Already reviewed') }} ✓</p>
                                 @else
                                     <div class="flex items-center gap-1">
                                         @for($i = 1; $i <= 5; $i++)
                                             <button type="button" wire:click="$set('productReviews.{{ $product->id }}.rating', {{ $i }})"
                                                 class="text-2xl transition {{ ($productReviews[$product->id]['rating'] ?? 0) >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}"
-                                                aria-label="Rate product {{ $i }} stars">
+                                                aria-label="{{ __('Rate product :i stars', ['i' => $i]) }}">
                                                 ★
                                             </button>
                                         @endfor
@@ -189,7 +189,7 @@
                                         @endif
                                     </div>
                                     @if(($productReviews[$product->id]['rating'] ?? 0) > 0)
-                                        <flux:textarea wire:model="productReviews.{{ $product->id }}.body" placeholder="Share your experience with this product (optional)" rows="3" />
+                                        <flux:textarea wire:model="productReviews.{{ $product->id }}.body" placeholder="{{ __('Share your experience with this product (optional)') }}" rows="3" />
                                     @endif
                                 @endif
                             </div>
@@ -202,11 +202,11 @@
                 @php
                     $canSubmit = $shopRating > 0 || collect($productReviews)->contains(fn ($r) => ($r['rating'] ?? 0) > 0);
                 @endphp
-                <flux:button wire:click="submit" variant="primary" :disabled="!$canSubmit">
-                    Submit Review
+<flux:button wire:click="submit" variant="primary" :disabled="!$canSubmit">
+                    {{ __('Submit Review') }}
                 </flux:button>
                 <flux:button wire:click="$set('showForm', false)" variant="ghost">
-                    Cancel
+                    {{ __('Cancel') }}
                 </flux:button>
             </div>
         </div>

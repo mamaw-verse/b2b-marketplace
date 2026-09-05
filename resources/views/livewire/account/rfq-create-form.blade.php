@@ -230,7 +230,7 @@
                             {{ $shop->storefront_name }}
                         </a>
                         @if ($shop->certificates->contains(fn ($certificate) => $certificate->status === 'active'))
-                            <x-hs-badge variant="verified" label="Verified" />
+                            <x-hs-badge variant="verified" label="{{ __('Verified') }}" />
                         @endif
                     </div>
                 </div>

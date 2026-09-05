@@ -23,18 +23,18 @@
                 <div class="flex items-center gap-3">
                     @if (($order->fulfilments->first()?->status === 'delivered' || $order->status === 'completed') && ! in_array($order->status, ['refunded', 'cancelled']))
                         @if ($order->disputes->isEmpty() || $order->disputes->every(fn ($d) => in_array($d->status, ['resolved_refunded', 'resolved_denied', 'withdrawn'])))
-                            <flux:button size="sm" variant="ghost" x-on:click="$dispatch('open-dispute-modal')">Open Dispute</flux:button>
+                            <flux:button size="sm" variant="ghost" x-on:click="$dispatch('open-dispute-modal')">{{ __('Open Dispute') }}</flux:button>
                         @endif
                     @endif
                     @if ($order->status === 'pending_payment')
-                        <flux:button size="sm" variant="primary" href="{{ route('account.orders.pay', $order) }}" wire:navigate>Pay Now</flux:button>
+                        <flux:button size="sm" variant="primary" href="{{ route('account.orders.pay', $order) }}" wire:navigate>{{ __('Pay Now') }}</flux:button>
                         <flux:modal.trigger name="confirm-cancel-order">
-                            <flux:button size="sm" variant="ghost">Cancel</flux:button>
+                            <flux:button size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
                         </flux:modal.trigger>
                     @endif
                     @if ($order->fulfilments->first()?->status === 'delivered' && $order->status === 'paid')
                         <flux:modal.trigger name="confirm-receipt-order">
-                            <flux:button size="sm" variant="primary">Confirm Receipt</flux:button>
+                            <flux:button size="sm" variant="primary">{{ __('Confirm Receipt') }}</flux:button>
                         </flux:modal.trigger>
                     @endif
                 </div>
@@ -185,12 +185,12 @@
                             <div class="p-4 rounded-lg border border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <h3 class="text-sm font-semibold text-[var(--hs-danger-700)]">Active Dispute</h3>
+                                        <h3 class="text-sm font-semibold text-[var(--hs-danger-700)]">{{ __('Active Dispute') }}</h3>
                                         <p class="text-sm text-[var(--hs-neutral-700)] mt-1">{{ str_replace('_', ' ', ucfirst($activeDispute->type)) }} — <x-hs-status-pill :status="$activeDispute->status" /></p>
                                         <p class="text-xs text-[var(--hs-neutral-500)] mt-1 line-clamp-1">{{ $activeDispute->reason }}</p>
                                     </div>
                                     <flux:button size="sm" x-on:click="$dispatch('open-dispute-detail-modal', { disputeId: {{ $activeDispute->id }} })">
-                                        View Dispute
+                                        {{ __('View Dispute') }}
                                     </flux:button>
                                 </div>
                             </div>
@@ -332,14 +332,14 @@
     {{-- Cancel Confirmation Modal --}}
     <x-hs-confirm
         name="confirm-cancel-order"
-        title="Cancel Order"
-        message="Cancel this order?"
+        title="{{ __('Cancel Order') }}"
+        message="{{ __('Cancel this order?') }}"
         variant="danger"
-        confirmText="Cancel Order"
+        confirmText="{{ __('Cancel Order') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="cancel" wire:loading.attr="disabled">
-                Cancel Order
+                {{ __('Cancel Order') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>
@@ -347,14 +347,14 @@
     {{-- Confirm Receipt Modal --}}
     <x-hs-confirm
         name="confirm-receipt-order"
-        title="Confirm Receipt"
-        message="Confirm you received this order?"
+        title="{{ __('Confirm Receipt') }}"
+        message="{{ __('Confirm you received this order?') }}"
         variant="primary"
-        confirmText="Confirm Receipt"
+        confirmText="{{ __('Confirm Receipt') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="confirmReceipt" wire:loading.attr="disabled">
-                Confirm Receipt
+                {{ __('Confirm Receipt') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

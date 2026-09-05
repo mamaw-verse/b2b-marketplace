@@ -20,11 +20,11 @@
                 </div>
                 <div class="flex items-center gap-3">
                     @if ($order->status === 'draft')
-                        <flux:button size="sm" href="{{ route('hub.orders.edit', $order) }}" wire:navigate>Edit</flux:button>
+                        <flux:button size="sm" href="{{ route('hub.orders.edit', $order) }}" wire:navigate>{{ __('Edit') }}</flux:button>
                     @endif
                     @if ($order->status === 'pending_payment')
                         <flux:modal.trigger name="confirm-recall-order">
-                            <flux:button size="sm">Recall</flux:button>
+                            <flux:button size="sm">{{ __('Recall') }}</flux:button>
                         </flux:modal.trigger>
                     @endif
                 </div>
@@ -313,14 +313,14 @@
     {{-- Recall Confirmation Modal --}}
     <x-hs-confirm
         name="confirm-recall-order"
-        title="Recall Order"
-        message="Recall this order to draft?"
+        title="{{ __('Recall Order') }}"
+        message="{{ __('Recall this order to draft?') }}"
         variant="warning"
-        confirmText="Recall"
+        confirmText="{{ __('Recall') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="recall" wire:loading.attr="disabled">
-                Recall
+                {{ __('Recall') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

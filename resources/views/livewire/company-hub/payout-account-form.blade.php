@@ -55,8 +55,8 @@
                 <div>
                     <flux:select
                         wire:model="bank_name"
-                        label="Bank Name"
-                        placeholder="Select your bank"
+                        label="{{ __('Bank Name') }}"
+                        placeholder="{{ __('Select your bank') }}"
                         required
                     >
                         @foreach ($this->bankList as $bank)
@@ -70,8 +70,8 @@
                 <div>
                     <flux:input
                         wire:model="bank_code"
-                        label="Bank Code"
-                        placeholder="e.g. BDO, BPI, MBTC"
+                        label="{{ __('Bank Code') }}"
+                        placeholder="{{ __('e.g. BDO, BPI, MBTC') }}"
                         required
                     />
                     @error('bank_code') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -81,8 +81,8 @@
                 <div>
                     <flux:input
                         wire:model="account_holder_name"
-                        label="Account Holder Name"
-                        placeholder="Full name as shown on bank account"
+                        label="{{ __('Account Holder Name') }}"
+                        placeholder="{{ __('Full name as shown on bank account') }}"
                         required
                     />
                     @error('account_holder_name') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -92,8 +92,8 @@
                 <div>
                     <flux:input
                         wire:model="account_number"
-                        label="Account Number"
-                        placeholder="Enter your bank account number"
+                        label="{{ __('Account Number') }}"
+                        placeholder="{{ __('Enter your bank account number') }}"
                         required
                     />
                     @error('account_number') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -103,8 +103,8 @@
                 <div>
                     <flux:input
                         wire:model="branch"
-                        label="Branch (Optional)"
-                        placeholder="Branch name or location"
+                        label="{{ __('Branch (Optional)') }}"
+                        placeholder="{{ __('Branch name or location') }}"
                     />
                     @error('branch') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                 </div>

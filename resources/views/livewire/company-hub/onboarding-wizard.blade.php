@@ -9,7 +9,7 @@
         <div class="p-6">
             {{-- Stepper / Progress indicator — only shown while the form is active --}}
             @if (!in_array($onboardingStatus, ['submitted', 'approved', 'rejected']))
-            <nav aria-label="Onboarding progress" class="mb-4">
+            <nav aria-label="{{ __('Onboarding progress') }}" class="mb-4">
                 <ol class="flex items-center">
                     @for ($step = 1; $step <= 5; $step++)
                         @php

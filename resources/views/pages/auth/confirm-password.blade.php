@@ -11,7 +11,7 @@
                         type="password"
                         required
                         autocomplete="current-password"
-                        placeholder="Enter your current password"
+                        placeholder="{{ __('Enter your current password') }}"
                     />
                     @error('password')
                         <p class="mt-1 text-sm text-[var(--hs-danger-500)]">{{ $message }}</p>

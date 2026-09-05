@@ -6,13 +6,13 @@
         {{-- Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between gap-4">
             <div>
-                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Variants</h1>
+                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Variants') }}</h1>
                 <p class="mt-0.5 text-sm text-[var(--hs-neutral-500)]">
-                    Each variant is a unique SKU — a specific combination of options and price.
+                    {{ __('Each variant is a unique SKU — a specific combination of options and price.') }}
                 </p>
             </div>
             <flux:button variant="primary" icon="plus" wire:click="openAddVariant" class="shrink-0">
-                Add Variant
+                {{ __('Add Variant') }}
             </flux:button>
         </div>
 
@@ -23,11 +23,11 @@
                 <div class="mb-5 flex items-start gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] px-4 py-3 text-sm text-[var(--hs-neutral-600)]">
                     <flux:icon name="information-circle" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-neutral-400)]" />
                     <span>
-                        No product options are defined yet.
+                        {{ __('No product options are defined yet.') }}
                         <a href="{{ route('hub.products.edit', $this->product) }}" wire:navigate class="underline font-medium text-[var(--hs-neutral-700)]">
-                            Set them on the Basic Info tab
+                            {{ __('Set them on the Basic Info tab') }}
                         </a>
-                        so each variant can carry the right attributes (e.g. Size, Cut, Weight).
+                        {{ __('so each variant can carry the right attributes (e.g. Size, Cut, Weight).') }}
                     </span>
                 </div>
             @endif
@@ -51,7 +51,7 @@
                                 icon="banknotes"
                                 wire:click="openQuantityBreaks({{ $variant['id'] }})"
                             >
-                                <span class="hidden sm:inline">Qty Breaks</span>
+                                <span class="hidden sm:inline">{{ __('Qty Breaks') }}</span>
                                 @if (count($variant['quantity_breaks'] ?? []) > 0)
                                     <flux:badge size="sm" color="green" class="ml-1">{{ count($variant['quantity_breaks']) }}</flux:badge>
                                 @endif
@@ -83,26 +83,26 @@
                     <div class="px-4 py-3.5 text-sm">
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-3">
                             <div>
-                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">Price</p>
+                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">{{ __('Price') }}</p>
                                 <p class="text-base font-bold text-[var(--hs-neutral-900)]">
                                     ₱{{ number_format((float) $variant['price'], 2) }}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">Min. Order</p>
+                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">{{ __('Min. Order') }}</p>
                                 <p class="font-medium text-[var(--hs-neutral-800)]">
                                     {{ $variant['minimum_order_quantity'] }}
                                     <span class="text-[var(--hs-neutral-500)] font-normal">{{ $variant['unit'] }}</span>
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">Lead Time</p>
+                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">{{ __('Lead Time') }}</p>
                                 <p class="font-medium text-[var(--hs-neutral-800)]">
-                                    {{ $variant['lead_time_days'] !== '' ? $variant['lead_time_days'] . ' days' : '—' }}
+                                    {{ $variant['lead_time_days'] !== '' ? __(':days days', ['days' => $variant['lead_time_days']]) : '—' }}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">Pack Size</p>
+                                <p class="text-xs text-[var(--hs-neutral-500)] mb-0.5">{{ __('Pack Size') }}</p>
                                 <p class="font-medium text-[var(--hs-neutral-800)]">{{ $variant['pack_size'] ?: '—' }}</p>
                             </div>
                         </div>
@@ -126,8 +126,8 @@
             @empty
                 <x-hs-empty-state
                     icon="squares-2x2"
-                    title="No variants yet"
-                    subtitle="Click 'Add Variant' to define the first SKU, price, and options for this product."
+                    title="{{ __('No variants yet') }}"
+                    subtitle="{{ __("Click 'Add Variant' to define the first SKU, price, and options for this product.") }}"
                 />
             @endforelse
 
@@ -137,8 +137,8 @@
     {{-- ── Add / Edit Variant Modal ─────────────────────────────────────── --}}
     <x-hs-modal
         model="showVariantModal"
-        :title="$form->editingVariantId ? 'Edit Variant' : 'Add Variant'"
-        subtitle="Fill in the details below. The variant is saved immediately when you click Save."
+        :title="$form->editingVariantId ? __('Edit Variant') : __('Add Variant')"
+        subtitle="{{ __('Fill in the details below. The variant is saved immediately when you click Save.') }}"
         size="xl"
         :dismissible="false"
     >
@@ -149,16 +149,16 @@
                 <div class="flex-1">
                     <flux:input
                         wire:model="form.sku"
-                        label="SKU"
-                        placeholder="e.g. PROD-001-S"
+                        label="{{ __('SKU') }}"
+                        placeholder="{{ __('e.g. PROD-001-S') }}"
                         required
                     />
                     @error('form.sku') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
                 <div class="w-36">
-                    <flux:select wire:model="form.status" label="Status">
-                        <flux:select.option value="archived">Archived</flux:select.option>
-                        <flux:select.option value="published">Published</flux:select.option>
+                    <flux:select wire:model="form.status" label="{{ __('Status') }}">
+                        <flux:select.option value="archived">{{ __('Archived') }}</flux:select.option>
+                        <flux:select.option value="published">{{ __('Published') }}</flux:select.option>
                     </flux:select>
                 </div>
             </div>
@@ -184,7 +184,7 @@
                 <div>
                     <flux:input
                         wire:model="form.price"
-                        label="Price (₱)"
+                        label="{{ __('Price (₱)') }}"
                         type="number"
                         step="0.01"
                         min="0"
@@ -197,7 +197,7 @@
                 <x-hs-unit-select
                     wire-model="form.unit"
                     :value="$form->unit"
-                    label="Unit"
+                    label="{{ __('Unit') }}"
                     layout="grid"
                     required
                 />
@@ -205,7 +205,7 @@
                 <div>
                     <flux:input
                         wire:model="form.moq"
-                        label="Min. Order Qty"
+                        label="{{ __('Min. Order Qty') }}"
                         type="number"
                         min="1"
                         placeholder="1"
@@ -221,18 +221,18 @@
                 <div>
                     <flux:input
                         wire:model="form.leadTime"
-                        label="Lead Time (days)"
+                        label="{{ __('Lead Time (days)') }}"
                         type="number"
                         min="0"
-                        placeholder="e.g. 7"
+                        placeholder="{{ __('e.g. 7') }}"
                     />
                     @error('form.leadTime') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <flux:input
                         wire:model="form.packSize"
-                        label="Pack Size"
-                        placeholder="e.g. 12 × 1 kg"
+                        label="{{ __('Pack Size') }}"
+                        placeholder="{{ __('e.g. 12 × 1 kg') }}"
                     />
                     @error('form.packSize') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
@@ -241,7 +241,7 @@
             {{-- Product Options (from schema) --}}
             @if (! empty($this->mergedAttributeSchema))
                 <div class="border-t border-[var(--hs-neutral-100)] pt-4">
-                    <p class="mb-3 text-sm font-semibold text-[var(--hs-neutral-700)]">Product Options</p>
+                    <p class="mb-3 text-sm font-semibold text-[var(--hs-neutral-700)]">{{ __('Product Options') }}</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         @foreach ($this->mergedAttributeSchema as $attrKey => $attrConfig)
                             <div>
@@ -253,7 +253,7 @@
                                 </label>
                                 @if (($attrConfig['type'] ?? 'text') === 'select' && ! empty($attrConfig['options']))
                                     <flux:select wire:model="form.attributes.{{ $attrKey }}">
-                                        <flux:select.option value="">Select…</flux:select.option>
+                                        <flux:select.option value="">{{ __('Select…') }}</flux:select.option>
                                         @foreach (array_map('trim', explode(',', $attrConfig['options'])) as $option)
                                             <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
                                         @endforeach
@@ -263,12 +263,12 @@
                                         wire:model="form.attributes.{{ $attrKey }}"
                                         type="number"
                                         step="any"
-                                        placeholder="Enter value"
+                                        placeholder="{{ __('Enter value') }}"
                                     />
                                 @else
                                     <flux:input
                                         wire:model="form.attributes.{{ $attrKey }}"
-                                        placeholder="Enter value"
+                                        placeholder="{{ __('Enter value') }}"
                                     />
                                 @endif
                             </div>
@@ -282,10 +282,10 @@
         <x-slot name="footer">
             <div class="flex justify-end gap-2">
                 <flux:button variant="ghost" wire:click="$set('showVariantModal', false)">
-                    Cancel
+                    {{ __('Cancel') }}
                 </flux:button>
                 <flux:button variant="primary" wire:click="saveVariant" wire:loading.attr="disabled">
-                    {{ $form->editingVariantId ? 'Update Variant' : 'Save Variant' }}
+                    {{ $form->editingVariantId ? __('Update Variant') : __('Save Variant') }}
                 </flux:button>
             </div>
         </x-slot>
@@ -294,15 +294,15 @@
     {{-- ── Quantity Breaks Modal ────────────────────────────────────────── --}}
     <x-hs-modal
         model="showQuantityBreaksModal"
-        title="Quantity Breaks"
-        subtitle="Define price tiers — buyers ordering more pay less per unit."
+        title="{{ __('Quantity Breaks') }}"
+        subtitle="{{ __('Define price tiers — buyers ordering more pay less per unit.') }}"
         size="md"
     >
         <div class="space-y-2">
             @if (! empty($quantityBreaks))
                 <div class="grid grid-cols-[80px_1fr_32px] gap-2 px-1">
-                    <span class="text-xs font-medium text-[var(--hs-neutral-500)]">Min. Qty</span>
-                    <span class="text-xs font-medium text-[var(--hs-neutral-500)]">Price</span>
+                    <span class="text-xs font-medium text-[var(--hs-neutral-500)]">{{ __('Min. Qty') }}</span>
+                    <span class="text-xs font-medium text-[var(--hs-neutral-500)]">{{ __('Price') }}</span>
                     <span></span>
                 </div>
             @endif
@@ -313,7 +313,7 @@
                         wire:model="quantityBreaks.{{ $breakIndex }}.min_qty"
                         type="number"
                         min="1"
-                        placeholder="Qty"
+                        placeholder="{{ __('Qty') }}"
                     />
                     <flux:input
                         wire:model="quantityBreaks.{{ $breakIndex }}.price"
@@ -337,17 +337,17 @@
             @endforeach
 
             <flux:button variant="ghost" size="sm" icon="plus" wire:click="addQuantityBreak" class="mt-1">
-                Add tier
+                {{ __('Add tier') }}
             </flux:button>
         </div>
 
         <x-slot name="footer">
             <div class="flex justify-end gap-2">
                 <flux:button variant="ghost" wire:click="$set('showQuantityBreaksModal', false)">
-                    Cancel
+                    {{ __('Cancel') }}
                 </flux:button>
                 <flux:button variant="primary" wire:click="saveQuantityBreaks" wire:loading.attr="disabled">
-                    Save Breaks
+                    {{ __('Save Breaks') }}
                 </flux:button>
             </div>
         </x-slot>
@@ -355,14 +355,14 @@
 
     <x-hs-confirm
         name="confirm-remove-quantity-break"
-        title="Remove Quantity Break"
-        message="Remove this quantity break?"
+        title="{{ __('Remove Quantity Break') }}"
+        message="{{ __('Remove this quantity break?') }}"
         variant="danger"
-        confirmText="Remove"
+        confirmText="{{ __('Remove') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="removeQuantityBreak" wire:loading.attr="disabled">
-                Remove
+                {{ __('Remove') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

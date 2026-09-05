@@ -12,7 +12,7 @@
                             <x-hs-country-flag :country-code="$shop->country_code" class="text-2xl sm:text-3xl" />
                         @endif
                         @if($shop->certificates->contains(fn($c) => $c->status === 'active'))
-                            <x-hs-badge variant="verified" label="Verified" />
+                            <x-hs-badge variant="verified" label="{{ __('Verified') }}" />
                         @endif
                     </div>
                     <p class="mt-1 text-[var(--hs-neutral-300)]">{{ $shop->registered_business_name }}</p>
@@ -77,7 +77,7 @@
                     {{-- Value Chain Stepper --}}
                     @if (!empty($shop->value_chain_positions))
                         <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">Value Chain Positions</h2>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Value Chain Positions') }}</h2>
                             <x-hs-value-chain :steps="$shop->value_chain_positions" />
                         </section>
                     @endif
@@ -85,7 +85,7 @@
                     {{-- Capabilities --}}
                     @if (!empty($shop->capabilities))
                         <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">Capabilities</h2>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Capabilities') }}</h2>
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($shop->capabilities as $capability)
                                     <x-hs-badge variant="tag" :label="ucfirst(str_replace('_', ' ', $capability))" />
@@ -97,7 +97,7 @@
                     {{-- Products Grid --}}
                     @if ($shop->products->count() > 0)
                         <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">Products</h2>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Products') }}</h2>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 @foreach ($shop->products as $product)
                                     <x-hs-product-card :product="$product" />
@@ -109,7 +109,7 @@
                     {{-- Reviews --}}
                     @if ($shop->total_reviews > 0)
                         <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">Reviews</h2>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Reviews') }}</h2>
                             <livewire:storefront.review-list reviewable-type="shop" :reviewable-id="$shop->id" />
                         </section>
                     @endif
@@ -123,7 +123,7 @@
                     @endphp
                     @if ($activeCategories->count() > 0)
                         <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
-                            <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">Categories</h3>
+                            <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Categories') }}</h3>
                             <div class="flex flex-wrap gap-1.5">
                                 @foreach ($activeCategories as $category)
                                     <x-hs-badge variant="tag" :label="$category->name" />
@@ -135,7 +135,7 @@
                     {{-- Certifications --}}
                     @if ($shop->certificates->count() > 0)
                         <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
-                            <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">Certifications</h3>
+                            <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Certifications') }}</h3>
                             <ul class="space-y-2">
                                 @foreach ($shop->certificates as $cert)
                                     <li class="flex items-center justify-between">
@@ -149,15 +149,15 @@
 
                     {{-- Export Readiness --}}
                     <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
-                        <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">Export Readiness</h3>
+                        <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Export Readiness') }}</h3>
                         <x-hs-badge variant="gold" :label="ucfirst(str_replace('_', ' ', $shop->export_readiness_status))" />
                     </section>
 
                     {{-- Lead Time --}}
                     @if($shop->average_production_lead_time)
                         <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
-                            <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">Production Lead Time</h3>
-                            <p class="text-2xl font-bold text-[var(--hs-green-700)]">{{ $shop->average_production_lead_time }} <span class="text-sm font-normal text-[var(--hs-neutral-500)]">days avg.</span></p>
+                            <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Production Lead Time') }}</h3>
+                            <p class="text-2xl font-bold text-[var(--hs-green-700)]">{{ $shop->average_production_lead_time }} <span class="text-sm font-normal text-[var(--hs-neutral-500)]">{{ __('days avg.') }}</span></p>
                         </section>
                     @endif
                 </aside>

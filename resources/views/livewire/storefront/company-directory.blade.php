@@ -1,7 +1,7 @@
 <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">Company Directory</h1>
-        <p class="mt-1 text-[var(--hs-neutral-500)]">Discover verified halal-certified businesses</p>
+        <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">{{ __('Company Directory') }}</h1>
+        <p class="mt-1 text-[var(--hs-neutral-500)]">{{ __('Discover verified halal-certified businesses') }}</p>
     </div>
 
     {{-- ── Sponsored Content — Search Results Placement ────── --}}
@@ -31,7 +31,7 @@
                         'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => $categoryId !== null,
                     ])
                 >
-                    All Categories
+                    {{ __('All Categories') }}
                 </button>
 
                 @foreach ($this->categories as $category)
@@ -58,19 +58,19 @@
                     <input
                         wire:model.live.debounce.300ms="query"
                         type="search"
-                        placeholder="Search companies..."
+                        placeholder="{{ __('Search companies...') }}"
                         class="w-full rounded-[var(--hs-radius-pill)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent shadow-[var(--hs-shadow-sm)]"
                     />
                 </div>
                 <div class="flex items-center gap-2">
-                    <label for="sort-by" class="text-xs font-medium text-[var(--hs-neutral-500)] whitespace-nowrap">Sort by</label>
+                    <label for="sort-by" class="text-xs font-medium text-[var(--hs-neutral-500)] whitespace-nowrap">{{ __('Sort by') }}</label>
                     <select
                         id="sort-by"
                         wire:model.live="sortBy"
                         class="rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 text-sm text-[var(--hs-neutral-700)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent"
                     >
-                        <option value="latest">Latest</option>
-                        <option value="rating">Highest Rated</option>
+                        <option value="latest">{{ __('Latest') }}</option>
+                        <option value="rating">{{ __('Highest Rated') }}</option>
                     </select>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     {{ $this->shops->links() }}
                 </div>
             @else
-                <x-hs-empty-state icon="search" title="No companies found" subtitle="Try adjusting your search or category filter." />
+                <x-hs-empty-state icon="search" title="{{ __('No companies found') }}" subtitle="{{ __('Try adjusting your search or category filter.') }}" />
             @endif
         </div>
     </div>

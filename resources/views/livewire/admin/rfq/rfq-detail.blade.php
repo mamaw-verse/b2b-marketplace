@@ -1,7 +1,7 @@
 <div>
     <div class="mb-6">
         <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route('admin.rfqs.index') }}">RFQs</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ route('admin.rfqs.index') }}">{{ __('RFQs') }}</flux:breadcrumbs.item>
             <flux:breadcrumbs.item>{{ $rfq->title }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
     </div>
@@ -9,7 +9,7 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <flux:heading size="xl">{{ $rfq->title }}</flux:heading>
-            <flux:subheading>Manage RFQ from {{ $rfq->buyer->email ?? 'Unknown Buyer' }}</flux:subheading>
+            <flux:subheading>{{ __('Manage RFQ from :buyer', ['buyer' => $rfq->buyer->email ?? __('Unknown Buyer')]) }}</flux:subheading>
         </div>
     </div>
 
@@ -19,10 +19,10 @@
             
             {{-- RFQ Content --}}
             <flux:card>
-                <flux:heading size="lg" class="mb-4">RFQ Details</flux:heading>
+                <flux:heading size="lg" class="mb-4">{{ __('RFQ Details') }}</flux:heading>
                 <div class="space-y-4">
                     <div>
-                        <div class="text-sm font-medium text-zinc-500">Target Shop</div>
+                        <div class="text-sm font-medium text-zinc-500">{{ __('Target Shop') }}</div>
                         <div class="mt-1 text-sm text-zinc-900 dark:text-white">
                             <a href="{{ route('admin.merchants.show', $recipient->shop_id) }}" class="text-[var(--hs-green-700)] hover:underline" wire:navigate>
                                 {{ $recipient->shop->storefront_name }}
@@ -30,14 +30,14 @@
                         </div>
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-zinc-500">Description</div>
+                        <div class="text-sm font-medium text-zinc-500">{{ __('Description') }}</div>
                         <div class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">{{ $rfq->description ?: 'No description provided.' }}</div>
                     </div>
                 </div>
 
                 @if($rfq->attachments->isNotEmpty())
                     <div class="mt-6">
-                        <div class="text-sm font-medium text-zinc-500 mb-2">Attachments</div>
+                        <div class="text-sm font-medium text-zinc-500 mb-2">{{ __('Attachments') }}</div>
                         <div class="flex flex-col gap-2">
                             @foreach($rfq->attachments as $attachment)
                                 <a href="{{ route('media.view', $attachment) }}" target="_blank" class="flex items-center gap-2 p-3 rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] hover:bg-[var(--hs-neutral-100)] transition group">
@@ -54,22 +54,22 @@
 
             {{-- Buyer Snapshot --}}
             <flux:card>
-                <flux:heading size="lg" class="mb-4">Buyer Information</flux:heading>
+                <flux:heading size="lg" class="mb-4">{{ __('Buyer Information') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Business Name</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Business Name') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $rfq->buyer_snapshot['business_name'] ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Contact Email</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Contact Email') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $rfq->buyer_snapshot['contact_email'] ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Contact Phone</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Contact Phone') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $rfq->buyer_snapshot['contact_phone'] ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">Location</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Location') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
                             {{ $rfq->buyer_snapshot['shipping_city'] ?? '' }}
                             @if(!empty($rfq->buyer_snapshot['shipping_city']) && !empty($rfq->buyer_snapshot['shipping_country_code'])) , @endif
@@ -84,24 +84,24 @@
         <div class="space-y-6">
             <flux:card>
                 <form wire:submit="saveAdminDetails" class="space-y-5">
-                    <flux:heading size="lg" class="mb-2">Admin Management</flux:heading>
+                    <flux:heading size="lg" class="mb-2">{{ __('Admin Management') }}</flux:heading>
                     
-                    <flux:select wire:model="adminStatus" label="Admin Status">
-                        <flux:select.option value="pending">Pending</flux:select.option>
-                        <flux:select.option value="in_progress">In Progress</flux:select.option>
-                        <flux:select.option value="resolved">Resolved</flux:select.option>
-                        <flux:select.option value="closed">Closed</flux:select.option>
+                    <flux:select wire:model="adminStatus" label="{{ __('Admin Status') }}">
+                        <flux:select.option value="pending">{{ __('Pending') }}</flux:select.option>
+                        <flux:select.option value="in_progress">{{ __('In Progress') }}</flux:select.option>
+                        <flux:select.option value="resolved">{{ __('Resolved') }}</flux:select.option>
+                        <flux:select.option value="closed">{{ __('Closed') }}</flux:select.option>
                     </flux:select>
 
-                    <flux:textarea wire:model="adminNotes" label="Internal Notes" rows="5" placeholder="Add private notes for admins..." />
+                    <flux:textarea wire:model="adminNotes" label="{{ __('Internal Notes') }}" rows="5" placeholder="{{ __('Add private notes for admins...') }}" />
 
                     <div class="pt-2">
-                        <flux:button type="submit" variant="primary" class="w-full">Save Changes</flux:button>
+                        <flux:button type="submit" variant="primary" class="w-full">{{ __('Save Changes') }}</flux:button>
                     </div>
 
                     @if($recipient->managedBy)
                         <div class="mt-4 text-xs text-zinc-500 border-t border-[var(--hs-neutral-100)] pt-4">
-                            Managed by: <span class="font-medium text-zinc-700">{{ $recipient->managedBy->name }}</span>
+                            {{ __('Managed by:') }} <span class="font-medium text-zinc-700">{{ $recipient->managedBy->name }}</span>
                         </div>
                     @endif
                 </form>

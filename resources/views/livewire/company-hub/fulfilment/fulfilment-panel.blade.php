@@ -5,7 +5,7 @@
 @endphp
 
 <div class="p-4 rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
-    <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">Fulfilment</h3>
+    <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Fulfilment') }}</h3>
 
     @if (! $fulfilment)
         <div class="space-y-3">
@@ -15,7 +15,7 @@
                     <input
                         wire:model="carrier"
                         type="text"
-                        placeholder="e.g. JRS Express"
+                        placeholder="{{ __('e.g. JRS Express') }}"
                         class="{{ $inputClasses }} {{ $errors->has('carrier') ? $inputInvalidClasses : '' }}"
                     />
                     <p class="mt-1 text-xs text-[var(--hs-danger-500)] min-h-[1rem]">@error('carrier') {{ $message }} @enderror</p>
@@ -40,7 +40,7 @@
                     <p class="mt-1 text-xs text-[var(--hs-danger-500)] min-h-[1rem]">@error('trackingUrl') {{ $message }} @enderror</p>
                 </div>
             </div>
-            <flux:button size="sm" wire:click="createFulfilment">Create Fulfilment</flux:button>
+            <flux:button size="sm" wire:click="createFulfilment">{{ __('Create Fulfilment') }}</flux:button>
         </div>
     @else
         <div class="flex items-center gap-2 mb-3">
@@ -83,17 +83,17 @@
                     </div>
                 </div>
                 <flux:modal.trigger name="confirm-mark-shipped">
-                    <flux:button size="sm" variant="primary">Mark Shipped</flux:button>
+                    <flux:button size="sm" variant="primary">{{ __('Mark Shipped') }}</flux:button>
                 </flux:modal.trigger>
             </div>
         @elseif ($fulfilment->status === 'shipped')
             <div class="flex gap-2">
                 <flux:modal.trigger name="confirm-mark-delivered">
-                    <flux:button size="sm" variant="primary">Mark Delivered</flux:button>
+                    <flux:button size="sm" variant="primary">{{ __('Mark Delivered') }}</flux:button>
                 </flux:modal.trigger>
                 @if (! $hasReturnDisputeInProgress)
                     <flux:modal.trigger name="confirm-mark-returned">
-                        <flux:button size="sm" variant="ghost">Mark Returned</flux:button>
+                        <flux:button size="sm" variant="ghost">{{ __('Mark Returned') }}</flux:button>
                     </flux:modal.trigger>
                 @endif
             </div>
@@ -102,28 +102,28 @@
 
     <x-hs-confirm
         name="confirm-mark-shipped"
-        title="Mark as Shipped"
-        message="Mark this order as shipped?"
+        title="{{ __('Mark as Shipped') }}"
+        message="{{ __('Mark this order as shipped?') }}"
         variant="primary"
-        confirmText="Mark Shipped"
+        confirmText="{{ __('Mark Shipped') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="markShipped" wire:loading.attr="disabled">
-                Mark Shipped
+                {{ __('Mark Shipped') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>
 
     <x-hs-confirm
         name="confirm-mark-delivered"
-        title="Mark as Delivered"
-        message="Mark this order as delivered?"
+        title="{{ __('Mark as Delivered') }}"
+        message="{{ __('Mark this order as delivered?') }}"
         variant="primary"
-        confirmText="Mark Delivered"
+        confirmText="{{ __('Mark Delivered') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="markDelivered" wire:loading.attr="disabled">
-                Mark Delivered
+                {{ __('Mark Delivered') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

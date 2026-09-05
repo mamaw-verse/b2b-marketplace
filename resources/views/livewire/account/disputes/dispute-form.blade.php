@@ -15,12 +15,12 @@
                 </p>
             </div>
 
-            <flux:select wire:model="type" label="Dispute Type">
-                <option value="refund_only">Refund Only</option>
-                <option value="return_refund">Return &amp; Refund</option>
+            <flux:select wire:model="type" label="{{ __('Dispute Type') }}">
+                <option value="refund_only">{{ __('Refund Only') }}</option>
+                <option value="return_refund">{{ __('Return & Refund') }}</option>
             </flux:select>
 
-            <flux:textarea wire:model="reason" label="Reason" rows="5" placeholder="Describe the issue..." />
+            <flux:textarea wire:model="reason" label="{{ __('Reason') }}" rows="5" placeholder="{{ __('Describe the issue...') }}" />
             @error('reason') <p class="text-sm text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
 
             {{-- Item selection: buyer picks which items and how many to dispute/return --}}

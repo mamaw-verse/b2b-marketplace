@@ -1,12 +1,12 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">My Orders</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('My Orders') }}</h1>
         </div>
 
         <div class="px-6 pt-5">
             <div class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-fit flex-wrap">
-                @foreach (['to_pay' => 'To Pay', 'to_ship' => 'To Ship', 'to_receive' => 'To Receive', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'disputed' => 'Disputes'] as $key => $label)
+                @foreach (['to_pay' => __('To Pay'), 'to_ship' => __('To Ship'), 'to_receive' => __('To Receive'), 'completed' => __('Completed'), 'cancelled' => __('Cancelled'), 'disputed' => __('Disputes')] as $key => $label)
                     <button wire:click="$set('tab', '{{ $key }}')" @class([
                         'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition flex items-center gap-2',
                         'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm' => $tab === $key,
@@ -23,7 +23,7 @@
 
         <div class="p-6">
             @if ($this->orders->isEmpty())
-                <p class="text-center text-[var(--hs-neutral-500)] py-8">No orders in this tab.</p>
+                <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No orders in this tab.') }}</p>
             @else
                 <div class="space-y-3">
                     @foreach ($this->orders as $order)
@@ -57,13 +57,13 @@
                                                     <span class="text-[var(--hs-neutral-500)]">{{ rtrim(rtrim(number_format((float) $displayQty, 2), '0'), '.') }}x</span>
                                                     <span>{{ $item->description }}</span>
                                                     @if ($tab === 'to_receive' && $fulfilledQty !== null)
-                                                        <span class="text-xs text-[var(--hs-neutral-400)]">of {{ rtrim(rtrim(number_format((float) $item->quantity, 2), '0'), '.') }} shipped</span>
+                                                        <span class="text-xs text-[var(--hs-neutral-400)]">{{ __('of :qty shipped', ['qty' => rtrim(rtrim(number_format((float) $item->quantity, 2), '0'), '.')]) }}</span>
                                                     @endif
                                                 </p>
                                             @endforeach
                                             @if ($order->items->count() > 3)
                                                 <p class="text-xs text-[var(--hs-neutral-400)] italic mt-1">
-                                                    + {{ $order->items->count() - 3 }} more item(s)
+                                                    {{ __('+ :count more item(s)', ['count' => $order->items->count() - 3]) }}
                                                 </p>
                                             @endif
                                         </div>

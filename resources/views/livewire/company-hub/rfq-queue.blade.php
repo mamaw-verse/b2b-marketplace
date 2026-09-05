@@ -14,11 +14,11 @@
         <div class="px-6 pt-4 flex flex-wrap gap-2">
             @php
                 $statuses = [
-                    '' => 'All',
-                    'received' => 'New',
-                    'reviewed' => 'Reviewed',
-                    'in_progress' => 'In Progress',
-                    'closed' => 'Closed',
+                    '' => __('All'),
+                    'received' => __('New'),
+                    'reviewed' => __('Reviewed'),
+                    'in_progress' => __('In Progress'),
+                    'closed' => __('Closed'),
                 ];
             @endphp
             @foreach ($statuses as $value => $label)
@@ -42,8 +42,8 @@
         <div class="p-6">
             @if ($this->rfqs->isEmpty())
                 <x-hs-empty-state
-                    title="No RFQs found"
-                    description="You haven't received any requests for quotation yet."
+                    title="{{ __('No RFQs found') }}"
+                    description="{{ __("You haven't received any requests for quotation yet.") }}"
                 />
             @else
                 <div class="space-y-3">

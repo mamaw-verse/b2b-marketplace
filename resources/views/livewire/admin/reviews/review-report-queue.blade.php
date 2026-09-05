@@ -3,8 +3,8 @@
 
         {{-- Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Review Reports</h1>
-            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">Flagged reviews pending moderation.</p>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Review Reports') }}</h1>
+            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Flagged reviews pending moderation.') }}</p>
         </div>
 
         {{-- Reports List --}}
@@ -16,7 +16,7 @@
                             <div class="flex-1 min-w-0 space-y-2">
                                 {{-- Reporter info --}}
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-400)]">Reported by</span>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-400)]">{{ __('Reported by') }}</span>
                                     <span class="text-sm font-medium text-[var(--hs-neutral-700)]">
                                         {{ $report->reporter->first_name }} {{ $report->reporter->last_name }}
                                     </span>
@@ -38,7 +38,7 @@
                                     @if ($report->review->body)
                                         <p class="text-sm text-[var(--hs-neutral-700)] leading-relaxed">{{ Str::limit($report->review->body, 300) }}</p>
                                     @else
-                                        <p class="text-sm text-[var(--hs-neutral-400)] italic">Rating only — no comment.</p>
+                                        <p class="text-sm text-[var(--hs-neutral-400)] italic">{{ __('Rating only — no comment.') }}</p>
                                     @endif
                                 </div>
 
@@ -52,10 +52,10 @@
                             {{-- Actions --}}
                             <div class="flex flex-col gap-2 shrink-0">
                                 <flux:button wire:click="dismiss({{ $report->id }})" variant="ghost" size="sm">
-                                    Dismiss
+                                    {{ __('Dismiss') }}
                                 </flux:button>
                                 <flux:button wire:click="action({{ $report->id }})" variant="danger" size="sm">
-                                    Hide Review
+                                    {{ __('Hide Review') }}
                                 </flux:button>
                             </div>
                         </div>
@@ -73,8 +73,8 @@
             <div class="px-6 py-16 text-center">
                 <x-hs-empty-state
                     icon="check-circle"
-                    title="All clear"
-                    subtitle="No pending review reports. All flagged reviews have been handled."
+                    title="{{ __('All clear') }}"
+                    subtitle="{{ __('No pending review reports. All flagged reviews have been handled.') }}"
                 />
             </div>
         @endif

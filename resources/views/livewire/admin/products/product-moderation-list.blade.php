@@ -3,11 +3,11 @@
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Product Moderation Queue</h1>
-                <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">Manage flagged and unpublished products.</p>
+                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Product Moderation Queue') }}</h1>
+                <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Manage flagged and unpublished products.') }}</p>
             </div>
             @if($shopId)
-                <flux:button href="{{ route('admin.merchants.show', $shopId) }}" variant="ghost">Back to Merchant</flux:button>
+                <flux:button href="{{ route('admin.merchants.show', $shopId) }}" variant="ghost">{{ __('Back to Merchant') }}</flux:button>
             @endif
         </div>
 
@@ -15,14 +15,14 @@
         <div class="px-4 sm:px-6 py-5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
             <div class="flex flex-col md:flex-row md:items-center gap-4">
                 <div class="flex-1">
-                    <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Search product name..." />
+                    <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search product name...') }}" />
                 </div>
-                
+
                 <div class="flex gap-2">
-                    <flux:select wire:model.live="statusFilter" class="w-48" placeholder="All Moderation Statuses">
-                        <flux:select.option value="active">Active</flux:select.option>
-                        <flux:select.option value="flagged">Flagged</flux:select.option>
-                        <flux:select.option value="admin_unpublished">Admin Unpublished</flux:select.option>
+                    <flux:select wire:model.live="statusFilter" class="w-48" placeholder="{{ __('All Moderation Statuses') }}">
+                        <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
+                        <flux:select.option value="flagged">{{ __('Flagged') }}</flux:select.option>
+                        <flux:select.option value="admin_unpublished">{{ __('Admin Unpublished') }}</flux:select.option>
                     </flux:select>
                 </div>
             </div>
@@ -32,11 +32,11 @@
         <div class="overflow-hidden">
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>Product</flux:table.column>
-                    <flux:table.column>Merchant</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Moderation</flux:table.column>
-                    <flux:table.column class="text-right">Actions</flux:table.column>
+                    <flux:table.column>{{ __('Product') }}</flux:table.column>
+                    <flux:table.column>{{ __('Merchant') }}</flux:table.column>
+                    <flux:table.column>{{ __('Status') }}</flux:table.column>
+                    <flux:table.column>{{ __('Moderation') }}</flux:table.column>
+                    <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -81,23 +81,23 @@
                             <flux:table.cell class="text-right">
                                 <flux:dropdown>
                                     <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" />
-                                    
+
                                     <flux:menu>
                                         @if($product->moderation_status !== 'flagged')
-                                            <flux:menu.item wire:click="flagProduct({{ $product->id }})" wire:confirm="Flag this product?">
-                                                Flag
+                                            <flux:menu.item x-on:click="$flux.modal('confirm-flag-{{ $product->id }}').show()">
+                                                {{ __('Flag') }}
                                             </flux:menu.item>
                                         @endif
-                                        
+
                                         @if($product->moderation_status !== 'admin_unpublished')
-                                            <flux:menu.item wire:click="unpublishProduct({{ $product->id }})" class="text-red-600" wire:confirm="Unpublish this product? It will be removed from search.">
-                                                Unpublish
+                                            <flux:menu.item x-on:click="$flux.modal('confirm-unpublish-{{ $product->id }}').show()" class="text-red-600">
+                                                {{ __('Unpublish') }}
                                             </flux:menu.item>
                                         @endif
 
                                         @if($product->moderation_status !== 'active')
-                                            <flux:menu.item wire:click="restoreProduct({{ $product->id }})" wire:confirm="Restore this product to active status?">
-                                                Restore (Active)
+                                            <flux:menu.item x-on:click="$flux.modal('confirm-restore-{{ $product->id }}').show()">
+                                                {{ __('Restore (Active)') }}
                                             </flux:menu.item>
                                         @endif
                                     </flux:menu>
@@ -107,7 +107,7 @@
                     @empty
                         <flux:table.row>
                             <flux:table.cell colspan="5" class="text-center text-zinc-500 py-8">
-                                No products found matching your filters.
+                                {{ __('No products found matching your filters.') }}
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse
@@ -121,6 +121,50 @@
             @endif
         </div>
     </div>
+
+    {{-- ── Confirm Modals ───────────────────────────────────────────── --}}
+    @foreach($this->products as $product)
+        @if($product->moderation_status !== 'flagged')
+            <x-hs-confirm
+                name="confirm-flag-{{ $product->id }}"
+                title="{{ __('Flag Product') }}"
+                message="{{ __('Are you sure you want to flag ":name"?', ['name' => $product->name]) }}"
+                variant="warning"
+                confirmText="{{ __('Flag') }}"
+            >
+                <x-slot name="action">
+                    <flux:button variant="ghost" wire:click="flagProduct({{ $product->id }})" wire:loading.attr="disabled" class="text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700">{{ __('Flag') }}</flux:button>
+                </x-slot>
+            </x-hs-confirm>
+        @endif
+
+        @if($product->moderation_status !== 'admin_unpublished')
+            <x-hs-confirm
+                name="confirm-unpublish-{{ $product->id }}"
+                title="{{ __('Unpublish Product') }}"
+                message="{{ __('Are you sure you want to unpublish ":name"? It will be removed from search.', ['name' => $product->name]) }}"
+                variant="danger"
+                confirmText="{{ __('Unpublish') }}"
+            >
+                <x-slot name="action">
+                    <flux:button variant="danger" wire:click="unpublishProduct({{ $product->id }})" wire:loading.attr="disabled">{{ __('Unpublish') }}</flux:button>
+                </x-slot>
+            </x-hs-confirm>
+        @endif
+
+        @if($product->moderation_status !== 'active')
+            <x-hs-confirm
+                name="confirm-restore-{{ $product->id }}"
+                title="{{ __('Restore Product') }}"
+                message="{{ __('Are you sure you want to restore ":name"? It will be set back to active.', ['name' => $product->name]) }}"
+                confirmText="{{ __('Restore') }}"
+            >
+                <x-slot name="action">
+                    <flux:button variant="primary" wire:click="restoreProduct({{ $product->id }})" wire:loading.attr="disabled">{{ __('Restore') }}</flux:button>
+                </x-slot>
+            </x-hs-confirm>
+        @endif
+    @endforeach
 
     {{-- ── Product Preview Modal ────────────────────────────────────── --}}
     <flux:modal name="product-preview" class="w-full max-w-2xl">
@@ -192,7 +236,7 @@
             {{-- Variants --}}
             @if($preview->variants->isNotEmpty())
                 <div class="mt-5">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-2">Variants</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-2">{{ __('Variants') }}</p>
                     <div class="divide-y divide-[var(--hs-neutral-100)] rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden">
                         @foreach($preview->variants as $variant)
                             <div class="flex items-center justify-between px-4 py-3 bg-[var(--hs-neutral-0)] text-sm">
@@ -209,7 +253,7 @@
                                         {{ $variant->currency ?? 'PHP' }} {{ number_format((float) $variant->price, 2) }}
                                     </span>
                                     <span class="text-[var(--hs-neutral-500)] ml-1">
-                                        &middot; MOQ {{ $variant->minimum_order_quantity }} {{ $variant->unit }}
+                                        {{ __('· MOQ :minimum_order_quantity :unit', ['minimum_order_quantity' => $variant->minimum_order_quantity, 'unit' => $variant->unit]) }}
                                     </span>
                                 </div>
                             </div>
@@ -220,12 +264,12 @@
 
             <div class="mt-6 flex justify-end">
                 <flux:modal.close>
-                    <flux:button variant="ghost">Close</flux:button>
+                    <flux:button variant="ghost">{{ __('Close') }}</flux:button>
                 </flux:modal.close>
             </div>
 
         @else
-            <div class="py-12 text-center text-sm text-[var(--hs-neutral-500)]">Loading…</div>
+            <div class="py-12 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('Loading…') }}</div>
         @endif
     </flux:modal>
 

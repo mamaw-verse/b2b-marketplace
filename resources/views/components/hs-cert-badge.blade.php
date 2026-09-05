@@ -6,9 +6,9 @@ $map = [
     'expired' => 'danger',
 ];
 $labels = [
-    'active' => 'Certified',
-    'expiring_soon' => 'Expiring Soon',
-    'expired' => 'Expired',
+    'active' => __('Certified'),
+    'expiring_soon' => __('Expiring Soon'),
+    'expired' => __('Expired'),
 ];
 @endphp
 <x-hs-badge :variant="$map[$status] ?? 'neutral'" :label="$labels[$status] ?? ucfirst($status)" {{ $attributes }} />

@@ -1,7 +1,7 @@
 <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
     {{-- Card Header --}}
     <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-        <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Certification Queue</h1>
+        <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Certification Queue') }}</h1>
     </div>
 
     @if (session('message'))
@@ -14,9 +14,9 @@
     <div class="px-4 sm:px-6 pt-5 pb-4 flex flex-wrap gap-1.5 bg-[var(--hs-neutral-50)] border-b border-[var(--hs-neutral-100)]">
         @php
             $tabs = [
-                'all' => 'All',
-                'interested' => 'Needs Contact',
-                'contacted' => 'Contacted',
+                'all' => __('All'),
+                'interested' => __('Needs Contact'),
+                'contacted' => __('Contacted'),
             ];
         @endphp
 
@@ -47,10 +47,10 @@
     <div class="overflow-hidden">
         <flux:table>
             <flux:table.columns>
-                <flux:table.column>Seller</flux:table.column>
-                <flux:table.column>Status</flux:table.column>
-                <flux:table.column>Submitted</flux:table.column>
-                <flux:table.column>Actions</flux:table.column>
+                <flux:table.column>{{ __('Seller') }}</flux:table.column>
+                <flux:table.column>{{ __('Status') }}</flux:table.column>
+                <flux:table.column>{{ __('Submitted') }}</flux:table.column>
+                <flux:table.column>{{ __('Actions') }}</flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
                 @forelse ($this->applications as $application)
@@ -63,14 +63,14 @@
                         <flux:table.cell>{{ $application->created_at?->format('M d, Y') }}</flux:table.cell>
                         <flux:table.cell>
                             @if ($application->status === 'interested')
-                                <flux:button size="sm" variant="primary" wire:click="markContacted({{ $application->id }})">Mark as Contacted</flux:button>
+                                <flux:button size="sm" variant="primary" wire:click="markContacted({{ $application->id }})">{{ __('Mark as Contacted') }}</flux:button>
                             @else
                                 <flux:text>{{ $application->addressed_at?->format('M d, Y') }}</flux:text>
                             @endif
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
-                    <flux:table.row><flux:table.cell colspan="4" class="text-center">No certification applications found.</flux:table.cell></flux:table.row>
+                    <flux:table.row><flux:table.cell colspan="4" class="text-center">{{ __('No certification applications found.') }}</flux:table.cell></flux:table.row>
                 @endforelse
             </flux:table.rows>
         </flux:table>

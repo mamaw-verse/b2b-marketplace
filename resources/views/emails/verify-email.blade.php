@@ -16,7 +16,7 @@
 <meta name="supported-color-schemes" content="light" />
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
 <meta name="x-apple-disable-message-reformatting" />
-<title>Verify your email &mdash; {{ $appName }}</title>
+<title>{{ __('Verify your email') }} &mdash; {{ $appName }}</title>
 <!--[if mso]>
 <noscript>
 <xml>
@@ -48,7 +48,7 @@ td,th,div,p,a,h1 {font-family:Arial, sans-serif; mso-line-height-rule:exactly;}
 <body style="margin:0; padding:0; background-color:#F0EEE9; word-spacing:normal;">
 <!-- Preheader (hidden preview text) -->
 <div style="display:none; max-height:0; max-width:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#F0EEE9;">
-Confirm your email to start sourcing verified Halal products on {{ $appName }}.
+{{ __('Confirm your email to start sourcing verified Halal products on :appName.', ['appName' => $appName]) }}
  &zwnj; &zwnj; &zwnj; &zwnj; &zwnj; &zwnj; &zwnj; &zwnj; &zwnj; &zwnj;
 </div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0EEE9;">
@@ -71,13 +71,13 @@ Confirm your email to start sourcing verified Halal products on {{ $appName }}.
   <tr>
     <td class="stack-padding" style="padding:40px 40px 8px;">
       <h1 class="h1-mobile" style="margin:0 0 16px; font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:28px; font-weight:bold; color:#00312B; text-align:left;">
-        Verify your email address
+        {{ __('Verify your email address') }}
       </h1>
       <p style="margin:0 0 16px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; color:#333333; text-align:left;">
-        Assalamu alaikum{{ ($firstName ?? null) ? ', '.$firstName : '' }},
+        {{ __('Assalamu alaikum') }}{{ ($firstName ?? null) ? ', '.$firstName : '' }},
       </p>
       <p style="margin:0 0 24px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; color:#333333; text-align:left;">
-        Thanks for joining <strong>{{ $appName }}</strong>, the B2B marketplace connecting verified Halal suppliers and buyers. Please confirm your email address to activate your account and start requesting quotations.
+        {{ __('Thanks for joining') }} <strong>{{ $appName }}</strong>{{ __(', the B2B marketplace connecting verified Halal suppliers and buyers.') }} {{ __('Please confirm your email address to activate your account and start requesting quotations.') }}
       </p>
     </td>
   </tr>
@@ -90,12 +90,12 @@ Confirm your email to start sourcing verified Halal products on {{ $appName }}.
             <!--[if mso]>
             <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ $url }}" style="height:50px;v-text-anchor:middle;width:280px;" arcsize="12%" stroke="f" fillcolor="#00312B">
             <w:anchorlock/>
-            <center style="color:#EEC900;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Verify Email Address</center>
+            <center style="color:#EEC900;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">{{ __('Verify Email Address') }}</center>
             </v:roundrect>
             <![endif]-->
             <!--[if !mso]><!-->
             <a href="{{ $url }}" target="_blank" class="cta-link" style="display:inline-block; width:280px; padding:15px 0; font-family:Arial, Helvetica, sans-serif; font-size:16px; font-weight:bold; color:#EEC900; text-align:center; text-decoration:none; mso-hide:all;">
-              Verify Email Address
+              {{ __('Verify Email Address') }}
             </a>
             <!--<![endif]-->
           </td>
@@ -107,10 +107,10 @@ Confirm your email to start sourcing verified Halal products on {{ $appName }}.
   <tr>
     <td class="stack-padding" style="padding:0 40px 32px;">
       <p style="margin:0 0 16px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:22px; color:#555555; text-align:left;">
-        This link will expire soon for your security. If you did not create an account with {{ $appName }}, no further action is required &mdash; you can safely ignore this email.
+        {{ __('This link will expire soon for your security. If you did not create an account with :appName, no further action is required', ['appName' => $appName]) }} &mdash; {{ __('you can safely ignore this email.') }}
       </p>
       <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; color:#333333; text-align:left;">
-        Regards,<br />The {{ $appName }} Team
+        {{ __('Regards,') }}<br />{{ __('The :appName Team', ['appName' => $appName]) }}
       </p>
     </td>
   </tr>
@@ -124,7 +124,7 @@ Confirm your email to start sourcing verified Halal products on {{ $appName }}.
   <tr>
     <td class="stack-padding" style="padding:24px 40px 40px;">
       <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#777777; text-align:left;">
-        Trouble clicking the button? Copy and paste this URL into your browser:<br />
+        {{ __('Trouble clicking the button? Copy and paste this URL into your browser:') }}<br />
         <a href="{{ $url }}" style="color:#00312B; text-decoration:underline; word-break:break-all;">{{ $url }}</a>
       </p>
     </td>
@@ -133,18 +133,18 @@ Confirm your email to start sourcing verified Halal products on {{ $appName }}.
   <tr>
     <td align="center" bgcolor="#FAF9F6" style="background-color:#FAF9F6; padding:32px 40px; border-top:1px solid #EEEEEE;">
       <p style="margin:0 0 12px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#666666; text-align:center;">
-        From Farm to Plate &mdash; Bringing Halal Products, Services and Opportunities to the Marketplace.
+        {{ __('From Farm to Plate') }} &mdash; {{ __('Bringing Halal Products, Services and Opportunities to the Marketplace.') }}
       </p>
       <p style="margin:0 0 16px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; text-align:center;">
-        <a href="{{ $homeUrl }}" style="color:#00312B; text-decoration:underline;">Home</a>
+        <a href="{{ $homeUrl }}" style="color:#00312B; text-decoration:underline;">{{ __('Home') }}</a>
          &middot;
-        <a href="{{ $productsUrl }}" style="color:#00312B; text-decoration:underline;">Products</a>
+        <a href="{{ $productsUrl }}" style="color:#00312B; text-decoration:underline;">{{ __('Products') }}</a>
          &middot;
-        <a href="{{ $companiesUrl }}" style="color:#00312B; text-decoration:underline;">Verified Companies</a>
+        <a href="{{ $companiesUrl }}" style="color:#00312B; text-decoration:underline;">{{ __('Verified Companies') }}</a>
       </p>
       <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#999999; text-align:center;">
-        &copy; {{ date('Y') }} {{ $appName }}. All rights reserved.<br />
-        Owned and operated by Maslaha Halal Certification Board Inc.
+        &copy; {{ date('Y') }} {{ $appName }}. {{ __('All rights reserved.') }}<br />
+        {{ __('Owned and operated by Maslaha Halal Certification Board Inc.') }}
       </p>
     </td>
   </tr>

@@ -1,23 +1,23 @@
 <div x-data="dashboardCharts()" x-effect="$wire.metrics && $nextTick(() => updateCharts($wire.metrics))" class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <flux:heading size="xl">Platform Dashboard</flux:heading>
-            <flux:subheading>Overview of platform performance and key metrics.</flux:subheading>
+            <flux:heading size="xl">{{ __('Platform Dashboard') }}</flux:heading>
+            <flux:subheading>{{ __('Overview of platform performance and key metrics.') }}</flux:subheading>
         </div>
         <div class="flex items-center gap-3">
             <flux:select wire:model.live="period" size="sm" class="w-40">
-                <flux:select.option value="today">Today</flux:select.option>
-                <flux:select.option value="7d">Last 7 days</flux:select.option>
-                <flux:select.option value="30d">Last 30 days</flux:select.option>
-                <flux:select.option value="90d">Last 90 days</flux:select.option>
-                <flux:select.option value="this_month">This Month</flux:select.option>
-                <flux:select.option value="last_month">Last Month</flux:select.option>
-                <flux:select.option value="custom">Custom Range</flux:select.option>
+                <flux:select.option value="today">{{ __('Today') }}</flux:select.option>
+                <flux:select.option value="7d">{{ __('Last 7 days') }}</flux:select.option>
+                <flux:select.option value="30d">{{ __('Last 30 days') }}</flux:select.option>
+                <flux:select.option value="90d">{{ __('Last 90 days') }}</flux:select.option>
+                <flux:select.option value="this_month">{{ __('This Month') }}</flux:select.option>
+                <flux:select.option value="last_month">{{ __('Last Month') }}</flux:select.option>
+                <flux:select.option value="custom">{{ __('Custom Range') }}</flux:select.option>
             </flux:select>
 
             @if($period === 'custom')
                 <flux:input type="date" wire:model.live="customFrom" size="sm" class="w-36" />
-                <span class="text-sm text-zinc-500">to</span>
+                <span class="text-sm text-zinc-500">{{ __('to') }}</span>
                 <flux:input type="date" wire:model.live="customTo" size="sm" class="w-36" />
             @endif
         </div>
@@ -28,13 +28,13 @@
         @if(config('marketplace.features.orders_enabled'))
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">GMV</span>
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('GMV') }}</span>
                     <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['gmv'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Total Orders</span>
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Total Orders') }}</span>
                     <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['total_orders'] ?? 0 }}</span>
                 </div>
             </flux:card>
@@ -42,21 +42,21 @@
         @if(config('marketplace.features.payouts_enabled'))
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Payouts Disbursed</span>
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Payouts Disbursed') }}</span>
                     <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_payouts_disbursed'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
         @endif
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Active Sellers</span>
+                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Sellers') }}</span>
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['total_active_sellers'] ?? 0 }}</span>
             </div>
         </flux:card>
         @if(config('marketplace.features.reviews_enabled'))
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Avg Rating</span>
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Avg Rating') }}</span>
                     <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
                         @if (($metrics['platform_average_rating'] ?? 0) > 0)
                             {{ number_format((float) $metrics['platform_average_rating'], 2) }} <span class="text-base font-normal text-zinc-500">/ 5.00</span>
@@ -71,25 +71,25 @@
         {{-- GA Stats Integrated --}}
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Active Users (GA)</span>
+                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Users (GA)') }}</span>
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['active_users'] ?? 0) : '—' }}</span>
             </div>
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Sessions (GA)</span>
+                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Sessions (GA)') }}</span>
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['sessions'] ?? 0) : '—' }}</span>
             </div>
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Page Views (GA)</span>
+                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Page Views (GA)') }}</span>
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['page_views'] ?? 0) : '—' }}</span>
             </div>
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Bounce Rate (GA)</span>
+                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Bounce Rate (GA)') }}</span>
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
                     @if (isset($metrics['ga']) && $metrics['ga'] !== null && ($metrics['ga']['bounce_rate'] ?? null) !== null)
                         {{ number_format($metrics['ga']['bounce_rate'], 1) }}%
@@ -101,7 +101,7 @@
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Avg. Session (GA)</span>
+                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Avg. Session (GA)') }}</span>
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
                     @if (isset($metrics['ga']) && $metrics['ga'] !== null && ($metrics['ga']['avg_session_duration'] ?? null) !== null)
                         @php
@@ -123,13 +123,13 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Transaction Fees Collected</span>
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Transaction Fees Collected') }}</span>
                     <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_transaction_fees_collected'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Commission Fees Collected</span>
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Commission Fees Collected') }}</span>
                     <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_commission_fees_collected'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
@@ -140,13 +140,13 @@
     @if(config('marketplace.features.orders_enabled'))
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">Revenue Trend</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Revenue Trend') }}</flux:heading>
                 <div class="relative" style="height: 260px;">
                     <canvas x-ref="revenueChart"></canvas>
                 </div>
             </flux:card>
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">Orders Trend</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Orders Trend') }}</flux:heading>
                 <div class="relative" style="height: 260px;">
                     <canvas x-ref="ordersChart"></canvas>
                 </div>
@@ -158,23 +158,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         @if(config('marketplace.features.subscriptions_enabled'))
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">Subscriptions</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Subscriptions') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
                     <div class="relative" style="width: 180px; height: 180px;">
                         <canvas x-ref="subscriptionsDonut"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
-                        <p class="text-sm font-semibold text-zinc-900 dark:text-white mb-2">Counts by Plan</p>
+                        <p class="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{{ __('Counts by Plan') }}</p>
                         @forelse($metrics['subscriptions']['counts'] ?? [] as $count)
                             <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
                                 <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ $count->plan_name }} — <span class="capitalize">{{ $count->status }}</span></span>
                                 <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $count->count }}</span>
                             </div>
                         @empty
-                            <p class="text-sm text-zinc-500 dark:text-zinc-400">No subscription data.</p>
+                            <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No subscription data.') }}</p>
                         @endforelse
                         <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                            <p class="text-sm text-zinc-600 dark:text-zinc-400">Trial to Paid Conversion</p>
+                            <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('Trial to Paid Conversion') }}</p>
                             <p class="text-xl font-bold text-zinc-900 dark:text-white tabular-nums mt-1">{{ $metrics['subscriptions']['trial_to_paid_conversion'] ?? 0 }}%</p>
                         </div>
                     </div>
@@ -184,7 +184,7 @@
 
         @if(config('marketplace.features.certification_apply_enabled'))
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">Certifications</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Certifications') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
                     <div class="relative" style="width: 180px; height: 180px;">
                         <canvas x-ref="certificationsDonut"></canvas>
@@ -192,7 +192,7 @@
                     <div class="flex-1 min-w-[200px]">
                         @foreach(['pending', 'approved', 'rejected'] as $status)
                             <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ $status }} Applications</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ __(':status Applications', ['status' => $status]) }}</span>
                                 <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $metrics['certifications'][$status] ?? 0 }}</span>
                             </div>
                         @endforeach
@@ -206,10 +206,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         @if(config('marketplace.features.admin_rfq_management_enabled'))
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">RFQs</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('RFQs') }}</flux:heading>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Total RFQs Created</span>
+                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Total RFQs Created') }}</span>
                         <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['rfqs']['volume'] ?? 0 }}</span>
                     </div>
                     <div class="flex flex-col p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
@@ -217,8 +217,8 @@
                             $rfqSeconds = $metrics['rfqs']['avg_resolution_time_seconds'] ?? 0;
                             $rfqHours = floor($rfqSeconds / 3600);
                         @endphp
-                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Avg Resolution Time</span>
-                        <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $rfqHours }} hrs</span>
+                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Avg Resolution Time') }}</span>
+                        <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ __(':hours hrs', ['hours' => $rfqHours]) }}</span>
                     </div>
                 </div>
             </flux:card>
@@ -226,7 +226,7 @@
 
         @if(config('marketplace.features.sponsored_content_enabled'))
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">Sponsored Content Performance</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Sponsored Content Performance') }}</flux:heading>
                 <div class="relative" style="height: 200px;">
                     <canvas x-ref="sponsoredChart"></canvas>
                 </div>
@@ -237,7 +237,7 @@
                             <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $event->count }}</span>
                         </div>
                     @empty
-                        <p class="text-sm text-zinc-500 dark:text-zinc-400">No event data.</p>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No event data.') }}</p>
                     @endforelse
                 </div>
             </flux:card>

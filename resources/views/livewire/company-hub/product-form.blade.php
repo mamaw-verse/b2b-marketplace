@@ -5,7 +5,7 @@
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">
-                {{ $product ? 'Edit Product' : 'Create Product' }}
+                {{ $product ? __('Edit Product') : __('Create Product') }}
             </h1>
         </div>
 
@@ -15,8 +15,8 @@
                 {{-- Product Name --}}
                 <flux:input
                     wire:model="name"
-                    label="Product Name"
-                    placeholder="Enter product name"
+                    label="{{ __('Product Name') }}"
+                    placeholder="{{ __('Enter product name') }}"
                     required
                 />
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -24,15 +24,15 @@
                 {{-- Description --}}
                 <flux:textarea
                     wire:model="description"
-                    label="Description"
-                    placeholder="Describe your product..."
+                    label="{{ __('Description') }}"
+                    placeholder="{{ __('Describe your product...') }}"
                     rows="4"
                 />
                 @error('description') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
                 {{-- ── Categories (toggle pills via Livewire action) ─────────── --}}
                 <div>
-                    <label class="block text-sm font-semibold text-[var(--hs-neutral-700)] mb-1.5">Categories</label>
+                    <label class="block text-sm font-semibold text-[var(--hs-neutral-700)] mb-1.5">{{ __('Categories') }}</label>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($this->categories as $id => $name)
                             <button
@@ -52,16 +52,16 @@
 
                 {{-- ── Featured Image ────────────────────────────────────────── --}}
                 <div>
-                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)]">Featured Image</label>
+                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('Featured Image') }}</label>
                     @if ($product?->featured_image_path && ! $featured_image)
-                        <p class="mt-2 mb-2 text-sm text-[var(--hs-neutral-500)]">Current image set. Upload a new one to replace it.</p>
+                        <p class="mt-2 mb-2 text-sm text-[var(--hs-neutral-500)]">{{ __('Current image set. Upload a new one to replace it.') }}</p>
                     @endif
                     <input type="file" wire:model="featured_image" accept="image/*" class="mt-1 block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]" />
                     @error('featured_image') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
                     @if ($featured_image && method_exists($featured_image, 'temporaryUrl'))
                         <div class="mt-3">
-                            <img src="{{ $featured_image->temporaryUrl() }}" alt="Preview" class="h-32 w-32 rounded-[var(--hs-radius-card)] object-cover border border-[var(--hs-neutral-200)]" />
+                            <img src="{{ $featured_image->temporaryUrl() }}" alt="{{ __('Preview') }}" class="h-32 w-32 rounded-[var(--hs-radius-card)] object-cover border border-[var(--hs-neutral-200)]" />
                         </div>
                     @endif
                 </div>
@@ -70,9 +70,9 @@
                 <div class="border-t border-[var(--hs-neutral-100)] pt-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">Product Options</h2>
+                            <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Product Options') }}</h2>
                             <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">
-                                Define the attributes buyers will see per variant (e.g. Cut, Weight, Packaging).
+                                {{ __('Define the attributes buyers will see per variant (e.g. Cut, Weight, Packaging).') }}
                             </p>
                         </div>
                         <div class="flex gap-2">
@@ -84,7 +84,7 @@
                                         size="sm"
                                         icon="arrow-path"
                                     >
-                                        Reload from Categories
+                                        {{ __('Reload from Categories') }}
                                     </flux:button>
                                 </flux:modal.trigger>
                             @endif
@@ -95,7 +95,7 @@
                                 icon="plus"
                                 wire:click="addAttribute"
                             >
-                                Add Option
+                                {{ __('Add Option') }}
                             </flux:button>
                         </div>
                     </div>
@@ -115,11 +115,11 @@
                                     {{-- Label --}}
                                     <div class="w-64 shrink-0">
                                         @if ($loop->first)
-                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">Label</label>
+                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">{{ __('Label') }}</label>
                                         @endif
                                         <flux:input
                                             wire:model="variantAttributesSchema.{{ $key }}.label"
-                                            placeholder="e.g. Cut"
+                                            placeholder="{{ __('e.g. Cut') }}"
                                             size="sm"
                                         />
                                     </div>
@@ -127,27 +127,27 @@
                                     {{-- Type --}}
                                     <div class="w-32 shrink-0">
                                         @if ($loop->first)
-                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">Type</label>
+                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">{{ __('Type') }}</label>
                                         @endif
                                         <flux:select
                                             wire:model="variantAttributesSchema.{{ $key }}.type"
                                             x-model="type"
                                             size="sm"
                                         >
-                                            <flux:select.option value="select">Select</flux:select.option>
-                                            <flux:select.option value="text">Text</flux:select.option>
-                                            <flux:select.option value="number">Number</flux:select.option>
+                                            <flux:select.option value="select">{{ __('Select') }}</flux:select.option>
+                                            <flux:select.option value="text">{{ __('Text') }}</flux:select.option>
+                                            <flux:select.option value="number">{{ __('Number') }}</flux:select.option>
                                         </flux:select>
                                     </div>
 
                                     {{-- Choices (disabled unless type is select) --}}
                                     <div class="flex-1 min-w-[180px]">
                                         @if ($loop->first)
-                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">Choices (comma-separated)</label>
+                                            <label class="block text-xs font-medium text-[var(--hs-neutral-500)] mb-1">{{ __('Choices (comma-separated)') }}</label>
                                         @endif
                                         <flux:input
                                             wire:model="variantAttributesSchema.{{ $key }}.options"
-                                            placeholder="e.g. Whole, Half, Quarter"
+                                            placeholder="{{ __('e.g. Whole, Half, Quarter') }}"
                                             size="sm"
                                             x-bind:disabled="type !== 'select'"
                                             x-bind:class="type !== 'select' ? 'opacity-40 cursor-not-allowed' : ''"
@@ -161,7 +161,7 @@
                                             wire:model="variantAttributesSchema.{{ $key }}.required"
                                             class="rounded border-[var(--hs-neutral-300)] text-[var(--hs-green-600)] focus:ring-[var(--hs-green-400)]"
                                         />
-                                        <span class="text-xs text-[var(--hs-neutral-600)]">Req.</span>
+                                        <span class="text-xs text-[var(--hs-neutral-600)]">{{ __('Req.') }}</span>
                                     </div>
 
                                     {{-- Remove --}}
@@ -181,9 +181,9 @@
                             <flux:icon name="squares-2x2" variant="outline" class="size-5 text-[var(--hs-neutral-400)] mx-auto" />
                             <p class="text-sm text-[var(--hs-neutral-500)]">
                                 @if (empty($category_ids))
-                                    Select a category above — options will be populated automatically from the category's schema.
+                                    {{ __("Select a category above — options will be populated automatically from the category's schema.") }}
                                 @else
-                                    No options yet. Click <span class="font-medium">"Add Option"</span> or <span class="font-medium">"Reload from Categories"</span> to get started.
+                                    {{ __('No options yet. Click') }} <span class="font-medium">"{{ __('Add Option') }}"</span> {{ __('or') }} <span class="font-medium">"{{ __('Reload from Categories') }}"</span> {{ __('to get started.') }}
                                 @endif
                             </p>
                         </div>
@@ -193,7 +193,7 @@
                 {{-- ── Form Actions ──────────────────────────────────────────── --}}
                 <div class="flex flex-wrap items-center gap-3 border-t border-[var(--hs-neutral-100)] pt-6">
                     <flux:button type="submit" variant="primary">
-                        {{ $product ? 'Update Product' : 'Create Product' }}
+                        {{ $product ? __('Update Product') : __('Create Product') }}
                     </flux:button>
 
                     @if ($product)
@@ -209,7 +209,7 @@
                     @endif
 
                     <flux:button variant="ghost" href="{{ route('hub.products.index') }}" wire:navigate>
-                        Cancel
+                        {{ __('Cancel') }}
                     </flux:button>
                 </div>
             </form>
@@ -218,28 +218,28 @@
 
     <x-hs-confirm
         name="confirm-reload-schema"
-        title="Reload Product Options"
-        message="This will replace all product options with the new category's defaults. Continue?"
+        title="{{ __('Reload Product Options') }}"
+        message="{{ __("This will replace all product options with the new category's defaults. Continue?") }}"
         variant="warning"
-        confirmText="Reload"
+        confirmText="{{ __('Reload') }}"
     >
         <x-slot name="action">
             <flux:button variant="filled" wire:click="reloadSchemaFromCategories" wire:loading.attr="disabled">
-                Reload
+                {{ __('Reload') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>
 
     <x-hs-confirm
         name="confirm-remove-attribute"
-        title="Remove Product Option"
-        message="Remove this product option?"
+        title="{{ __('Remove Product Option') }}"
+        message="{{ __('Remove this product option?') }}"
         variant="danger"
-        confirmText="Remove"
+        confirmText="{{ __('Remove') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="removeAttribute" wire:loading.attr="disabled">
-                Remove
+                {{ __('Remove') }}
             </flux:button>
         </x-slot>
     </x-hs-confirm>

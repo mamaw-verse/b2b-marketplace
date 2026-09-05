@@ -1,16 +1,16 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Earnings</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Earnings') }}</h1>
         </div>
 
         {{-- Summary Cards --}}
         <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach ([
-                ['label' => 'Total Earned', 'value' => $this->summary['total_earned'], 'color' => 'green'],
-                ['label' => 'Pending Balance', 'value' => $this->summary['pending_balance'], 'color' => 'warning'],
-                ['label' => 'Total Released', 'value' => $this->summary['total_released'], 'color' => 'blue'],
-                ['label' => 'Total Fees Paid', 'value' => $this->summary['total_fees_paid'], 'color' => 'neutral'],
+                ['label' => __('Total Earned'), 'value' => $this->summary['total_earned'], 'color' => 'green'],
+                ['label' => __('Pending Balance'), 'value' => $this->summary['pending_balance'], 'color' => 'warning'],
+                ['label' => __('Total Released'), 'value' => $this->summary['total_released'], 'color' => 'blue'],
+                ['label' => __('Total Fees Paid'), 'value' => $this->summary['total_fees_paid'], 'color' => 'neutral'],
             ] as $card)
                 <div class="p-4 rounded-lg border border-[var(--hs-neutral-200)]">
                     <p class="text-sm text-[var(--hs-neutral-600)]">{{ $card['label'] }}</p>
@@ -22,27 +22,27 @@
         {{-- Filters --}}
         <div class="px-6 flex flex-wrap items-end gap-4 border-t border-[var(--hs-neutral-100)] pt-5">
             <div>
-                <flux:input type="date" wire:model.live="dateFrom" label="From" size="sm" />
+                <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
             </div>
             <div>
-                <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
+                <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
             </div>
         </div>
 
         {{-- Transaction List --}}
         <div class="p-6">
             @if ($this->transactions->isEmpty())
-                <p class="text-center text-[var(--hs-neutral-500)] py-8">No transactions yet.</p>
+                <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No transactions yet.') }}</p>
             @else
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-[var(--hs-neutral-100)]">
-                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">Date</th>
-                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">Type</th>
-                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">Order</th>
-                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">Note</th>
-                                <th class="text-right py-3 px-2 text-[var(--hs-neutral-600)] font-medium">Amount</th>
+                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">{{ __('Date') }}</th>
+                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">{{ __('Type') }}</th>
+                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">{{ __('Order') }}</th>
+                                <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)] font-medium">{{ __('Note') }}</th>
+                                <th class="text-right py-3 px-2 text-[var(--hs-neutral-600)] font-medium">{{ __('Amount') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -53,11 +53,11 @@
                                     </td>
                                     <td class="py-3 px-2">
                                         @if ($entry->type === 'escrow_hold')
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-info-50)] text-[var(--hs-info-700)]">Escrow</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-info-50)] text-[var(--hs-info-700)]">{{ __('Escrow') }}</span>
                                         @elseif ($entry->type === 'payout')
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-success-50)] text-[var(--hs-success-700)]">Payout</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-success-50)] text-[var(--hs-success-700)]">{{ __('Payout') }}</span>
                                         @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]">Refund</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]">{{ __('Refund') }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-2 text-[var(--hs-neutral-700)]">#{{ $entry->order_id }}</td>

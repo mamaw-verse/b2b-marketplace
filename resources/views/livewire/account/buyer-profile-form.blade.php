@@ -16,8 +16,8 @@
                 <div>
                     <flux:input
                         wire:model="business_name"
-                        label="Business Name"
-                        placeholder="Enter your business or company name"
+                        label="{{ __('Business Name') }}"
+                        placeholder="{{ __('Enter your business or company name') }}"
                         required
                     />
                     @error('business_name') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -29,15 +29,15 @@
 
                     <flux:input
                         wire:model="billing_address_1"
-                        label="Address Line 1"
-                        placeholder="Street address, P.O. box, company name"
+                        label="{{ __('Address Line 1') }}"
+                        placeholder="{{ __('Street address, P.O. box, company name') }}"
                     />
                     @error('billing_address_1') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
                     <flux:input
                         wire:model="billing_address_2"
-                        label="Address Line 2"
-                        placeholder="Apartment, suite, unit, building, floor, etc."
+                        label="{{ __('Address Line 2') }}"
+                        placeholder="{{ __('Apartment, suite, unit, building, floor, etc.') }}"
                     />
                     @error('billing_address_2') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
@@ -45,16 +45,16 @@
                         <div>
                             <flux:input
                                 wire:model="billing_city"
-                                label="City"
-                                placeholder="City / Municipality"
+                                label="{{ __('City') }}"
+                                placeholder="{{ __('City / Municipality') }}"
                             />
                             @error('billing_city') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <flux:input
                                 wire:model="billing_province"
-                                label="Province"
-                                placeholder="Province / State"
+                                label="{{ __('Province') }}"
+                                placeholder="{{ __('Province / State') }}"
                             />
                             @error('billing_province') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
@@ -64,15 +64,15 @@
                         <div>
                             <flux:input
                                 wire:model="billing_zip_code"
-                                label="Zip Code"
-                                placeholder="Postal / ZIP code"
+                                label="{{ __('Zip Code') }}"
+                                placeholder="{{ __('Postal / ZIP code') }}"
                             />
                             @error('billing_zip_code') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <flux:input
                                 wire:model="billing_country_code"
-                                label="Country Code"
+                                label="{{ __('Country Code') }}"
                                 placeholder="PH"
                                 maxlength="2"
                             />
@@ -99,15 +99,15 @@
                     @unless ($useShippingSameAsBilling)
                         <flux:input
                             wire:model="shipping_address_1"
-                            label="Address Line 1"
-                            placeholder="Street address, P.O. box, company name"
+                            label="{{ __('Address Line 1') }}"
+                            placeholder="{{ __('Street address, P.O. box, company name') }}"
                         />
                         @error('shipping_address_1') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
                         <flux:input
                             wire:model="shipping_address_2"
-                            label="Address Line 2"
-                            placeholder="Apartment, suite, unit, building, floor, etc."
+                            label="{{ __('Address Line 2') }}"
+                            placeholder="{{ __('Apartment, suite, unit, building, floor, etc.') }}"
                         />
                         @error('shipping_address_2') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
@@ -115,16 +115,16 @@
                             <div>
                                 <flux:input
                                     wire:model="shipping_city"
-                                    label="City"
-                                    placeholder="City / Municipality"
+                                    label="{{ __('City') }}"
+                                    placeholder="{{ __('City / Municipality') }}"
                                 />
                                 @error('shipping_city') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <flux:input
                                     wire:model="shipping_province"
-                                    label="Province"
-                                    placeholder="Province / State"
+                                    label="{{ __('Province') }}"
+                                    placeholder="{{ __('Province / State') }}"
                                 />
                                 @error('shipping_province') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                             </div>
@@ -134,15 +134,15 @@
                             <div>
                                 <flux:input
                                     wire:model="shipping_zip_code"
-                                    label="Zip Code"
-                                    placeholder="Postal / ZIP code"
+                                    label="{{ __('Zip Code') }}"
+                                    placeholder="{{ __('Postal / ZIP code') }}"
                                 />
                                 @error('shipping_zip_code') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <flux:input
                                     wire:model="shipping_country_code"
-                                    label="Country Code"
+                                    label="{{ __('Country Code') }}"
                                     placeholder="PH"
                                     maxlength="2"
                                 />
@@ -161,7 +161,7 @@
                         <div>
                             <flux:input
                                 wire:model="contact_phone"
-                                label="Phone"
+                                label="{{ __('Phone') }}"
                                 placeholder="+63 917 123 4567"
                                 type="tel"
                             />
@@ -170,7 +170,7 @@
                         <div>
                             <flux:input
                                 wire:model="contact_email"
-                                label="Email"
+                                label="{{ __('Email') }}"
                                 placeholder="purchasing@yourcompany.ph"
                                 type="email"
                             />

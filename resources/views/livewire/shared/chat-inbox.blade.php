@@ -197,7 +197,7 @@
                             <div class="flex items-center gap-3 px-5 py-2.5 bg-[var(--hs-green-50)] border-b border-[var(--hs-neutral-200)]">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-semibold text-[var(--hs-neutral-900)] truncate">
-                                        Order #{{ $stripOrder->order_number }} · {{ $stripOrder->items()->first()?->description ?? 'Order' }}
+                                        {{ __('Order #:order', ['order' => $stripOrder->order_number]) }} · {{ $stripOrder->items()->first()?->description ?? 'Order' }}
                                     </p>
                                     <p class="text-[11px] text-[var(--hs-neutral-500)] truncate">
                                         {{ $stripOrder->items()->count() }} {{ Str::plural('item', $stripOrder->items()->count()) }} · {{ $stripOrder->currency }} {{ number_format((float) $stripOrder->order_total, 2) }}

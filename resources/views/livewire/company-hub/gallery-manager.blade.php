@@ -5,7 +5,7 @@
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Gallery</h1>
+                <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Gallery') }}</h1>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ $product->name }}</p>
             </div>
         </div>
@@ -16,8 +16,8 @@
             <div class="mb-6 rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-50)] p-6">
                 <div class="text-center">
                     <svg class="mx-auto size-10 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-                    <p class="mt-2 text-sm text-[var(--hs-neutral-600)]">Upload product images</p>
-                    <p class="text-xs text-[var(--hs-neutral-400)]">JPEG, PNG, WebP up to 5MB each</p>
+                    <p class="mt-2 text-sm text-[var(--hs-neutral-600)]">{{ __('Upload product images') }}</p>
+                    <p class="text-xs text-[var(--hs-neutral-400)]">{{ __('JPEG, PNG, WebP up to 5MB each') }}</p>
                 </div>
                 <div class="mt-4">
                     <input type="file" wire:model="newPhotos" accept="image/jpeg,image/png,image/webp" multiple class="block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]" />
@@ -27,7 +27,7 @@
                 @if ($newPhotos)
                     <div class="mt-4 flex justify-center">
                         <flux:button variant="primary" size="sm" wire:click="uploadPhotos">
-                            Upload {{ count($newPhotos) }} {{ count($newPhotos) === 1 ? 'Photo' : 'Photos' }}
+                            {{ __('Upload :count :label', ['count' => count($newPhotos), 'label' => count($newPhotos) === 1 ? __('Photo') : __('Photos')]) }}
                         </flux:button>
                     </div>
                 @endif
@@ -41,14 +41,14 @@
                             <div wire:sort:handle class="aspect-square">
                                 <img
                                     src="{{ $item->image_url }}"
-                                    alt="Gallery image"
+                                    alt="{{ __('Gallery image') }}"
                                     class="h-full w-full object-cover"
                                 />
                             </div>
                             <button
                                 type="button"
                                 wire:click="confirmRemoveImage({{ $item->id }})"
-                                aria-label="Remove image"
+                                aria-label="{{ __('Remove image') }}"
                                 class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white text-xs opacity-0 transition group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
                             >
                                 <flux:icon name="x-mark" variant="mini" class="size-3.5" />
@@ -62,7 +62,7 @@
                     @endforeach
                 </div>
             @else
-                <x-hs-empty-state icon="image" title="No images yet" subtitle="Upload photos to build your product gallery." />
+                <x-hs-empty-state icon="image" title="{{ __('No images yet') }}" subtitle="{{ __('Upload photos to build your product gallery.') }}" />
             @endif
         </div>
     </div>
@@ -70,10 +70,10 @@
     {{-- Remove Image Confirmation --}}
     <x-hs-confirm
         name="remove-image-confirm"
-        title="Remove Image"
-        message="Remove this image?"
+        title="{{ __('Remove Image') }}"
+        message="{{ __('Remove this image?') }}"
         variant="danger"
-        confirmText="Remove"
+        confirmText="{{ __('Remove') }}"
     >
         <x-slot name="action">
             <flux:button variant="danger" wire:click="removeImage" wire:loading.attr="disabled">
