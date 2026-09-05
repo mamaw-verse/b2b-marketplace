@@ -229,7 +229,7 @@ return [
                     'default_sorting_field' => 'created_at',
                 ],
                 'search-parameters' => [
-                    'query_by' => 'name,description,shop_name',
+                    'query_by' => 'name,categories,description,shop_name',
                 ],
             ],
         ],

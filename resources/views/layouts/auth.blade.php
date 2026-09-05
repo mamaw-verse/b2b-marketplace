@@ -8,7 +8,7 @@
     </head>
     <body class="min-h-screen bg-[var(--hs-neutral-50)] antialiased">
         {{-- Center stage --}}
-        <div class="flex justify-center px-6 pb-16 py-16 sm:py-10">
+        <div class="flex min-h-svh items-center justify-center px-6 py-16 sm:py-10">
             <div class="w-full max-w-3xl overflow-hidden rounded-[var(--hs-radius-panel)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-xs grid grid-cols-1 lg:grid-cols-2">
 
                 {{-- Left: promo / benefits column --}}

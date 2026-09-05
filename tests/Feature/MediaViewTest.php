@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\Rfq;
 use App\Models\RfqRecipient;
 use App\Models\Shop;
+use App\Models\SponsoredContent;
+use App\Models\SponsoredContentTier;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
@@ -131,4 +133,42 @@ test('the RFQ buyer can view their own RFQ attachment', function () {
     $rfq->attachments()->attach($media->id);
 
     $this->actingAs($buyer)->get(route('media.view', $media))->assertOk();
+});
+
+test('unauthenticated users can view a sponsored content creative image', function () {
+    $uploader = User::factory()->create();
+    $tier = SponsoredContentTier::firstOrCreate(['name' => 'Gold'], ['priority_weight' => 100]);
+
+    $media = Media::factory()->create([
+        'uploaded_by_id' => $uploader->id,
+        'storage_path' => 'media/sponsored-banner.jpg',
+        'original_filename' => 'sponsored-banner.jpg',
+        'mime_type' => 'image/jpeg',
+        'scan_status' => 'clean',
+    ]);
+    Storage::disk('s3')->put('media/sponsored-banner.jpg', 'dummy');
+
+    SponsoredContent::create([
+        'sponsored_content_tier_id' => $tier->id,
+        'title' => 'Test Ad',
+        'media_id' => $media->id,
+        'destination_url' => 'https://example.com',
+        'starts_at' => now()->subDay(),
+        'ends_at' => now()->addDay(),
+        'is_active' => true,
+        'created_by' => $uploader->id,
+    ]);
+
+    $this->get(route('media.view', $media))->assertOk();
+});
+
+test('unauthenticated users cannot view media that is neither a public product doc nor sponsored content', function () {
+    $media = Media::factory()->create([
+        'storage_path' => 'media/private-other.pdf',
+        'original_filename' => 'private-other.pdf',
+        'scan_status' => 'clean',
+    ]);
+    Storage::disk('s3')->put('media/private-other.pdf', 'dummy');
+
+    $this->get(route('media.view', $media))->assertForbidden();
 });

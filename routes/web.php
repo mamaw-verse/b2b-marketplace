@@ -38,7 +38,11 @@ Route::get('media/{media}/view', function (App\Models\Media $media) {
                 ->whereIn('status', ['active', 'trialing'])))
         ->exists();
 
-    if (! $isPublicProductDocument) {
+    // Sponsored content creatives are public — they appear on the storefront
+    // for unauthenticated visitors so their images must be accessible to all.
+    $isSponsoredContentCreative = App\Models\SponsoredContent::where('media_id', $media->id)->exists();
+
+    if (! $isPublicProductDocument && ! $isSponsoredContentCreative) {
         $user = auth()->user();
 
         if (! $user) {

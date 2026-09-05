@@ -28,12 +28,10 @@ test('hero section renders CTA buttons', function () {
     $response->assertSee('See How It Works');
 });
 
-test('hero section renders trust stats', function () {
+test('hero section renders search panel', function () {
     $response = $this->get(route('home'));
 
-    $response->assertSee('Verified Companies');
-    $response->assertSee('Halal Products');
-    $response->assertSee('Categories');
+    $response->assertSee('Search halal products');
 });
 
 test('hero section renders MHCB certification floating card', function () {

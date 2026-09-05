@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Products;
 
 use App\Models\Product;
+use App\Notifications\ProductFlaggedNotification;
+use App\Notifications\ProductUnpublishedNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -88,22 +90,26 @@ final class ProductModerationList extends Component
     {
         Gate::authorize('product.moderate');
 
-        $product = Product::findOrFail($productId);
+        $product = Product::with('shop.user')->findOrFail($productId);
         $product->update(['moderation_status' => 'flagged']);
         $product->searchable(); // Triggers update in typesense
 
-        flux()->toast('Product flagged.');
+        $product->shop->user->notify(new ProductFlaggedNotification($product));
+
+        $this->dispatch('toast', message: 'Product flagged.');
     }
 
     public function unpublishProduct(int $productId): void
     {
         Gate::authorize('product.moderate');
 
-        $product = Product::findOrFail($productId);
+        $product = Product::with('shop.user')->findOrFail($productId);
         $product->update(['moderation_status' => 'admin_unpublished']);
         $product->searchable(); // Triggers update in typesense
 
-        flux()->toast('Product unpublished.');
+        $product->shop->user->notify(new ProductUnpublishedNotification($product));
+
+        $this->dispatch('toast', message: 'Product unpublished.');
     }
 
     public function restoreProduct(int $productId): void
@@ -114,7 +120,7 @@ final class ProductModerationList extends Component
         $product->update(['moderation_status' => 'active']);
         $product->searchable(); // Triggers update in typesense
 
-        flux()->toast('Product restored to active.');
+        $this->dispatch('toast', message: 'Product restored to active.');
     }
 
     public function render()

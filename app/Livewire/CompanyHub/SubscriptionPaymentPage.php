@@ -197,6 +197,7 @@ final class SubscriptionPaymentPage extends Component
                 'state_province_region' => $this->province,
                 'country_code' => $this->countryCode,
                 'postal_code' => $this->postalCode,
+                'callback_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
                 'success_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
                 'failure_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
             ]);

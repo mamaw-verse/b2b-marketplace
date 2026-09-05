@@ -6,7 +6,6 @@ namespace App\Livewire\Storefront;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Shop;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -21,9 +20,6 @@ final class HeroSearch extends Component
     public string $query = '';
 
     /** @var array<int, mixed> */
-    public array $companyResults = [];
-
-    /** @var array<int, mixed> */
     public array $productResults = [];
 
     public function updatedQuery(): void
@@ -34,28 +30,12 @@ final class HeroSearch extends Component
     public function search(): void
     {
         if (mb_strlen($this->query) < 2) {
-            $this->companyResults = [];
             $this->productResults = [];
 
             return;
         }
 
-        $this->companyResults = Shop::search($this->query)->take(6)->get()->toArray();
-        $this->productResults = Product::search($this->query)->take(6)->get()->toArray();
-    }
-
-    /**
-     * @return Collection<int, Shop>
-     */
-    #[Computed]
-    public function featuredCompanies(): Collection
-    {
-        return Shop::with(['categories', 'certificates'])
-            ->where('status', 'active')
-            ->where('country_code', config('marketplace.instance_country'))
-            ->latest()
-            ->take(6)
-            ->get();
+        $this->productResults = Product::search($this->query)->take(8)->get()->toArray();
     }
 
     /**
@@ -78,19 +58,6 @@ final class HeroSearch extends Component
     public function categories(): Collection
     {
         return Category::orderBy('name')->get();
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    #[Computed]
-    public function stats(): array
-    {
-        return [
-            'companies' => Shop::where('status', 'active')->where('country_code', config('marketplace.instance_country'))->count(),
-            'products' => Product::marketplaceVisible()->count(),
-            'categories' => Category::count(),
-        ];
     }
 
     /**
