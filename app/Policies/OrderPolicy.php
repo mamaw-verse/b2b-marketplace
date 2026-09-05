@@ -14,6 +14,10 @@ final class OrderPolicy
      */
     public function create(User $user): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->shop !== null && $user->shop->status === 'active';
     }
 
@@ -22,6 +26,10 @@ final class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->buyer_user_id
             || $user->id === $order->shop->user_id;
     }
@@ -31,6 +39,10 @@ final class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->shop->user_id
             && $order->status === 'draft';
     }
@@ -40,6 +52,10 @@ final class OrderPolicy
      */
     public function submit(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->shop->user_id
             && $order->status === 'draft';
     }
@@ -49,6 +65,10 @@ final class OrderPolicy
      */
     public function recall(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->shop->user_id
             && $order->status === 'pending_payment';
     }
@@ -58,6 +78,10 @@ final class OrderPolicy
      */
     public function cancelAsBuyer(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->buyer_user_id
             && $order->status === 'pending_payment';
     }
@@ -67,6 +91,10 @@ final class OrderPolicy
      */
     public function pay(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->buyer_user_id
             && $order->status === 'pending_payment';
     }
@@ -77,6 +105,10 @@ final class OrderPolicy
      */
     public function cancelAsSeller(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         if ($user->id !== $order->shop->user_id) {
             return false;
         }
@@ -96,6 +128,10 @@ final class OrderPolicy
      */
     public function confirmReceipt(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         if ($user->id !== $order->buyer_user_id) {
             return false;
         }
@@ -116,6 +152,10 @@ final class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->shop->user_id
             && $order->status === 'draft';
     }
@@ -126,6 +166,10 @@ final class OrderPolicy
      */
     public function manageDispute(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.orders_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->shop->user_id;
     }
 }

@@ -7,17 +7,26 @@ namespace App\Services;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
- * Client for the DLT Payment Collection API v3.0.
+ * Client for the DLT Payment Collection API v4.0 (Hosted Checkout).
  *
- * Endpoints:
- *  - POST /oauth/token
- *  - GET  /api/v1/collection/apn/brands
- *  - POST /api/v1/collection/apn/submit
- *  - POST /api/v1/quick-link/session (legacy, kept for reference)
- *  - GET  /api/v1/quick-link/session
+ * All payment types — card and e-wallet — go through DLT's own hosted
+ * checkout page. The merchant never collects card numbers or CVVs.
+ *
+ * Endpoints used:
+ *  - POST /oauth/token                   — machine client credentials
+ *  - GET  /api/v1/collection/apn/brands  — available payment brands
+ *  - POST /api/v1/collection/apn/submit  — create a hosted checkout transaction
+ *  - POST /api/v1/collection/apn/sync    — recovery: re-check a PENDING transaction
+ *  - POST /api/v1/quick-link/session     — create a Quick Link hosted checkout session
+ *  - GET  /api/v1/quick-link/session     — read back a Quick Link session
+ *
+ * Trust model: DLT derives the merchant from the OAuth token, not from
+ * `merchant_account_id` in the request body. Do not treat `merchant_account_id`
+ * as a security boundary — it is only a compatibility assertion.
  */
 final class DltPaymentService
 {
@@ -29,7 +38,7 @@ final class DltPaymentService
     ) {}
 
     /**
-     * Get a cached Bearer access token from DLT OAuth2.
+     * Fetch (or return cached) Bearer access token via OAuth2 client credentials.
      */
     public function getBearerToken(): string
     {
@@ -50,10 +59,19 @@ final class DltPaymentService
                     'client_secret' => config('services.dlt.client_secret'),
                 ]);
         } catch (ConnectionException $e) {
+            Log::error('DLT: OAuth token request — connection failed', [
+                'endpoint' => $this->baseUrl().'/oauth/token',
+                'error' => $e->getMessage(),
+            ]);
             throw $this->unreachable($e);
         }
 
         if ($response->failed()) {
+            Log::error('DLT: OAuth token request — HTTP error', [
+                'endpoint' => $this->baseUrl().'/oauth/token',
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
             throw new RuntimeException('DLT OAuth token request failed: '.$response->body());
         }
 
@@ -69,10 +87,11 @@ final class DltPaymentService
     /**
      * GET /api/v1/collection/apn/brands
      *
-     * Returns available payment brands (cards + e-wallets).
-     * Each brand has: value (display name), code, image (URL), is_card (bool).
+     * Returns available payment brands (Visa, GCash, etc.).
+     * `code` is opaque and time-sensitive — copy it verbatim into
+     * `payment_brand_code` on Submit Payment; never cache it long-term.
      *
-     * @return array<int, array{value: string, code: string, image: string, is_card: bool}>
+     * @return array<int, array{value: string, code: string, image: string|null, is_card: bool}>
      */
     public function getBrands(): array
     {
@@ -85,6 +104,10 @@ final class DltPaymentService
                     'service_code' => config('services.dlt.service_code'),
                 ]);
         } catch (ConnectionException $e) {
+            Log::error('DLT: Get brands — connection failed', [
+                'endpoint' => $this->baseUrl().'/api/v1/collection/apn/brands',
+                'error' => $e->getMessage(),
+            ]);
             throw $this->unreachable($e);
         }
 
@@ -96,16 +119,26 @@ final class DltPaymentService
     /**
      * POST /api/v1/collection/apn/submit
      *
-     * Submit a payment. Caller provides all fields except merchant_account_id
-     * and service_code (injected here).
+     * Creates a Hosted Checkout transaction. DLT returns `data.payment_url`;
+     * redirect the payor there unconditionally — DLT handles card entry, OTP,
+     * and wallet QR on its hosted page. Never send card numbers, CVVs, or
+     * device/3DS fields — DLT rejects them.
      *
-     * For card payments (is_card_payment=true):
-     *   - Response is synchronous: data.payment_status = PAID|PENDING|REJECTED
-     *   - data.payment_url is null
+     * After submission the transaction status is PENDING. The authoritative
+     * status update comes via the signed merchant webhook or a `/sync` call.
+     * Do NOT trust the payor's browser return as payment confirmation.
      *
-     * For e-wallet payments (is_card_payment=false):
-     *   - Response includes data.payment_url to redirect the payer to
-     *   - After completion, DLT redirects to success_url/failure_url
+     * Required caller-supplied fields (inject merchant_account_id and
+     * service_code automatically):
+     *   merchant_transaction_id (max 45, ASCII alphanumeric/dash/underscore)
+     *   time_offset (+/-HH:MM, e.g. "+08:00")
+     *   channel (1 = API)
+     *   amount (>0, ≤500,000.00)
+     *   payment_brand (value from getBrands)
+     *   payment_brand_code (code from getBrands — opaque, copy verbatim)
+     *   first_name, last_name, email
+     *   address_line_one, city_municipality, state_province_region,
+     *   country_code, postal_code
      *
      * @param  array<string, mixed>  $payload
      * @return array{success: bool, message: string, data: array<string, mixed>}
@@ -121,6 +154,12 @@ final class DltPaymentService
             $response = $this->authorized($token)
                 ->post($this->baseUrl().'/api/v1/collection/apn/submit', $payload);
         } catch (ConnectionException $e) {
+            Log::error('DLT: Submit payment — connection failed', [
+                'endpoint' => $this->baseUrl().'/api/v1/collection/apn/submit',
+                'merchant_transaction_id' => $payload['merchant_transaction_id'] ?? null,
+                'amount' => $payload['amount'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
             throw $this->unreachable($e);
         }
 
@@ -130,9 +169,54 @@ final class DltPaymentService
     }
 
     /**
-     * Create a Quick Link hosted checkout session (legacy — kept for reference).
+     * POST /api/v1/collection/apn/sync
      *
-     * @return array{token: string, checkout_url: string, expires_at: int}
+     * Authenticated recovery check for a stuck or inconclusive transaction.
+     * Use when a transaction remains PENDING after the payor's browser return,
+     * or when the webhook has not arrived in a reasonable time.
+     *
+     * PAID and REJECTED are terminal — /sync will never downgrade them.
+     * Do NOT use this for routine polling; call it only for recovery.
+     *
+     * @return array{merchant_transaction_id: string, payment_status: string, provider_message: string|null, timestamp: string}
+     */
+    public function syncPaymentStatus(string $merchantTransactionId): array
+    {
+        $token = $this->getBearerToken();
+
+        try {
+            $response = $this->authorized($token)
+                ->post($this->baseUrl().'/api/v1/collection/apn/sync', [
+                    'merchant_transaction_id' => $merchantTransactionId,
+                ]);
+        } catch (ConnectionException $e) {
+            Log::error('DLT: Sync payment status — connection failed', [
+                'endpoint' => $this->baseUrl().'/api/v1/collection/apn/sync',
+                'merchant_transaction_id' => $merchantTransactionId,
+                'error' => $e->getMessage(),
+            ]);
+            throw $this->unreachable($e);
+        }
+
+        $this->throwIfFailed($response);
+
+        return $response->json('data', []);
+    }
+
+    /**
+     * POST /api/v1/quick-link/session
+     *
+     * Creates a Quick Link hosted checkout session. Returns an opaque token
+     * (expires in 30 minutes) and a `website` URL — redirect the payor there.
+     *
+     * NOTE: `product_description` is required by DLT despite being documented
+     * as optional — omitting it causes a 500 server error.
+     *
+     * OAuth credentials must never be placed in the payor's browser.
+     * Status authority is the signed merchant webhook or `/sync`, not the
+     * browser return.
+     *
+     * @return array{token: string, checkout_url: string, expires_at: string}
      */
     public function createQuickLinkSession(
         string $merchantTransactionId,
@@ -152,40 +236,43 @@ final class DltPaymentService
                     'amount' => round($amount, 2),
                     'currency' => 'PHP',
                     'product_name' => $productName,
+                    'product_description' => $productName,
                     'quantity' => 1,
                     'success_url' => $successUrl,
                     'failure_url' => $failureUrl,
                 ]);
         } catch (ConnectionException $e) {
+            Log::error('DLT: Create Quick Link session — connection failed', [
+                'endpoint' => $this->baseUrl().'/api/v1/quick-link/session',
+                'merchant_transaction_id' => $merchantTransactionId,
+                'error' => $e->getMessage(),
+            ]);
             throw $this->unreachable($e);
         }
 
-        if ($response->failed()) {
-            throw new RuntimeException('DLT Quick Link session creation failed: '.$response->body());
-        }
+        $this->throwIfFailed($response);
 
-        $data = $response->json();
+        $sessionData = $response->json('data');
 
-        if (! ($data['success'] ?? false)) {
-            throw new RuntimeException('DLT Quick Link session failed: '.($data['message'] ?? 'Unknown error'));
-        }
-
-        $sessionData = $data['data'];
-
-        $checkoutUrl = $sessionData['website'] ?? $this->buildFallbackCheckoutUrl(
-            $merchantTransactionId,
-            $amount,
-        );
-
+        // data.website is the merchant's own website — not the DLT-hosted checkout page.
+        // The actual checkout URL is always built from the merchant_account_id, the
+        // merchant_transaction_id, and the amount via checkout-ql.dltc.com.ph.
         return [
             'token' => $sessionData['token'],
-            'checkout_url' => $checkoutUrl,
-            'expires_at' => $sessionData['expires_at'] ?? 0,
+            'checkout_url' => $this->buildCheckoutUrl(
+                $sessionData['merchant_transaction_id'],
+                (float) $sessionData['amount'],
+            ),
+            'expires_at' => $sessionData['expires_at'] ?? '',
         ];
     }
 
     /**
-     * Fetch a Quick Link session to verify it exists (tamper guard).
+     * GET /api/v1/quick-link/session
+     *
+     * Reads back a Quick Link session by its opaque token. Use as a
+     * convenience read after the payor returns from hosted checkout, but
+     * treat `/sync` or the signed webhook as the authoritative status source.
      *
      * @return array<string, mixed>
      */
@@ -199,23 +286,20 @@ final class DltPaymentService
                     'token' => $sessionToken,
                 ]);
         } catch (ConnectionException $e) {
+            Log::error('DLT: Get Quick Link session — connection failed', [
+                'endpoint' => $this->baseUrl().'/api/v1/quick-link/session',
+                'session_token' => $sessionToken,
+                'error' => $e->getMessage(),
+            ]);
             throw $this->unreachable($e);
         }
 
-        if ($response->failed()) {
-            throw new RuntimeException('DLT Get Quick Link session failed: '.$response->body());
-        }
+        $this->throwIfFailed($response);
 
-        $data = $response->json();
-
-        if (! ($data['success'] ?? false)) {
-            throw new RuntimeException('DLT session verification failed: '.($data['message'] ?? 'Unknown error'));
-        }
-
-        return $data['data'] ?? [];
+        return $response->json('data', []);
     }
 
-    private function authorized(string $token)
+    private function authorized(string $token): \Illuminate\Http\Client\PendingRequest
     {
         return $this->http->withToken($token)->asJson()->acceptJson();
     }
@@ -226,10 +310,8 @@ final class DltPaymentService
     }
 
     /**
-     * Translate a low-level HTTP connection failure (DNS resolution, timeout,
-     * TLS handshake, network down) into the RuntimeException the callers
-     * already handle, so the gateway being unreachable never surfaces as an
-     * unhandled 500.
+     * Wrap a connection-level failure in a RuntimeException so callers can
+     * handle gateway-unreachable the same way as API errors.
      */
     private function unreachable(ConnectionException $e): RuntimeException
     {
@@ -237,22 +319,43 @@ final class DltPaymentService
     }
 
     /**
-     * Check response success and throw appropriately.
+     * Assert the response is successful ({success: true}) and throw a
+     * descriptive RuntimeException otherwise, logging the raw body.
+     *
+     * Branches: validation errors (errors array present) vs. general errors.
      */
-    private function throwIfFailed($response): void
+    private function throwIfFailed(\Illuminate\Http\Client\Response $response): void
     {
         if ($response->successful() && $response->json('success') === true) {
             return;
         }
 
         if ($errors = $response->json('errors')) {
+            Log::error('DLT: API validation error', [
+                'status' => $response->status(),
+                'message' => $response->json('message'),
+                'errors' => $errors,
+            ]);
             throw new RuntimeException('DLT validation error: '.json_encode($errors));
         }
 
+        Log::error('DLT: API request failed', [
+            'status' => $response->status(),
+            'success_field' => $response->json('success'),
+            'message' => $response->json('message'),
+            'body' => $response->body(),
+        ]);
         throw new RuntimeException('DLT request failed: '.($response->json('message') ?? $response->body()));
     }
 
-    private function buildFallbackCheckoutUrl(string $merchantTransactionId, float $amount): string
+    /**
+     * Build the DLT Quick Link hosted checkout URL.
+     *
+     * data.website in the Quick Link response is the merchant's own website,
+     * not the DLT checkout page. The actual payor-facing URL is always this
+     * checkout-ql.dltc.com.ph pattern.
+     */
+    private function buildCheckoutUrl(string $merchantTransactionId, float $amount): string
     {
         $merchantAccountId = config('services.dlt.merchant_account_id');
         $formattedAmount = number_format($amount, 2, '.', '');

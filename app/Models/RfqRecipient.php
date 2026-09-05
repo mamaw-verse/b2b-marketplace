@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $shop_id
  * @property string $status
  * @property string|null $decline_reason
+ * @property string|null $admin_status
+ * @property string|null $admin_notes
+ * @property int|null $managed_by
  * @property \Illuminate\Support\Carbon|null $last_activity_at
  * @property \Illuminate\Support\Carbon|null $reviewed_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -33,6 +36,9 @@ final class RfqRecipient extends Model
         'decline_reason',
         'last_activity_at',
         'reviewed_at',
+        'admin_status',
+        'admin_notes',
+        'managed_by',
     ];
 
     /**
@@ -52,6 +58,14 @@ final class RfqRecipient extends Model
     }
 
     /**
+     * The admin user currently/last managing this recipient.
+     */
+    public function managedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'managed_by');
+    }
+
+    /**
      * Quotations submitted by this recipient (seller) for this RFQ.
      */
     public function quotations(): HasMany
@@ -60,15 +74,26 @@ final class RfqRecipient extends Model
     }
 
     /**
-     * Whether this recipient is in a terminal state.
+     * Whether this recipient is in a terminal (seller-facing) state.
+     *
+     * Both `closed` (explicit close by buyer or seller) and `no_bid` (legacy)
+     * are terminal — no further transitions are allowed.
      */
     public function isTerminal(): bool
     {
-        return $this->status === 'no_bid';
+        return in_array($this->status, ['closed', 'no_bid'], true);
     }
 
     /**
-     * Touch the last_activity_at timestamp (resets no-bid timer).
+     * Whether the admin-side tracking is in a terminal state.
+     */
+    public function isAdminTerminal(): bool
+    {
+        return in_array($this->admin_status, ['resolved', 'closed'], true);
+    }
+
+    /**
+     * Touch the last_activity_at timestamp (resets auto-close timer).
      */
     public function touchActivity(): void
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub\Hub;
 
+use App\Models\CertificationApplication;
 use App\Models\Order;
 use App\Models\Shop;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,16 @@ final class Dashboard extends Component
         return Auth::user()->shop;
     }
 
-    public function mount(): void
+    #[Computed]
+    public function certificationApplication(): ?CertificationApplication
+    {
+        return CertificationApplication::query()
+            ->where('shop_id', Auth::user()->shop?->id)
+            ->latest('created_at')
+            ->first();
+    }
+
+    public function mount(\App\Services\ShopAnalyticsService $analyticsService): void
     {
         $shop = Auth::user()->shop;
         if (! $shop) {
@@ -34,11 +44,24 @@ final class Dashboard extends Component
 
         $this->counts = [
             'new_rfqs' => $shop->rfqRecipients()->where('status', 'received')->count(),
-            'orders_in_progress' => Order::where('shop_id', $shop->id)->where('status', 'paid')->count(),
-            'unfulfilled_orders' => Order::where('shop_id', $shop->id)->where('status', 'paid')->whereDoesntHave('fulfilments', fn ($q) => $q->whereIn('status', ['shipped', 'delivered']))->count(),
-            'draft_orders' => Order::where('shop_id', $shop->id)->where('status', 'draft')->count(),
-            'open_disputes' => DB::table('disputes')->join('orders', 'orders.id', '=', 'disputes.order_id')->where('orders.shop_id', $shop->id)->whereNotIn('disputes.status', ['resolved_refunded', 'resolved_denied', 'withdrawn'])->count(),
         ];
+
+        if (config('marketplace.features.orders_enabled')) {
+            $this->counts['orders_in_progress'] = Order::where('shop_id', $shop->id)->where('status', 'paid')->count();
+            $this->counts['unfulfilled_orders'] = Order::where('shop_id', $shop->id)->where('status', 'paid')->whereDoesntHave('fulfilments', fn ($q) => $q->whereIn('status', ['shipped', 'delivered']))->count();
+            $this->counts['draft_orders'] = Order::where('shop_id', $shop->id)->where('status', 'draft')->count();
+        }
+
+        if (config('marketplace.features.disputes_enabled')) {
+            $this->counts['open_disputes'] = DB::table('disputes')->join('orders', 'orders.id', '=', 'disputes.order_id')->where('orders.shop_id', $shop->id)->whereNotIn('disputes.status', ['resolved_refunded', 'resolved_denied', 'withdrawn'])->count();
+        }
+
+        if (config('marketplace.features.subscriptions_enabled')) {
+            $this->counts['subscription'] = $analyticsService->shopSubscription($shop);
+        }
+
+        $this->counts['certification'] = $analyticsService->shopCertification($shop);
+        $this->counts['listings'] = $analyticsService->shopListings($shop);
     }
 
     public function render()

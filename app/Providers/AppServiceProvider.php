@@ -44,6 +44,15 @@ final class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\PostOrderStatusMessage::class);
         \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\PostDisputeStatusMessage::class);
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\SubscriptionStatusChanged::class,
+            \App\Listeners\ReindexProductsForSubscriptionChange::class,
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\OrderReturned::class,
+            \App\Listeners\NotifyBuyerOrderReturned::class,
+        );
 
         \Illuminate\Support\Facades\Gate::define('accessHub', function (\App\Models\User $user) {
             return $user->shop !== null

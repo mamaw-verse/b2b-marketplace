@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Admin\OnboardingReview;
+use App\Models\Category;
 use App\Models\Media;
 use App\Models\ShopOnboarding;
 use App\Models\User;
@@ -74,4 +75,23 @@ test('closing the document viewer clears the preview state', function () {
         ->assertSet('documentPreviewUrl', null)
         ->assertSet('viewingMediaId', null)
         ->assertDontSee('Open in new tab');
+});
+
+test('product category ids are resolved to their category names', function () {
+    $bakery = Category::factory()->create(['name' => 'Bakery']);
+    $beverages = Category::factory()->create(['name' => 'Beverages']);
+
+    $this->onboarding->update(['product_categories' => "{$bakery->id},{$beverages->id}"]);
+
+    Livewire::test(OnboardingReview::class, ['onboarding' => $this->onboarding->fresh()])
+        ->assertSee('Bakery')
+        ->assertSee('Beverages')
+        ->assertDontSee("{$bakery->id},{$beverages->id}");
+});
+
+test('product categories section shows a placeholder when none are set', function () {
+    $this->onboarding->update(['product_categories' => null]);
+
+    Livewire::test(OnboardingReview::class, ['onboarding' => $this->onboarding->fresh()])
+        ->assertSee('—');
 });

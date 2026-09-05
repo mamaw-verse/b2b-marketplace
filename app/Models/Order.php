@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
+ * @property string $order_number
  * @property int $buyer_user_id
  * @property int $shop_id
  * @property int|null $quotation_id
@@ -79,6 +80,23 @@ final class Order extends Model
         'completed_at',
         'cancelled_at',
     ];
+
+    // ──────────────────────────────────────────────────────────────
+    // Accessors
+    // ──────────────────────────────────────────────────────────────
+
+    /**
+     * Human-readable order reference number.
+     * Format: ORD-YYYYMM-NNNNN  (e.g. ORD-202609-00042)
+     * Derived from the record's primary key and creation month so it is always
+     * unique, sortable, and clearly dated without requiring a separate column.
+     */
+    public function getOrderNumberAttribute(): string
+    {
+        $month = ($this->created_at ?? now())->format('Ym');
+
+        return 'ORD-'.$month.'-'.mb_str_pad((string) $this->id, 5, '0', STR_PAD_LEFT);
+    }
 
     // ──────────────────────────────────────────────────────────────
     // Relationships

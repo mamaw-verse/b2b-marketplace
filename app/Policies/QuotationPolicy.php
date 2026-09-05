@@ -15,6 +15,10 @@ final class QuotationPolicy
      */
     public function create(User $user, RfqRecipient $rfqRecipient): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $rfqRecipient->shop_id;
     }
 
@@ -23,6 +27,10 @@ final class QuotationPolicy
      */
     public function update(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $quotation->rfqRecipient->shop_id
             && $quotation->isDraft();
     }
@@ -32,6 +40,10 @@ final class QuotationPolicy
      */
     public function delete(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $quotation->rfqRecipient->shop_id
             && $quotation->isDraft();
     }
@@ -41,6 +53,10 @@ final class QuotationPolicy
      */
     public function submit(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $quotation->rfqRecipient->shop_id
             && $quotation->isDraft()
             && $quotation->items()->count() > 0;
@@ -51,6 +67,10 @@ final class QuotationPolicy
      */
     public function withdraw(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $quotation->rfqRecipient->shop_id
             && $quotation->isSubmitted();
     }
@@ -60,6 +80,10 @@ final class QuotationPolicy
      */
     public function award(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->id === $quotation->rfq->user_id
             && $quotation->isSubmitted();
     }
@@ -69,6 +93,10 @@ final class QuotationPolicy
      */
     public function reject(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         return $user->id === $quotation->rfq->user_id
             && $quotation->isSubmitted();
     }
@@ -78,6 +106,10 @@ final class QuotationPolicy
      */
     public function view(User $user, Quotation $quotation): bool
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
         // Seller owns it
         if ($user->shop?->id === $quotation->rfqRecipient->shop_id) {
             return true;

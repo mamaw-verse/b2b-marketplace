@@ -8,6 +8,7 @@ use App\Jobs\QuotationExpiryJob;
 use App\Jobs\ReconcileMediaOrphansJob;
 use App\Jobs\RfqAutoCloseJob;
 use App\Jobs\ScanCertificateExpiryJob;
+use App\Jobs\ScanSubscriptionRenewalsJob;
 use App\Jobs\SellerNoBidTimeoutJob;
 use App\Jobs\SyncSearchIndexJob;
 use Illuminate\Foundation\Inspiring;
@@ -20,6 +21,7 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new SyncSearchIndexJob)->everyFiveMinutes();
 Schedule::job(new ScanCertificateExpiryJob)->dailyAt('02:00')->timezone('UTC');
+Schedule::job(new ScanSubscriptionRenewalsJob)->dailyAt('02:30')->timezone('UTC')->withoutOverlapping();
 Schedule::job(new SellerNoBidTimeoutJob)->dailyAt('03:00')->timezone('UTC')->withoutOverlapping();
 Schedule::job(new RfqAutoCloseJob)->dailyAt('03:15')->timezone('UTC')->withoutOverlapping();
 Schedule::job(new QuotationExpiryJob)->dailyAt('03:30')->timezone('UTC')->withoutOverlapping();

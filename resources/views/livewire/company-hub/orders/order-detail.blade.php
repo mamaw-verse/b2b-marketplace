@@ -7,7 +7,7 @@
             <div class="flex items-start justify-between gap-6 flex-wrap">
                 <div>
                     <div class="flex items-center gap-2.5">
-                        <h1 class="text-[22px] font-[650] tracking-[-0.01em] text-[var(--hs-neutral-900)]">Order #{{ $order->id }}</h1>
+                        <h1 class="text-[22px] font-[650] tracking-[-0.01em] text-[var(--hs-neutral-900)]">{{ $order->order_number }}</h1>
                         <x-hs-status-pill :status="$order->status" />
                     </div>
                     <p class="text-sm text-[var(--hs-neutral-500)] mt-1">
@@ -143,45 +143,47 @@
                             <span class="text-[var(--hs-neutral-400)] font-normal normal-case tracking-normal">· {{ $order->items->count() }}</span>
                         </h2>
                     </div>
-                    <table class="w-full table-fixed border-collapse text-[13.5px]">
-                        <thead>
-                            <tr>
-                                <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Description') }}</th>
-                                <th class="w-24 text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Qty') }}</th>
-                                <th class="w-28 text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Unit price') }}</th>
-                                <th class="w-28 text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold pb-2.5 border-b border-[var(--hs-neutral-100)]">{{ __('Subtotal') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($order->items as $item)
-                                <tr>
-                                    <td class="py-3 text-[var(--hs-neutral-900)] font-medium">{{ $item->description }}</td>
-                                    <td class="py-3 text-right text-[var(--hs-neutral-700)] tabular-nums">{{ (int) $item->quantity }} {{ $item->unit }}</td>
-                                    <td class="py-3 text-right text-[var(--hs-neutral-700)]">{{ number_format((float) $item->unit_price, 2) }}</td>
-                                    <td class="py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums">{{ number_format((float) $item->subtotal, 2) }}</td>
+                    <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden">
+                        <table class="w-full text-[13.5px]">
+                            <thead>
+                                <tr class="bg-[var(--hs-neutral-50)]">
+                                    <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 w-8">#</th>
+                                    <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5">{{ __('Description') }}</th>
+                                    <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">{{ __('Qty') }}</th>
+                                    <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">{{ __('Unit') }}</th>
+                                    <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">{{ __('Unit price') }}</th>
+                                    <th class="text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">{{ __('Subtotal') }}</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                        @if ($order->fees->isNotEmpty())
-                            <tfoot>
-                                @foreach ($order->fees as $fee)
-                                    {{-- Fee rows read as plain table rows (no shading); only the first
-                                         keeps a top border to separate them from the item rows. --}}
-                                    <tr @if ($loop->first) class="border-t border-[var(--hs-neutral-100)]" @endif>
-                                        <td class="py-2 text-[var(--hs-neutral-500)] italic">
-                                            <span class="inline-flex items-center gap-1.5">
-                                                <flux:icon name="receipt-percent" variant="mini" class="size-3.5 text-[var(--hs-neutral-400)]" />
-                                                {{ $fee->label }}
-                                            </span>
-                                        </td>
-                                        <td class="py-2"></td>
-                                        <td class="py-2"></td>
-                                        <td class="py-2 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic">{{ number_format((float) $fee->amount, 2) }}</td>
+                            </thead>
+                            <tbody class="divide-y divide-[var(--hs-neutral-100)]">
+                                @foreach ($order->items as $item)
+                                    <tr>
+                                        <td class="px-4 py-3 text-[var(--hs-neutral-400)] text-[12px] tabular-nums">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 text-[var(--hs-neutral-900)] font-medium">{{ $item->description }}</td>
+                                        <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap">{{ (int) $item->quantity }}</td>
+                                        <td class="px-4 py-3 text-[var(--hs-neutral-600)] whitespace-nowrap">{{ $item->unit }}</td>
+                                        <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap">{{ $order->currency }}&nbsp;{{ number_format((float) $item->unit_price, 2) }}</td>
+                                        <td class="px-4 py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums whitespace-nowrap">{{ $order->currency }}&nbsp;{{ number_format((float) $item->subtotal, 2) }}</td>
                                     </tr>
                                 @endforeach
-                            </tfoot>
-                        @endif
-                    </table>
+                            </tbody>
+                            @if ($order->fees->isNotEmpty())
+                                <tfoot class="border-t border-[var(--hs-neutral-200)] divide-y divide-[var(--hs-neutral-100)]">
+                                    @foreach ($order->fees as $fee)
+                                        <tr class="bg-[var(--hs-neutral-50)]">
+                                            <td colspan="5" class="px-4 py-2.5 text-[var(--hs-neutral-500)] italic">
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    <flux:icon name="receipt-percent" variant="mini" class="size-3.5 text-[var(--hs-neutral-400)]" />
+                                                    {{ $fee->label }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-2.5 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic whitespace-nowrap">{{ $order->currency }}&nbsp;{{ number_format((float) $fee->amount, 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tfoot>
+                            @endif
+                        </table>
+                    </div>
                 </section>
 
                 {{-- Disputes Section — full history: status, reason, resolution, timestamps --}}

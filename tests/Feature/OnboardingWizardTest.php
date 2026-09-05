@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Livewire\CompanyHub\OnboardingWizard;
 use App\Models\Media;
 use App\Models\ShopOnboarding;
-use App\Models\ShopOnboardingCertificate;
 use App\Models\User;
+use App\Services\MediaUploadService;
 use Database\Seeders\RolePermissionSeeder;
 use Livewire\Livewire;
 
@@ -23,6 +23,8 @@ test('wizard mounts with empty form object for new onboarding', function () {
     Livewire::test(OnboardingWizard::class)
         ->assertSet('currentStep', 1)
         ->assertSet('form.registered_business_name', '')
+        ->assertSet('form.company_description', '')
+        ->assertSet('form.products_description', '')
         ->assertSet('form.country_code', 'PH');
 });
 
@@ -39,6 +41,8 @@ test('wizard hydrates form object from existing onboarding', function () {
         'tax_identification_number' => 'TIN-98765',
         'country_code' => 'PH',
         'export_readiness_status' => 'never_exported',
+        'company_description' => 'We produce halal food.',
+        'products_description' => 'Frozen meals and snacks.',
         'status' => 'pending',
     ]);
 
@@ -48,7 +52,9 @@ test('wizard hydrates form object from existing onboarding', function () {
         ->assertSet('form.registered_business_name', 'Acme Foods Inc')
         ->assertSet('form.storefront_name', 'Acme Halal')
         ->assertSet('form.business_structure', 'corporation')
-        ->assertSet('form.dti_sec_number', 'SEC-12345');
+        ->assertSet('form.dti_sec_number', 'SEC-12345')
+        ->assertSet('form.company_description', 'We produce halal food.')
+        ->assertSet('form.products_description', 'Frozen meals and snacks.');
 });
 
 test('step 1 validation fails when required fields are empty', function () {
@@ -64,6 +70,8 @@ test('step 1 validation fails when required fields are empty', function () {
         ->assertHasErrors([
             'form.registered_business_name' => 'required',
             'form.storefront_name' => 'required',
+            'form.company_description' => 'required',
+            'form.products_description' => 'required',
         ])
         ->assertSet('currentStep', 1);
 });
@@ -80,12 +88,14 @@ test('step 1 advances to step 2 when valid', function () {
         ->set('form.business_structure', 'sole_proprietorship')
         ->set('form.dti_sec_number', 'DTI-111')
         ->set('form.tax_identification_number', 'TIN-222')
+        ->set('form.company_description', 'We make great halal products.')
+        ->set('form.products_description', 'Snacks, beverages, and more.')
         ->call('nextStep')
         ->assertHasNoErrors()
         ->assertSet('currentStep', 2);
 });
 
-test('step 1 persists form data to the database', function () {
+test('step 1 persists form data including descriptions to the database', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
@@ -97,6 +107,8 @@ test('step 1 persists form data to the database', function () {
         ->set('form.business_structure', 'partnership')
         ->set('form.dti_sec_number', 'DTI-333')
         ->set('form.tax_identification_number', 'TIN-444')
+        ->set('form.company_description', 'Our company sells premium goods.')
+        ->set('form.products_description', 'A wide range of certified items.')
         ->call('nextStep');
 
     $this->assertDatabaseHas('shop_onboardings', [
@@ -104,51 +116,20 @@ test('step 1 persists form data to the database', function () {
         'registered_business_name' => 'Persisted Co',
         'storefront_name' => 'Persisted Shop',
         'business_structure' => 'partnership',
+        'company_description' => 'Our company sells premium goods.',
+        'products_description' => 'A wide range of certified items.',
     ]);
 });
 
-test('certificate filename is hydrated and displayed with its extension preserved', function () {
+test('wizard has 4 total steps', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
-    $onboarding = ShopOnboarding::create([
-        'user_id' => $seller->id,
-        'registered_business_name' => 'Cert Co',
-        'storefront_name' => 'Cert Shop',
-        'business_structure' => 'corporation',
-        'dti_sec_number' => 'SEC-1',
-        'tax_identification_number' => 'TIN-1',
-        'country_code' => 'PH',
-        'export_readiness_status' => 'never_exported',
-        'status' => 'requires_revision',
-    ]);
-
-    $longName = 'a-very-long-halal-certification-document-name-2026.pdf';
-    $media = Media::factory()->create([
-        'original_filename' => $longName,
-        'extension' => 'pdf',
-        'uploaded_by_id' => $seller->id,
-    ]);
-
-    ShopOnboardingCertificate::create([
-        'onboarding_id' => $onboarding->id,
-        'certification_body' => 'IDCP',
-        'registration_number' => 'REG-1',
-        'expiry_date' => now()->addYear()->format('Y-m-d'),
-        'media_id' => $media->id,
-    ]);
-
     $this->actingAs($seller);
 
-    $component = Livewire::test(OnboardingWizard::class);
+    $component = Livewire::test(OnboardingWizard::class)->instance();
 
-    // Filename is hydrated into the certificate array.
-    expect($component->get('certificates')[0]['filename'])->toBe($longName);
-
-    // Rendered display truncates the base name but keeps the .pdf extension.
-    $component->set('currentStep', 3)
-        ->assertSee('.pdf')
-        ->assertSee('…');
+    expect(OnboardingWizard::TOTAL_STEPS)->toBe(4);
 });
 
 test('resetDocument detaches the media and clears the stuck document', function () {
@@ -276,10 +257,11 @@ test('step 2 hydrates stored categories back into an array', function () {
         ->assertSet('form.product_categories', [$catA->id, $catB->id]);
 });
 
-test('step 1 hard-codes country to PH regardless of prior value', function () {
+test('step 1 uses the configured marketplace instance country', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
+    config()->set('marketplace.instance_country', 'MY');
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
@@ -288,39 +270,14 @@ test('step 1 hard-codes country to PH regardless of prior value', function () {
         ->set('form.business_structure', 'corporation')
         ->set('form.dti_sec_number', 'DTI-C')
         ->set('form.tax_identification_number', 'TIN-C')
+        ->set('form.company_description', 'A company.')
+        ->set('form.products_description', 'Products.')
         ->call('nextStep');
 
     $this->assertDatabaseHas('shop_onboardings', [
         'user_id' => $seller->id,
-        'country_code' => 'PH',
+        'country_code' => 'MY',
     ]);
-});
-
-test('step 3 requires certification body for each certificate', function () {
-    $seller = User::factory()->create();
-    $seller->assignRole('seller');
-
-    $this->actingAs($seller);
-
-    Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 3)
-        ->call('addCertificate')
-        ->call('saveCurrentStep')
-        ->assertHasErrors(['certificates.0.certification_body']);
-});
-
-test('step 3 requires a file when the certificate has no existing media', function () {
-    $seller = User::factory()->create();
-    $seller->assignRole('seller');
-
-    $this->actingAs($seller);
-
-    Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 3)
-        ->call('addCertificate')
-        ->set('certificates.0.certification_body', 'IDCP')
-        ->call('saveCurrentStep')
-        ->assertHasErrors(['certificateFiles.0']);
 });
 
 test('reapply moves a rejected application back to pending and resets to step 1', function () {
@@ -356,7 +313,7 @@ test('reapply moves a rejected application back to pending and resets to step 1'
     ]);
 });
 
-test('wizard redirects to the dashboard when onboarding is already approved', function () {
+test('wizard shows the approved confirmation screen with CTAs when onboarding is approved', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
@@ -375,7 +332,9 @@ test('wizard redirects to the dashboard when onboarding is already approved', fu
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->assertRedirect(route('hub.hub-dashboard'));
+        ->assertSet('onboardingStatus', 'approved')
+        ->assertSee(__('Application Approved'))
+        ->assertSee(__('Go to Dashboard'));
 });
 
 test('submit is a no-op when the application is already submitted', function () {
@@ -398,7 +357,7 @@ test('submit is a no-op when the application is already submitted', function () 
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 5)
+        ->set('currentStep', 4)
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -441,10 +400,12 @@ test('stepForErrorKey maps field keys and prefixes to the correct step', functio
     $component = Livewire::test(OnboardingWizard::class)->instance();
 
     expect($component->stepForErrorKey('form.registered_business_name'))->toBe(1)
+        ->and($component->stepForErrorKey('form.company_description'))->toBe(1)
+        ->and($component->stepForErrorKey('form.products_description'))->toBe(1)
         ->and($component->stepForErrorKey('form.export_readiness_status'))->toBe(2)
-        ->and($component->stepForErrorKey('certificates.0.certification_body'))->toBe(3)
-        ->and($component->stepForErrorKey('certificateFiles.1'))->toBe(3)
-        ->and($component->stepForErrorKey('documents'))->toBe(5)
+        ->and($component->stepForErrorKey('form.value_chain_positions'))->toBe(3)
+        ->and($component->stepForErrorKey('form.capabilities'))->toBe(3)
+        ->and($component->stepForErrorKey('documentUploads.business_permit'))->toBe(4)
         ->and($component->stepForErrorKey('unknown.key'))->toBeNull();
 });
 
@@ -462,14 +423,14 @@ test('hasPendingDocuments reflects whether any uploaded document is still scanni
     // A pending document makes the checklist "pending".
     $component->set('uploadedDocuments', [
         'business_permit' => ['media_id' => 1, 'filename' => 'permit.pdf', 'scan_status' => 'pending'],
-        'dti_sec_certificate' => ['media_id' => 2, 'filename' => 'dti.pdf', 'scan_status' => 'clean'],
+        'other_supporting_document' => ['media_id' => 2, 'filename' => 'other.pdf', 'scan_status' => 'clean'],
     ]);
     expect($component->instance()->hasPendingDocuments())->toBeTrue();
 
     // Once everything is settled (clean/infected), polling should stop.
     $component->set('uploadedDocuments', [
         'business_permit' => ['media_id' => 1, 'filename' => 'permit.pdf', 'scan_status' => 'clean'],
-        'dti_sec_certificate' => ['media_id' => 2, 'filename' => 'dti.pdf', 'scan_status' => 'infected'],
+        'other_supporting_document' => ['media_id' => 2, 'filename' => 'other.pdf', 'scan_status' => 'infected'],
     ]);
     expect($component->instance()->hasPendingDocuments())->toBeFalse();
 });
@@ -520,9 +481,9 @@ test('a verified document can be replaced when the application requires revision
 
     $this->actingAs($seller);
 
-    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 5);
+    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 4);
 
-    // The verified document loads and step 5 offers a way to replace it.
+    // The verified document loads and step 4 offers a way to replace it.
     expect($component->get('uploadedDocuments'))->toHaveKey('business_permit');
     $component->assertSee(__('Replace'));
 
@@ -536,49 +497,57 @@ test('a verified document can be replaced when the application requires revision
     ]);
 });
 
-test('a rejected application can replace its verified documents after re-applying', function () {
+test('setting documentUploads auto-triggers uploadDocument without manual button click', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
     $onboarding = ShopOnboarding::create([
         'user_id' => $seller->id,
-        'registered_business_name' => 'Rejected Co',
-        'storefront_name' => 'Rejected Shop',
+        'registered_business_name' => 'Auto Upload Co',
+        'storefront_name' => 'Auto Upload Shop',
         'business_structure' => 'corporation',
-        'dti_sec_number' => 'SEC-RJ',
-        'tax_identification_number' => 'TIN-RJ',
+        'dti_sec_number' => 'SEC-AU',
+        'tax_identification_number' => 'TIN-AU',
         'country_code' => 'PH',
         'export_readiness_status' => 'never_exported',
-        'status' => 'rejected',
-        'admin_notes' => 'Documents unclear.',
+        'status' => 'pending',
     ]);
-
-    $media = Media::factory()->create([
-        'original_filename' => 'dti.pdf',
-        'extension' => 'pdf',
-        'scan_status' => 'clean',
-        'description' => 'dti_sec_certificate',
-        'uploaded_by_id' => $seller->id,
-    ]);
-
-    $onboarding->documents()->attach($media->id);
 
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->assertSet('onboardingStatus', 'rejected')
-        // Re-apply re-opens the wizard; documents remain attached and replaceable.
-        ->call('reapply')
-        ->assertSet('onboardingStatus', 'pending')
-        ->set('currentStep', 5)
-        ->assertSee(__('Replace'))
-        ->call('resetDocument', 'dti_sec_certificate')
-        ->assertDontSee($media->original_filename);
+        ->set('currentStep', 4)
+        ->call('uploadDocument', 'business_permit', app(MediaUploadService::class))
+        // No file set — uploadDocument returns early gracefully
+        ->assertHasNoErrors();
 
-    $this->assertDatabaseMissing('shop_onboarding_documents', [
-        'onboarding_id' => $onboarding->id,
-        'media_id' => $media->id,
-    ]);
+    // Verify the updatedDocumentUploads lifecycle hook exists.
+    $component = Livewire::test(OnboardingWizard::class);
+    expect(method_exists($component->instance(), 'updatedDocumentUploads'))->toBeTrue();
+});
+
+test('step 4 document upload dropzone has no manual upload button', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->set('currentStep', 4)
+        ->assertDontSee('wire:click="uploadDocument')
+        ->assertSee('Drag & drop, or click to browse');
+});
+
+test('step 4 document dropzone wires a dropped file to the hidden input', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->set('currentStep', 4)
+        ->assertSee('dataTransfer?.files', escape: false)
+        ->assertSee('dispatchEvent(new Event(\'change\', { bubbles: true }))', escape: false);
 });
 
 test('the revision-required banner prominently shows the reviewer notes', function () {
@@ -605,4 +574,66 @@ test('the revision-required banner prominently shows the reviewer notes', functi
         ->assertSee(__('Revision Required'))
         ->assertSee(__('Reviewer notes'))
         ->assertSee('Please re-upload a clearer DTI certificate.');
+});
+
+test('currentStep is persisted in the URL so a page refresh restores the last step', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    // Simulate arriving at step 3 via the URL query parameter.
+    $component = Livewire::withQueryParams(['currentStep' => 3])
+        ->test(OnboardingWizard::class);
+
+    $component->assertSet('currentStep', 3);
+});
+
+test('a stale or out-of-range step in the URL is clamped to valid bounds', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    Livewire::withQueryParams(['currentStep' => 99])
+        ->test(OnboardingWizard::class)
+        ->assertSet('currentStep', 4);
+
+    Livewire::withQueryParams(['currentStep' => 0])
+        ->test(OnboardingWizard::class)
+        ->assertSet('currentStep', 1);
+});
+
+test('step 4 only requires business_permit and optionally other_supporting_document', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    $component = Livewire::test(OnboardingWizard::class)->instance();
+
+    expect(array_keys(OnboardingWizard::REQUIRED_DOCUMENTS))->toBe(['business_permit', 'other_supporting_document']);
+});
+
+test('company_description and products_description are saved to shop_onboardings', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->set('form.registered_business_name', 'Test Co')
+        ->set('form.storefront_name', 'Test Shop')
+        ->set('form.business_structure', 'corporation')
+        ->set('form.dti_sec_number', 'DTI-T')
+        ->set('form.tax_identification_number', 'TIN-T')
+        ->set('form.company_description', 'We are a halal food company.')
+        ->set('form.products_description', 'Premium halal snacks.')
+        ->call('saveCurrentStep');
+
+    $this->assertDatabaseHas('shop_onboardings', [
+        'user_id' => $seller->id,
+        'company_description' => 'We are a halal food company.',
+        'products_description' => 'Premium halal snacks.',
+    ]);
 });

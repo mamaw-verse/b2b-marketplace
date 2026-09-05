@@ -63,4 +63,12 @@ final class Media extends Model
     {
         return $this->belongsToMany(Dispute::class, 'dispute_media');
     }
+
+    /**
+     * RFQs that attach this media as an attachment.
+     */
+    public function rfqs(): BelongsToMany
+    {
+        return $this->belongsToMany(Rfq::class, 'rfq_attachments');
+    }
 }

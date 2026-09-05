@@ -158,10 +158,10 @@ final class ProductForm extends Component
     public function publish(): void
     {
         abort_unless($this->product !== null, 403);
-        $this->authorize('update', $this->product);
+        $this->authorize('publish', $this->product);
 
         $this->product->update(['status' => 'published']);
-        IndexProductJob::dispatch($this->product->id)->afterCommit();
+        IndexProductJob::dispatch($this->product)->afterCommit();
 
         \Flux\Flux::toast(__('Product published.'), variant: 'success');
     }
@@ -175,6 +175,7 @@ final class ProductForm extends Component
         $this->authorize('update', $this->product);
 
         $this->product->update(['status' => 'archived']);
+        IndexProductJob::dispatch($this->product)->afterCommit();
 
         \Flux\Flux::toast(__('Product archived.'), variant: 'success');
     }

@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property int $order_payment_term_id
+ * @property int|null $order_payment_term_id
+ * @property int|null $subscription_id
  * @property string $status
  * @property string $dlt_merchant_transaction_id
  * @property string|null $dlt_quick_link_token
@@ -31,6 +32,7 @@ final class PaymentAttempt extends Model
 
     protected $fillable = [
         'order_payment_term_id',
+        'subscription_id',
         'status',
         'dlt_merchant_transaction_id',
         'dlt_quick_link_token',
@@ -45,6 +47,11 @@ final class PaymentAttempt extends Model
     public function paymentTerm(): BelongsTo
     {
         return $this->belongsTo(OrderPaymentTerm::class, 'order_payment_term_id');
+    }
+
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
     }
 
     /**

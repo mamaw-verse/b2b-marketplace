@@ -67,3 +67,27 @@ test('navigation header contains anchor links for homepage sections', function (
     $response->assertSee('Supply Chain');
     $response->assertSee('Join Us');
 });
+
+test('google analytics snippet is not rendered when measurement id is missing', function () {
+    config([
+        'services.google_analytics.measurement_id' => null,
+    ]);
+
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertDontSee('googletagmanager.com/gtag/js');
+    $response->assertDontSee('gtag(\'config\'');
+});
+
+test('google analytics snippet is rendered when measurement id is configured', function () {
+    config([
+        'services.google_analytics.measurement_id' => 'G-XXXXXXXXXX',
+    ]);
+
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertSee('googletagmanager.com/gtag/js?id=G-XXXXXXXXXX', false);
+    $response->assertSee("gtag('config', 'G-XXXXXXXXXX')", false);
+});

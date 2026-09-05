@@ -14,6 +14,10 @@ final class RfqRecipientPolicy
      */
     public function viewAny(User $user): bool
     {
+        if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+            return false;
+        }
+
         return $user->shop !== null;
     }
 
@@ -22,6 +26,10 @@ final class RfqRecipientPolicy
      */
     public function view(User $user, RfqRecipient $rfqRecipient): bool
     {
+        if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $rfqRecipient->shop_id;
     }
 
@@ -30,6 +38,10 @@ final class RfqRecipientPolicy
      */
     public function review(User $user, RfqRecipient $rfqRecipient): bool
     {
+        if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $rfqRecipient->shop_id
             && ! $rfqRecipient->isTerminal();
     }
@@ -39,15 +51,24 @@ final class RfqRecipientPolicy
      */
     public function inProgress(User $user, RfqRecipient $rfqRecipient): bool
     {
+        if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $rfqRecipient->shop_id
             && ! $rfqRecipient->isTerminal();
     }
 
     /**
-     * Seller can decline if it belongs to their shop and is not terminal.
+     * Seller can close (terminate) their RFQ recipient if it belongs to their shop
+     * and is not already in a terminal state.
      */
-    public function decline(User $user, RfqRecipient $rfqRecipient): bool
+    public function close(User $user, RfqRecipient $rfqRecipient): bool
     {
+        if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+            return false;
+        }
+
         return $user->shop?->id === $rfqRecipient->shop_id
             && ! $rfqRecipient->isTerminal();
     }

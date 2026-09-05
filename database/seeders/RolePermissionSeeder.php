@@ -27,12 +27,20 @@ final class RolePermissionSeeder extends Seeder
         // Create permissions
         $permissions = [
             'onboarding.review',
+            'certification.view',
             'category.manage',
             'document.view_any',
             'shop.manage_own',
             'product.manage_own',
             'directory.browse',
             'payout.release',
+            // Phase 6 permissions
+            'subscription.manage',
+            'certification.review',
+            'sponsored_content.manage',
+            'rfq.manage',
+            'merchant.manage',
+            'product.moderate',
         ];
 
         foreach ($permissions as $permission) {
@@ -43,9 +51,16 @@ final class RolePermissionSeeder extends Seeder
         $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin->syncPermissions([
             'onboarding.review',
+            'certification.view',
             'category.manage',
             'document.view_any',
             'payout.release',
+            'subscription.manage',
+            'certification.review',
+            'sponsored_content.manage',
+            'rfq.manage',
+            'merchant.manage',
+            'product.moderate',
         ]);
 
         $seller = Role::firstOrCreate(['name' => 'seller', 'guard_name' => 'web']);

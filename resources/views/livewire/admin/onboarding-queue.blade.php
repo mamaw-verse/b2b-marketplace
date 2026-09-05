@@ -84,7 +84,7 @@
                                     wire:navigate
                                     x-on:click.stop
                                 >
-                                    Review
+                                    {{ $onboarding->status === 'submitted' ? 'Review' : 'View' }}
                                 </flux:button>
                             </flux:table.cell>
                         </flux:table.row>

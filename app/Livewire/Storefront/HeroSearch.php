@@ -52,6 +52,7 @@ final class HeroSearch extends Component
     {
         return Shop::with(['categories', 'certificates'])
             ->where('status', 'active')
+            ->where('country_code', config('marketplace.instance_country'))
             ->latest()
             ->take(6)
             ->get();
@@ -63,8 +64,8 @@ final class HeroSearch extends Component
     #[Computed]
     public function featuredProducts(): Collection
     {
-        return Product::with(['shop', 'variants'])
-            ->where('status', 'published')
+        return Product::marketplaceVisible()
+            ->with(['shop', 'variants'])
             ->latest()
             ->take(8)
             ->get();
@@ -86,10 +87,41 @@ final class HeroSearch extends Component
     public function stats(): array
     {
         return [
-            'companies' => Shop::where('status', 'active')->count(),
-            'products' => Product::where('status', 'published')->count(),
+            'companies' => Shop::where('status', 'active')->where('country_code', config('marketplace.instance_country'))->count(),
+            'products' => Product::marketplaceVisible()->count(),
             'categories' => Category::count(),
         ];
+    }
+
+    /**
+     * All known country portals from config, excluding the current instance.
+     *
+     * @return array<int, array<string, string|null>>
+     */
+    #[Computed]
+    public function otherPortals(): array
+    {
+        $instanceCountry = config('marketplace.instance_country');
+
+        return collect(config('marketplace.portals', []))
+            ->reject(fn (array $p) => $p['country_code'] === $instanceCountry)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * The current instance's portal entry from config.
+     *
+     * @return array<string, string|null>
+     */
+    #[Computed]
+    public function instancePortal(): array
+    {
+        $instanceCountry = config('marketplace.instance_country');
+
+        return collect(config('marketplace.portals', []))
+            ->firstWhere('country_code', $instanceCountry)
+            ?? ['country_code' => $instanceCountry, 'display_name' => $instanceCountry, 'flag' => '🌐', 'locale' => 'en', 'url' => null];
     }
 
     public function render(): View

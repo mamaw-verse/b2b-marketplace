@@ -8,6 +8,7 @@ use App\Events\OrderCancelled;
 use App\Events\OrderCompleted;
 use App\Events\OrderDelivered;
 use App\Events\OrderPaid;
+use App\Events\OrderReturned;
 use App\Events\OrderShipped;
 use App\Models\ConversationThread;
 use App\Models\Message;
@@ -41,6 +42,11 @@ final class PostOrderStatusMessage
         $this->postMessage($event->order);
     }
 
+    public function handleOrderReturned(OrderReturned $event): void
+    {
+        $this->postMessage($event->order);
+    }
+
     /**
      * Register the listeners for the subscriber.
      */
@@ -51,6 +57,7 @@ final class PostOrderStatusMessage
         $events->listen(OrderDelivered::class, [self::class, 'handleOrderDelivered']);
         $events->listen(OrderCompleted::class, [self::class, 'handleOrderCompleted']);
         $events->listen(OrderCancelled::class, [self::class, 'handleOrderCancelled']);
+        $events->listen(OrderReturned::class, [self::class, 'handleOrderReturned']);
     }
 
     private function postMessage(Order $order): void

@@ -11,9 +11,9 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $onboarding_id
- * @property string $certification_body
+ * @property string|null $certification_body
  * @property string|null $certification_body_other
- * @property string $registration_number
+ * @property string|null $registration_number
  * @property Carbon|null $expiry_date
  * @property int|null $media_id
  * @property Carbon|null $created_at

@@ -1,7 +1,7 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Arbitrate Dispute — Order #{{ $dispute->order_id }}</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">Arbitrate Dispute — {{ $dispute->order->order_number }}</h1>
         </div>
 
         @if (session('error'))

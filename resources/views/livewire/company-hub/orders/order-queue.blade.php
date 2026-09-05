@@ -44,7 +44,7 @@
                         <tbody>
                             @foreach ($this->orders as $order)
                                 <tr class="border-b border-[var(--hs-neutral-50)] hover:bg-[var(--hs-neutral-50)]">
-                                    <td class="py-3 px-2 font-medium text-[var(--hs-neutral-900)]">#{{ $order->id }}</td>
+                                    <td class="py-3 px-2 font-medium text-[var(--hs-neutral-900)]">{{ $order->order_number }}</td>
                                     <td class="py-3 px-2 text-[var(--hs-neutral-700)]">{{ $order->customer_business_name ?? $order->buyer?->first_name }}</td>
                                     <td class="py-3 px-2 text-[var(--hs-neutral-900)] font-medium">{{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</td>
                                     <td class="py-3 px-2"><x-hs-status-pill :status="$order->status" /></td>

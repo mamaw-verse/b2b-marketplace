@@ -65,6 +65,8 @@ final class ShopOnboarding extends Model
         'export_readiness_status',
         'value_chain_positions',
         'capabilities',
+        'company_description',
+        'products_description',
         'status',
         'shop_id',
         'admin_notes',

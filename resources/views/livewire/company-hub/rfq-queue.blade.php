@@ -18,7 +18,7 @@
                     'received' => 'New',
                     'reviewed' => 'Reviewed',
                     'in_progress' => 'In Progress',
-                    'no_bid' => 'Declined',
+                    'closed' => 'Closed',
                 ];
             @endphp
             @foreach ($statuses as $value => $label)

@@ -70,65 +70,49 @@ final class RfqDetail extends Component
     }
 
     /**
-     * S4.T10: Close (no_bid) this RFQ with an optional reason.
+     * S4.T10: Close this RFQ recipient with an optional reason.
      *
-     * Mirrors the buyer-side close: withdraws any still-submitted quotations and
-     * always notifies the buyer that the seller has closed the RFQ, regardless of
-     * whether a quotation existed, since the seller is no longer pursuing it.
+     * Sets the recipient status to 'closed', marks any pending (submitted) quotations
+     * as 'not_awarded', and keeps any awarded quotations intact. Also closes the
+     * parent RFQ if no awarded quotation exists on the whole RFQ.
      */
     public function closeRfq(): void
     {
-        Gate::authorize('decline', $this->rfqRecipient);
+        Gate::authorize('close', $this->rfqRecipient);
 
-        $submitted = DB::transaction(function () {
+        DB::transaction(function () {
             $this->rfqRecipient->update([
-                'status' => 'no_bid',
+                'status' => 'closed',
                 'decline_reason' => $this->closeReason ?: null,
                 'last_activity_at' => now(),
             ]);
 
-            // Withdraw any submitted quotations owned by this recipient.
-            $submitted = $this->rfqRecipient->quotations()
+            // Invalidate all pending (submitted) quotations for this recipient.
+            // Awarded quotations are retained as-is.
+            $this->rfqRecipient->quotations()
                 ->where('status', 'submitted')
-                ->get();
+                ->update(['status' => 'not_awarded']);
 
-            foreach ($submitted as $quotation) {
-                $quotation->update(['status' => 'withdrawn']);
-            }
-
-            // Phase 1 has a single recipient per RFQ, so a seller close means no
-            // seller is pursuing the request. Close the parent RFQ too (unless a
-            // quotation was already awarded) so the buyer view reflects the same
-            // terminal state as a buyer-initiated close and can no longer act on it.
+            // Close the parent RFQ too if there are no awarded quotations anywhere
+            // on the RFQ (single-recipient phase: seller close = no one pursuing it).
             $rfq = $this->rfqRecipient->rfq;
 
-            $hasAwarded = $rfq->quotations()->where('status', 'awarded')->exists();
-
-            if (! $rfq->isClosed() && ! $hasAwarded) {
+            if (! $rfq->isClosed() && ! $rfq->quotations()->where('status', 'awarded')->exists()) {
                 $rfq->update([
                     'status' => 'closed',
                     'closed_at' => now(),
                     'last_activity_at' => now(),
                 ]);
             }
-
-            return $submitted;
         });
 
-        // Notify the buyer per withdrawn quotation (outside the transaction).
-        foreach ($submitted as $quotation) {
-            $this->notifyBuyerOfWithdrawal($quotation);
-        }
-
         $this->rfqRecipient->refresh();
-
-        // Always notify the buyer that the seller closed this RFQ, so the close
-        // has the same visible effect as a buyer-initiated close even when the
-        // seller never submitted a quotation.
-        $buyer = $this->rfqRecipient->rfq->user;
-        $buyer?->notify(new RfqNoBidNotification($this->rfqRecipient, reason: 'seller_closed'));
-
         $this->showCloseModal = false;
+
+        // Notify the buyer that the seller has closed this RFQ.
+        $this->rfqRecipient->rfq->user?->notify(
+            new RfqNoBidNotification($this->rfqRecipient, reason: 'seller_closed')
+        );
 
         \Flux\Flux::toast('RFQ closed.', variant: 'warning');
     }

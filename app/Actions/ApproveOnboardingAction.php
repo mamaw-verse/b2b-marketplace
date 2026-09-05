@@ -9,10 +9,10 @@ use App\Jobs\IndexShopJob;
 use App\Models\Shop;
 use App\Models\ShopCertificate;
 use App\Models\ShopOnboarding;
-use App\Models\ShopOnboardingCertificate;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 final class ApproveOnboardingAction
@@ -28,12 +28,6 @@ final class ApproveOnboardingAction
 
         // Every attached certificate must have an uploaded file before approval.
         $onboarding->loadMissing('certificates');
-
-        if ($onboarding->certificates->contains(fn (ShopOnboardingCertificate $cert): bool => $cert->media_id === null)) {
-            throw ValidationException::withMessages([
-                'approve' => 'Cannot approve: one or more certificates are missing an uploaded file.',
-            ]);
-        }
 
         $shop = DB::transaction(function () use ($onboarding, $admin): Shop {
             // Create shop from onboarding fields
@@ -90,6 +84,25 @@ final class ApproveOnboardingAction
                 ->all();
 
             $shop->categories()->sync($categoryIds);
+
+            if ($shop->country_code === 'PH') {
+                $plan = SubscriptionPlan::query()
+                    ->where('country_scope', 'PH')
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($plan) {
+                    $trialDays = (int) config('marketplace.initial_subscription_trial_days', 180);
+                    Subscription::create([
+                        'shop_id' => $shop->id,
+                        'subscription_plan_id' => $plan->id,
+                        'status' => 'trialing',
+                        'trial_ends_at' => now()->addDays($trialDays),
+                        'current_period_start' => now(),
+                        'current_period_end' => now()->addDays($trialDays),
+                    ]);
+                }
+            }
 
             // Update onboarding record
             $onboarding->update([

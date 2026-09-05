@@ -95,6 +95,7 @@ final class CreateOrderAction
                 $subtotal = bcmul((string) $quotationItem->quantity, $itemData['unit_price'], 2);
 
                 $order->items()->create([
+                    'product_id' => $quotationItem->product_id,
                     'variant_id' => $quotationItem->variant_id,
                     'variant_snapshot' => $quotationItem->variant_snapshot,
                     'description' => $itemData['description'],
@@ -198,12 +199,13 @@ final class CreateOrderAction
      */
     private function resolveItemData(object $quotationItem): array
     {
-        // Priority 1: variant_snapshot is non-null
+        // Priority 1: variant_snapshot is non-null — use snapshot for unit only;
+        // the negotiated price is always on the quotation item itself.
         if ($quotationItem->variant_snapshot !== null) {
             return [
                 'description' => $quotationItem->description,
                 'unit' => $quotationItem->variant_snapshot['unit'] ?? $quotationItem->unit,
-                'unit_price' => (string) ($quotationItem->variant_snapshot['unit_price'] ?? $quotationItem->unit_price),
+                'unit_price' => (string) $quotationItem->unit_price,
             ];
         }
 
@@ -215,7 +217,7 @@ final class CreateOrderAction
                 return [
                     'description' => $quotationItem->description,
                     'unit' => $variant->unit,
-                    'unit_price' => (string) $variant->price,
+                    'unit_price' => (string) $quotationItem->unit_price,
                 ];
             }
         }

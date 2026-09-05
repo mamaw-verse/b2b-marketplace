@@ -11,11 +11,19 @@ final class ConversationPolicy
 {
     public function view(User $user, Conversation $conversation): bool
     {
+        if (! config('marketplace.features.chat_enabled')) {
+            return false;
+        }
+
         return $conversation->hasParticipant($user);
     }
 
     public function createThread(User $user, Conversation $conversation): bool
     {
+        if (! config('marketplace.features.chat_enabled')) {
+            return false;
+        }
+
         return $conversation->hasParticipant($user);
     }
 }

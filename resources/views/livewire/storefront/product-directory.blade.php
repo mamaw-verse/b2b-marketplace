@@ -190,6 +190,10 @@
         </div>
     </section>
 
+    {{-- ── Sponsored Content — Category Page Placement ────── --}}
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <livewire:shared.sponsored-content-banner placement="category_page" />
+    </div>
 
     {{-- ═══════════════════════════════════════════════════════════
          PRODUCT GRID

@@ -16,3 +16,9 @@ paths:
 - Card payments return synchronous `payment_status` (PAID/PENDING/REJECTED); e-wallet returns `payment_url` for redirect.
 - All requests need `->asJson()->acceptJson()` headers.
 - Amount is sent as string decimal for Submit Payment ("100.00"), numeric for Quick Link (100.00).
+
+## DLT Quick Link: product_description is required despite docs saying optional
+DLT's /api/v1/quick-link/session endpoint returns a 500 "Undefined array key product_description" if product_description is omitted, even though the official docs mark it as optional. Always send product_description — use product_name as the fallback value if you don't have a separate description. Same applies to merchant_transaction_id: must be strictly alphanumeric (no hyphens/dashes), max 45 chars, despite docs saying dash/underscore are allowed.
+
+## DLT Quick Link: data.website is the merchant site, not the checkout URL
+data.website in the Quick Link session response is the merchant's own website URL (e.g. 1halastore.com), NOT the DLT-hosted checkout page. The actual payor checkout URL is always: https://checkout-ql.dltc.com.ph/?merchant={merchant_account_id}&transaction_id={merchant_transaction_id}&amount={amount}&quantity=1. Never use data.website as the redirect target.

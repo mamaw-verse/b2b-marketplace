@@ -20,6 +20,21 @@
         />
     </div>
 
+
+    <flux:textarea
+        wire:model.blur="form.company_description"
+        :label="__('Company Description')"
+        rows="4"
+        required
+    />
+
+    <flux:textarea
+        wire:model.blur="form.products_description"
+        :label="__('Products Description')"
+        rows="4"
+        required
+    />
+
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
         <flux:select wire:model.blur="form.business_structure" :label="__('Business Structure')" placeholder="Select structure...">
             <flux:select.option value="sole_proprietorship">{{ __('Sole Proprietorship') }}</flux:select.option>

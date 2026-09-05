@@ -32,18 +32,16 @@ beforeEach(function () {
     ]);
 });
 
-// ── S4.T10 — Rename Decline → Close ──────────────────────────────────────────
+// ── S4.T10 — Close (replaces Decline / no_bid) ───────────────────────────────
 
-test('the actions bar shows a Close button instead of Decline', function () {
+test('the actions bar shows a Close button and no Decline button', function () {
     Livewire::actingAs($this->seller)
         ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
         ->assertSee('Close')
         ->assertDontSee('Decline');
 });
 
-test('closeRfq marks the recipient no_bid with the close reason', function () {
-    Notification::fake();
-
+test('closeRfq sets the recipient status to closed', function () {
     Livewire::actingAs($this->seller)
         ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
         ->set('closeReason', 'Cannot fulfil this volume.')
@@ -52,62 +50,45 @@ test('closeRfq marks the recipient no_bid with the close reason', function () {
 
     $this->assertDatabaseHas('rfq_recipients', [
         'id' => $this->recipient->id,
-        'status' => 'no_bid',
+        'status' => 'closed',
         'decline_reason' => 'Cannot fulfil this volume.',
     ]);
+});
 
-    // The parent RFQ must also close so the buyer view reflects the terminal state.
+test('closeRfq also closes the parent RFQ when no quotation is awarded', function () {
+    Livewire::actingAs($this->seller)
+        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
+        ->call('closeRfq');
+
     $this->assertDatabaseHas('rfqs', [
         'id' => $this->rfq->id,
         'status' => 'closed',
     ]);
     expect($this->rfq->fresh()->closed_at)->not->toBeNull();
-
-    Notification::assertSentTo(
-        $this->buyer,
-        RfqNoBidNotification::class,
-        fn (RfqNoBidNotification $n) => $n->reason === 'seller_closed'
-    );
 });
 
-test('closeRfq does not close the parent RFQ when a quotation was already awarded', function () {
-    Notification::fake();
-
-    Quotation::factory()->create([
+test('closeRfq does not close the parent RFQ when a quotation has already been awarded', function () {
+    Quotation::factory()->awarded()->create([
         'rfq_id' => $this->rfq->id,
         'rfq_recipient_id' => $this->recipient->id,
-        'status' => 'awarded',
     ]);
 
     Livewire::actingAs($this->seller)
         ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
         ->call('closeRfq');
 
+    // Recipient is closed, but parent RFQ remains open (awarded quotation present).
+    $this->assertDatabaseHas('rfq_recipients', [
+        'id' => $this->recipient->id,
+        'status' => 'closed',
+    ]);
     $this->assertDatabaseHas('rfqs', [
         'id' => $this->rfq->id,
         'status' => 'open',
     ]);
 });
 
-test('closeRfq notifies the buyer even when no quotation was submitted', function () {
-    Notification::fake();
-
-    Livewire::actingAs($this->seller)
-        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
-        ->call('closeRfq');
-
-    // No quotation to withdraw, but the buyer still learns the seller closed it.
-    Notification::assertNotSentTo($this->buyer, QuotationWithdrawnNotification::class);
-    Notification::assertSentTo(
-        $this->buyer,
-        RfqNoBidNotification::class,
-        fn (RfqNoBidNotification $n) => $n->reason === 'seller_closed'
-    );
-});
-
-test('closeRfq withdraws submitted quotations and notifies the buyer', function () {
-    Notification::fake();
-
+test('closeRfq marks submitted quotations as not_awarded', function () {
     $quotation = Quotation::factory()->submitted()->create([
         'rfq_id' => $this->rfq->id,
         'rfq_recipient_id' => $this->recipient->id,
@@ -119,10 +100,49 @@ test('closeRfq withdraws submitted quotations and notifies the buyer', function 
 
     $this->assertDatabaseHas('quotations', [
         'id' => $quotation->id,
-        'status' => 'withdrawn',
+        'status' => 'not_awarded',
+    ]);
+});
+
+test('closeRfq retains awarded quotations unchanged', function () {
+    $awarded = Quotation::factory()->awarded()->create([
+        'rfq_id' => $this->rfq->id,
+        'rfq_recipient_id' => $this->recipient->id,
     ]);
 
-    Notification::assertSentTo($this->buyer, QuotationWithdrawnNotification::class);
+    Livewire::actingAs($this->seller)
+        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
+        ->call('closeRfq');
+
+    $this->assertDatabaseHas('quotations', [
+        'id' => $awarded->id,
+        'status' => 'awarded',
+    ]);
+});
+
+test('closeRfq notifies the buyer with seller_closed reason', function () {
+    Notification::fake();
+
+    Livewire::actingAs($this->seller)
+        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
+        ->set('closeReason', 'Cannot fulfil this volume.')
+        ->call('closeRfq');
+
+    Notification::assertSentTo(
+        $this->buyer,
+        RfqNoBidNotification::class,
+        fn ($n) => $n->reason === 'seller_closed'
+            && $n->rfqRecipient->decline_reason === 'Cannot fulfil this volume.'
+    );
+});
+
+test('a seller cannot close an already-closed recipient', function () {
+    $this->recipient->update(['status' => 'closed']);
+
+    Livewire::actingAs($this->seller)
+        ->test(RfqDetail::class, ['rfqRecipient' => $this->recipient])
+        ->call('closeRfq')
+        ->assertForbidden();
 });
 
 // ── S4.T11 — Expandable line items + Withdraw ────────────────────────────────

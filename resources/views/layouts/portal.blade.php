@@ -18,21 +18,14 @@
 <body class="min-h-screen flex flex-col bg-[var(--hs-neutral-50)] text-[var(--hs-neutral-900)]">
     @php
         $user = auth()->user();
-        $hasCompanyAccount = $user?->hasRole('seller') || $user?->shop()->exists();
 
-        // Detect the active portal from the current route first so that
-        // /account/* pages always render the buyer (account) nav — even for
-        // users who also own a shop. Falls back to hub for company accounts.
+        // Phase 6: unified portal — no longer a separate hub vs account split.
+        // Admin keeps its own portal; all other authenticated users use the
+        // single 'portal' context regardless of whether they're a buyer or seller.
         if ($user?->hasRole('admin')) {
             $portal = 'admin';
-        } elseif (request()->routeIs('account.*')) {
-            $portal = 'account';
-        } elseif (request()->routeIs('hub.*')) {
-            $portal = 'hub';
-        } elseif ($hasCompanyAccount) {
-            $portal = 'hub';
-        } elseif (! isset($portal) || ! in_array($portal, ['hub', 'account'], true)) {
-            $portal = 'account';
+        } else {
+            $portal = 'portal';
         }
     @endphp
     @include('partials.portal-header')

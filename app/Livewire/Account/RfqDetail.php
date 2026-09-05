@@ -140,15 +140,11 @@ final class RfqDetail extends Component
             return;
         }
 
-        // S4.T9: cascade — close every recipient seller that is not already in a
-        // terminal state (no_bid) and has not had a quotation awarded, so they no
-        // longer see this as an open RFQ. NOTE: the rfq_recipient_status enum has
-        // no 'awarded' value (awarding lives on the quotation), so we express the
-        // "not awarded" exclusion via the quotations relation rather than a status
-        // literal, which Postgres would reject.
+        // Cascade: close every recipient that is not already in a terminal state.
+        // This mirrors the seller-side close — all non-terminal recipients (including
+        // those with awarded quotations) are moved to 'closed'.
         $this->rfq->recipients()
-            ->where('status', '!=', 'no_bid')
-            ->whereDoesntHave('quotations', fn ($q) => $q->where('status', 'awarded'))
+            ->whereNotIn('status', ['closed', 'no_bid'])
             ->update(['status' => 'closed']);
 
         $this->showCloseConfirmation = false;

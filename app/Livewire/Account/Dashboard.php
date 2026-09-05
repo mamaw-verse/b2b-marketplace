@@ -35,10 +35,11 @@ final class Dashboard extends Component
                     ->orWhereHas('fulfilments', fn ($f) => $f->where('status', 'pending')))
                 ->count(),
             'to_receive' => Order::where('buyer_user_id', $buyerId)
+                ->whereNotIn('status', ['completed', 'cancelled', 'refunded'])
                 ->whereHas('fulfilments', fn ($f) => $f->whereIn('status', ['shipped', 'delivered']))
                 ->count(),
             'completed' => Order::where('buyer_user_id', $buyerId)
-                ->where('status', 'completed')->count(),
+                ->whereIn('status', ['completed', 'refunded'])->count(),
         ];
     }
 

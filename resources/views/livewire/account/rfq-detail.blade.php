@@ -18,9 +18,14 @@
                 </div>
             </div>
 
-            {{-- Seller closed the RFQ: show notice + reason when available --}}
-            @php $closedRecipient = $rfq->recipients->firstWhere('status', 'no_bid'); @endphp
-            @if ($closedRecipient)
+            {{-- Seller closed the RFQ: show notice whenever a recipient has a
+                 terminal status (closed or no_bid). The buyer-close path sets the
+                 parent RFQ to 'closed' too, so we distinguish the two cases:
+                 - rfq open + terminal recipient  → seller self-closed
+                 - rfq closed + terminal recipient with decline_reason → seller closed first, buyer may have followed
+                 Either way, show the seller's reason when one was given. --}}
+            @php $closedRecipient = $rfq->recipients->first(fn ($r) => in_array($r->status, ['closed', 'no_bid'])); @endphp
+            @if ($closedRecipient && ($rfq->isOpen() || $closedRecipient->decline_reason))
                 <div class="px-6 py-4 border-b border-[var(--hs-neutral-100)]">
                     <div class="flex items-start gap-3 rounded-[var(--hs-radius-card)] bg-[var(--hs-warning-50)] border border-[var(--hs-warning-200)] p-3.5">
                         <flux:icon name="x-circle" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-warning-500)]" />
@@ -39,8 +44,9 @@
                 </div>
             @endif
 
-            {{-- Close RFQ Action --}}
-            @if ($rfq->isOpen())
+            {{-- Close RFQ Action: only visible when the RFQ is open and the seller
+                 has not already self-closed (any terminal recipient hides the button). --}}
+            @if ($rfq->isOpen() && ! $rfq->recipients->contains(fn ($r) => $r->isTerminal()))
                 <div class="px-6 py-3 border-b border-[var(--hs-neutral-100)]">
                     <flux:button
                         variant="ghost"

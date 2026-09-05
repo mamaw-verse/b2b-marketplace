@@ -26,8 +26,13 @@
         <div class="min-h-0 flex-1 overflow-y-auto border-t border-[var(--hs-neutral-100)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--hs-neutral-200)] hover:[&::-webkit-scrollbar-thumb]:bg-[var(--hs-neutral-300)]">
             @forelse ($this->conversations as $conversation)
                 @php
-                    $storeName = $conversation->shop->storefront_name;
-                    $initials = strtoupper(mb_substr($storeName, 0, 2));
+                    if ($portal === 'hub') {
+                        $displayName = $conversation->buyer->buyerProfile?->business_name
+                            ?: trim($conversation->buyer->first_name . ' ' . $conversation->buyer->last_name);
+                    } else {
+                        $displayName = $conversation->shop->storefront_name;
+                    }
+                    $initials = strtoupper(mb_substr($displayName, 0, 2));
                     $isActive = $selectedConversationId === $conversation->id;
                     $unreadCount = $conversation->unreadCountFor(auth()->user());
                 @endphp
@@ -45,7 +50,7 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
                             <p class="{{ $isActive ? 'font-bold text-[var(--hs-neutral-900)]' : 'font-semibold text-[var(--hs-neutral-800)]' }} truncate text-xs leading-tight">
-                                {{ $storeName }}
+                                {{ $displayName }}
                             </p>
                             <span class="shrink-0 text-[10px] font-medium text-[var(--hs-neutral-400)]">
                                 {{ $conversation->updated_at->diffForHumans(null, true) }}
@@ -79,8 +84,13 @@
         @if ($selectedConversationId)
             @php
                 $selectedConversation = $this->conversations->firstWhere('id', $selectedConversationId);
-                $storeName = $selectedConversation?->shop?->storefront_name ?? '';
-                $initials = strtoupper(mb_substr($storeName, 0, 2));
+                if ($portal === 'hub') {
+                    $displayName = $selectedConversation?->buyer?->buyerProfile?->business_name
+                        ?: trim(($selectedConversation?->buyer?->first_name ?? '') . ' ' . ($selectedConversation?->buyer?->last_name ?? ''));
+                } else {
+                    $displayName = $selectedConversation?->shop?->storefront_name ?? '';
+                }
+                $initials = strtoupper(mb_substr($displayName, 0, 2));
             @endphp
 
             {{-- Chat Header --}}
@@ -92,7 +102,7 @@
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2">
-                                <h1 class="truncate text-sm font-bold text-[var(--hs-neutral-900)]">{{ $storeName }}</h1>
+                                <h1 class="truncate text-sm font-bold text-[var(--hs-neutral-900)]">{{ $displayName }}</h1>
                                 <span class="size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]"></span>
                             </div>
                             <p class="text-[11px] text-[var(--hs-neutral-500)]">{{ __('Active conversation') }}</p>
@@ -187,7 +197,7 @@
                             <div class="flex items-center gap-3 px-5 py-2.5 bg-[var(--hs-green-50)] border-b border-[var(--hs-neutral-200)]">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-semibold text-[var(--hs-neutral-900)] truncate">
-                                        Order #{{ $stripOrder->id }} · {{ $stripOrder->items()->first()?->description ?? 'Order' }}
+                                        Order #{{ $stripOrder->order_number }} · {{ $stripOrder->items()->first()?->description ?? 'Order' }}
                                     </p>
                                     <p class="text-[11px] text-[var(--hs-neutral-500)] truncate">
                                         {{ $stripOrder->items()->count() }} {{ Str::plural('item', $stripOrder->items()->count()) }} · {{ $stripOrder->currency }} {{ number_format((float) $stripOrder->order_total, 2) }}

@@ -92,7 +92,7 @@ final class HubProductController extends Controller
      */
     public function publish(Request $request, Product $product): JsonResponse
     {
-        Gate::authorize('update', $product);
+        Gate::authorize('publish', $product);
 
         $publishedVariantCount = $product->variants()
             ->where('status', 'published')
@@ -106,7 +106,7 @@ final class HubProductController extends Controller
 
         $product->update(['status' => 'published']);
 
-        IndexProductJob::dispatch($product);
+        IndexProductJob::dispatch($product)->afterCommit();
 
         return response()->json(['data' => $product]);
     }

@@ -16,6 +16,10 @@ final class DisputePolicy
      */
     public function create(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         if ($user->id !== $order->buyer_user_id) {
             return false;
         }
@@ -36,6 +40,10 @@ final class DisputePolicy
      */
     public function view(User $user, Dispute $dispute): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         $order = $dispute->order;
 
         return $user->id === $order->buyer_user_id
@@ -50,6 +58,10 @@ final class DisputePolicy
      */
     public function resolve(User $user, Dispute $dispute): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         if ($user->id !== $dispute->order->shop->user_id) {
             return false;
         }
@@ -68,6 +80,10 @@ final class DisputePolicy
      */
     public function confirmReturn(User $user, Dispute $dispute): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         if ($user->id !== $dispute->order->shop->user_id) {
             return false;
         }
@@ -82,6 +98,10 @@ final class DisputePolicy
      */
     public function escalate(User $user, Dispute $dispute): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         $order = $dispute->order;
         $isParticipant = $user->id === $order->buyer_user_id
             || $user->id === $order->shop->user_id;
@@ -103,6 +123,10 @@ final class DisputePolicy
      */
     public function withdraw(User $user, Dispute $dispute): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         if ($user->id !== $dispute->opened_by_user_id) {
             return false;
         }
@@ -119,6 +143,10 @@ final class DisputePolicy
      */
     public function arbitrate(User $user, Dispute $dispute): bool
     {
+        if (! config('marketplace.features.disputes_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin')
             && $dispute->status === 'escalated';
     }

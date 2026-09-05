@@ -4,30 +4,21 @@
         <flux:text class="mt-1">{{ __('Tell us about your production capabilities and export readiness.') }}</flux:text>
     </div>
 
-    <div>
-        <flux:label>{{ __('Product Categories') }}</flux:label>
-        <flux:text class="mt-1 mb-3">{{ __('Select the product categories you sell or manufacture.') }}</flux:text>
-
+    <flux:checkbox.group wire:model="form.product_categories" :label="__('Product Categories')" :description="__('Select the product categories you sell or manufacture.')">
         @if ($this->categories->isEmpty())
             <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No categories are available yet.') }}</p>
         @else
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @foreach ($this->categories as $category)
-                    <label
-                        wire:key="category-{{ $category->id }}"
-                        class="flex items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 text-sm text-[var(--hs-neutral-800)] cursor-pointer hover:border-[var(--hs-green-400)] transition"
-                    >
-                        <flux:checkbox wire:model="form.product_categories" value="{{ $category->id }}" />
-                        <span>{{ $category->name }}</span>
-                    </label>
+                    <flux:checkbox wire:key="category-{{ $category->id }}" value="{{ $category->id }}" :label="$category->name" />
                 @endforeach
             </div>
         @endif
+    </flux:checkbox.group>
 
-        @error('form.product_categories')
-            <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
-        @enderror
-    </div>
+    @error('form.product_categories')
+        <p class="-mt-4 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
+    @enderror
 
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <flux:input

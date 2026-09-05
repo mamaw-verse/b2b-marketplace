@@ -21,6 +21,10 @@ final class QuotationExpiryJob implements ShouldQueue
 
     public function handle(): void
     {
+        if (! config('marketplace.features.quotations_enabled')) {
+            return;
+        }
+
         $quotations = Quotation::where('status', 'submitted')
             ->where('valid_until', '<', now())
             ->with(['rfq.user', 'rfqRecipient.shop.user'])

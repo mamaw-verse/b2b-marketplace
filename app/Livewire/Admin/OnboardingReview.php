@@ -6,11 +6,13 @@ namespace App\Livewire\Admin;
 
 use App\Actions\ApproveOnboardingAction;
 use App\Events\OnboardingStatusChanged;
+use App\Models\Category;
 use App\Models\Media;
 use App\Models\ShopOnboarding;
 use App\Services\MediaUploadService;
 use Illuminate\Support\Facades\Auth;
 use InvalidArgumentException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -33,6 +35,29 @@ final class OnboardingReview extends Component
 
     public bool $showActionModal = false;
 
+    #[Computed]
+    public function productCategoryNames(): array
+    {
+        if (! $this->onboarding->product_categories) {
+            return [];
+        }
+
+        $ids = collect(explode(',', $this->onboarding->product_categories))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return [];
+        }
+
+        return Category::whereIn('id', $ids)
+            ->get(['id', 'name'])
+            ->pluck('name')
+            ->toArray();
+    }
+
     public function mount(ShopOnboarding $onboarding): void
     {
         $this->onboarding = $onboarding->load(['user', 'certificates.media', 'documents']);
@@ -40,6 +65,10 @@ final class OnboardingReview extends Component
 
     public function approve(ApproveOnboardingAction $approveAction): void
     {
+        if ($this->onboarding->status !== 'submitted') {
+            return;
+        }
+
         $approveAction->execute($this->onboarding, Auth::user());
 
         session()->flash('message', 'Onboarding approved successfully. Shop has been created.');
@@ -49,6 +78,10 @@ final class OnboardingReview extends Component
 
     public function openActionModal(string $action): void
     {
+        if ($this->onboarding->status !== 'submitted') {
+            return;
+        }
+
         $this->action = $action;
         $this->notes = '';
         $this->showActionModal = true;
@@ -56,6 +89,10 @@ final class OnboardingReview extends Component
 
     public function submitAction(): void
     {
+        if ($this->onboarding->status !== 'submitted') {
+            return;
+        }
+
         $this->validate([
             'notes' => 'required|string|min:1',
         ]);

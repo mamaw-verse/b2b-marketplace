@@ -70,3 +70,60 @@ test('to_receive tab excludes completed orders', function () {
 
     expect($component->instance()->tabCounts()['to_receive'])->toBe(1);
 });
+
+test('confirm receive button visible only for delivered orders', function () {
+    $delivered = Order::factory()->create([
+        'buyer_user_id' => $this->buyer->id,
+        'shop_id' => $this->shop->id,
+        'status' => 'paid',
+    ]);
+    Fulfilment::factory()->delivered()->create(['order_id' => $delivered->id]);
+
+    $component = Livewire::actingAs($this->buyer)
+        ->test(OrderList::class)
+        ->set('tab', 'to_receive');
+
+    $component->assertSee('Confirm Receive');
+});
+
+test('confirm receive button hidden for shipped order', function () {
+    $shipped = Order::factory()->create([
+        'buyer_user_id' => $this->buyer->id,
+        'shop_id' => $this->shop->id,
+        'status' => 'paid',
+    ]);
+    Fulfilment::factory()->shipped()->create(['order_id' => $shipped->id]);
+
+    $component = Livewire::actingAs($this->buyer)
+        ->test(OrderList::class)
+        ->set('tab', 'to_receive');
+
+    $html = $component->html();
+
+    expect($html)->not->toContain('Confirm Receive');
+});
+
+test('confirmReceived uses ConfirmReceiptAction and creates payout ledger entry', function () {
+    $order = Order::factory()->create([
+        'buyer_user_id' => $this->buyer->id,
+        'shop_id' => $this->shop->id,
+        'status' => 'paid',
+        'order_total' => 1000.00,
+        'items_total' => 1000.00,
+        'fees_total' => 0.00,
+    ]);
+    Fulfilment::factory()->delivered()->create(['order_id' => $order->id]);
+
+    Livewire::actingAs($this->buyer)
+        ->test(OrderList::class)
+        ->call('confirmReceived', $order->id);
+
+    $this->assertDatabaseHas('orders', [
+        'id' => $order->id,
+        'status' => 'completed',
+    ]);
+    $this->assertDatabaseHas('ledger_entries', [
+        'order_id' => $order->id,
+        'type' => 'payout',
+    ]);
+});

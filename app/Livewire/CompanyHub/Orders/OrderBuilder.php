@@ -54,7 +54,7 @@ final class OrderBuilder extends Component
 
     public string $shippingZipCode = '';
 
-    // Product/variant search (S4.T17)
+    // Product/variant search — only used for standalone (non-quotation) orders.
     public string $productSearch = '';
 
     // Items and fees managed via Alpine.js (sent on save)
@@ -69,7 +69,19 @@ final class OrderBuilder extends Component
     }
 
     /**
+     * Whether this order was created from a quotation.
+     * When true, items are locked — they come from the awarded quotation and
+     * cannot be added, edited, or removed.
+     */
+    #[Computed]
+    public function fromQuotation(): bool
+    {
+        return $this->order()?->quotation_id !== null;
+    }
+
+    /**
      * Search this shop's published product variants by product name or SKU.
+     * Only relevant for standalone (non-quotation) orders.
      *
      * @return Collection<int, ProductVariant>
      */
@@ -196,26 +208,30 @@ final class OrderBuilder extends Component
             'shipping_zip_code' => $this->shippingZipCode,
         ]);
 
-        // Replace items
-        $order->items()->delete();
-        $itemRows = [];
-        foreach ($this->items as $index => $item) {
-            if (empty($item['description'])) {
-                continue;
+        // Replace items — only allowed on standalone (non-quotation) orders.
+        // When an order originates from a quotation the items are locked to the
+        // negotiated quotation prices and cannot be mutated here.
+        if (! $this->fromQuotation()) {
+            $order->items()->delete();
+            $itemRows = [];
+            foreach ($this->items as $index => $item) {
+                if (empty($item['description'])) {
+                    continue;
+                }
+                $itemRows[] = [
+                    'description' => $item['description'],
+                    'quantity' => $item['quantity'] ?? 1,
+                    'unit' => $item['unit'] ?? 'pcs',
+                    'unit_price' => $item['unit_price'] ?? 0,
+                    'subtotal' => round(((float) ($item['quantity'] ?? 0)) * ((float) ($item['unit_price'] ?? 0)), 2),
+                    'sort_order' => $index,
+                    'variant_id' => $item['variant_id'] ?? null,
+                    'variant_snapshot' => $item['variant_snapshot'] ?? null,
+                ];
             }
-            $itemRows[] = [
-                'description' => $item['description'],
-                'quantity' => $item['quantity'] ?? 1,
-                'unit' => $item['unit'] ?? 'pcs',
-                'unit_price' => $item['unit_price'] ?? 0,
-                'subtotal' => round(((float) ($item['quantity'] ?? 0)) * ((float) ($item['unit_price'] ?? 0)), 2),
-                'sort_order' => $index,
-                'variant_id' => $item['variant_id'] ?? null,
-                'variant_snapshot' => $item['variant_snapshot'] ?? null,
-            ];
-        }
-        if ($itemRows !== []) {
-            $order->items()->createMany($itemRows);
+            if ($itemRows !== []) {
+                $order->items()->createMany($itemRows);
+            }
         }
 
         // Replace fees

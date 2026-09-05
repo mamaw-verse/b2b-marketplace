@@ -8,6 +8,9 @@
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white font-[var(--hs-font-display)] break-words">{{ $shop->storefront_name }}</h1>
+                        @if($shop->country_code)
+                            <x-hs-country-flag :country-code="$shop->country_code" class="text-2xl sm:text-3xl" />
+                        @endif
                         @if($shop->certificates->contains(fn($c) => $c->status === 'active'))
                             <x-hs-badge variant="verified" label="Verified" />
                         @endif
@@ -41,6 +44,24 @@
                         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
                         {{ __('Edit shop profile') }}
                     </a>
+                @elseif (config('marketplace.features.chat_enabled'))
+                    <button
+                        wire:click="messageCompany"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-[var(--hs-radius-pill)] bg-[var(--hs-neutral-0)]/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-[var(--hs-neutral-0)]/25 transition hover:bg-[var(--hs-neutral-0)]/20"
+                    >
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                        {{ __('Message this company') }}
+                    </button>
+                @endif
+            @else
+                @if (config('marketplace.features.chat_enabled'))
+                    <button
+                        wire:click="messageCompany"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-[var(--hs-radius-pill)] bg-[var(--hs-neutral-0)]/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-[var(--hs-neutral-0)]/25 transition hover:bg-[var(--hs-neutral-0)]/20"
+                    >
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+                        {{ __('Message this company') }}
+                    </button>
                 @endif
             @endauth
             </div>

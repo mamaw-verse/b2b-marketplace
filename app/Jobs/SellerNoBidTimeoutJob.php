@@ -21,6 +21,10 @@ final class SellerNoBidTimeoutJob implements ShouldQueue
 
     public function handle(): void
     {
+        if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+            return;
+        }
+
         $threshold = now()->subDays(7);
 
         $recipients = RfqRecipient::whereIn('status', ['received', 'reviewed', 'in_progress'])

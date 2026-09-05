@@ -37,7 +37,7 @@
                                 <div class="flex items-start justify-between">
                                     <div>
                                         <p class="font-medium text-[var(--hs-neutral-900)]">{{ $order->shop->storefront_name }}</p>
-                                        <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">Order #{{ $order->id }} &middot; {{ $order->created_at->format('M d, Y') }}</p>
+                                        <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">{{ $order->order_number }} &middot; {{ $order->created_at->format('M d, Y') }}</p>
 
                                         @php
                                             // On the To Receive tab, show the quantity that was actually
@@ -78,7 +78,9 @@
                             @if ($tab === 'to_receive')
                                 <div class="flex items-center justify-end gap-2 px-4 pb-4 pt-3 border-t border-[var(--hs-neutral-100)]">
                                     <flux:button variant="ghost" size="sm" href="{{ route('account.orders.show', $order) }}" wire:navigate>{{ __('Track Order') }}</flux:button>
-                                    <flux:button variant="primary" size="sm" wire:click="confirmReceived({{ $order->id }})">{{ __('Confirm Receive') }}</flux:button>
+                                    @if ($order->fulfilments->contains('status', 'delivered'))
+                                        <flux:button variant="primary" size="sm" wire:click="confirmReceived({{ $order->id }})">{{ __('Confirm Receive') }}</flux:button>
+                                    @endif
                                 </div>
                             @endif
                         </div>

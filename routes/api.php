@@ -129,15 +129,19 @@ Route::prefix('v1')->group(function () {
         Route::delete('/orders/{order}', [HubOrderController::class, 'destroy']);
 
         // Fulfilment (Seller)
-        Route::post('/orders/{order}/fulfilment', [FulfilmentController::class, 'store']);
-        Route::put('/orders/{order}/fulfilment', [FulfilmentController::class, 'update']);
-        Route::post('/orders/{order}/fulfilment/ship', [FulfilmentController::class, 'ship']);
-        Route::post('/orders/{order}/fulfilment/deliver', [FulfilmentController::class, 'deliver']);
-        Route::post('/orders/{order}/fulfilment/return', [FulfilmentController::class, 'returnToSeller']);
+        Route::middleware('feature:fulfilment_enabled')->group(function () {
+            Route::post('/orders/{order}/fulfilment', [FulfilmentController::class, 'store']);
+            Route::put('/orders/{order}/fulfilment', [FulfilmentController::class, 'update']);
+            Route::post('/orders/{order}/fulfilment/ship', [FulfilmentController::class, 'ship']);
+            Route::post('/orders/{order}/fulfilment/deliver', [FulfilmentController::class, 'deliver']);
+            Route::post('/orders/{order}/fulfilment/return', [FulfilmentController::class, 'returnToSeller']);
+        });
 
         // Seller Dispute Actions
-        Route::post('/orders/{order}/disputes/{dispute}/resolve', [DisputeController::class, 'resolve']);
-        Route::post('/orders/{order}/disputes/{dispute}/confirm-return', [DisputeController::class, 'confirmReturn']);
+        Route::middleware('feature:disputes_enabled')->group(function () {
+            Route::post('/orders/{order}/disputes/{dispute}/resolve', [DisputeController::class, 'resolve']);
+            Route::post('/orders/{order}/disputes/{dispute}/confirm-return', [DisputeController::class, 'confirmReturn']);
+        });
 
         // Seller Hub
         Route::get('/dashboard', [SellerHubController::class, 'dashboard']);
@@ -148,8 +152,10 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1');
 
         // Payout Account
-        Route::get('/payout-account', [HubPayoutAccountController::class, 'show']);
-        Route::put('/payout-account', [HubPayoutAccountController::class, 'upsert']);
+        Route::middleware('feature:payouts_enabled')->group(function () {
+            Route::get('/payout-account', [HubPayoutAccountController::class, 'show']);
+            Route::put('/payout-account', [HubPayoutAccountController::class, 'upsert']);
+        });
 
         Route::get('/products', [HubProductController::class, 'index']);
         Route::post('/products', [HubProductController::class, 'store']);
@@ -167,9 +173,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/earnings', HubEarningsController::class);
 
         // Payouts (Seller)
-        Route::get('/payouts/balance', [HubPayoutController::class, 'balance']);
-        Route::get('/payouts', [HubPayoutController::class, 'index']);
-        Route::get('/payouts/{payout}', [HubPayoutController::class, 'show']);
+        Route::middleware('feature:payouts_enabled')->group(function () {
+            Route::get('/payouts/balance', [HubPayoutController::class, 'balance']);
+            Route::get('/payouts', [HubPayoutController::class, 'index']);
+            Route::get('/payouts/{payout}', [HubPayoutController::class, 'show']);
+        });
     });
 
     // Admin Review Console (requires auth + onboarding.review permission)
@@ -191,8 +199,10 @@ Route::prefix('v1')->group(function () {
 
     // Admin Disputes (requires auth + role:admin)
     Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-        Route::get('/disputes', [AdminDisputeController::class, 'index']);
-        Route::post('/disputes/{dispute}/arbitrate', [AdminDisputeController::class, 'arbitrate']);
+        Route::middleware('feature:disputes_enabled')->group(function () {
+            Route::get('/disputes', [AdminDisputeController::class, 'index']);
+            Route::post('/disputes/{dispute}/arbitrate', [AdminDisputeController::class, 'arbitrate']);
+        });
 
         // Financial Ledger (Admin)
         Route::get('/ledger', [LedgerController::class, 'index']);
@@ -201,32 +211,37 @@ Route::prefix('v1')->group(function () {
         Route::get('/analytics', AnalyticsController::class);
 
         // Payout Settings
-        Route::get('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'index']);
-        Route::put('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'update']);
+        Route::middleware('feature:payouts_enabled')->group(function () {
+            Route::get('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'index']);
+            Route::put('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'update']);
+        });
 
         // Review Reports
-        Route::get('/review-reports', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'index']);
-        Route::post('/review-reports/{reviewReport}/dismiss', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'dismiss']);
-        Route::post('/review-reports/{reviewReport}/action', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'action']);
+        Route::middleware('feature:reviews_enabled')->group(function () {
+            Route::get('/review-reports', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'index']);
+            Route::post('/review-reports/{reviewReport}/dismiss', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'dismiss']);
+            Route::post('/review-reports/{reviewReport}/action', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'action']);
+        });
 
-        // Payout Accounts
-        Route::get('/payout-accounts', [PayoutAccountController::class, 'index']);
-        Route::post('/payout-accounts/{sellerPayoutAccount}/verify', [PayoutAccountController::class, 'verify']);
-        Route::post('/payout-accounts/{sellerPayoutAccount}/reject', [PayoutAccountController::class, 'reject']);
+        // Payout Accounts & Payouts
+        Route::middleware('feature:payouts_enabled')->group(function () {
+            Route::get('/payout-accounts', [PayoutAccountController::class, 'index']);
+            Route::post('/payout-accounts/{sellerPayoutAccount}/verify', [PayoutAccountController::class, 'verify']);
+            Route::post('/payout-accounts/{sellerPayoutAccount}/reject', [PayoutAccountController::class, 'reject']);
 
-        // Payouts
-        Route::get('/payouts/eligible', [AdminPayoutController::class, 'eligible']);
-        Route::get('/payouts', [AdminPayoutController::class, 'index']);
-        Route::post('/payouts', [AdminPayoutController::class, 'store']);
-        Route::get('/payouts/{payout}', [AdminPayoutController::class, 'show']);
-        Route::post('/payouts/{payout}/release', [AdminPayoutController::class, 'release'])
-            ->middleware('permission:payout.release');
-        Route::post('/payouts/{payout}/retry', [AdminPayoutController::class, 'retry'])
-            ->middleware('permission:payout.release');
+            Route::get('/payouts/eligible', [AdminPayoutController::class, 'eligible']);
+            Route::get('/payouts', [AdminPayoutController::class, 'index']);
+            Route::post('/payouts', [AdminPayoutController::class, 'store']);
+            Route::get('/payouts/{payout}', [AdminPayoutController::class, 'show']);
+            Route::post('/payouts/{payout}/release', [AdminPayoutController::class, 'release'])
+                ->middleware('permission:payout.release');
+            Route::post('/payouts/{payout}/retry', [AdminPayoutController::class, 'retry'])
+                ->middleware('permission:payout.release');
+        });
     });
 
     // Reviews (requires auth + verified)
-    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::middleware(['auth:sanctum', 'verified', 'feature:reviews_enabled'])->group(function () {
         Route::post('/orders/{order}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'store'])
             ->middleware('throttle:review-creation');
         Route::put('/reviews/{review}', [App\Http\Controllers\Api\V1\ReviewController::class, 'update']);

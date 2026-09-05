@@ -445,6 +445,11 @@
             </div>
         </section>
 
+        {{-- ── Sponsored Content — Homepage Placement ─────────── --}}
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <livewire:shared.sponsored-content-banner placement="homepage" />
+        </div>
+
         {{-- ── Featured Products ──────────────────────────────── --}}
         <section id="featured-products" class="bg-[var(--hs-neutral-50)] border-t border-b border-[var(--hs-neutral-200)]">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
@@ -476,66 +481,51 @@
             </div>
         </section>
 
-        {{-- ── Country Portals — Coming Soon ─────────────────── --}}
+        {{-- ── Country Portals ─────────────────────────────────── --}}
         <section id="country-portals" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
             <div class="text-center mb-6 sm:mb-8">
                 <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">
-                    More Halal business portals are coming soon.
+                    1HalalStore across the Halal world
                 </h2>
                 <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] max-w-2xl mx-auto">
-                    The 1HALALSTORE network is expanding. New country portals are coming soon, connecting local businesses with buyers and partners across established and emerging Halal markets.
+                    Each country runs its own independent portal. Click to visit a portal, or browse the one you're on now.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-3">
-                @foreach ([
-                    [
-                        'name'    => 'Malaysia',
-                        'emoji'   => '🇲🇾',
-                        'photo'   => 'https://images.unsplash.com/photo-1569878698898-3d112b16d123?w=800&q=80',
-                        'credit'  => 'Alex Azabache / Unsplash',
-                        'tagline' => 'Tap into one of Southeast Asia\'s most developed Halal markets — from food to finance.',
-                    ],
-                    [
-                        'name'    => 'Saudi Arabia',
-                        'emoji'   => '🇸🇦',
-                        'photo'   => 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=800&q=80',
-                        'credit'  => 'Hala AlGhanim / Unsplash',
-                        'tagline' => 'Connect with producers and buyers at the heart of the global Halal economy.',
-                    ],
-                    [
-                        'name'    => 'Brunei',
-                        'emoji'   => '🇧🇳',
-                        'photo'   => 'https://images.unsplash.com/photo-1709808971463-270bae12b837?w=800&q=80',
-                        'credit'  => 'Hung Li / Unsplash',
-                        'tagline' => 'Reach one of the world\'s highest-income Halal-majority markets in Borneo.',
-                    ],
-                ] as $portal)
-                    <div class="group relative overflow-hidden rounded-[var(--hs-radius-card)] shadow-[var(--hs-shadow-md)] aspect-[4/3] sm:aspect-square">
-                        <img
-                            src="{{ $portal['photo'] }}"
-                            alt="{{ $portal['name'] }}"
-                            class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105"
-                            loading="lazy"
-                            decoding="async"
-                        />
-                        {{-- Dark green gradient overlay --}}
-                        <div class="absolute inset-0 bg-gradient-to-b from-[rgba(5,41,27,0.55)] via-[rgba(5,41,27,0.80)] to-[rgba(5,41,27,0.97)]"></div>
-                        <div class="relative flex h-full flex-col justify-between p-5 sm:p-6 text-left">
-                            <div>
-                                <span class="text-2xl sm:text-3xl" aria-hidden="true">{{ $portal['emoji'] }}</span>
-                                <h3 style="color:#ffffff !important; text-shadow:0 1px 4px rgba(0,0,0,0.6);" class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold font-[var(--hs-font-display)]">{{ $portal['name'] }}</h3>
-                                <p style="color:rgba(255,255,255,0.82) !important; text-shadow:0 1px 3px rgba(0,0,0,0.5);" class="mt-2 text-sm leading-relaxed">{{ $portal['tagline'] }}</p>
-                            </div>
-                            <div class="flex items-center justify-between mt-4">
-                                <span style="text-shadow:0 1px 3px rgba(0,0,0,0.4);" class="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--hs-gold-400)]">
-                                    {{ __('Coming Soon') }}
-                                    <flux:icon.arrow-right class="size-4" />
-                                </span>
-                                <span class="text-[0.6rem] text-white/30">{{ $portal['credit'] }}</span>
-                            </div>
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                {{-- Current instance — "You are here" --}}
+                <div class="relative flex flex-col items-center gap-2 rounded-xl border-2 border-[var(--hs-green-600)] bg-[var(--hs-green-50)] p-4 text-center shadow-[var(--hs-shadow-sm)]">
+                    <span class="text-3xl sm:text-4xl" aria-hidden="true">{{ $this->instancePortal['flag'] }}</span>
+                    <span class="text-sm font-bold text-[var(--hs-green-800)]">{{ $this->instancePortal['display_name'] }}</span>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-[var(--hs-green-600)] px-2 py-0.5 text-[0.65rem] font-bold text-white uppercase tracking-wide">
+                        <flux:icon.map-pin class="size-2.5" />
+                        You are here
+                    </span>
+                </div>
+
+                {{-- Other country portals --}}
+                @foreach ($this->otherPortals as $portal)
+                    @if ($portal['url'])
+                        <a
+                            href="{{ $portal['url'] }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group flex flex-col items-center gap-2 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-4 text-center shadow-[var(--hs-shadow-sm)] hover:border-[var(--hs-green-400)] hover:bg-[var(--hs-green-50)] transition"
+                        >
+                            <span class="text-3xl sm:text-4xl" aria-hidden="true">{{ $portal['flag'] }}</span>
+                            <span class="text-sm font-semibold text-[var(--hs-neutral-800)] group-hover:text-[var(--hs-green-700)]">{{ $portal['display_name'] }}</span>
+                            <span class="inline-flex items-center gap-1 text-[0.65rem] font-semibold text-[var(--hs-green-700)]">
+                                {{ __('Visit Portal') }}
+                                <flux:icon.arrow-top-right-on-square class="size-2.5" />
+                            </span>
+                        </a>
+                    @else
+                        <div class="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-4 text-center opacity-60">
+                            <span class="text-3xl sm:text-4xl" aria-hidden="true">{{ $portal['flag'] }}</span>
+                            <span class="text-sm font-semibold text-[var(--hs-neutral-600)]">{{ $portal['display_name'] }}</span>
+                            <span class="text-[0.65rem] font-semibold text-[var(--hs-neutral-400)] uppercase tracking-wide">{{ __('Coming Soon') }}</span>
                         </div>
-                    </div>
+                    @endif
                 @endforeach
             </div>
         </section>

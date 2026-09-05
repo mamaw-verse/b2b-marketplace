@@ -7,6 +7,7 @@ namespace App\Livewire\CompanyHub;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -45,10 +46,16 @@ final class ProductList extends Component
         }
 
         $product = $this->findOwnedProduct($this->confirmingProductId);
+        $newStatus = $product->status === 'published' ? 'archived' : 'published';
 
-        $product->update([
-            'status' => $product->status === 'published' ? 'archived' : 'published',
-        ]);
+        if ($newStatus === 'published') {
+            Gate::authorize('publish', $product);
+        } else {
+            Gate::authorize('update', $product);
+        }
+
+        $product->update(['status' => $newStatus]);
+        \App\Jobs\IndexProductJob::dispatch($product)->afterCommit();
 
         $this->confirmingProductId = null;
         $this->confirmingAction = null;

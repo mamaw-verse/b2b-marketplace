@@ -43,7 +43,7 @@ final class ProductDirectory extends Component
     public function categories(): \Illuminate\Support\Collection
     {
         return Category::withCount([
-            'products as published_products_count' => fn ($q) => $q->where('products.status', 'published'),
+            'products as published_products_count' => fn ($q) => $q->marketplaceVisible(),
         ])
             ->orderBy('name')
             ->get()
@@ -57,7 +57,7 @@ final class ProductDirectory extends Component
     #[Computed]
     public function totalProductCount(): int
     {
-        return Product::where('status', 'published')->count();
+        return Product::marketplaceVisible()->count();
     }
 
     /**
@@ -66,7 +66,7 @@ final class ProductDirectory extends Component
     #[Computed]
     public function totalSupplierCount(): int
     {
-        return Product::where('status', 'published')
+        return Product::marketplaceVisible()
             ->distinct('shop_id')
             ->count('shop_id');
     }
@@ -90,7 +90,7 @@ final class ProductDirectory extends Component
             return $search->paginate(12);
         }
 
-        $query = Product::where('status', 'published')
+        $query = Product::marketplaceVisible()
             ->with(['shop', 'variants', 'categories']);
 
         if ($this->categoryId) {

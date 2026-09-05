@@ -13,6 +13,10 @@ final class OnboardingForm extends Form
 
     public string $registered_business_name = '';
 
+    public string $company_description = '';
+
+    public string $products_description = '';
+
     public string $storefront_name = '';
 
     public string $business_structure = '';
@@ -35,7 +39,7 @@ final class OnboardingForm extends Form
 
     public string $zip_code = '';
 
-    public string $country_code = 'PH';
+    public string $country_code = '';
 
     // ── Step 2: Product & Compliance ──────────────────────────────────────────
 
@@ -57,6 +61,38 @@ final class OnboardingForm extends Form
     public array $capabilities = [];
 
     /**
+     * Human-readable attribute names used in validation error messages.
+     * Prevents Laravel from generating messages like "The form.registered business name field is required."
+     *
+     * @return array<string, string>
+     */
+    public function validationAttributes(): array
+    {
+        return [
+            'registered_business_name' => 'Registered Business Name',
+            'company_description' => 'Company Description',
+            'products_description' => 'Products Description',
+            'storefront_name' => 'Storefront Name',
+            'business_structure' => 'Business Structure',
+            'dti_sec_number' => 'DTI/SEC Number',
+            'tax_identification_number' => 'TIN',
+            'phone' => 'Phone',
+            'email' => 'Email',
+            'address_1' => 'Address Line 1',
+            'address_2' => 'Address Line 2',
+            'city' => 'City',
+            'province' => 'Province',
+            'zip_code' => 'Zip Code',
+            'product_categories' => 'Product Categories',
+            'fda_lto_number' => 'FDA LTO Number',
+            'average_production_lead_time' => 'Average Production Lead Time',
+            'export_readiness_status' => 'Export Readiness',
+            'value_chain_positions' => 'Value Chain Positions',
+            'capabilities' => 'Capabilities',
+        ];
+    }
+
+    /**
      * Validation rules for a given wizard step.
      *
      * @return array<string, array<int, string>>
@@ -68,6 +104,8 @@ final class OnboardingForm extends Form
                 'registered_business_name' => ['required', 'string', 'max:255'],
                 'storefront_name' => ['required', 'string', 'max:255'],
                 'business_structure' => ['required', 'string'],
+                'company_description' => ['required', 'string', 'max:2000'],
+                'products_description' => ['required', 'string', 'max:2000'],
                 'dti_sec_number' => ['required', 'string', 'max:100'],
                 'tax_identification_number' => ['required', 'string', 'max:50'],
                 'phone' => ['nullable', 'string', 'max:30'],
@@ -84,7 +122,7 @@ final class OnboardingForm extends Form
                 'average_production_lead_time' => ['nullable', 'integer'],
                 'export_readiness_status' => ['required', 'string'],
             ],
-            4 => [
+            3 => [
                 'value_chain_positions' => ['array'],
                 'capabilities' => ['array'],
             ],
@@ -104,6 +142,8 @@ final class OnboardingForm extends Form
                 'registered_business_name' => $this->registered_business_name,
                 'storefront_name' => $this->storefront_name,
                 'business_structure' => $this->business_structure ?: null,
+                'company_description' => $this->company_description ?: null,
+                'products_description' => $this->products_description ?: null,
                 'dti_sec_number' => $this->dti_sec_number,
                 'tax_identification_number' => $this->tax_identification_number,
                 'phone' => $this->phone,
@@ -113,7 +153,7 @@ final class OnboardingForm extends Form
                 'city' => $this->city,
                 'province' => $this->province,
                 'zip_code' => $this->zip_code,
-                'country_code' => 'PH',
+                'country_code' => config('marketplace.instance_country', 'PH'),
             ],
             2 => [
                 'product_categories' => $this->product_categories !== []
@@ -123,7 +163,7 @@ final class OnboardingForm extends Form
                 'average_production_lead_time' => $this->average_production_lead_time ?: null,
                 'export_readiness_status' => $this->export_readiness_status ?: null,
             ],
-            4 => [
+            3 => [
                 'value_chain_positions' => $this->value_chain_positions,
                 'capabilities' => $this->capabilities,
             ],
@@ -139,6 +179,8 @@ final class OnboardingForm extends Form
         $this->registered_business_name = $onboarding->registered_business_name ?? '';
         $this->storefront_name = $onboarding->storefront_name ?? '';
         $this->business_structure = $onboarding->business_structure ?? '';
+        $this->company_description = $onboarding->company_description ?? '';
+        $this->products_description = $onboarding->products_description ?? '';
         $this->dti_sec_number = $onboarding->dti_sec_number ?? '';
         $this->tax_identification_number = $onboarding->tax_identification_number ?? '';
         $this->phone = $onboarding->phone ?? '';
@@ -148,7 +190,7 @@ final class OnboardingForm extends Form
         $this->city = $onboarding->city ?? '';
         $this->province = $onboarding->province ?? '';
         $this->zip_code = $onboarding->zip_code ?? '';
-        $this->country_code = 'PH';
+        $this->country_code = $onboarding->country_code ?? config('marketplace.instance_country', 'PH');
         $this->product_categories = $this->parseProductCategories($onboarding->product_categories);
         $this->fda_lto_number = $onboarding->fda_lto_number ?? '';
         $this->average_production_lead_time = (string) ($onboarding->average_production_lead_time ?? '');

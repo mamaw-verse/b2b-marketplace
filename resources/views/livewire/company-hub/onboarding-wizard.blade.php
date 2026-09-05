@@ -7,7 +7,8 @@
         </div>
 
         <div class="p-6">
-            {{-- Stepper / Progress indicator --}}
+            {{-- Stepper / Progress indicator — only shown while the form is active --}}
+            @if (!in_array($onboardingStatus, ['submitted', 'approved', 'rejected']))
             <nav aria-label="Onboarding progress" class="mb-4">
                 <ol class="flex items-center">
                     @for ($step = 1; $step <= 5; $step++)
@@ -15,8 +16,8 @@
                             $stepLabel = match ($step) {
                                 1 => __('Company'),
                                 2 => __('Operations'),
-                                3 => __('Halal Cert'),
-                                4 => __('Value Chain'),
+                                3 => __('Value Chain'),
+                                4 => __('Certificates'),
                                 5 => __('Documents'),
                             };
                         @endphp
@@ -57,11 +58,12 @@
                 {{-- Mobile-only caption, since labels hide below sm: --}}
                 <p class="mt-2 text-xs font-medium text-[var(--hs-green-700)] sm:hidden">
                     {{ __('Step :current of 5 — :label', ['current' => $currentStep, 'label' => match ($currentStep) {
-                        1 => __('Company'), 2 => __('Operations'), 3 => __('Halal Cert'),
-                        4 => __('Value Chain'), 5 => __('Documents'),
+                        1 => __('Company'), 2 => __('Operations'),
+                        3 => __('Value Chain'), 4 => __('Certificates'), 5 => __('Documents'),
                     }]) }}
                 </p>
             </nav>
+            @endif
 
             {{-- Flash messages --}}
             @if (session('message'))
@@ -99,6 +101,32 @@
                         <flux:button wire:click="reapply" variant="primary">
                             {{ __('Re-apply') }}
                         </flux:button>
+                    </div>
+                </div>
+            @elseif ($onboardingStatus === 'approved')
+                <div class="py-12 text-center">
+                    <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-[var(--hs-green-50)]">
+                        <flux:icon name="check-circle" class="size-8 text-[var(--hs-green-700)]" />
+                    </div>
+                    <h2 class="mt-4 text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Application Approved') }}</h2>
+                    <p class="mt-2 text-[var(--hs-neutral-600)] max-w-md mx-auto">
+                        {{ __('Congratulations! Your onboarding application has been approved.') }}
+                    </p>
+
+                    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <flux:button href="{{ route('hub.hub-dashboard') }}" variant="primary">
+                            {{ __('Go to Dashboard') }}
+                        </flux:button>
+                        @if(config('marketplace.features.certification_apply_enabled'))
+                        <flux:button href="{{ route('hub.certifications.index') }}" variant="subtle">
+                            {{ __('I\'m Interested in Halal Certification') }}
+                        </flux:button>
+                        @endif
+                        @if(config('marketplace.features.subscriptions_enabled'))
+                        <flux:button href="{{ route('hub.subscription') }}" variant="subtle" wire:navigate>
+                            {{ __('Choose a Subscription Plan') }}
+                        </flux:button>
+                        @endif
                     </div>
                 </div>
             @else
@@ -168,10 +196,10 @@
                             @include('livewire.company-hub.steps.step-2-operations')
                             @break
                         @case(3)
-                            @include('livewire.company-hub.steps.step-3-halal-certification')
+                            @include('livewire.company-hub.steps.step-4-value-chain')
                             @break
                         @case(4)
-                            @include('livewire.company-hub.steps.step-4-value-chain')
+                            @include('livewire.company-hub.steps.step-3-halal-certification')
                             @break
                         @case(5)
                             @include('livewire.company-hub.steps.step-5-documents')

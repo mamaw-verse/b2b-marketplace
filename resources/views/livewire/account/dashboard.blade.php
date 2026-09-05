@@ -48,7 +48,7 @@
                    class="flex items-center justify-between px-6 py-4 hover:bg-[var(--hs-neutral-50)] transition">
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-[var(--hs-neutral-900)] truncate">{{ $order->shop?->storefront_name ?? __('Order') }}</p>
-                        <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">{{ __('Order') }} #{{ $order->id }} &middot; {{ $order->created_at->format('M d, Y') }}</p>
+                        <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">{{ $order->order_number }} &middot; {{ $order->created_at->format('M d, Y') }}</p>
                     </div>
                     <div class="text-right shrink-0 ml-4">
                         <p class="font-semibold text-[var(--hs-neutral-900)]">{{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</p>

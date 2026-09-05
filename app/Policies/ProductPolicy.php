@@ -36,4 +36,18 @@ final class ProductPolicy
     {
         return $user->id === $product->shop->user_id;
     }
+
+    /**
+     * Determine whether the user can publish the product.
+     */
+    public function publish(User $user, Product $product): bool
+    {
+        if ($user->id !== $product->shop->user_id) {
+            return false;
+        }
+
+        $shop = $product->shop;
+
+        return $shop->status === 'active' && $shop->hasActiveOrTrialingSubscription();
+    }
 }

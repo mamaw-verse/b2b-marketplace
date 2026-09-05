@@ -2,7 +2,7 @@
     <x-hs-modal
         name="open-dispute-modal"
         model="show"
-        :title="__('Open Dispute') . ' — Order #' . $order->id"
+        :title="__('Open Dispute') . ' — ' . $order->order_number"
         size="lg"
     >
         <div class="space-y-4">

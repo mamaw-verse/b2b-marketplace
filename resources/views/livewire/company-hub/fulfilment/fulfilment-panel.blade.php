@@ -91,9 +91,11 @@
                 <flux:modal.trigger name="confirm-mark-delivered">
                     <flux:button size="sm" variant="primary">Mark Delivered</flux:button>
                 </flux:modal.trigger>
-                <flux:modal.trigger name="confirm-mark-returned">
-                    <flux:button size="sm" variant="ghost">Mark Returned</flux:button>
-                </flux:modal.trigger>
+                @if (! $hasReturnDisputeInProgress)
+                    <flux:modal.trigger name="confirm-mark-returned">
+                        <flux:button size="sm" variant="ghost">Mark Returned</flux:button>
+                    </flux:modal.trigger>
+                @endif
             </div>
         @endif
     @endif
@@ -126,17 +128,68 @@
         </x-slot>
     </x-hs-confirm>
 
-    <x-hs-confirm
-        name="confirm-mark-returned"
-        title="Mark as Returned"
-        message="Mark this order as returned to seller?"
-        variant="warning"
-        confirmText="Mark Returned"
-    >
-        <x-slot name="action">
-            <flux:button variant="filled" wire:click="markReturned" wire:loading.attr="disabled">
-                Mark Returned
-            </flux:button>
-        </x-slot>
-    </x-hs-confirm>
+    @if (! $hasReturnDisputeInProgress)
+        <flux:modal name="confirm-mark-returned" class="md:w-[440px] !p-0">
+            <div class="flex flex-col">
+                {{-- Header --}}
+                <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
+                    <div class="flex items-start gap-3">
+                        <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-[var(--hs-warning-500)] bg-[var(--hs-warning-50)]">
+                            <flux:icon name="arrow-uturn-left" variant="mini" class="size-5" />
+                        </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Mark as Returned') }}</h3>
+                            <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('Confirm the goods were returned. You can optionally issue a refund to the buyer now.') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Body --}}
+                <div class="px-6 py-5 space-y-4">
+                    <flux:select
+                        wire:model.live="returnRefundType"
+                        :label="__('Refund')"
+                    >
+                        <flux:select.option value="no_refund">{{ __('No refund') }}</flux:select.option>
+                        <flux:select.option value="full_refund">{{ __('Full refund') }} ({{ $order->currency }} {{ number_format((float) $order->order_total, 2) }})</flux:select.option>
+                        <flux:select.option value="partial_refund">{{ __('Partial refund') }}</flux:select.option>
+                    </flux:select>
+
+                    @if ($returnRefundType === 'partial_refund')
+                        <div>
+                            <flux:input
+                                wire:model="returnRefundAmount"
+                                :label="__('Refund Amount') . ' *'"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                max="{{ (float) $order->order_total }}"
+                                :placeholder="'0.00'"
+                            />
+                            <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">{{ __('Max:') }} {{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</p>
+                            @error('returnRefundAmount')
+                                <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Footer --}}
+                <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-6 py-4">
+                    <div class="flex justify-end gap-2">
+                        <flux:modal.close>
+                            <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                        </flux:modal.close>
+                        <flux:button
+                            variant="filled"
+                            wire:click="markReturned"
+                            wire:loading.attr="disabled"
+                        >
+                            {{ __('Confirm Return') }}
+                        </flux:button>
+                    </div>
+                </div>
+            </div>
+        </flux:modal>
+    @endif
 </div>

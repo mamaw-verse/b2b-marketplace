@@ -13,6 +13,16 @@
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+    @if(config('services.google_analytics.measurement_id'))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google_analytics.measurement_id') }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ config('services.google_analytics.measurement_id') }}');
+        </script>
+    @endif
 </head>
 <body class="min-h-screen flex flex-col bg-[var(--hs-neutral-50)]" x-data="{ sfNav: false }" @keydown.escape.window="sfNav = false">
 

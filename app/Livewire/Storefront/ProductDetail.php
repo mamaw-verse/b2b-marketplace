@@ -16,6 +16,17 @@ final class ProductDetail extends Component
 
     public function mount(Product $product): void
     {
+        $product->loadMissing('shop');
+
+        $visible = $product->status === 'published'
+            && $product->shop->status === 'active';
+
+        if ($visible && config('marketplace.features.subscriptions_enabled')) {
+            $visible = $product->shop->hasActiveOrTrialingSubscription();
+        }
+
+        abort_unless($visible, 404);
+
         $this->product = $product;
         $this->product->load([
             // Only published variants are shown publicly; archived variants

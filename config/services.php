@@ -58,4 +58,10 @@ return [
         'disbursement_enabled' => (bool) env('DLT_DISBURSEMENT_ENABLED', false),
     ],
 
+    'google_analytics' => [
+        'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
+        'property_id' => env('GA4_PROPERTY_ID'),
+        'credentials' => env('GOOGLE_ANALYTICS_CREDENTIALS'),
+    ],
+
 ];

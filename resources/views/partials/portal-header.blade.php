@@ -47,35 +47,31 @@
                     </button>
                 @endunless
                 {{-- Logo: hidden on mobile for storefront (drawer shows it), always shown on portal --}}
-                <a href="{{ route('home') }}" class="{{ $isPortal ? 'flex' : 'hidden sm:flex' }} items-center gap-2 mr-1" wire:navigate>
+                <a href="{{ route('home') }}" class="{{ $isPortal ? 'flex' : 'hidden sm:flex' }} items-center gap-2.5 mr-1" wire:navigate>
                     <img src="/images/brand-logo.png" alt="1Halal Store" class="h-9 w-auto">
+                    @unless ($isPortal)
+                        @php
+                            $flagMap = ['PH'=>'🇵🇭','MY'=>'🇲🇾','SA'=>'🇸🇦','BN'=>'🇧🇳','ID'=>'🇮🇩','TR'=>'🇹🇷'];
+                            $flag = $flagMap[config('marketplace.instance_country')] ?? '🌐';
+                        @endphp
+                        <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-[var(--hs-neutral-50)] ring-1 ring-[var(--hs-neutral-200)] px-2 py-0.5 text-xs font-medium text-[var(--hs-neutral-600)]" title="{{ config('marketplace.instance_country') }}">
+                            <span class="text-sm leading-none">{{ $flag }}</span>
+                            {{ config('marketplace.instance_country') }}
+                        </span>
+                    @endunless
                 </a>
 
-                {{-- Portal context: company name + hub label, divided from the logo.
-                     Uses the layout-computed $portal so shared pages (e.g. /settings/*)
-                     keep the hub the user came from instead of flipping to Buyer Hub. --}}
+                {{-- Portal context label — single unified label for all non-admin portal pages. --}}
                 @auth
-                    @if (($portal ?? null) === 'hub' || request()->routeIs('hub.*'))
+                    @if ($isPortal && ! $isAdmin)
                         <div class="hidden sm:flex items-center gap-3 pl-1">
                             <span class="h-8 w-px bg-[var(--hs-neutral-200)]"></span>
                             <div class="flex flex-col leading-tight">
                                 <span class="text-base font-bold text-[var(--hs-green-600)] truncate max-w-[240px]">
-                                    {{ $shop?->storefront_name ?? __('Seller Hub') }}
+                                    {{ $shop?->storefront_name ?? trim($user->first_name . ' ' . $user->last_name) }}
                                 </span>
                                 <span class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">
-                                    {{ __('Seller Hub') }}
-                                </span>
-                            </div>
-                        </div>
-                    @elseif (($portal ?? null) === 'account' || request()->routeIs('account.*'))
-                        <div class="hidden sm:flex items-center gap-3 pl-1">
-                            <span class="h-8 w-px bg-[var(--hs-neutral-200)]"></span>
-                            <div class="flex flex-col leading-tight">
-                                <span class="text-base font-bold text-[var(--hs-green-600)] truncate max-w-[240px]">
-                                    {{ trim($user->first_name . ' ' . $user->last_name) }}
-                                </span>
-                                <span class="text-xs font-bold uppercase tracking-wider text-[var(--hs-gold-700)]">
-                                    {{ __('Buyer Hub') }}
+                                    {{ __('My Portal') }}
                                 </span>
                             </div>
                         </div>
@@ -137,6 +133,39 @@
                     </nav>
                 @endunless
 
+                {{-- Locale Switcher --}}
+                <div class="relative" x-data="{ openLocale: false }" @keydown.escape.window="openLocale = false" @click.outside="openLocale = false">
+                    <button
+                        @click="openLocale = !openLocale"
+                        class="flex items-center gap-1 rounded-lg px-2 py-2 text-sm font-medium text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-100)] transition"
+                    >
+                        <svg class="size-4 text-[var(--hs-neutral-500)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802" /></svg>
+                        <span class="uppercase">{{ app()->getLocale() }}</span>
+                    </button>
+                    <div
+                        x-show="openLocale"
+                        x-transition.opacity.duration.150ms
+                        class="absolute right-0 mt-1 w-40 origin-top-right rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-lg)] py-1 z-50"
+                        style="display: none;"
+                    >
+                        @php
+                            $localeOptions = collect(config('marketplace.portals', []))
+                                ->unique('locale')
+                                ->map(fn ($p) => ['locale' => $p['locale'], 'flag' => $p['flag'], 'display_name' => $p['display_name']]);
+                        @endphp
+                        @foreach($localeOptions as $option)
+                            <form method="POST" action="{{ route('locale.switch') }}">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ $option['locale'] }}">
+                                <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--hs-neutral-50)] {{ app()->getLocale() === $option['locale'] ? 'text-[var(--hs-gold-600)] font-semibold' : 'text-[var(--hs-neutral-700)]' }}">
+                                    <span>{{ $option['flag'] }}</span>
+                                    <span>{{ $option['display_name'] }}</span>
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
+                </div>
+
                 @auth
                     <livewire:shared.notification-bell />
                 @endauth
@@ -172,23 +201,14 @@
                             </div>
 
                             <div class="py-1">
-                                {{-- Buyer Hub: always available to any authenticated non-admin --}}
+                                {{-- Single portal entry for all non-admin authenticated users --}}
                                 @unless ($isAdmin)
-                                    <a href="{{ route('account.dashboard') }}" wire:navigate @click="open = false"
+                                    <a href="{{ route('portal.dashboard') }}" wire:navigate @click="open = false"
                                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
-                                        <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>
-                                        {{ __('Buyer Hub') }}
+                                        <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" /></svg>
+                                        {{ __('My Portal') }}
                                     </a>
                                 @endunless
-
-                                {{-- Seller Hub: shown once the user has an approved (active) shop --}}
-                                @if ($isSeller)
-                                    <a href="{{ route('hub.hub-dashboard') }}" wire:navigate @click="open = false"
-                                       class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
-                                        <svg class="size-4 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
-                                        {{ __('Seller Hub') }}
-                                    </a>
-                                @endif
 
                                 @if ($isAdmin)
                                     <a href="{{ route('admin.onboardings.index') }}" wire:navigate @click="open = false"

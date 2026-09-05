@@ -15,6 +15,10 @@ final class ReviewPolicy
      */
     public function viewAny(?User $user): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         return true;
     }
 
@@ -23,6 +27,10 @@ final class ReviewPolicy
      */
     public function create(User $user, Order $order): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         return $user->id === $order->buyer_user_id
             && $order->status === 'completed';
     }
@@ -32,6 +40,10 @@ final class ReviewPolicy
      */
     public function update(User $user, Review $review): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         return $user->id === $review->reviewer_user_id;
     }
 
@@ -40,6 +52,10 @@ final class ReviewPolicy
      */
     public function respond(User $user, Review $review): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         $reviewable = $review->reviewable;
 
         if ($reviewable instanceof \App\Models\Shop) {
@@ -58,6 +74,10 @@ final class ReviewPolicy
      */
     public function report(User $user, Review $review): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         return $user->id !== $review->reviewer_user_id;
     }
 
@@ -66,6 +86,10 @@ final class ReviewPolicy
      */
     public function hide(User $user): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin');
     }
 
@@ -74,6 +98,10 @@ final class ReviewPolicy
      */
     public function dismiss(User $user): bool
     {
+        if (! config('marketplace.features.reviews_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin');
     }
 }

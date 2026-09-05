@@ -4,7 +4,7 @@
         <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Pay for Order #{{ $order->id }}</h1>
+                    <h1 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Pay for {{ $order->order_number }}</h1>
                     <p class="text-sm text-[var(--hs-neutral-500)]">{{ $order->shop->storefront_name }}</p>
                 </div>
                 <div class="text-right">

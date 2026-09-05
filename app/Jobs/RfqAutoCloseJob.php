@@ -39,17 +39,26 @@ final class RfqAutoCloseJob implements ShouldQueue
                     'closed_at' => now(),
                 ]);
 
-                // Cascade submitted quotations to not_awarded
-                $rfq->quotations()
-                    ->where('status', 'submitted')
-                    ->update(['status' => 'not_awarded']);
+                if (! config('marketplace.features.admin_rfq_management_enabled')) {
+                    // Cascade submitted quotations to not_awarded
+                    $rfq->quotations()
+                        ->where('status', 'submitted')
+                        ->update(['status' => 'not_awarded']);
+                } else {
+                    // Update admin_status on recipients
+                    $rfq->recipients()
+                        ->whereNotIn('admin_status', ['resolved', 'closed'])
+                        ->update(['admin_status' => 'closed']);
+                }
             });
 
-            // Notify recipient sellers
-            foreach ($rfq->recipients as $recipient) {
-                $shopOwner = $recipient->shop->user ?? null;
-                if ($shopOwner) {
-                    $shopOwner->notify(new RfqClosedNotification($recipient, 'system'));
+            if (! config('marketplace.features.admin_rfq_management_enabled')) {
+                // Notify recipient sellers
+                foreach ($rfq->recipients as $recipient) {
+                    $shopOwner = $recipient->shop->user ?? null;
+                    if ($shopOwner) {
+                        $shopOwner->notify(new RfqClosedNotification($recipient, 'system'));
+                    }
                 }
             }
 

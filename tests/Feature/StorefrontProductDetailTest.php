@@ -6,12 +6,19 @@ use App\Livewire\Storefront\ProductDetail;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use Database\Seeders\RolePermissionSeeder;
 use Livewire\Livewire;
 
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
     $this->shop = Shop::factory()->create(['status' => 'active']);
+    $plan = SubscriptionPlan::factory()->create();
+    Subscription::factory()->trialing()->create([
+        'shop_id' => $this->shop->id,
+        'subscription_plan_id' => $plan->id,
+    ]);
     $this->product = Product::factory()->create(['shop_id' => $this->shop->id, 'status' => 'published']);
 });
 

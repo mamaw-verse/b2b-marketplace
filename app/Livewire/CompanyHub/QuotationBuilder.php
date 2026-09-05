@@ -76,6 +76,9 @@ final class QuotationBuilder extends Component
     {
         Gate::authorize('view', $rfqRecipient);
 
+        // Block creating or editing a quotation when the recipient's RFQ is closed.
+        abort_if($rfqRecipient->isTerminal(), 403, 'This RFQ is closed. No further quotations can be submitted.');
+
         $this->rfqRecipientId = $rfqRecipient->id;
 
         if ($quotation?->exists) {

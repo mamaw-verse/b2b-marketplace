@@ -1,5 +1,9 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { Chart, registerables } from 'chart.js';
+
+window.Chart = Chart;
+Chart.register(...registerables);
 
 window.Pusher = Pusher;
 

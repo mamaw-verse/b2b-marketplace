@@ -32,7 +32,9 @@ function makeRecipient(Rfq $rfq, string $status): RfqRecipient
     ]);
 }
 
-test('closing an RFQ cascades non-terminal recipients to closed', function () {
+// ── Cascade ───────────────────────────────────────────────────────────────────
+
+test('closing an RFQ cascades all non-terminal recipients to closed', function () {
     $received = makeRecipient($this->rfq, 'received');
     $reviewed = makeRecipient($this->rfq, 'reviewed');
     $inProgress = makeRecipient($this->rfq, 'in_progress');
@@ -49,24 +51,9 @@ test('closing an RFQ cascades non-terminal recipients to closed', function () {
     }
 });
 
-test('closing an RFQ does not touch no_bid recipients', function () {
-    $noBid = makeRecipient($this->rfq, 'no_bid');
-
-    Livewire::actingAs($this->buyer)
-        ->test(RfqDetail::class, ['rfq' => $this->rfq])
-        ->call('closeRfq');
-
-    $this->assertDatabaseHas('rfq_recipients', [
-        'id' => $noBid->id,
-        'status' => 'no_bid',
-    ]);
-});
-
-test('closing an RFQ does not close recipients whose quotation was awarded', function () {
-    // The recipient stays in_progress; a recipient with an awarded quotation is
-    // excluded from the cascade so its awarded relationship is preserved.
+test('closing an RFQ cascades recipients with awarded quotations to closed too', function () {
     $awardedRecipient = makeRecipient($this->rfq, 'in_progress');
-    Quotation::factory()->awarded()->create([
+    $awarded = Quotation::factory()->awarded()->create([
         'rfq_id' => $this->rfq->id,
         'rfq_recipient_id' => $awardedRecipient->id,
     ]);
@@ -77,17 +64,32 @@ test('closing an RFQ does not close recipients whose quotation was awarded', fun
 
     $this->assertDatabaseHas('rfq_recipients', [
         'id' => $awardedRecipient->id,
-        'status' => 'in_progress',
+        'status' => 'closed',
     ]);
 
+    // Awarded quotation itself is not touched by the recipient cascade.
     $this->assertDatabaseHas('quotations', [
-        'rfq_recipient_id' => $awardedRecipient->id,
+        'id' => $awarded->id,
         'status' => 'awarded',
     ]);
 });
 
-test('the buyer view shows the seller close notice and reason', function () {
-    $recipient = makeRecipient($this->rfq, 'no_bid');
+test('closing an RFQ does not touch already-terminal recipients', function () {
+    $alreadyClosed = makeRecipient($this->rfq, 'closed');
+    $noBid = makeRecipient($this->rfq, 'no_bid');
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->call('closeRfq');
+
+    $this->assertDatabaseHas('rfq_recipients', ['id' => $alreadyClosed->id, 'status' => 'closed']);
+    $this->assertDatabaseHas('rfq_recipients', ['id' => $noBid->id, 'status' => 'no_bid']);
+});
+
+// ── Seller-closed notice (buyer view) ─────────────────────────────────────────
+
+test('buyer view shows seller-closed notice when rfq is open and a recipient is closed', function () {
+    $recipient = makeRecipient($this->rfq, 'closed');
     $recipient->update(['decline_reason' => 'Cannot fulfil this volume within the timeline.']);
 
     Livewire::actingAs($this->buyer)
@@ -96,11 +98,47 @@ test('the buyer view shows the seller close notice and reason', function () {
         ->assertSee('Cannot fulfil this volume within the timeline.');
 });
 
-test('the buyer view shows the close notice without a reason when none was given', function () {
+test('buyer view shows seller-closed notice when a recipient status is no_bid', function () {
     makeRecipient($this->rfq, 'no_bid');
 
     Livewire::actingAs($this->buyer)
         ->test(RfqDetail::class, ['rfq' => $this->rfq])
         ->assertSee('The seller closed this RFQ.')
         ->assertDontSee('Reason:');
+});
+
+test('buyer view does NOT show seller-closed notice after the buyer closes the rfq', function () {
+    // When buyer closes: parent RFQ becomes 'closed', recipients become 'closed'.
+    // The notice gates on rfq.isOpen() so it disappears once the buyer closes.
+    makeRecipient($this->rfq, 'in_progress');
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->call('closeRfq');
+
+    $this->rfq->refresh();
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->assertDontSee('The seller closed this RFQ.');
+});
+
+// ── Close RFQ button visibility ───────────────────────────────────────────────
+
+test('buyer view shows Close RFQ button when rfq is open and no recipient is terminal', function () {
+    makeRecipient($this->rfq, 'in_progress');
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->assertSee('Close RFQ');
+});
+
+test('buyer view hides Close RFQ button when a recipient has already been closed by the seller', function () {
+    makeRecipient($this->rfq, 'closed');
+
+    // The action-bar trigger button has wire:click="$set('showCloseConfirmation', true)".
+    // It should not be rendered when any recipient is already terminal.
+    Livewire::actingAs($this->buyer)
+        ->test(RfqDetail::class, ['rfq' => $this->rfq])
+        ->assertDontSeeHtml('showCloseConfirmation\', true');
 });

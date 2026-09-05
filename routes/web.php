@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Route;
 | Public Storefront Routes (home page + discovery)
 |--------------------------------------------------------------------------
 */
+Route::post('/locale', function (Illuminate\Http\Request $request) {
+    $validLocales = collect(config('marketplace.portals', []))->pluck('locale')->unique()->implode(',');
+    $request->validate(['locale' => 'required|string|in:'.$validLocales]);
+    session(['locale' => $request->locale]);
+
+    return back();
+})->name('locale.switch');
+
 Route::livewire('/', 'storefront.hero-search')->name('home');
 Route::livewire('/companies', 'storefront.company-directory')->name('storefront.companies');
 Route::livewire('/companies/{shop}', 'storefront.company-profile')->name('storefront.company');
@@ -17,13 +25,17 @@ Route::livewire('/products/{product}', 'storefront.product-detail')->name('store
 
 /*
 | Media viewer.
-| Documents attached to a PUBLISHED product are public (Q2: accessible to all,
-| even unauthenticated users). Any other media requires an authenticated admin
-| or the original uploader.
+| Documents attached to a marketplace-visible published product are public
+| (accessible to all, even unauthenticated users). Any other media requires an
+| authenticated admin, the original uploader, or the relevant buyer/seller.
 */
 Route::get('media/{media}/view', function (App\Models\Media $media) {
     $isPublicProductDocument = $media->products()
         ->where('status', 'published')
+        ->whereHas('shop', fn ($query) => $query
+            ->where('status', 'active')
+            ->whereHas('subscriptions', fn ($subscriptionQuery) => $subscriptionQuery
+                ->whereIn('status', ['active', 'trialing'])))
         ->exists();
 
     if (! $isPublicProductDocument) {
@@ -46,7 +58,13 @@ Route::get('media/{media}/view', function (App\Models\Media $media) {
             )
             ->exists();
 
-        if (! $isAdminOrUploader && ! $isDisputeParty) {
+        // RFQ attachments must be viewable by the buyer who created the RFQ and
+        // any seller shop that is a recipient of that RFQ.
+        $isRfqRecipient = $user->shop && $media->rfqs()
+            ->whereHas('recipients', fn ($q) => $q->where('shop_id', $user->shop->id))
+            ->exists();
+
+        if (! $isAdminOrUploader && ! $isDisputeParty && ! $isRfqRecipient) {
             abort(403);
         }
     }
@@ -58,6 +76,11 @@ Route::get('media/{media}/view', function (App\Models\Media $media) {
 })->name('media.view');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Phase 6: canonical unified dashboard for all non-admin users.
+    Route::livewire('portal/dashboard', 'portal.dashboard')->name('portal.dashboard');
+
+    // Legacy redirect: /redirect (used by Fortify post-login) routes to the
+    // appropriate destination. Admin → admin console; all others → unified portal.
     Route::get('redirect', function () {
         $user = auth()->user();
 
@@ -65,13 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return redirect()->route('admin.onboardings.index');
         }
 
-        if ($user->shop && $user->shop->status === 'active') {
-            return redirect()->route('hub.hub-dashboard');
-        }
-
-        // Buyers (and users mid-onboarding) land on their account dashboard.
-        // Becoming a seller is an opt-in action from the portal, not the default.
-        return redirect()->route('account.dashboard');
+        return redirect()->route('portal.dashboard');
     })->name('dashboard');
 });
 
@@ -81,7 +98,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->group(function () {
-    Route::livewire('dashboard', 'account.dashboard')->name('dashboard');
+    // Phase 6: /account/dashboard is kept for backward-compat but redirects to the
+    // unified portal dashboard. Existing links (emails, bookmarks) continue to work.
+    Route::redirect('dashboard', '/portal/dashboard')->name('dashboard');
     Route::livewire('profile', 'account.buyer-profile-form')->name('profile');
     // Seller onboarding application (buyer applies to become a seller)
     Route::livewire('onboarding', 'company-hub.onboarding-wizard')->name('onboarding');
@@ -89,12 +108,16 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->gr
     Route::livewire('rfqs', 'account.rfq-list')->name('rfqs.index');
     Route::livewire('rfqs/create', 'account.rfq-create-form')->name('rfqs.create');
     Route::livewire('rfqs/{rfq}', 'account.rfq-detail')->name('rfqs.show');
-    Route::livewire('messages', 'account.chat-inbox')->name('messages');
+    Route::middleware('feature:chat_enabled')->group(function () {
+        Route::livewire('messages', 'account.chat-inbox')->name('messages');
+    });
 
     // Orders (buyer)
-    Route::livewire('orders', 'account.orders.order-list')->name('orders.index');
-    Route::livewire('orders/{order}', 'account.orders.order-detail')->name('orders.show');
-    Route::livewire('orders/{order}/pay', 'account.orders.payment-page')->name('orders.pay');
+    Route::middleware('feature:orders_enabled')->group(function () {
+        Route::livewire('orders', 'account.orders.order-list')->name('orders.index');
+        Route::livewire('orders/{order}', 'account.orders.order-detail')->name('orders.show');
+        Route::livewire('orders/{order}/pay', 'account.orders.payment-page')->name('orders.pay');
+    });
 
     // Payment History (buyer)
     Route::livewire('payments', 'account.payment-history')->name('payments');
@@ -112,15 +135,19 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->gr
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(function () {
+    // Phase 6: /hub redirects to the unified portal dashboard.
     Route::get('/', function () {
-        $user = auth()->user();
-        if ($user->shop && $user->shop->status === 'active') {
-            return redirect()->route('hub.hub-dashboard');
-        }
-
-        return redirect()->route('account.onboarding');
+        return redirect()->route('portal.dashboard');
     })->name('dashboard');
+    // The old hub-dashboard Livewire route is kept for backward-compat
+    // (existing links, emails, etc.) and redirects to the unified dashboard.
+    Route::redirect('dashboard', '/portal/dashboard')->name('hub-dashboard');
     Route::livewire('shop/profile', 'company-hub.shop-profile-form')->name('shop.profile');
+    Route::livewire('certifications', 'company-hub.certification-application-form')->name('certifications.index');
+    Route::middleware('feature:subscriptions_enabled')->group(function () {
+        Route::livewire('subscription', 'company-hub.subscription-page')->name('subscription');
+        Route::livewire('subscription/{subscription}/pay', 'company-hub.subscription-payment-page')->name('subscription.pay');
+    });
 
     // Product management
     Route::livewire('products', 'company-hub.product-list')->name('products.index');
@@ -131,27 +158,36 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::livewire('products/{product}/documents', 'company-hub.document-manager')->name('products.documents');
 
     // RFQ management (seller)
-    Route::livewire('rfqs', 'company-hub.rfq-queue')->name('rfqs.index');
-    Route::livewire('rfqs/{rfqRecipient}', 'company-hub.rfq-detail')->name('rfqs.show');
-    Route::livewire('rfqs/{rfqRecipient}/quotations/create', 'company-hub.quotation-builder')->name('quotations.create');
-    Route::livewire('rfqs/{rfqRecipient}/quotations/{quotation}/edit', 'company-hub.quotation-builder')->name('quotations.edit');
-    Route::livewire('messages', 'company-hub.chat-inbox')->name('messages');
+    Route::middleware('feature:seller_rfq_queue_enabled')->group(function () {
+        Route::livewire('rfqs', 'company-hub.rfq-queue')->name('rfqs.index');
+        Route::livewire('rfqs/{rfqRecipient}', 'company-hub.rfq-detail')->name('rfqs.show');
+    });
+
+    // Quotations (seller)
+    Route::middleware('feature:quotations_enabled')->group(function () {
+        Route::livewire('rfqs/{rfqRecipient}/quotations/create', 'company-hub.quotation-builder')->name('quotations.create');
+        Route::livewire('rfqs/{rfqRecipient}/quotations/{quotation}/edit', 'company-hub.quotation-builder')->name('quotations.edit');
+    });
+    Route::middleware('feature:chat_enabled')->group(function () {
+        Route::livewire('messages', 'company-hub.chat-inbox')->name('messages');
+    });
 
     // Orders (seller)
-    Route::livewire('orders', 'company-hub.orders.order-queue')->name('orders.index');
-    Route::livewire('orders/create', 'company-hub.orders.order-builder')->name('orders.create');
-    Route::livewire('orders/{order}/edit', 'company-hub.orders.order-builder')->name('orders.edit');
-    Route::livewire('orders/{order}', 'company-hub.orders.order-detail')->name('orders.show');
+    Route::middleware('feature:orders_enabled')->group(function () {
+        Route::livewire('orders', 'company-hub.orders.order-queue')->name('orders.index');
+        Route::livewire('orders/create', 'company-hub.orders.order-builder')->name('orders.create');
+        Route::livewire('orders/{order}/edit', 'company-hub.orders.order-builder')->name('orders.edit');
+        Route::livewire('orders/{order}', 'company-hub.orders.order-detail')->name('orders.show');
+    });
 
-    // Payout Account
-    Route::livewire('payout-account', 'company-hub.payout-account-form')->name('payout-account');
-
-    // Payouts (seller)
-    Route::livewire('payouts', 'company-hub.payouts.payout-history')->name('payouts.index');
-    Route::livewire('payouts/{payout}', 'company-hub.payouts.payout-detail')->name('payouts.show');
+    // Payout Account & Payouts (seller)
+    Route::middleware('feature:payouts_enabled')->group(function () {
+        Route::livewire('payout-account', 'company-hub.payout-account-form')->name('payout-account');
+        Route::livewire('payouts', 'company-hub.payouts.payout-history')->name('payouts.index');
+        Route::livewire('payouts/{payout}', 'company-hub.payouts.payout-detail')->name('payouts.show');
+    });
 
     // Seller Hub pages
-    Route::livewire('dashboard', 'company-hub.hub.dashboard')->name('hub-dashboard');
     Route::livewire('customers', 'company-hub.hub.customers-list')->name('customers.index');
     Route::livewire('reports', 'company-hub.hub.reports')->name('reports');
 
@@ -159,7 +195,9 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::livewire('earnings', 'company-hub.earnings.earnings-overview')->name('earnings');
 
     // Reviews (seller)
-    Route::livewire('reviews', 'company-hub.reviews.review-list')->name('reviews.index');
+    Route::middleware('feature:reviews_enabled')->group(function () {
+        Route::livewire('reviews', 'company-hub.reviews.review-list')->name('reviews.index');
+    });
 });
 
 /*
@@ -168,48 +206,81 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/', '/admin/onboardings')->name('dashboard');
+    Route::redirect('/', '/admin/dashboard')->name('dashboard');
     Route::livewire('onboardings', 'admin.onboarding-queue')->name('onboardings.index');
     Route::livewire('onboardings/{onboarding}', 'admin.onboarding-review')->name('onboardings.show');
+    Route::livewire('certifications', 'admin.certification-queue')->name('certifications.index');
+    Route::livewire('subscriptions', 'admin.subscription-queue')->name('subscriptions.index');
     Route::livewire('categories', 'admin.category-manager')->name('categories.index');
     Route::livewire('categories/create', 'admin.category-create')->name('categories.create');
     Route::livewire('categories/{category}/edit', 'admin.category-edit')->name('categories.edit');
 
+    // RFQ Management (admin)
+    Route::middleware('feature:admin_rfq_management_enabled')->group(function () {
+        Route::livewire('rfqs', 'admin.rfq.rfq-list')->name('rfqs.index');
+        Route::livewire('rfqs/{rfq}', 'admin.rfq.rfq-detail')->name('rfqs.show');
+    });
+
     // Disputes (admin)
-    Route::livewire('disputes', 'admin.disputes.dispute-queue')->name('disputes.index');
-    Route::livewire('disputes/{dispute}', 'admin.disputes.dispute-arbitration')->name('disputes.show');
+    Route::middleware('feature:disputes_enabled')->group(function () {
+        Route::livewire('disputes', 'admin.disputes.dispute-queue')->name('disputes.index');
+        Route::livewire('disputes/{dispute}', 'admin.disputes.dispute-arbitration')->name('disputes.show');
+    });
 
-    // Payout Settings
-    Route::livewire('payout-settings', 'admin.payout-settings')->name('payout-settings');
+    // Payouts (admin)
+    Route::middleware('feature:payouts_enabled')->group(function () {
+        Route::livewire('payout-settings', 'admin.payout-settings')->name('payout-settings');
+        Route::livewire('payout-accounts', 'admin.payout-accounts.payout-account-queue')->name('payout-accounts.index');
+        Route::livewire('payouts', 'admin.payouts.payout-queue')->name('payouts.index');
+        Route::livewire('payouts/eligible', 'admin.payouts.eligible-payouts')->name('payouts.eligible');
+        Route::livewire('payouts/{payout}', 'admin.payouts.payout-detail')->name('payouts.show');
+    });
 
-    // Financial Ledger (admin)
-    Route::livewire('ledger', 'admin.finance.financial-ledger')->name('ledger');
-
-    // Payout Accounts
-    Route::livewire('payout-accounts', 'admin.payout-accounts.payout-account-queue')->name('payout-accounts.index');
-
-    // Payouts
-    Route::livewire('payouts', 'admin.payouts.payout-queue')->name('payouts.index');
-    Route::livewire('payouts/eligible', 'admin.payouts.eligible-payouts')->name('payouts.eligible');
-    Route::livewire('payouts/{payout}', 'admin.payouts.payout-detail')->name('payouts.show');
+    // Financial Ledger (admin) — disabled pending Phase 7
+    // Route::livewire('ledger', 'admin.finance.financial-ledger')->name('ledger');
 
     // Analytics Dashboard
-    Route::livewire('analytics', 'admin.finance.analytics-dashboard')->name('analytics');
+    Route::livewire('dashboard', 'admin.finance.analytics-dashboard')->name('dashboard.index');
 
     // Review Reports
-    Route::livewire('review-reports', 'admin.reviews.review-report-queue')->name('review-reports.index');
+    Route::middleware('feature:reviews_enabled')->group(function () {
+        Route::livewire('review-reports', 'admin.reviews.review-report-queue')->name('review-reports.index');
+    });
+
+    // Admin Merchant & Product Management
+    Route::livewire('merchants', 'admin.merchants.merchant-list')->name('merchants.index');
+    Route::livewire('merchants/{shop}', 'admin.merchants.merchant-show')->name('merchants.show');
+    Route::livewire('products/moderation', 'admin.products.product-moderation-list')->name('products.moderation');
+
+    // Sponsored Content (M7)
+    Route::middleware('feature:sponsored_content_enabled')->group(function () {
+        Route::livewire('sponsored-content', 'admin.sponsored-content.sponsored-content-list')->name('sponsored-content.index');
+        Route::livewire('sponsored-content/create', 'admin.sponsored-content.sponsored-content-composer')->name('sponsored-content.create');
+        Route::livewire('sponsored-content/{sponsoredContent}/edit', 'admin.sponsored-content.sponsored-content-composer')->name('sponsored-content.edit');
+    });
 });
+
+// Sponsored content click-tracking (public — no auth required)
+Route::get('/ads/{sponsoredContent}/click', App\Http\Controllers\SponsoredContentClickController::class)
+    ->name('sponsored-content.click');
 
 /*
 |--------------------------------------------------------------------------
 | Payment Callback Routes (DLT redirects here after checkout)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'feature:orders_enabled'])->group(function () {
     Route::get('/orders/{order}/payment/success', [App\Http\Controllers\OrderPaymentCallbackController::class, 'success'])
         ->name('orders.payment.success');
     Route::get('/orders/{order}/payment/failure', [App\Http\Controllers\OrderPaymentCallbackController::class, 'failure'])
         ->name('orders.payment.failure');
+});
+
+Route::middleware(['auth', 'feature:subscriptions_enabled'])->group(function () {
+    Route::get('/hub/subscription/{subscription}/payment/success', [App\Http\Controllers\SubscriptionPaymentCallbackController::class, 'success'])
+        ->name('hub.subscriptions.payment.success');
+    Route::get('/hub/subscription/{subscription}/payment/failure', [App\Http\Controllers\SubscriptionPaymentCallbackController::class, 'failure'])
+        ->name('hub.subscriptions.payment.failure');
 });
 
 require __DIR__.'/settings.php';

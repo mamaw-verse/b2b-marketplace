@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,6 +20,7 @@ final class OrderList extends Component
 {
     use WithPagination;
 
+    #[Url]
     public string $tab = 'to_pay';
 
     public function updatedTab(): void
@@ -30,14 +32,14 @@ final class OrderList extends Component
     {
         $order = Order::where('buyer_user_id', Auth::id())->findOrFail($orderId);
 
-        $order->update(['status' => 'completed']);
-        $order->fulfilments()->update(['status' => 'delivered']);
+        $action = app(\App\Actions\ConfirmReceiptAction::class);
+        $result = $action->execute($order);
 
-        if ($order->shop->user) {
-            $order->shop->user->notify(new \App\Notifications\OrderCompletedNotification($order));
+        if ($result['success']) {
+            \Flux\Flux::toast('Order confirmed as received.', variant: 'success');
+        } else {
+            \Flux\Flux::toast($result['error'], variant: 'danger');
         }
-
-        \Flux\Flux::toast('Order confirmed as received.', variant: 'success');
     }
 
     #[Computed]

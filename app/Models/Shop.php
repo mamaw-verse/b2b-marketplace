@@ -66,6 +66,8 @@ final class Shop extends Model
         'export_readiness_status',
         'value_chain_positions',
         'capabilities',
+        'company_description',
+        'products_description',
         'user_id',
         'status',
         'geo_location',
@@ -131,6 +133,14 @@ final class Shop extends Model
     }
 
     /**
+     * Certification applications submitted by this shop.
+     */
+    public function certificationApplications(): HasMany
+    {
+        return $this->hasMany(CertificationApplication::class);
+    }
+
+    /**
      * Primary product categories assigned to this shop.
      */
     public function categories(): BelongsToMany
@@ -188,6 +198,32 @@ final class Shop extends Model
     }
 
     /**
+     * Subscriptions for this shop.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Most recent subscription record for this shop.
+     */
+    public function latestSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
+    /**
+     * Determine whether the shop has an active or trialing subscription.
+     */
+    public function hasActiveOrTrialingSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->whereIn('status', ['active', 'trialing'])
+            ->exists();
+    }
+
+    /**
      * Reviews for this shop.
      */
     public function reviews(): \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -201,6 +237,18 @@ final class Shop extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function suspend(): void
+    {
+        $this->update(['status' => 'suspended']);
+        $this->searchable();
+    }
+
+    public function reactivate(): void
+    {
+        $this->update(['status' => 'active']);
+        $this->searchable();
     }
 
     /**

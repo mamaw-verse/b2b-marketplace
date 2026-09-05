@@ -96,7 +96,7 @@ final class ScanUploadedFileJob implements ShouldQueue
             fwrite($socket, "zINSTREAM\0");
 
             // Send file content in chunks (max 2MB per chunk per ClamAV protocol)
-            $chunkSize = 2048;
+            $chunkSize = 2 * 1024 * 1024;
             $offset = 0;
             $length = mb_strlen($content);
 

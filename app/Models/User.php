@@ -123,6 +123,14 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Get the total unread message count across all conversations.
+     */
+    public function unreadMessagesCount(): int
+    {
+        return Conversation::forUser($this)->get()->sum(fn ($c) => $c->unreadCountFor($this));
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

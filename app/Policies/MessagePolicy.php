@@ -14,6 +14,10 @@ final class MessagePolicy
      */
     public function create(User $user, ConversationThread $thread): bool
     {
+        if (! config('marketplace.features.chat_enabled')) {
+            return false;
+        }
+
         return $thread->conversation->hasParticipant($user);
     }
 }

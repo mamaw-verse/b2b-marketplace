@@ -36,7 +36,12 @@ final class RfqQueue extends Component
             ->orderByDesc('created_at');
 
         if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
+            // The 'closed' tab includes both explicit closes and system timeout (no_bid).
+            $statuses = $this->statusFilter === 'closed'
+                ? ['closed', 'no_bid']
+                : [$this->statusFilter];
+
+            $query->whereIn('status', $statuses);
         }
 
         return $query->cursorPaginate(20);
@@ -48,7 +53,7 @@ final class RfqQueue extends Component
         $shop = Auth::user()->shop;
 
         if (! $shop) {
-            return ['received' => 0, 'reviewed' => 0, 'in_progress' => 0, 'no_bid' => 0];
+            return ['received' => 0, 'reviewed' => 0, 'in_progress' => 0, 'closed' => 0];
         }
 
         $counts = RfqRecipient::where('shop_id', $shop->id)
@@ -61,7 +66,7 @@ final class RfqQueue extends Component
             'received' => $counts['received'] ?? 0,
             'reviewed' => $counts['reviewed'] ?? 0,
             'in_progress' => $counts['in_progress'] ?? 0,
-            'no_bid' => $counts['no_bid'] ?? 0,
+            'closed' => ($counts['closed'] ?? 0) + ($counts['no_bid'] ?? 0),
         ];
     }
 

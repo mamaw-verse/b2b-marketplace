@@ -115,17 +115,24 @@
                         for="doc-input-{{ $type }}"
                         x-on:dragover.prevent="dragging = true"
                         x-on:dragleave.prevent="dragging = false"
-                        x-on:drop.prevent="dragging = false"
+                        x-on:drop.prevent="
+                            dragging = false;
+                            if ($event.dataTransfer?.files?.length) {
+                                const input = document.getElementById('doc-input-{{ $type }}');
+                                input.files = $event.dataTransfer.files;
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        "
                         x-bind:class="dragging
                             ? 'border-[var(--hs-green-600)] bg-[var(--hs-green-50)]'
-                            : 'border-[var(--hs-neutral-200)] hover:border-[var(--hs-green-600)] hover:bg-[var(--hs-green-50)]'"
+                            : '{{ $errors->has("documentUploads.{$type}") ? 'border-[var(--hs-danger-500)] bg-[var(--hs-danger-50)]' : 'border-[var(--hs-neutral-200)] hover:border-[var(--hs-green-600)] hover:bg-[var(--hs-green-50)]' }}'"
                         class="flex flex-col items-center justify-center gap-2 rounded-[var(--hs-radius-card)] border-2 border-dashed p-6 text-center cursor-pointer transition"
                     >
-                        <flux:icon name="cloud-arrow-up" class="size-7 text-[var(--hs-neutral-500)]" />
-                        <p class="text-sm font-medium text-[var(--hs-neutral-900)]">
+                        <flux:icon name="cloud-arrow-up" class="size-7 {{ $errors->has("documentUploads.{$type}") ? 'text-[var(--hs-danger-500)]' : 'text-[var(--hs-neutral-500)]' }}" />
+                        <p class="text-sm font-medium {{ $errors->has("documentUploads.{$type}") ? 'text-[var(--hs-danger-700)]' : 'text-[var(--hs-neutral-900)]' }}">
                             {{ __('Drag & drop, or click to browse') }}
                         </p>
-                        <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('PDF, JPG, PNG — max 20MB') }}</p>
+                        <p class="text-xs {{ $errors->has("documentUploads.{$type}") ? 'text-[var(--hs-danger-500)]' : 'text-[var(--hs-neutral-500)]' }}">{{ __('PDF, JPG, PNG — max 20MB') }}</p>
                         <input
                             id="doc-input-{{ $type }}"
                             type="file"
@@ -135,31 +142,10 @@
                         />
                     </label>
 
-                    {{-- Selected-but-not-yet-uploaded file + upload action --}}
-                    @if (isset($documentUploads[$type]) && $documentUploads[$type])
-                        <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <p class="flex min-w-0 items-center gap-2 text-sm text-[var(--hs-neutral-700)]">
-                                <flux:icon name="document" class="size-4 shrink-0 text-[var(--hs-neutral-500)]" />
-                                <span class="truncate">{{ $documentUploads[$type]->getClientOriginalName() }}</span>
-                            </p>
-                            <flux:button
-                                wire:click="uploadDocument('{{ $type }}')"
-                                wire:loading.attr="disabled"
-                                wire:target="uploadDocument('{{ $type }}'), documentUploads.{{ $type }}"
-                                variant="primary"
-                                size="sm"
-                                class="w-full sm:w-auto"
-                            >
-                                <span wire:loading.remove wire:target="uploadDocument('{{ $type }}')">{{ __('Upload') }}</span>
-                                <span wire:loading wire:target="uploadDocument('{{ $type }}')">{{ __('Uploading…') }}</span>
-                            </flux:button>
-                        </div>
-                    @endif
-
                     {{-- Upload/transfer progress for this specific field --}}
                     <div
                         wire:loading
-                        wire:target="documentUploads.{{ $type }}"
+                        wire:target="documentUploads.{{ $type }}, uploadDocument('{{ $type }}')"
                         class="mt-2 flex items-center gap-2 text-sm text-[var(--hs-neutral-500)]"
                     >
                         <flux:icon name="arrow-path" class="size-4 animate-spin" />

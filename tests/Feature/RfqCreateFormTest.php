@@ -27,6 +27,29 @@ beforeEach(function () {
     BuyerProfile::factory()->create(['user_id' => $this->buyer->id]);
 });
 
+// =============================================================================
+// Step routing
+// =============================================================================
+
+test('buyer without a profile lands on step 1', function () {
+    $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
+    $noProfileBuyer->assignRole('buyer');
+
+    Livewire::actingAs($noProfileBuyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->assertSet('step', 1)
+        ->assertSee('Set up your buyer profile')
+        ->assertSee('Continue to RFQ');
+});
+
+test('buyer with an existing profile lands directly on step 2', function () {
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->assertSet('step', 2)
+        ->assertDontSee('Set up your buyer profile')
+        ->assertSee('Send RFQ');
+});
+
 test('the RFQ form renders without redirecting even when buyer profile is absent', function () {
     $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
     $noProfileBuyer->assignRole('buyer');
@@ -43,6 +66,81 @@ test('the RFQ form renders in the storefront layout', function () {
         ->assertOk()
         ->assertSee('Request for Quotation');
 });
+
+// =============================================================================
+// Step 1 — profile save
+// =============================================================================
+
+test('saveProfile creates the buyer profile and advances to step 2', function () {
+    $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
+    $noProfileBuyer->assignRole('buyer');
+
+    Livewire::actingAs($noProfileBuyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->assertSet('step', 1)
+        ->set('business_name', 'Acme Supplies')
+        ->set('billing_city', 'Manila')
+        ->call('saveProfile')
+        ->assertHasNoErrors()
+        ->assertSet('step', 2)
+        ->assertSee('Send RFQ');
+
+    expect($noProfileBuyer->fresh()->buyerProfile)->not->toBeNull()
+        ->and($noProfileBuyer->fresh()->buyerProfile->business_name)->toBe('Acme Supplies');
+});
+
+test('saveProfile fails validation when business name is missing', function () {
+    $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
+    $noProfileBuyer->assignRole('buyer');
+
+    Livewire::actingAs($noProfileBuyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->set('business_name', '')
+        ->call('saveProfile')
+        ->assertHasErrors(['business_name' => 'required'])
+        ->assertSet('step', 1);
+});
+
+test('saveProfile shipping same as billing copies billing fields', function () {
+    $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
+    $noProfileBuyer->assignRole('buyer');
+
+    Livewire::actingAs($noProfileBuyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->set('business_name', 'Acme Supplies')
+        ->set('billing_city', 'Cebu')
+        ->set('useShippingSameAsBilling', true)
+        ->call('saveProfile')
+        ->assertHasNoErrors();
+
+    $profile = $noProfileBuyer->fresh()->buyerProfile;
+
+    expect($profile->shipping_city)->toBe('Cebu');
+});
+
+// =============================================================================
+// Step 2 — step indicator & edit link
+// =============================================================================
+
+test('step 2 shows an edit profile link pointing to the account profile route', function () {
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->assertSee(route('account.profile'), false)
+        ->assertSee('Edit profile');
+});
+
+test('step 1 does not show the edit profile link', function () {
+    $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
+    $noProfileBuyer->assignRole('buyer');
+
+    Livewire::actingAs($noProfileBuyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
+        ->assertDontSee('Edit profile');
+});
+
+// =============================================================================
+// Step 2 — RFQ submission
+// =============================================================================
 
 test('attachment uses a single file input (not multiple)', function () {
     $this->actingAs($this->buyer)
@@ -74,6 +172,7 @@ test('no attachment is also valid', function () {
         ->call('submit')
         ->assertHasNoErrors(['attachment']);
 });
+
 test('the page is wrapped in a storefront page container', function () {
     $this->actingAs($this->buyer)
         ->get(route('account.rfqs.create', ['shop_id' => $this->shop->id]))
@@ -109,6 +208,7 @@ test('clearAttachment discards the staged upload', function () {
         ->assertSet('attachment', null)
         ->assertDontSee('spec.pdf');
 });
+
 test('the reference product featured image is shown when arriving from a product page', function () {
     $product = Product::factory()->published()->create([
         'shop_id' => $this->shop->id,
@@ -176,6 +276,7 @@ test('a reference product without a featured image falls back to a placeholder',
         ->assertSee('Imageless Product')
         ->assertDontSee('<img', false);
 });
+
 test('submitting stays on the page and shows an in-place success message with a link to My RFQs', function () {
     Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
@@ -199,4 +300,16 @@ test('the success state cannot be used to submit the RFQ twice', function () {
     $component->assertHasNoErrors();
 
     expect(Rfq::where('title', 'Test RFQ')->count())->toBe(1);
+});
+
+test('submitting the RFQ on step 2 redirects back to step 1 when profile is missing', function () {
+    // Simulate an edge case: profile somehow missing when submit fires on step 2.
+    $noProfileBuyer = User::factory()->create(['email_verified_at' => now()]);
+    $noProfileBuyer->assignRole('buyer');
+
+    Livewire::actingAs($noProfileBuyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('step', 2) // force step 2 without having a profile
+        ->call('submit')
+        ->assertSet('step', 1); // falls back to step 1
 });

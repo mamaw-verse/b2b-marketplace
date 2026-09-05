@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,6 +38,7 @@ final class Product extends Model
         'description',
         'featured_image_path',
         'status',
+        'moderation_status',
         'variant_attributes_schema',
         'average_rating',
         'total_reviews',
@@ -69,7 +71,38 @@ final class Product extends Model
 
     public function shouldBeSearchable(): bool
     {
-        return $this->status === 'published' && $this->deleted_at === null;
+        $visible = $this->status === 'published'
+            && $this->moderation_status === 'active'
+            && $this->deleted_at === null
+            && $this->shop?->status === 'active';
+
+        if ($visible && config('marketplace.features.subscriptions_enabled')) {
+            $visible = $this->shop?->hasActiveOrTrialingSubscription();
+        }
+
+        return (bool) $visible;
+    }
+
+    /**
+     * Scope products that are visible in the marketplace.
+     * When subscriptions are enabled, only products from shops with an
+     * active or trialing subscription are returned.
+     */
+    public function scopeMarketplaceVisible(Builder $query): Builder
+    {
+        $query
+            ->where('products.status', 'published')
+            ->where('products.moderation_status', 'active')
+            ->whereHas('shop', fn (Builder $shopQuery) => $shopQuery
+                ->where('status', 'active'));
+
+        if (config('marketplace.features.subscriptions_enabled')) {
+            $query->whereHas('shop', fn (Builder $shopQuery) => $shopQuery
+                ->whereHas('subscriptions', fn (Builder $subscriptionQuery) => $subscriptionQuery
+                    ->whereIn('status', ['active', 'trialing'])));
+        }
+
+        return $query;
     }
 
     /**

@@ -30,7 +30,7 @@ abstract class ChatInbox extends Component
     final public function conversations()
     {
         return Conversation::forUser(Auth::user())
-            ->with(['buyer', 'shop'])
+            ->with(['buyer.buyerProfile', 'shop'])
             ->orderByDesc('updated_at')
             ->get();
     }

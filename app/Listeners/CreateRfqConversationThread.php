@@ -12,6 +12,15 @@ final class CreateRfqConversationThread
 {
     public function handle(RfqCreated $event): void
     {
+        // Phase 6 M5: RFQ auto-threading is removed from the RFQ creation path
+        // when admin_rfq_management_enabled is on. Chat stays enabled — a buyer
+        // can still message a seller directly via "Message this company" on the
+        // storefront company page. This listener is retained (not deleted) per the
+        // additive-only principle so toggling the flag off restores prior behaviour.
+        if (config('marketplace.features.admin_rfq_management_enabled')) {
+            return;
+        }
+
         $rfq = $event->rfq;
         $recipient = $rfq->recipients()->first();
 

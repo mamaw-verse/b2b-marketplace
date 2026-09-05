@@ -124,12 +124,14 @@
                                     />
 
                                     <flux:button
-                                        variant="ghost"
+                                        variant="subtle"
                                         size="sm"
                                         :icon="$product->status === 'published'
                                             ? 'archive-box'
                                             : 'arrow-up-circle'"
                                         wire:click="confirmToggleStatus({{ $product->id }}, '{{ $product->status === 'published' ? 'archive' : 'publish' }}')"
+                                        wire:target="confirmToggleStatus"
+                                        wire:loading.attr="disabled"
                                         tooltip="{{ $product->status === 'published' ? __('Archive') : __('Publish') }}"
                                     />
 

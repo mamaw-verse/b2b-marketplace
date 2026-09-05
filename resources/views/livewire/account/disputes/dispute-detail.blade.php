@@ -2,7 +2,7 @@
     <x-hs-modal
         name="open-dispute-detail-modal"
         model="show"
-        :title="'Dispute — Order #' . $order->id"
+        :title="'Dispute — ' . $order->order_number"
         size="lg"
     >
         @if ($dispute)

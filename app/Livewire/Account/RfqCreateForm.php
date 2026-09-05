@@ -23,6 +23,10 @@ final class RfqCreateForm extends Component
 {
     use WithFileUploads;
 
+    // -------------------------------------------------------------------------
+    // URL-bound query params
+    // -------------------------------------------------------------------------
+
     #[Url]
     public ?int $shop_id = null;
 
@@ -35,6 +39,52 @@ final class RfqCreateForm extends Component
 
     #[Url]
     public string $title = '';
+
+    // -------------------------------------------------------------------------
+    // Step state: 1 = profile setup, 2 = RFQ form
+    // -------------------------------------------------------------------------
+
+    public int $step = 2;
+
+    // -------------------------------------------------------------------------
+    // Step 1 — Buyer profile fields
+    // -------------------------------------------------------------------------
+
+    public string $business_name = '';
+
+    public string $billing_address_1 = '';
+
+    public string $billing_address_2 = '';
+
+    public string $billing_city = '';
+
+    public string $billing_province = '';
+
+    public string $billing_zip_code = '';
+
+    public string $billing_country_code = 'PH';
+
+    public string $shipping_address_1 = '';
+
+    public string $shipping_address_2 = '';
+
+    public string $shipping_city = '';
+
+    public string $shipping_province = '';
+
+    public string $shipping_zip_code = '';
+
+    public string $shipping_country_code = 'PH';
+
+    public string $contact_phone = '';
+
+    public string $contact_email = '';
+
+    public bool $useShippingSameAsBilling = true;
+
+    // -------------------------------------------------------------------------
+    // Step 2 — RFQ fields
+    // -------------------------------------------------------------------------
 
     public string $description = '';
 
@@ -53,18 +103,55 @@ final class RfqCreateForm extends Component
 
     public function mount(): void
     {
-        // Buyer profile is no longer required before rendering the form.
-        // The submit() action still validates the profile exists before saving.
+        $profile = Auth::user()->buyerProfile;
+
+        if (! $profile) {
+            $this->step = 1;
+
+            return;
+        }
+
+        // Profile exists — pre-populate in case the buyer navigates back.
+        $this->step = 2;
     }
 
-    /**
-     * Discard the staged temporary upload so the buyer can pick a different file.
-     */
-    public function clearAttachment(): void
+    // -------------------------------------------------------------------------
+    // Step 1 action
+    // -------------------------------------------------------------------------
+
+    public function saveProfile(): void
     {
-        $this->attachment = null;
-        $this->resetErrorBag('attachment');
+        $this->validate($this->profileRules());
+
+        $data = [
+            'business_name' => $this->business_name,
+            'billing_address_1' => $this->billing_address_1 ?: null,
+            'billing_address_2' => $this->billing_address_2 ?: null,
+            'billing_city' => $this->billing_city ?: null,
+            'billing_province' => $this->billing_province ?: null,
+            'billing_zip_code' => $this->billing_zip_code ?: null,
+            'billing_country_code' => $this->billing_country_code ?: 'PH',
+            'shipping_address_1' => $this->useShippingSameAsBilling ? ($this->billing_address_1 ?: null) : ($this->shipping_address_1 ?: null),
+            'shipping_address_2' => $this->useShippingSameAsBilling ? ($this->billing_address_2 ?: null) : ($this->shipping_address_2 ?: null),
+            'shipping_city' => $this->useShippingSameAsBilling ? ($this->billing_city ?: null) : ($this->shipping_city ?: null),
+            'shipping_province' => $this->useShippingSameAsBilling ? ($this->billing_province ?: null) : ($this->shipping_province ?: null),
+            'shipping_zip_code' => $this->useShippingSameAsBilling ? ($this->billing_zip_code ?: null) : ($this->shipping_zip_code ?: null),
+            'shipping_country_code' => $this->useShippingSameAsBilling ? ($this->billing_country_code ?: 'PH') : ($this->shipping_country_code ?: 'PH'),
+            'contact_phone' => $this->contact_phone ?: null,
+            'contact_email' => $this->contact_email ?: null,
+        ];
+
+        Auth::user()->buyerProfile()->updateOrCreate(
+            ['user_id' => Auth::id()],
+            $data,
+        );
+
+        $this->step = 2;
     }
+
+    // -------------------------------------------------------------------------
+    // Step 2 action
+    // -------------------------------------------------------------------------
 
     public function submit(): void
     {
@@ -73,13 +160,14 @@ final class RfqCreateForm extends Component
             return;
         }
 
-        $this->validate();
+        $this->validate($this->rfqRules());
 
         $user = Auth::user();
         $buyerProfile = $user->buyerProfile;
 
         if (! $buyerProfile) {
-            $this->addError('buyer_profile', 'Please complete your buyer profile before sending an RFQ.');
+            // This shouldn't happen in normal flow, but guard against stale state.
+            $this->step = 1;
 
             return;
         }
@@ -136,6 +224,23 @@ final class RfqCreateForm extends Component
         $this->reset(['description', 'attachment']);
     }
 
+    // -------------------------------------------------------------------------
+    // File upload helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Discard the staged temporary upload so the buyer can pick a different file.
+     */
+    public function clearAttachment(): void
+    {
+        $this->attachment = null;
+        $this->resetErrorBag('attachment');
+    }
+
+    // -------------------------------------------------------------------------
+    // Render
+    // -------------------------------------------------------------------------
+
     public function render()
     {
         $shop = $this->shop_id
@@ -156,10 +261,59 @@ final class RfqCreateForm extends Component
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
     /**
      * @return array<string, array<int, string>>
      */
     protected function rules(): array
+    {
+        // Called by Livewire's real-time validation — delegate to the active step's rules.
+        return $this->step === 1
+            ? $this->profileRules()
+            : $this->rfqRules();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'attachment.mimes' => 'Only PDF, Word, and image files are accepted.',
+        ];
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function profileRules(): array
+    {
+        return [
+            'business_name' => ['required', 'string', 'max:255'],
+            'billing_address_1' => ['nullable', 'string', 'max:255'],
+            'billing_address_2' => ['nullable', 'string', 'max:255'],
+            'billing_city' => ['nullable', 'string', 'max:120'],
+            'billing_province' => ['nullable', 'string', 'max:120'],
+            'billing_zip_code' => ['nullable', 'string', 'max:20'],
+            'billing_country_code' => ['nullable', 'string', 'size:2'],
+            'shipping_address_1' => ['nullable', 'string', 'max:255'],
+            'shipping_address_2' => ['nullable', 'string', 'max:255'],
+            'shipping_city' => ['nullable', 'string', 'max:120'],
+            'shipping_province' => ['nullable', 'string', 'max:120'],
+            'shipping_zip_code' => ['nullable', 'string', 'max:20'],
+            'shipping_country_code' => ['nullable', 'string', 'size:2'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+        ];
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function rfqRules(): array
     {
         return [
             'title' => ['required', 'string', 'max:500'],
@@ -173,16 +327,6 @@ final class RfqCreateForm extends Component
                 // text/plain and other generic types are rejected.
                 'mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp',
             ],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function messages(): array
-    {
-        return [
-            'attachment.mimes' => 'Only PDF, Word, and image files are accepted.',
         ];
     }
 }

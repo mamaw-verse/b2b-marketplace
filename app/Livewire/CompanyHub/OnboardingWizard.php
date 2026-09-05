@@ -17,6 +17,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Throwable;
@@ -30,10 +31,8 @@ final class OnboardingWizard extends Component
     public const int TOTAL_STEPS = 5;
 
     public const array REQUIRED_DOCUMENTS = [
-        'dti_sec_certificate' => 'DTI/SEC Certificate',
         'business_permit' => 'Business Permit',
-        'bir_form_2303' => 'BIR Form 2303',
-        'ingredient_list' => 'Ingredient List',
+        'other_supporting_document' => 'Other Supporting Document',
     ];
 
     /**
@@ -44,6 +43,8 @@ final class OnboardingWizard extends Component
      */
     public const array FIELD_LABELS = [
         'form.registered_business_name' => 'Registered Business Name',
+        'form.company_description' => 'Company Description',
+        'form.products_description' => 'Products Description',
         'form.storefront_name' => 'Storefront Name',
         'form.business_structure' => 'Business Structure',
         'form.dti_sec_number' => 'DTI/SEC Number',
@@ -61,7 +62,8 @@ final class OnboardingWizard extends Component
         'form.export_readiness_status' => 'Export Readiness',
         'form.value_chain_positions' => 'Value Chain Positions',
         'form.capabilities' => 'Capabilities',
-        'documents' => 'Required Documents',
+        'documentUploads.business_permit' => 'Business Permit',
+        'documentUploads.other_supporting_document' => 'Other Supporting Document',
     ];
 
     /**
@@ -72,6 +74,8 @@ final class OnboardingWizard extends Component
      */
     public const array STEP_FOR_FIELD = [
         'form.registered_business_name' => 1,
+        'form.company_description' => 1,
+        'form.products_description' => 1,
         'form.storefront_name' => 1,
         'form.business_structure' => 1,
         'form.dti_sec_number' => 1,
@@ -87,13 +91,13 @@ final class OnboardingWizard extends Component
         'form.fda_lto_number' => 2,
         'form.average_production_lead_time' => 2,
         'form.export_readiness_status' => 2,
-        'certificates' => 3,
-        'certificateFiles' => 3,
-        'form.value_chain_positions' => 4,
-        'form.capabilities' => 4,
-        'documents' => 5,
+        'form.value_chain_positions' => 3,
+        'form.capabilities' => 3,
+        'certificates' => 4,
+        'documentUploads' => 5,
     ];
 
+    #[Url]
     public int $currentStep = 1;
 
     public string $onboardingStatus = '';
@@ -102,32 +106,26 @@ final class OnboardingWizard extends Component
 
     public OnboardingForm $form;
 
-    /** @var array<int, array<string, mixed>> */
-    public array $certificates = [];
-
-    public ?int $confirmingRemoveCertificateIndex = null;
-
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> */
-    public array $certificateFiles = [];
-
     /** @var array<string, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> */
     public array $documentUploads = [];
 
     /** @var array<string, array<string, mixed>> */
     public array $uploadedDocuments = [];
 
+    /** @var array<int, array<string, mixed>> */
+    public array $certificates = [];
+
+    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> */
+    public array $certificateFiles = [];
+
     public function mount(): void
     {
+        // Clamp any URL-injected step to a valid range (e.g. stale bookmark).
+        $this->currentStep = max(1, min($this->currentStep, self::TOTAL_STEPS));
+
         $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
 
         if ($onboarding) {
-            // Already approved: the wizard is read-only/complete — send to the
-            // dashboard rather than letting the seller re-edit an approved shop.
-            if ($onboarding->status === 'approved') {
-                $this->redirect(route('hub.hub-dashboard'));
-
-                return;
-            }
 
             $this->onboardingStatus = $onboarding->status ?? '';
             $this->adminNotes = $onboarding->admin_notes;
@@ -141,9 +139,12 @@ final class OnboardingWizard extends Component
                 'expiry_date' => $cert->expiry_date?->format('Y-m-d') ?? '',
                 'media_id' => $cert->media_id,
                 'filename' => $cert->media?->original_filename,
+                'scan_status' => $cert->media?->scan_status,
             ])->toArray();
 
             $this->loadUploadedDocuments($onboarding);
+        } else {
+            $this->form->country_code = config('marketplace.instance_country', 'PH');
         }
     }
 
@@ -184,7 +185,7 @@ final class OnboardingWizard extends Component
             $this->getStepData(),
         );
 
-        if ($this->currentStep === 3) {
+        if ($this->currentStep === 4) {
             $this->saveCertificates($onboarding);
         }
 
@@ -212,42 +213,37 @@ final class OnboardingWizard extends Component
 
         // Find which required documents are missing entirely
         $uploadedTypes = $documents->pluck('description')->filter()->values()->toArray();
-        $missingLabels = [];
-        $pendingLabels = [];
-        $infectedLabels = [];
+
+        $hasErrors = false;
+
+        // Clear any stale per-type document errors before re-evaluating.
+        foreach (array_keys(self::REQUIRED_DOCUMENTS) as $type) {
+            $this->resetErrorBag("documentUploads.{$type}");
+        }
+
+        $this->resetErrorBag('documents');
 
         foreach (self::REQUIRED_DOCUMENTS as $type => $label) {
             if (! in_array($type, $uploadedTypes, true)) {
-                $missingLabels[] = $label;
+                $this->addError("documentUploads.{$type}", "{$label} is required.");
+                $hasErrors = true;
             }
         }
 
         foreach ($documents as $doc) {
-            $label = self::REQUIRED_DOCUMENTS[$doc->description] ?? $doc->description;
+            $type = $doc->description;
+            $label = self::REQUIRED_DOCUMENTS[$type] ?? $type;
+
             if ($doc->scan_status === 'pending') {
-                $pendingLabels[] = $label;
+                $this->addError("documentUploads.{$type}", "{$label}: Security scan in progress — please wait and try again.");
+                $hasErrors = true;
             } elseif ($doc->scan_status === 'infected') {
-                $infectedLabels[] = $label;
+                $this->addError("documentUploads.{$type}", "{$label}: Failed security scan — please re-upload a clean file.");
+                $hasErrors = true;
             }
         }
 
-        $errors = [];
-
-        if (! empty($missingLabels)) {
-            $errors[] = 'Missing: '.implode(', ', $missingLabels).'.';
-        }
-
-        if (! empty($pendingLabels)) {
-            $errors[] = 'Still scanning (please wait and try again): '.implode(', ', $pendingLabels).'.';
-        }
-
-        if (! empty($infectedLabels)) {
-            $errors[] = 'Failed security scan (please re-upload): '.implode(', ', $infectedLabels).'.';
-        }
-
-        if (! empty($errors)) {
-            $this->addError('documents', implode(' ', $errors));
-
+        if ($hasErrors) {
             return;
         }
 
@@ -272,6 +268,8 @@ final class OnboardingWizard extends Component
             'registration_number' => '',
             'expiry_date' => '',
             'media_id' => null,
+            'filename' => null,
+            'scan_status' => null,
         ];
     }
 
@@ -333,6 +331,129 @@ final class OnboardingWizard extends Component
         unset($this->documentUploads[$documentType]);
     }
 
+    /**
+     * Livewire lifecycle hook: automatically upload a document as soon as a
+     * file is selected via the wire:model file input, removing the need
+     * for the user to click an "Upload" button.
+     */
+    public function updatedDocumentUploads(mixed $value, string $key): void
+    {
+        // Clear any prior error for this slot the moment the user picks a new file.
+        $this->resetErrorBag("documentUploads.{$key}");
+
+        if ($value !== null) {
+            $this->uploadDocument($key, app(MediaUploadService::class));
+        }
+    }
+
+    /**
+     * Livewire lifecycle hook: when a certificate file is selected via the
+     * dropzone wire:model, immediately persist it by uploading to S3 and
+     * attaching it to the certificate entry — no manual "Next" click needed.
+     */
+    public function updatedCertificateFiles(mixed $value, string $key): void
+    {
+        if ($value === null) {
+            return;
+        }
+
+        // Clear the prior file-required error as soon as the user picks a file.
+        $this->resetErrorBag("certificateFiles.{$key}");
+
+        $index = (int) $key;
+        $certificate = $this->certificates[$index] ?? null;
+
+        if ($certificate === null) {
+            return;
+        }
+
+        $uploadService = app(MediaUploadService::class);
+
+        try {
+            $media = $uploadService->store($value, Auth::id(), 'halal_certificate');
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->first() ?? $e->getMessage();
+            $this->addError("certificateFiles.{$index}", $message);
+
+            return;
+        } catch (Throwable $e) {
+            $this->addError("certificateFiles.{$index}", $e->getMessage());
+
+            return;
+        }
+
+        $this->certificates[$index]['media_id'] = $media->id;
+        $this->certificates[$index]['filename'] = $media->original_filename;
+        $this->certificates[$index]['scan_status'] = $media->scan_status;
+        unset($this->certificateFiles[$index]);
+
+        // Persist to DB immediately so the upload survives a page refresh.
+        $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+
+        if ($onboarding && $certificate['id']) {
+            ShopOnboardingCertificate::where('id', $certificate['id'])->update(['media_id' => $media->id]);
+        }
+    }
+
+    /**
+     * General lifecycle hook: clear the validation error for any form field
+     * or nested certificate field the moment the user makes a change, so the
+     * error ring and message disappear as soon as the correction is provided.
+     */
+    public function updated(string $key): void
+    {
+        // form.* fields map directly to their error key.
+        if (str_starts_with($key, 'form.')) {
+            $this->resetErrorBag($key);
+
+            return;
+        }
+
+        // certificates.N.field — clear the field-level error.
+        if (str_starts_with($key, 'certificates.')) {
+            $this->resetErrorBag($key);
+        }
+    }
+
+    /**
+     * Clear an already-uploaded certificate file so the user can replace it
+     * with a fresh dropzone. Only clears local state; the media record is kept
+     * until the step is saved (avoiding orphaned uploads on cancel).
+     */
+    public function replaceCertificateFile(int $index): void
+    {
+        if (! isset($this->certificates[$index])) {
+            return;
+        }
+
+        $this->certificates[$index]['media_id'] = null;
+        $this->certificates[$index]['filename'] = null;
+        $this->certificates[$index]['scan_status'] = null;
+        unset($this->certificateFiles[$index]);
+    }
+
+    /**
+     * Detach an infected or unwanted certificate file so the user can
+     * re-upload a clean replacement. Nulls out the media_id on the DB record.
+     */
+    public function resetCertificateFile(int $index): void
+    {
+        if (! isset($this->certificates[$index])) {
+            return;
+        }
+
+        $certId = $this->certificates[$index]['id'] ?? null;
+
+        if ($certId) {
+            ShopOnboardingCertificate::where('id', $certId)->update(['media_id' => null]);
+        }
+
+        $this->certificates[$index]['media_id'] = null;
+        $this->certificates[$index]['filename'] = null;
+        $this->certificates[$index]['scan_status'] = null;
+        unset($this->certificateFiles[$index]);
+    }
+
     public function refreshDocumentStatuses(): void
     {
         $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
@@ -375,11 +496,49 @@ final class OnboardingWizard extends Component
 
         $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
 
-        $onboarding?->update([
+        if (! $onboarding) {
+            return;
+        }
+
+        // Detach all documents and delete all certificates.
+        $onboarding->documents()->detach();
+        $onboarding->certificates()->delete();
+
+        // Clear all form fields on the DB record.
+        $onboarding->update([
             'status' => 'pending',
             'admin_notes' => null,
+            'submitted_at' => null,
+            'reviewed_at' => null,
+            'reviewed_by_id' => null,
+            'registered_business_name' => null,
+            'storefront_name' => null,
+            'business_structure' => null,
+            'company_description' => null,
+            'products_description' => null,
+            'dti_sec_number' => null,
+            'tax_identification_number' => null,
+            'phone' => null,
+            'email' => null,
+            'address_1' => null,
+            'address_2' => null,
+            'city' => null,
+            'province' => null,
+            'zip_code' => null,
+            'product_categories' => null,
+            'fda_lto_number' => null,
+            'average_production_lead_time' => null,
+            'export_readiness_status' => null,
+            'value_chain_positions' => null,
+            'capabilities' => null,
         ]);
 
+        // Reset all local component state.
+        $this->form->setOnboarding($onboarding->fresh());
+        $this->certificates = [];
+        $this->certificateFiles = [];
+        $this->uploadedDocuments = [];
+        $this->documentUploads = [];
         $this->onboardingStatus = 'pending';
         $this->adminNotes = null;
         $this->currentStep = 1;
@@ -422,6 +581,52 @@ final class OnboardingWizard extends Component
         }
 
         return false;
+    }
+
+    /**
+     * Whether any uploaded certificate file is still awaiting its security scan.
+     * Drives auto-refresh polling on the certificates step.
+     */
+    #[Computed]
+    public function hasPendingCertificates(): bool
+    {
+        foreach ($this->certificates as $certificate) {
+            if (($certificate['scan_status'] ?? null) === 'pending') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function refreshCertificateStatuses(): void
+    {
+        $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+
+        if (! $onboarding) {
+            return;
+        }
+
+        $mediaIds = collect($this->certificates)
+            ->pluck('media_id')
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($mediaIds)) {
+            return;
+        }
+
+        $scanStatuses = \App\Models\Media::whereIn('id', $mediaIds)
+            ->pluck('scan_status', 'id');
+
+        foreach ($this->certificates as $index => $certificate) {
+            $mediaId = $certificate['media_id'] ?? null;
+
+            if ($mediaId && isset($scanStatuses[$mediaId])) {
+                $this->certificates[$index]['scan_status'] = $scanStatuses[$mediaId];
+            }
+        }
     }
 
     /**
@@ -472,16 +677,8 @@ final class OnboardingWizard extends Component
             ->mapWithKeys(fn ($rule, $field) => ["form.{$field}" => $rule])
             ->all();
 
-        if ($this->currentStep === 3) {
-            [$certRules, $certMessages] = $this->certificateValidation();
-
-            if (! empty($certRules)) {
-                $this->validate($certRules, $certMessages);
-            }
-        }
-
         if (! empty($rules)) {
-            $this->validate($rules);
+            $this->validate($rules, [], self::FIELD_LABELS);
         }
     }
 
@@ -492,26 +689,6 @@ final class OnboardingWizard extends Component
      *
      * @return array{0: array<string, array<int, string>>, 1: array<string, string>}
      */
-    private function certificateValidation(): array
-    {
-        $rules = [];
-        $messages = [];
-
-        foreach ($this->certificates as $index => $certificate) {
-            $rules["certificates.{$index}.certification_body"] = ['required', 'string'];
-            $messages["certificates.{$index}.certification_body.required"] = "Certificate #{$index}: Certification body is required.";
-
-            if (empty($certificate['media_id'])) {
-                $rules["certificateFiles.{$index}"] = ['required'];
-                $messages["certificateFiles.{$index}.required"] = 'Certificate #'.($index + 1).': A certificate file is required.';
-            }
-
-            // Fix the human index in the certification-body message (1-based).
-            $messages["certificates.{$index}.certification_body.required"] = 'Certificate #'.($index + 1).': Certification body is required.';
-        }
-
-        return [$rules, $messages];
-    }
 
     /**
      * @return array<string, mixed>
@@ -523,48 +700,23 @@ final class OnboardingWizard extends Component
 
     private function saveCertificates(ShopOnboarding $onboarding): void
     {
-        $uploadService = app(MediaUploadService::class);
-
-        foreach ($this->certificates as $index => $certData) {
-            // Guard: never persist a certificate without a certification body.
-            if (empty($certData['certification_body'])) {
+        foreach ($this->certificates as $index => $data) {
+            // Skip completely blank rows — no expiry and no file means nothing to save.
+            if (empty($data['expiry_date']) && empty($data['media_id'])) {
                 continue;
-            }
-
-            $mediaId = $certData['media_id'];
-
-            if (isset($this->certificateFiles[$index]) && $this->certificateFiles[$index]) {
-                $file = $this->certificateFiles[$index];
-
-                try {
-                    $media = $uploadService->store($file, Auth::id(), 'halal_certificate');
-                } catch (ValidationException $e) {
-                    $message = collect($e->errors())->flatten()->first() ?? $e->getMessage();
-                    $this->addError("certificateFiles.{$index}", $message);
-
-                    continue;
-                } catch (Throwable $e) {
-                    $this->addError("certificateFiles.{$index}", $e->getMessage());
-
-                    continue;
-                }
-
-                $mediaId = $media->id;
-                $this->certificates[$index]['media_id'] = $media->id;
-                unset($this->certificateFiles[$index]);
             }
 
             $attributes = [
                 'onboarding_id' => $onboarding->id,
-                'certification_body' => $certData['certification_body'] ?: null,
-                'certification_body_other' => $certData['certification_body_other'] ?: null,
-                'registration_number' => $certData['registration_number'] ?? '',
-                'expiry_date' => $certData['expiry_date'] ?: null,
-                'media_id' => $mediaId,
+                'certification_body' => $data['certification_body'] ?: null,
+                'certification_body_other' => $data['certification_body_other'] ?? null,
+                'registration_number' => $data['registration_number'] ?? null,
+                'expiry_date' => $data['expiry_date'] ?: null,
+                'media_id' => $data['media_id'] ?? null,
             ];
 
-            if ($certData['id']) {
-                ShopOnboardingCertificate::where('id', $certData['id'])->update($attributes);
+            if (! empty($data['id'])) {
+                ShopOnboardingCertificate::where('id', $data['id'])->update($attributes);
             } else {
                 $cert = ShopOnboardingCertificate::create($attributes);
                 $this->certificates[$index]['id'] = $cert->id;

@@ -57,8 +57,11 @@ final class CompanyDirectory extends Component
     #[Computed]
     public function shops(): LengthAwarePaginator
     {
+        $instanceCountry = config('marketplace.instance_country');
+
         if ($this->query !== '') {
-            $search = Shop::search($this->query);
+            $search = Shop::search($this->query)
+                ->where('country_code', $instanceCountry);
 
             if ($this->categoryId) {
                 $category = Category::find($this->categoryId);
@@ -70,7 +73,8 @@ final class CompanyDirectory extends Component
             return $search->paginate(12);
         }
 
-        $query = Shop::where('status', 'active');
+        $query = Shop::where('status', 'active')
+            ->where('country_code', $instanceCountry);
 
         if ($this->categoryId) {
             $query->whereHas('categories', fn ($q) => $q->where('categories.id', $this->categoryId));

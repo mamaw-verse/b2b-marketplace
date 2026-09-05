@@ -14,6 +14,10 @@ final class PayoutPolicy
      */
     public function viewAny(User $user): bool
     {
+        if (! config('marketplace.features.payouts_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin');
     }
 
@@ -22,6 +26,10 @@ final class PayoutPolicy
      */
     public function view(User $user, Payout $payout): bool
     {
+        if (! config('marketplace.features.payouts_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin')
             || ($user->shop && $user->shop->id === $payout->shop_id);
     }
@@ -31,6 +39,10 @@ final class PayoutPolicy
      */
     public function create(User $user): bool
     {
+        if (! config('marketplace.features.payouts_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin');
     }
 
@@ -39,6 +51,10 @@ final class PayoutPolicy
      */
     public function release(User $user, Payout $payout): bool
     {
+        if (! config('marketplace.features.payouts_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin') && $user->hasPermissionTo('payout.release');
     }
 
@@ -47,6 +63,10 @@ final class PayoutPolicy
      */
     public function retry(User $user, Payout $payout): bool
     {
+        if (! config('marketplace.features.payouts_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin') && $user->hasPermissionTo('payout.release');
     }
 
@@ -55,6 +75,10 @@ final class PayoutPolicy
      */
     public function viewEligible(User $user): bool
     {
+        if (! config('marketplace.features.payouts_enabled')) {
+            return false;
+        }
+
         return $user->hasRole('admin');
     }
 }

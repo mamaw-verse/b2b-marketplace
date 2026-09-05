@@ -87,7 +87,15 @@
                 <div class="p-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">Product Categories</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->product_categories ?? '—' }}</p>
+                        <div class="mt-2 flex flex-wrap gap-1.5">
+                            @if($this->productCategoryNames && count($this->productCategoryNames) > 0)
+                                @foreach($this->productCategoryNames as $name)
+                                    <x-hs-badge variant="tag" :label="$name" />
+                                @endforeach
+                            @else
+                                <p class="text-sm text-[var(--hs-neutral-900)]">—</p>
+                            @endif
+                        </div>
                     </div>
                     <div>
                         <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">Avg. Production Lead Time</p>
@@ -124,82 +132,61 @@
                 </div>
             </div>
 
-            {{-- Halal Certificates — moved back into the main column. The
-                 overflow-x-auto wrapper already handles wide table content,
-                 so this card doesn't need to break the grid to avoid clipping. --}}
+            {{-- Halal Certificates --}}
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
                 <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
                     <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Halal Certificates</h2>
                 </div>
                 <div class="p-6">
                     @if ($onboarding->certificates->isNotEmpty())
-                        <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
-                            <flux:table>
-                                <flux:table.columns>
-                                    <flux:table.column>Certification Body</flux:table.column>
-                                    <flux:table.column>Registration #</flux:table.column>
-                                    <flux:table.column>Expiry Date</flux:table.column>
-                                    <flux:table.column>Document</flux:table.column>
-                                </flux:table.columns>
-                                <flux:table.rows>
-                                    @foreach ($onboarding->certificates as $certificate)
-                                        <flux:table.row :key="$certificate->id" class="hover:bg-[var(--hs-neutral-50)] transition">
-                                            <flux:table.cell>{{ $certificate->certification_body }}{{ $certificate->certification_body_other ? ' (' . $certificate->certification_body_other . ')' : '' }}</flux:table.cell>
-                                            <flux:table.cell>{{ $certificate->registration_number }}</flux:table.cell>
-                                            <flux:table.cell>{{ $certificate->expiry_date?->format('M d, Y') ?? '—' }}</flux:table.cell>
-                                            <flux:table.cell>
-                                                @if ($certificate->media_id)
-                                                    <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $certificate->media_id }})">
-                                                        View
-                                                    </flux:button>
-                                                @else
-                                                    <span class="text-[var(--hs-neutral-400)]">—</span>
-                                                @endif
-                                            </flux:table.cell>
-                                        </flux:table.row>
-                                    @endforeach
-                                </flux:table.rows>
-                            </flux:table>
-                        </div>
+                        <ul class="space-y-2">
+                            @foreach ($onboarding->certificates as $certificate)
+                                <li class="flex items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] px-4 py-3">
+                                    <flux:icon name="document-text" class="size-5 shrink-0 text-[var(--hs-neutral-400)]" />
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate text-sm font-medium text-[var(--hs-neutral-900)]">{{ $certificate->media?->original_filename ?? '—' }}</p>
+                                        @if ($certificate->expiry_date)
+                                            <p class="text-xs text-[var(--hs-neutral-500)]">Expires {{ $certificate->expiry_date->format('M d, Y') }}</p>
+                                        @endif
+                                    </div>
+                                    @if ($certificate->media_id)
+                                        <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $certificate->media_id }})">
+                                            View
+                                        </flux:button>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
                     @else
                         <p class="text-sm text-[var(--hs-neutral-400)]">No certificates attached.</p>
                     @endif
                 </div>
             </div>
 
-            {{-- Uploaded Documents — moved back into the main column, same reasoning. --}}
+            {{-- Uploaded Documents --}}
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
                 <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
                     <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">Uploaded Documents</h2>
                 </div>
                 <div class="p-6">
                     @if ($onboarding->documents->isNotEmpty())
-                        <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
-                            <flux:table>
-                                <flux:table.columns>
-                                    <flux:table.column>Document</flux:table.column>
-                                    <flux:table.column>Type</flux:table.column>
-                                    <flux:table.column>Scan Status</flux:table.column>
-                                    <flux:table.column>Actions</flux:table.column>
-                                </flux:table.columns>
-                                <flux:table.rows>
-                                    @foreach ($onboarding->documents as $document)
-                                        <flux:table.row :key="$document->id" class="hover:bg-[var(--hs-neutral-50)] transition">
-                                            <flux:table.cell variant="strong">{{ $document->original_filename }}</flux:table.cell>
-                                            <flux:table.cell>{{ $document->description ?? '—' }}</flux:table.cell>
-                                            <flux:table.cell class="py-0">
-                                                <x-hs-status-pill :status="$document->scan_status" />
-                                            </flux:table.cell>
-                                            <flux:table.cell>
-                                                <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $document->id }})">
-                                                    View
-                                                </flux:button>
-                                            </flux:table.cell>
-                                        </flux:table.row>
-                                    @endforeach
-                                </flux:table.rows>
-                            </flux:table>
-                        </div>
+                        <ul class="space-y-2">
+                            @foreach ($onboarding->documents as $document)
+                                <li class="flex items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] px-4 py-3">
+                                    <flux:icon name="document-text" class="size-5 shrink-0 text-[var(--hs-neutral-400)]" />
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate text-sm font-medium text-[var(--hs-neutral-900)]">{{ $document->original_filename }}</p>
+                                        @if ($document->description)
+                                            <p class="text-xs text-[var(--hs-neutral-500)]">{{ ucfirst(str_replace('_', ' ', $document->description)) }}</p>
+                                        @endif
+                                    </div>
+                                    <x-hs-status-pill :status="$document->scan_status" />
+                                    <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $document->id }})">
+                                        View
+                                    </flux:button>
+                                </li>
+                            @endforeach
+                        </ul>
                     @else
                         <p class="text-sm text-[var(--hs-neutral-400)]">No documents attached.</p>
                     @endif
@@ -238,7 +225,7 @@
             </div>
 
             {{-- Action Buttons --}}
-            @if (in_array($onboarding->status, ['pending', 'submitted', 'requires_revision']))
+            @if ($onboarding->status === 'submitted')
                 <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-5">
                     <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-4">Decision</h3>
 

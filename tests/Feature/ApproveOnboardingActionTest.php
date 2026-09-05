@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Media;
 use App\Models\ShopOnboarding;
 use App\Models\ShopOnboardingCertificate;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Validation\ValidationException;
@@ -95,6 +97,10 @@ test('approval succeeds and creates an active shop when certificates are complet
 
     $onboarding = makeOnboardingFor($seller);
 
+    $plan = SubscriptionPlan::factory()->philippines()->create([
+        'name' => 'Philippines Premium Plan',
+    ]);
+
     $media = Media::factory()->create(['uploaded_by_id' => $seller->id]);
 
     ShopOnboardingCertificate::create([
@@ -109,4 +115,9 @@ test('approval succeeds and creates an active shop when certificates are complet
 
     expect($shop->status)->toBe('active');
     expect($onboarding->fresh()->status)->toBe('approved');
+    $subscription = Subscription::query()->where('shop_id', $shop->id)->firstOrFail();
+
+    expect($subscription->status)->toBe('trialing')
+        ->and($subscription->subscription_plan_id)->toBe($plan->id)
+        ->and($subscription->trial_ends_at->diffInDays(now()))->toBeBetween(179, 180);
 });

@@ -8,7 +8,7 @@
             </svg>
         </div>
         <div class="min-w-0 flex-1">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--hs-blue-700)]">{{ __('Order') }} #{{ $order->id }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--hs-blue-700)]">{{ $order->order_number }}</p>
         </div>
         <x-hs-status-pill :status="$order->status" />
     </div>

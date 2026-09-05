@@ -4,6 +4,11 @@
         <p class="mt-1 text-[var(--hs-neutral-500)]">Discover verified halal-certified businesses</p>
     </div>
 
+    {{-- ── Sponsored Content — Search Results Placement ────── --}}
+    <div class="mb-8">
+        <livewire:shared.sponsored-content-banner placement="search_results" />
+    </div>
+
     <div class="flex flex-col gap-8 lg:flex-row">
         {{-- Sidebar: Category Filter --}}
         <aside class="w-full lg:w-56 shrink-0" x-data="{ open: false }">

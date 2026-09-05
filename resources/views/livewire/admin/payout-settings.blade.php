@@ -9,7 +9,7 @@
             {{-- Dispute Hold Days --}}
             <div>
                 <flux:input
-                    wire:model="dispute_hold_days"
+                    wire:model.blur="dispute_hold_days"
                     label="Dispute Hold Days"
                     type="number"
                     min="1"
@@ -23,7 +23,7 @@
             {{-- Minimum Payout Threshold --}}
             <div>
                 <flux:input
-                    wire:model="minimum_payout_threshold"
+                    wire:model.blur="minimum_payout_threshold"
                     label="Minimum Payout Threshold (₱)"
                     type="number"
                     step="0.01"
@@ -37,7 +37,7 @@
             {{-- Transaction Fee Amount --}}
             <div>
                 <flux:input
-                    wire:model="transaction_fee_amount"
+                    wire:model.blur="transaction_fee_amount"
                     label="Transaction Fee Amount (₱)"
                     type="number"
                     step="0.01"
@@ -51,7 +51,7 @@
             {{-- Commission Fee Rate --}}
             <div>
                 <flux:input
-                    wire:model="commission_fee_rate"
+                    wire:model.blur="commission_fee_rate"
                     label="Commission Fee Rate"
                     type="number"
                     step="0.001"

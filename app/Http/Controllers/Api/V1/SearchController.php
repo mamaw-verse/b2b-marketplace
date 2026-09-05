@@ -95,7 +95,7 @@ final class SearchController extends Controller
         }
 
         $shop->load(['categories', 'certificates', 'products' => function ($query) {
-            $query->where('status', 'published')->limit(10);
+            $query->marketplaceVisible()->limit(10);
         }, 'products.variants']);
 
         return response()->json(['data' => $shop]);
@@ -106,7 +106,14 @@ final class SearchController extends Controller
      */
     public function showProduct(Product $product): JsonResponse
     {
-        if ($product->status !== 'published') {
+        $product->loadMissing('shop');
+
+        if (
+            $product->status !== 'published'
+            || ! $product->shop
+            || ! $product->shop->hasActiveOrTrialingSubscription()
+            || $product->shop->status !== 'active'
+        ) {
             abort(404);
         }
 

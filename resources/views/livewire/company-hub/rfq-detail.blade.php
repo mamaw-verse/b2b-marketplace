@@ -28,7 +28,7 @@
                         </flux:button>
                     @endif
 
-                    @if ($rfqRecipient->status === 'in_progress')
+                    @if ($rfqRecipient->status === 'in_progress' && config('marketplace.features.quotations_enabled'))
                         <flux:button variant="primary" href="{{ route('hub.quotations.create', $rfqRecipient) }}" size="sm" icon="document-plus" wire:navigate>
                             {{ __('Create Quotation') }}
                         </flux:button>
@@ -60,6 +60,7 @@
         </div>
 
         {{-- Your Quotations --}}
+        @if (config('marketplace.features.quotations_enabled'))
         <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
             <div class="px-6 py-4 border-b border-[var(--hs-neutral-100)] flex items-center gap-2">
                 <h2 class="text-base font-semibold text-[var(--hs-neutral-800)]">{{ __('Your Quotations') }}</h2>
@@ -110,7 +111,7 @@
                                     <div class="mt-3 pt-3 border-t border-[var(--hs-green-200)]">
                                         @if ($quotation->order)
                                             <flux:button variant="ghost" size="xs" icon="eye" href="{{ route('hub.orders.show', $quotation->order) }}" wire:navigate>
-                                                {{ __('View Order #') }}{{ $quotation->order->id }}
+                                                {{ __('View ') }}{{ $quotation->order->order_number }}
                                             </flux:button>
                                         @else
                                             <flux:button variant="primary" size="xs" icon="plus" href="{{ route('hub.orders.create', ['quotationId' => $quotation->id]) }}" wire:navigate>
@@ -224,7 +225,7 @@
                     </div>
 
                     {{-- Prompt to submit another after rejection --}}
-                    @if ($rfqRecipient->quotations->where('status', 'rejected')->isNotEmpty() && $rfqRecipient->rfq->isOpen() && $rfqRecipient->status === 'in_progress')
+                    @if ($rfqRecipient->quotations->where('status', 'rejected')->isNotEmpty() && $rfqRecipient->rfq->isOpen() && $rfqRecipient->status === 'in_progress' && ! $rfqRecipient->isTerminal())
                         <div class="mt-4 flex items-start gap-3 rounded-[var(--hs-radius-card)] bg-[var(--hs-info-50)] border border-[var(--hs-info-200)] p-3.5">
                             <flux:icon name="light-bulb" variant="mini" class="mt-0.5 shrink-0 text-[var(--hs-info-500)]" />
                             <div>
@@ -240,6 +241,7 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- Attachments --}}
         @if ($rfqRecipient->rfq->attachments->count() > 0)

@@ -10,7 +10,7 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ $orderId ? 'Edit Order #' . $orderId : 'New Order' }}</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ $orderId ? 'Edit ' . ($this->order?->order_number ?? 'Order') : 'New Order' }}</h1>
         </div>
 
         @if (session('error'))
@@ -84,7 +84,8 @@
                  "
                  x-effect="recalcTotal()">
 
-                {{-- Product / variant search (S4.T17) --}}
+                {{-- Product / variant search — only available for standalone (non-quotation) orders --}}
+                @if (! $this->fromQuotation)
                 <section class="py-6 border-b border-[var(--hs-neutral-100)]">
                     <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">Add from Catalog</h2>
                     <div class="relative max-w-md">
@@ -124,73 +125,120 @@
                         @endif
                     </div>
                 </section>
+                @endif
 
                 {{-- Order Items --}}
                 <section class="py-6 border-b border-[var(--hs-neutral-100)]">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)]">Items</h2>
-                        <button type="button" @click="items.push({description:'', quantity:1, unit:'pcs', unit_price:0, variant_id:null, variant_snapshot:null})" class="text-sm text-[var(--hs-green-700)] hover:underline">+ Add Item</button>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)]">Items</h2>
+                            @if ($this->fromQuotation)
+                                <span class="inline-flex items-center gap-1 text-[11px] text-[var(--hs-neutral-400)] font-medium">
+                                    <flux:icon name="lock-closed" variant="mini" class="size-3" />
+                                    From quotation · prices locked
+                                </span>
+                            @endif
+                        </div>
+                        @if (! $this->fromQuotation)
+                            <button type="button" @click="items.push({description:'', quantity:1, unit:'pcs', unit_price:0, variant_id:null, variant_snapshot:null})" class="text-sm text-[var(--hs-green-700)] hover:underline">+ Add Item</button>
+                        @endif
                     </div>
 
-                    <template x-if="items.length">
-                        <div class="grid grid-cols-12 gap-2 mb-1.5 px-0.5 text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">
-                            <div class="col-span-4">Description</div>
-                            <div class="col-span-2">Qty</div>
-                            <div class="col-span-2">Unit</div>
-                            <div class="col-span-2">Unit price</div>
-                            <div class="col-span-1 text-right">Subtotal</div>
-                            <div class="col-span-1"></div>
-                        </div>
-                    </template>
+                    @if ($this->fromQuotation)
+                        {{-- Read-only item table for quotation-sourced orders --}}
+                        <template x-if="items.length">
+                            <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden">
+                                <table class="w-full text-[13.5px]">
+                                    <thead>
+                                        <tr class="bg-[var(--hs-neutral-50)]">
+                                            <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 w-8">#</th>
+                                            <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5">Description</th>
+                                            <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">Qty</th>
+                                            <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">Unit</th>
+                                            <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">Unit Price</th>
+                                            <th class="text-right text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 whitespace-nowrap">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(item, index) in items" :key="index">
+                                            <tr class="border-t border-[var(--hs-neutral-100)]">
+                                                <td class="px-4 py-3 text-[var(--hs-neutral-400)] text-[12px] tabular-nums" x-text="index + 1"></td>
+                                                <td class="px-4 py-3 text-[var(--hs-neutral-900)] font-medium" x-text="item.description || '—'"></td>
+                                                <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap" x-text="parseInt(item.quantity)"></td>
+                                                <td class="px-4 py-3 text-[var(--hs-neutral-600)] whitespace-nowrap" x-text="item.unit"></td>
+                                                <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap" x-text="money(item.unit_price)"></td>
+                                                <td class="px-4 py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums whitespace-nowrap" x-text="money(rowSubtotal(item))"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                        <template x-if="!items.length">
+                            <p class="text-sm text-[var(--hs-neutral-500)] py-2">No items found.</p>
+                        </template>
+                    @else
+                        {{-- Editable items for standalone orders --}}
+                        <template x-if="items.length">
+                            <div class="grid grid-cols-12 gap-2 mb-1.5 px-0.5 text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">
+                                <div class="col-span-4">Description</div>
+                                <div class="col-span-2">Qty</div>
+                                <div class="col-span-2">Unit</div>
+                                <div class="col-span-2">Unit price</div>
+                                <div class="col-span-1 text-right">Subtotal</div>
+                                <div class="col-span-1"></div>
+                            </div>
+                        </template>
 
-                    <template x-for="(item, index) in items" :key="index">
-                        <div class="grid grid-cols-12 gap-2 mb-2 items-start">
-                            <div class="col-span-4"><input x-model="item.description" placeholder="Description" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-2">
-                                <input
-                                    x-model.number="item.quantity"
-                                    type="number"
-                                    step="1"
-                                    min="1"
-                                    inputmode="numeric"
-                                    placeholder="Qty"
-                                    @input="item.quantity = item.quantity === '' ? '' : Math.max(1, Math.trunc(item.quantity))"
-                                    :class="(item.quantity === '' || item.quantity < 1) ? '!border-red-500 !ring-1 !ring-red-500' : ''"
-                                    class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]"
-                                />
-                                <p x-show="item.quantity === '' || item.quantity < 1" x-cloak class="mt-1 text-xs text-[var(--hs-danger-500)]">Min 1</p>
+                        <template x-for="(item, index) in items" :key="index">
+                            <div class="grid grid-cols-12 gap-2 mb-2 items-start">
+                                <div class="col-span-4"><input x-model="item.description" placeholder="Description" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                                <div class="col-span-2">
+                                    <input
+                                        x-model.number="item.quantity"
+                                        type="number"
+                                        step="1"
+                                        min="1"
+                                        inputmode="numeric"
+                                        placeholder="Qty"
+                                        @input="item.quantity = item.quantity === '' ? '' : Math.max(1, Math.trunc(item.quantity))"
+                                        :class="(item.quantity === '' || item.quantity < 1) ? '!border-red-500 !ring-1 !ring-red-500' : ''"
+                                        class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]"
+                                    />
+                                    <p x-show="item.quantity === '' || item.quantity < 1" x-cloak class="mt-1 text-xs text-[var(--hs-danger-500)]">Min 1</p>
+                                </div>
+                                <div class="col-span-2">
+                                    {{-- Unit dropdown from curated units (S4.T15) --}}
+                                    <select x-model="item.unit" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]">
+                                        @foreach ($unitGroups as $groupName => $groupUnits)
+                                            <optgroup label="{{ $groupName }}">
+                                                @foreach ($groupUnits as $unit)
+                                                    <option value="{{ $unit['value'] }}">{{ $unit['label'] }}</option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-span-2"><input x-model.number="item.unit_price" type="number" min="0" step="0.01" placeholder="Unit Price" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                                <div class="col-span-1 text-right text-sm text-[var(--hs-neutral-700)] tabular-nums pt-2" x-text="money(rowSubtotal(item))"></div>
+                                <div class="col-span-1 flex justify-end">
+                                    <flux:button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="trash"
+                                        @click="items.splice(index, 1)"
+                                        aria-label="Remove item"
+                                        class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
+                                    />
+                                </div>
                             </div>
-                            <div class="col-span-2">
-                                {{-- Unit dropdown from curated units (S4.T15) --}}
-                                <select x-model="item.unit" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]">
-                                    @foreach ($unitGroups as $groupName => $groupUnits)
-                                        <optgroup label="{{ $groupName }}">
-                                            @foreach ($groupUnits as $unit)
-                                                <option value="{{ $unit['value'] }}">{{ $unit['label'] }}</option>
-                                            @endforeach
-                                        </optgroup>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-span-2"><input x-model.number="item.unit_price" type="number" min="0" step="0.01" placeholder="Unit Price" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-1 text-right text-sm text-[var(--hs-neutral-700)] tabular-nums pt-2" x-text="money(rowSubtotal(item))"></div>
-                            <div class="col-span-1 flex justify-end">
-                                <flux:button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    icon="trash"
-                                    @click="items.splice(index, 1)"
-                                    aria-label="Remove item"
-                                    class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
-                                />
-                            </div>
-                        </div>
-                    </template>
+                        </template>
 
-                    <template x-if="!items.length">
-                        <p class="text-sm text-[var(--hs-neutral-500)] py-2">No items yet — add one to get started.</p>
-                    </template>
+                        <template x-if="!items.length">
+                            <p class="text-sm text-[var(--hs-neutral-500)] py-2">No items yet — add one to get started.</p>
+                        </template>
+                    @endif
                 </section>
 
                 {{-- Fees --}}
