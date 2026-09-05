@@ -197,8 +197,8 @@ final class SubscriptionPaymentPage extends Component
                 'state_province_region' => $this->province,
                 'country_code' => $this->countryCode,
                 'postal_code' => $this->postalCode,
-                // callback_url = this same page — DLT will append merchant_transaction_id as a query param on return
-                'callback_url' => $this->dltCallbackUrl($subscription->id),
+                'success_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
+                'failure_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
             ]);
 
             $paymentData = $result['data'] ?? [];
@@ -353,18 +353,5 @@ final class SubscriptionPaymentPage extends Component
         }
 
         event(new SubscriptionStatusChanged($subscription->fresh()));
-    }
-
-    /**
-     * The callback_url sent to DLT — this same page.
-     * DLT will append ?merchant_transaction_id=... to it on return.
-     * Uses APP_URL as the base so the domain is always correct in all environments.
-     */
-    private function dltCallbackUrl(int $subscriptionId): string
-    {
-        $base = mb_rtrim((string) config('app.url'), '/');
-        $path = route('hub.subscription.pay', ['subscription' => $subscriptionId], absolute: false);
-
-        return $base.$path;
     }
 }

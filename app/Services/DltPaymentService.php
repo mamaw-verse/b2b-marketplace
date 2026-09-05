@@ -150,18 +150,36 @@ final class DltPaymentService
         $payload['merchant_account_id'] = config('services.dlt.merchant_account_id');
         $payload['service_code'] = config('services.dlt.service_code');
 
+        $endpoint = $this->baseUrl().'/api/v1/collection/apn/submit';
+
+        // Log as curl for easy debugging
+        $safePayload = $payload;
+        Log::info('DLT: Submit payment — request', [
+            'curl' => sprintf(
+                "curl -s -X POST '%s' \\\n  -H 'Authorization: Bearer %s' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Accept: application/json' \\\n  -d '%s'",
+                $endpoint,
+                mb_substr($token, 0, 20).'...',
+                json_encode($safePayload, JSON_PRETTY_PRINT)
+            ),
+        ]);
+
         try {
             $response = $this->authorized($token)
-                ->post($this->baseUrl().'/api/v1/collection/apn/submit', $payload);
+                ->post($endpoint, $payload);
         } catch (ConnectionException $e) {
             Log::error('DLT: Submit payment — connection failed', [
-                'endpoint' => $this->baseUrl().'/api/v1/collection/apn/submit',
+                'endpoint' => $endpoint,
                 'merchant_transaction_id' => $payload['merchant_transaction_id'] ?? null,
                 'amount' => $payload['amount'] ?? null,
                 'error' => $e->getMessage(),
             ]);
             throw $this->unreachable($e);
         }
+
+        Log::info('DLT: Submit payment — response', [
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
 
         $this->throwIfFailed($response);
 
