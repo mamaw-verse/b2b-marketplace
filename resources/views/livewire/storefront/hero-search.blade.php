@@ -371,20 +371,22 @@
     @else
         {{-- ═══════════════════════════════════════════════════════
              DEFAULT HOME CONTENT (when no search)
-             Reordered for marketplace priority:
-             1. Categories        (navigation — pairs with search)
-             2. Featured Products (core commerce content, moved up)
-             3. Value Strip       (quick trust signals)
-             4. Sponsored Content (monetization, once engaged)
-             5. Who We Serve / What We Offer (about/context)
-             6. Supply Chain Flow (educational/model explainer)
-             7. Country Portals   (navigation utility, niche)
-             8. Sourcing CTA      (secondary conversion)
-             9. Join CTA          (closing banner)
+             Section order:
+             1. Featured Products  (neutral-50)
+             2. Sourcing CTA       (neutral-0)
+             3. Value Strip        (green-50  — accent band, both borders)
+             4. Sponsored          (neutral-0)
+             5. Who We Serve       (neutral-50)
+             6. Supply Chain       (neutral-0)
+             7. Country Portals    (neutral-50)
+             8. Join CTA           (no section bg — dark card floats on white)
+             Border rule: each section has border-t only; the previous
+             section's top border acts as the divider. Value Strip is the
+             only exception (accent band uses border-t + border-b in green).
         ═══════════════════════════════════════════════════════ --}}
 
         {{-- ── Featured Products ──────────────────────────────── --}}
-        <section id="featured-products" class="bg-[var(--hs-neutral-50)] border-t border-b border-[var(--hs-neutral-200)] mt-10 sm:mt-14">
+        <section id="featured-products" class="bg-[var(--hs-neutral-50)] border-t border-[var(--hs-neutral-200)] mt-10 sm:mt-14">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
                 <div class="flex items-end justify-between mb-5 sm:mb-6">
                     <div>
@@ -414,253 +416,8 @@
             </div>
         </section>
 
-        {{-- ── Value Strip ─────────────────────────────────────── --}}
-        <div class="border-b border-[var(--hs-green-100)] bg-[var(--hs-green-50)] py-8 sm:py-10">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-2 gap-5 sm:gap-6 sm:grid-cols-3 lg:grid-cols-5">
-                    @foreach ([
-                        ['icon' => 'shield-check',  'label' => '100% Halal Focused'],
-                        ['icon' => 'globe-alt',      'label' => 'Global Market Access'],
-                        ['icon' => 'cpu-chip',       'label' => 'Digital Innovation'],
-                        ['icon' => 'users',          'label' => 'Community Empowerment'],
-                        ['icon' => 'arrow-path',     'label' => 'Sustainable & Ethical Growth'],
-                    ] as $value)
-                        <div class="flex flex-col items-center gap-2 sm:gap-2.5 text-center">
-                            <div class="flex size-11 sm:size-[52px] items-center justify-center rounded-full bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-[var(--hs-shadow-sm)]">
-                                <flux:icon :icon="$value['icon']" class="size-5 sm:size-6" />
-                            </div>
-                            <span class="text-[0.76rem] sm:text-[0.82rem] font-bold text-[var(--hs-green-900)] max-w-[14ch]">{{ __($value['label']) }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- ── Sponsored Content — Homepage Placement ─────────── --}}
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <livewire:shared.sponsored-content-banner placement="homepage" orientation="row" />
-        </div>
-
-        {{-- ── Who We Serve / What We Offer ───────────────────── --}}
-        <section id="who-we-serve" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-            {{-- Section header --}}
-            <div class="max-w-2xl mb-8 sm:mb-12">
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
-                    <flux:icon.squares-2x2 class="size-3.5" />
-                    {{ __('A Trusted Halal Ecosystem') }}
-                </span>
-                <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight">
-                    {{ __('Built on integrity, transparency & technology.') }}
-                </h2>
-                <p class="mt-3 sm:mt-4 text-base text-[var(--hs-neutral-500)]">
-                    {{ __('Every stakeholder in the halal economy has a place on the platform — and a reason to trust what happens next.') }}
-                </p>
-            </div>
-
-            {{-- Two-column panels --}}
-            <div class="grid grid-cols-1 gap-5 sm:gap-7 lg:grid-cols-2">
-
-                {{-- Who We Serve (dark) --}}
-                <div id="who-we-serve-panel" class="rounded-[var(--hs-radius-panel)] bg-[var(--hs-green-950)] p-5 sm:p-7">
-                    <div class="flex items-center gap-3 mb-4 sm:mb-5">
-                        <div class="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-[var(--hs-gold-500)]/15 text-[var(--hs-gold-400)]">
-                            <flux:icon.users class="size-5" />
-                        </div>
-                        <h3 class="text-lg sm:text-xl font-bold text-white">{{ __('Who We Serve') }}</h3>
-                    </div>
-                    <ul class="divide-y divide-white/[0.08]">
-                        @foreach ([
-                            ['icon' => 'map-pin',             'label' => 'Farmers & Fisherfolk'],
-                            ['icon' => 'cog-6-tooth',         'label' => 'Producers & Manufacturers'],
-                            ['icon' => 'shield-check',        'label' => 'Halal Certified Suppliers'],
-                            ['icon' => 'truck',               'label' => 'Logistics & Cold Chain Providers'],
-                            ['icon' => 'rectangle-stack',     'label' => 'Distributors & Wholesalers'],
-                            ['icon' => 'building-storefront', 'label' => 'Retailers & Halal Businesses'],
-                            ['icon' => 'user-group',          'label' => 'Consumers (B2C)'],
-                        ] as $item)
-                            <li class="flex items-center gap-2.5 sm:gap-3 py-2 sm:py-2.5">
-                                <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-[var(--hs-gold-300)]">
-                                    <flux:icon :icon="$item['icon']" class="size-4" />
-                                </div>
-                                <span class="text-[0.85rem] sm:text-[0.9rem] font-semibold text-white/90">{{ __($item['label']) }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-
-                {{-- What We Offer (light) --}}
-                <div id="what-we-offer" class="rounded-[var(--hs-radius-panel)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)] p-5 sm:p-7 shadow-[var(--hs-shadow-sm)]">
-                    <div class="flex items-center gap-3 mb-4 sm:mb-5">
-                        <div class="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-[var(--hs-green-50)] text-[var(--hs-green-700)]">
-                            <flux:icon.shopping-bag class="size-5" />
-                        </div>
-                        <h3 class="text-lg sm:text-xl font-bold text-[var(--hs-neutral-900)]">{{ __('What We Offer') }}</h3>
-                    </div>
-                    <ul class="divide-y divide-[var(--hs-neutral-100)]">
-                        @foreach ([
-                            ['icon' => 'clipboard-document-list', 'label' => 'Halal-verified suppliers directory'],
-                            ['icon' => 'shopping-bag',            'label' => 'Products & services sourcing (B2B & B2C)'],
-                            ['icon' => 'shield-check',            'label' => 'Halal certification awareness & support'],
-                            ['icon' => 'map',                     'label' => 'Supply chain visibility & traceability'],
-                            ['icon' => 'paper-airplane',          'label' => 'Logistics & export assistance'],
-                            ['icon' => 'link',                    'label' => 'Business matching & partnerships'],
-                            ['icon' => 'academic-cap',            'label' => 'Halal events, training & consultancy'],
-                        ] as $item)
-                            <li class="flex items-center gap-2.5 sm:gap-3 py-2 sm:py-2.5">
-                                <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--hs-green-50)] text-[var(--hs-green-700)]">
-                                    <flux:icon :icon="$item['icon']" class="size-4" />
-                                </div>
-                                <span class="text-[0.85rem] sm:text-[0.9rem] font-semibold text-[var(--hs-neutral-700)]">{{ __($item['label']) }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-
-            </div>
-        </section>
-
-        {{-- ── Supply Chain Flow ───────────────────────────────── --}}
-        <section id="supply-chain" class="bg-[var(--hs-neutral-0)] border-t border-b border-[var(--hs-neutral-100)] py-14 sm:py-20">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                {{-- Header --}}
-                <div class="text-center mb-10 sm:mb-14">
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
-                        <flux:icon.arrow-path-rounded-square class="size-3.5" />
-                        {{ __('End-to-End Traceability') }}
-                    </span>
-                    <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight max-w-[20ch] mx-auto">
-                        {{ __('The halal supply chain we connect') }}
-                    </h2>
-                </div>
-
-                {{-- Steps grid --}}
-                <div class="relative">
-                    {{-- connecting line (desktop only) --}}
-                    <div class="hidden lg:block absolute left-[7%] right-[7%] top-[34px] border-t-2 border-dashed border-[var(--hs-neutral-300)]"></div>
-
-                    <div class="relative grid grid-cols-2 gap-y-8 gap-x-3 sm:gap-y-10 sm:gap-x-4 sm:grid-cols-4 lg:grid-cols-7">
-                        @foreach ([
-                            ['stage' => '01', 'icon' => 'map-pin',            'title' => 'Farm & Source',        'desc' => 'Sustainable & ethical sourcing'],
-                            ['stage' => '02', 'icon' => 'cog-6-tooth',        'title' => 'Process & Produce',    'desc' => 'Halal compliant production'],
-                            ['stage' => '03', 'icon' => 'shield-check',       'title' => 'Certify & Assure',     'desc' => 'Halal certification & QA'],
-                            ['stage' => '04', 'icon' => 'archive-box',        'title' => 'Pack & Store',         'desc' => 'Halal-safe packaging & storage'],
-                            ['stage' => '05', 'icon' => 'truck',               'title' => 'Distribute & Deliver', 'desc' => 'Trusted logistics & distribution'],
-                            ['stage' => '06', 'icon' => 'building-storefront', 'title' => 'Retail & Sell',        'desc' => 'Halal retail & business partners'],
-                            ['stage' => '07', 'icon' => 'heart',                'title' => 'Consume & Trust',      'desc' => 'Confident halal consumers'],
-                        ] as $step)
-                            <div class="group relative z-10 flex flex-col items-center text-center px-1 sm:px-2">
-                                <div class="flex size-14 sm:size-16 lg:size-[68px] items-center justify-center rounded-full border-2 border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-[var(--hs-shadow-sm)] transition group-hover:border-[var(--hs-gold-500)] group-hover:text-[var(--hs-gold-600)] group-hover:-translate-y-1">
-                                    <flux:icon :icon="$step['icon']" class="size-5 sm:size-6" />
-                                </div>
-                                <span class="mt-3 sm:mt-4 block text-[0.62rem] sm:text-[0.68rem] font-extrabold tracking-[0.06em] text-[var(--hs-gold-600)]">{{ __('STAGE :stage', ['stage' => $step['stage']]) }}</span>
-                                <h4 class="mt-1 text-[0.8rem] sm:text-[0.88rem] font-extrabold text-[var(--hs-neutral-900)]">{{ __($step['title']) }}</h4>
-                                <p class="mt-1 text-[0.72rem] sm:text-[0.76rem] leading-snug text-[var(--hs-neutral-500)]">{{ __($step['desc']) }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {{-- ── Country Portals ─────────────────────────────────── --}}
-        <section id="country-portals" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-            <div class="text-center mb-6 sm:mb-10">
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
-                    <flux:icon.globe-alt class="size-3.5" />
-                    {{ __('Global Halal Network') }}
-                </span>
-                <h2 class="mt-4 text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">
-                    {{ __('1HalalStore across the Halal world') }}
-                </h2>
-                <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] max-w-2xl mx-auto">
-                    {{ __("Each country runs its own independent portal. Click to visit a portal, or browse the one you're on now.") }}
-                </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 sm:gap-5 sm:grid-cols-3 lg:grid-cols-6">
-
-                {{-- Current instance — "You are here" --}}
-                @php $p = $this->instancePortal; @endphp
-                <div class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_6px_32px_rgba(0,0,0,0.22)]"
-                     style="min-height: 280px;">
-                    {{-- Full-bleed landmark photo --}}
-                    @if (!empty($p['landmark_image']))
-                        <img src="{{ $p['landmark_image'] }}"
-                             alt="{{ $p['display_name'] }} landmark"
-                             class="absolute inset-0 w-full h-full object-cover object-center">
-                    @endif
-
-                    {{-- Top gradient + country name + flag --}}
-                    <div class="relative z-10 flex-1 flex flex-col items-center justify-start pt-4 px-3"
-                         style="background: linear-gradient(to bottom, rgba(3,25,16,0.78) 0%, rgba(3,25,16,0.18) 55%, transparent 100%);">
-                        <p class="text-[0.72rem] sm:text-[0.85rem] font-black tracking-[0.12em] text-white uppercase leading-tight text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] line-clamp-2">
-                            {{ $p['card_heading'] ?? $p['display_name'] }}
-                        </p>
-                        <span class="text-4xl sm:text-5xl leading-none mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]" aria-hidden="true">{{ $p['flag'] }}</span>
-                    </div>
-
-                    {{-- Bottom gradient + "You are here" badge only --}}
-                    <div class="relative z-10 px-2 pt-8 pb-3 text-center"
-                         style="background: linear-gradient(to top, rgba(3,25,16,0.88) 0%, rgba(3,25,16,0.50) 55%, transparent 100%);">
-                        <span class="inline-flex items-center gap-0.5 rounded-full bg-[var(--hs-green-600)] px-2 py-0.5 text-[0.55rem] font-bold text-white uppercase tracking-wide">
-                            <flux:icon.map-pin class="size-2.5 shrink-0" />
-                            {{ __('You are here') }}
-                        </span>
-                    </div>
-                </div>
-
-                {{-- Other country portals --}}
-                @foreach ($this->otherPortals as $portal)
-                    @php
-                        $tag      = $portal['url'] ? 'a' : 'div';
-                        $attrs    = $portal['url']
-                            ? 'href="'.e($portal['url']).'" target="_blank" rel="noopener noreferrer"'
-                            : '';
-                        $isActive = (bool) $portal['url'];
-                    @endphp
-
-                    <{{ $tag }} {{ $attrs }}
-                        class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
-                        style="min-height: 280px;"
-                    >
-                        {{-- Full-bleed landmark photo --}}
-                        @if (!empty($portal['landmark_image']))
-                            <img src="{{ $portal['landmark_image'] }}"
-                                 alt="{{ $portal['display_name'] }} landmark"
-                                 class="absolute inset-0 w-full h-full object-cover object-center {{ $isActive ? 'transition-transform duration-500 group-hover:scale-105' : '' }}">
-                        @endif
-
-                        {{-- Top gradient + country name + flag --}}
-                        <div class="relative z-10 flex-1 flex flex-col items-center justify-start pt-4 px-3"
-                             style="background: linear-gradient(to bottom, rgba(3,25,16,0.78) 0%, rgba(3,25,16,0.18) 55%, transparent 100%);">
-                            <p class="text-[0.72rem] sm:text-[0.85rem] font-black tracking-[0.12em] text-white uppercase leading-tight text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] line-clamp-2">
-                                {{ $portal['card_heading'] ?? $portal['display_name'] }}
-                            </p>
-                            <span class="text-4xl sm:text-5xl leading-none mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]" aria-hidden="true">{{ $portal['flag'] }}</span>
-                        </div>
-
-                        {{-- Bottom gradient + status only --}}
-                        <div class="relative z-10 px-2 pt-8 pb-3 text-center"
-                             style="background: linear-gradient(to top, rgba(3,25,16,0.88) 0%, rgba(3,25,16,0.50) 55%, transparent 100%);">
-                            @if ($isActive)
-                                <span class="inline-flex items-center gap-0.5 text-[0.62rem] font-semibold text-white/80">
-                                    {{ __('Visit Portal') }}
-                                    <flux:icon.arrow-top-right-on-square class="size-2.5 shrink-0" />
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[0.55rem] font-bold text-white uppercase tracking-wide backdrop-blur-sm">
-                                    {{ __('Coming Soon') }}
-                                </span>
-                            @endif
-                        </div>
-                    </{{ $tag }}>
-                @endforeach
-
-            </div>
-        </section>
-
         {{-- ── Can't Find What You're Looking For? / Sourcing ─── --}}
-        <section id="sourcing" class="bg-[var(--hs-neutral-50)] border-t border-b border-[var(--hs-neutral-200)]">
+        <section id="sourcing" class="bg-[var(--hs-neutral-0)] border-t border-[var(--hs-neutral-200)]">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-center">
                 <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
                     <flux:icon.magnifying-glass class="size-3.5" />
@@ -688,8 +445,260 @@
             </div>
         </section>
 
+        {{-- ── Value Strip (accent band — border-t AND border-b) ── --}}
+        <div class="border-t border-b border-[var(--hs-green-100)] bg-[var(--hs-green-50)] py-8 sm:py-10">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 gap-5 sm:gap-6 sm:grid-cols-3 lg:grid-cols-5">
+                    @foreach ([
+                        ['icon' => 'shield-check',  'label' => '100% Halal Focused'],
+                        ['icon' => 'globe-alt',      'label' => 'Global Market Access'],
+                        ['icon' => 'cpu-chip',       'label' => 'Digital Innovation'],
+                        ['icon' => 'users',          'label' => 'Community Empowerment'],
+                        ['icon' => 'arrow-path',     'label' => 'Sustainable & Ethical Growth'],
+                    ] as $value)
+                        <div class="flex flex-col items-center gap-2 sm:gap-2.5 text-center">
+                            <div class="flex size-11 sm:size-[52px] items-center justify-center rounded-full bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-[var(--hs-shadow-sm)]">
+                                <flux:icon :icon="$value['icon']" class="size-5 sm:size-6" />
+                            </div>
+                            <span class="text-[0.76rem] sm:text-[0.82rem] font-bold text-[var(--hs-green-900)] max-w-[14ch]">{{ __($value['label']) }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- ── Sponsored Content — Homepage Placement ─────────── --}}
+        {{-- No border-t here: Value Strip's border-b already separates them --}}
+        <div class="bg-[var(--hs-neutral-0)]">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <livewire:shared.sponsored-content-banner placement="homepage" orientation="row" />
+            </div>
+        </div>
+
+        {{-- ── Who We Serve / What We Offer ───────────────────── --}}
+        <section id="who-we-serve" class="bg-[var(--hs-neutral-50)] border-t border-[var(--hs-neutral-200)]">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+                {{-- Section header --}}
+                <div class="max-w-2xl mb-8 sm:mb-12">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
+                        <flux:icon.squares-2x2 class="size-3.5" />
+                        {{ __('A Trusted Halal Ecosystem') }}
+                    </span>
+                    <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight">
+                        {{ __('Built on integrity, transparency & technology.') }}
+                    </h2>
+                    <p class="mt-3 sm:mt-4 text-base text-[var(--hs-neutral-500)]">
+                        {{ __('Every stakeholder in the halal economy has a place on the platform — and a reason to trust what happens next.') }}
+                    </p>
+                </div>
+
+                {{-- Two-column panels --}}
+                <div class="grid grid-cols-1 gap-5 sm:gap-7 lg:grid-cols-2">
+
+                    {{-- Who We Serve (dark) --}}
+                    <div id="who-we-serve-panel" class="rounded-[var(--hs-radius-panel)] bg-[var(--hs-green-950)] p-5 sm:p-7">
+                        <div class="flex items-center gap-3 mb-4 sm:mb-5">
+                            <div class="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-[var(--hs-gold-500)]/15 text-[var(--hs-gold-400)]">
+                                <flux:icon.users class="size-5" />
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white">{{ __('Who We Serve') }}</h3>
+                        </div>
+                        <ul class="divide-y divide-white/[0.08]">
+                            @foreach ([
+                                ['icon' => 'map-pin',             'label' => 'Farmers & Fisherfolk'],
+                                ['icon' => 'cog-6-tooth',         'label' => 'Producers & Manufacturers'],
+                                ['icon' => 'shield-check',        'label' => 'Halal Certified Suppliers'],
+                                ['icon' => 'truck',               'label' => 'Logistics & Cold Chain Providers'],
+                                ['icon' => 'rectangle-stack',     'label' => 'Distributors & Wholesalers'],
+                                ['icon' => 'building-storefront', 'label' => 'Retailers & Halal Businesses'],
+                                ['icon' => 'user-group',          'label' => 'Consumers (B2C)'],
+                            ] as $item)
+                                <li class="flex items-center gap-2.5 sm:gap-3 py-2 sm:py-2.5">
+                                    <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-[var(--hs-gold-300)]">
+                                        <flux:icon :icon="$item['icon']" class="size-4" />
+                                    </div>
+                                    <span class="text-[0.85rem] sm:text-[0.9rem] font-semibold text-white/90">{{ __($item['label']) }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    {{-- What We Offer (light) --}}
+                    <div id="what-we-offer" class="rounded-[var(--hs-radius-panel)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)] p-5 sm:p-7 shadow-[var(--hs-shadow-sm)]">
+                        <div class="flex items-center gap-3 mb-4 sm:mb-5">
+                            <div class="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-[var(--hs-green-50)] text-[var(--hs-green-700)]">
+                                <flux:icon.shopping-bag class="size-5" />
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-[var(--hs-neutral-900)]">{{ __('What We Offer') }}</h3>
+                        </div>
+                        <ul class="divide-y divide-[var(--hs-neutral-100)]">
+                            @foreach ([
+                                ['icon' => 'clipboard-document-list', 'label' => 'Halal-verified suppliers directory'],
+                                ['icon' => 'shopping-bag',            'label' => 'Products & services sourcing (B2B & B2C)'],
+                                ['icon' => 'shield-check',            'label' => 'Halal certification awareness & support'],
+                                ['icon' => 'map',                     'label' => 'Supply chain visibility & traceability'],
+                                ['icon' => 'paper-airplane',          'label' => 'Logistics & export assistance'],
+                                ['icon' => 'link',                    'label' => 'Business matching & partnerships'],
+                                ['icon' => 'academic-cap',            'label' => 'Halal events, training & consultancy'],
+                            ] as $item)
+                                <li class="flex items-center gap-2.5 sm:gap-3 py-2 sm:py-2.5">
+                                    <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--hs-green-50)] text-[var(--hs-green-700)]">
+                                        <flux:icon :icon="$item['icon']" class="size-4" />
+                                    </div>
+                                    <span class="text-[0.85rem] sm:text-[0.9rem] font-semibold text-[var(--hs-neutral-700)]">{{ __($item['label']) }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        {{-- ── Supply Chain Flow ───────────────────────────────── --}}
+        <section id="supply-chain" class="bg-[var(--hs-neutral-0)] border-t border-[var(--hs-neutral-200)] py-14 sm:py-20">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                {{-- Header --}}
+                <div class="text-center mb-10 sm:mb-14">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
+                        <flux:icon.arrow-path-rounded-square class="size-3.5" />
+                        {{ __('End-to-End Traceability') }}
+                    </span>
+                    <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight max-w-[20ch] mx-auto">
+                        {{ __('The halal supply chain we connect') }}
+                    </h2>
+                </div>
+
+                {{-- Steps grid --}}
+                <div class="relative">
+                    {{-- connecting line (desktop only) --}}
+                    <div class="hidden lg:block absolute left-[7%] right-[7%] top-[34px] border-t-2 border-dashed border-[var(--hs-neutral-300)]"></div>
+
+                    <div class="relative grid grid-cols-2 gap-y-8 gap-x-3 sm:gap-y-10 sm:gap-x-4 sm:grid-cols-4 lg:grid-cols-7">
+                        @foreach ([
+                            ['stage' => '01', 'icon' => 'map-pin',             'title' => 'Farm & Source',        'desc' => 'Sustainable & ethical sourcing'],
+                            ['stage' => '02', 'icon' => 'cog-6-tooth',         'title' => 'Process & Produce',    'desc' => 'Halal compliant production'],
+                            ['stage' => '03', 'icon' => 'shield-check',        'title' => 'Certify & Assure',     'desc' => 'Halal certification & QA'],
+                            ['stage' => '04', 'icon' => 'archive-box',         'title' => 'Pack & Store',         'desc' => 'Halal-safe packaging & storage'],
+                            ['stage' => '05', 'icon' => 'truck',               'title' => 'Distribute & Deliver', 'desc' => 'Trusted logistics & distribution'],
+                            ['stage' => '06', 'icon' => 'building-storefront', 'title' => 'Retail & Sell',        'desc' => 'Halal retail & business partners'],
+                            ['stage' => '07', 'icon' => 'heart',               'title' => 'Consume & Trust',      'desc' => 'Confident halal consumers'],
+                        ] as $step)
+                            <div class="group relative z-10 flex flex-col items-center text-center px-1 sm:px-2">
+                                <div class="flex size-14 sm:size-16 lg:size-[68px] items-center justify-center rounded-full border-2 border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-[var(--hs-shadow-sm)] transition group-hover:border-[var(--hs-gold-500)] group-hover:text-[var(--hs-gold-600)] group-hover:-translate-y-1">
+                                    <flux:icon :icon="$step['icon']" class="size-5 sm:size-6" />
+                                </div>
+                                <span class="mt-3 sm:mt-4 block text-[0.62rem] sm:text-[0.68rem] font-extrabold tracking-[0.06em] text-[var(--hs-gold-600)]">{{ __('STAGE :stage', ['stage' => $step['stage']]) }}</span>
+                                <h4 class="mt-1 text-[0.8rem] sm:text-[0.88rem] font-extrabold text-[var(--hs-neutral-900)]">{{ __($step['title']) }}</h4>
+                                <p class="mt-1 text-[0.72rem] sm:text-[0.76rem] leading-snug text-[var(--hs-neutral-500)]">{{ __($step['desc']) }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- ── Country Portals ─────────────────────────────────── --}}
+        <section id="country-portals" class="bg-[var(--hs-neutral-50)] border-t border-[var(--hs-neutral-200)]">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+                <div class="text-center mb-6 sm:mb-10">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
+                        <flux:icon.globe-alt class="size-3.5" />
+                        {{ __('Global Halal Network') }}
+                    </span>
+                    <h2 class="mt-4 text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">
+                        {{ __('1HalalStore across the Halal world') }}
+                    </h2>
+                    <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] max-w-2xl mx-auto">
+                        {{ __("Each country runs its own independent portal. Click to visit a portal, or browse the one you're on now.") }}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 sm:gap-5 sm:grid-cols-3 lg:grid-cols-6">
+
+                    {{-- Current instance — "You are here" --}}
+                    @php $p = $this->instancePortal; @endphp
+                    <div class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_6px_32px_rgba(0,0,0,0.22)]"
+                         style="min-height: 280px;">
+                        {{-- Full-bleed landmark photo --}}
+                        @if (!empty($p['landmark_image']))
+                            <img src="{{ $p['landmark_image'] }}"
+                                 alt="{{ $p['display_name'] }} landmark"
+                                 class="absolute inset-0 w-full h-full object-cover object-center">
+                        @endif
+
+                        {{-- Top gradient + country name + flag --}}
+                        <div class="relative z-10 flex-1 flex flex-col items-center justify-start pt-4 px-3"
+                             style="background: linear-gradient(to bottom, rgba(3,25,16,0.78) 0%, rgba(3,25,16,0.18) 55%, transparent 100%);">
+                            <p class="text-[0.72rem] sm:text-[0.85rem] font-black tracking-[0.12em] text-white uppercase leading-tight text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] line-clamp-2">
+                                {{ $p['card_heading'] ?? $p['display_name'] }}
+                            </p>
+                            <span class="text-4xl sm:text-5xl leading-none mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]" aria-hidden="true">{{ $p['flag'] }}</span>
+                        </div>
+
+                        {{-- Bottom gradient + "You are here" badge only --}}
+                        <div class="relative z-10 px-2 pt-8 pb-3 text-center"
+                             style="background: linear-gradient(to top, rgba(3,25,16,0.88) 0%, rgba(3,25,16,0.50) 55%, transparent 100%);">
+                            <span class="inline-flex items-center gap-0.5 rounded-full bg-[var(--hs-green-600)] px-2 py-0.5 text-[0.55rem] font-bold text-white uppercase tracking-wide">
+                                <flux:icon.map-pin class="size-2.5 shrink-0" />
+                                {{ __('You are here') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Other country portals --}}
+                    @foreach ($this->otherPortals as $portal)
+                        @php
+                            $tag      = $portal['url'] ? 'a' : 'div';
+                            $attrs    = $portal['url']
+                                ? 'href="'.e($portal['url']).'" target="_blank" rel="noopener noreferrer"'
+                                : '';
+                            $isActive = (bool) $portal['url'];
+                        @endphp
+
+                        <{{ $tag }} {{ $attrs }}
+                            class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
+                            style="min-height: 280px;"
+                        >
+                            {{-- Full-bleed landmark photo --}}
+                            @if (!empty($portal['landmark_image']))
+                                <img src="{{ $portal['landmark_image'] }}"
+                                     alt="{{ $portal['display_name'] }} landmark"
+                                     class="absolute inset-0 w-full h-full object-cover object-center {{ $isActive ? 'transition-transform duration-500 group-hover:scale-105' : '' }}">
+                            @endif
+
+                            {{-- Top gradient + country name + flag --}}
+                            <div class="relative z-10 flex-1 flex flex-col items-center justify-start pt-4 px-3"
+                                 style="background: linear-gradient(to bottom, rgba(3,25,16,0.78) 0%, rgba(3,25,16,0.18) 55%, transparent 100%);">
+                                <p class="text-[0.72rem] sm:text-[0.85rem] font-black tracking-[0.12em] text-white uppercase leading-tight text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] line-clamp-2">
+                                    {{ $portal['card_heading'] ?? $portal['display_name'] }}
+                                </p>
+                                <span class="text-4xl sm:text-5xl leading-none mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]" aria-hidden="true">{{ $portal['flag'] }}</span>
+                            </div>
+
+                            {{-- Bottom gradient + status only --}}
+                            <div class="relative z-10 px-2 pt-8 pb-3 text-center"
+                                 style="background: linear-gradient(to top, rgba(3,25,16,0.88) 0%, rgba(3,25,16,0.50) 55%, transparent 100%);">
+                                @if ($isActive)
+                                    <span class="inline-flex items-center gap-0.5 text-[0.62rem] font-semibold text-white/80">
+                                        {{ __('Visit Portal') }}
+                                        <flux:icon.arrow-top-right-on-square class="size-2.5 shrink-0" />
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[0.55rem] font-bold text-white uppercase tracking-wide backdrop-blur-sm">
+                                        {{ __('Coming Soon') }}
+                                    </span>
+                                @endif
+                            </div>
+                        </{{ $tag }}>
+                    @endforeach
+
+                </div>
+            </div>
+        </section>
+
         {{-- ── Why Trust Us / CTA Banner ─────────────────────── --}}
-        <section id="join" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <section id="join" class="border-t border-[var(--hs-neutral-200)] mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div class="relative overflow-hidden rounded-2xl bg-[var(--hs-green-950)] px-5 sm:px-8 py-9 sm:py-12 text-center">
                 <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px); background-size: 20px 20px;"></div>
                 <div class="relative">

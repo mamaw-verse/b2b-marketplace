@@ -5,7 +5,7 @@
          Default variant: one weighted ad rendered as a full-width banner.
     ══════════════════════════════════════════════════════════════════════ --}}
     @if ($orientation === 'wide' && $content && $content->wideMedia)
-        <div class="w-full my-4">
+        <div class="w-full py-4">
             <a
                 href="{{ route('sponsored-content.click', $content) }}"
                 target="_blank"
@@ -122,7 +122,7 @@
             $poolSize = $pool->count();
         @endphp
         @if ($poolSize > 0)
-        <div class="w-full my-4">
+        <div class="w-full py-6 sm:py-8">
             {{-- Section label --}}
             <div class="flex items-center justify-between mb-3">
                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">
