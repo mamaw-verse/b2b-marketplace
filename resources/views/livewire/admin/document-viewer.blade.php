@@ -1,6 +1,6 @@
 {{-- Document Viewer Modal --}}
 <flux:modal wire:model="showDocumentViewer" class="w-full md:w-[64rem] lg:w-[76rem] max-w-[calc(100vw-2rem)]">
-    <div class="space-y-4">
+    <div class="flex max-h-[85vh] flex-col gap-4">
         @if ($documentPreviewUrl)
             @php
                 $media = $viewingMediaId ? \App\Models\Media::find($viewingMediaId) : null;
@@ -25,15 +25,17 @@
                 </flux:button>
             </div>
 
-            @if ($isImage)
-                <div class="flex justify-center rounded border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-2">
-                    <img src="{{ $documentPreviewUrl }}" alt="{{ $media->original_filename }}" class="max-h-[75vh] rounded">
-                </div>
-            @else
-                <iframe src="{{ $documentPreviewUrl }}" class="h-[75vh] w-full rounded border border-[var(--hs-neutral-200)]" title="{{ __('Document Preview') }}"></iframe>
-            @endif
+            <div class="min-h-0 flex-1 overflow-auto rounded border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
+                @if ($isImage)
+                    <div class="flex justify-center p-2">
+                        <img src="{{ $documentPreviewUrl }}" alt="{{ $media->original_filename }}" class="max-h-full rounded">
+                    </div>
+                @else
+                    <iframe src="{{ $documentPreviewUrl }}" class="h-full w-full" title="{{ __('Document Preview') }}"></iframe>
+                @endif
+            </div>
 
-            <div class="flex justify-end">
+            <div class="flex justify-end shrink-0">
                 <flux:button variant="ghost" wire:click="closeDocumentViewer">{{ __('Close') }}</flux:button>
             </div>
         @else

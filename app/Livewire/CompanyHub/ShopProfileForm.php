@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub;
 
 use App\Models\Category;
+use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -14,7 +15,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.portal', ['portal' => 'hub'])]
-#[Title('Shop Profile')]
+#[Title('Business Profile')]
 final class ShopProfileForm extends Component
 {
     public string $registered_business_name = '';
@@ -90,7 +91,7 @@ final class ShopProfileForm extends Component
         $shop->update($validated);
         $shop->categories()->sync($categoryIds);
 
-        \Flux\Flux::toast(__('Shop profile updated.'), variant: 'success');
+        Flux::toast(__('Shop profile updated.'), variant: 'success');
     }
 
     /**

@@ -52,17 +52,50 @@
 
                 {{-- ── Featured Image ────────────────────────────────────────── --}}
                 <div>
-                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('Featured Image') }}</label>
-                    @if ($product?->featured_image_path && ! $featured_image)
-                        <p class="mt-2 mb-2 text-sm text-[var(--hs-neutral-500)]">{{ __('Current image set. Upload a new one to replace it.') }}</p>
-                    @endif
-                    <input type="file" wire:model="featured_image" accept="image/*" class="mt-1 block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]" />
-                    @error('featured_image') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
+                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1.5">{{ __('Featured Image') }}</label>
 
-                    @if ($featured_image && method_exists($featured_image, 'temporaryUrl'))
-                        <div class="mt-3">
-                            <img src="{{ $featured_image->temporaryUrl() }}" alt="{{ __('Preview') }}" class="h-32 w-32 rounded-[var(--hs-radius-card)] object-cover border border-[var(--hs-neutral-200)]" />
+                    @php
+                        $existingImage = (! $removeFeaturedImage && $product?->featured_image_path)
+                            ? $product->featuredImageUrl
+                            : null;
+                        $pendingImage  = $featured_image instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile
+                            ? $featured_image->temporaryUrl()
+                            : null;
+                        $previewUrl    = $pendingImage ?? $existingImage;
+                    @endphp
+
+                    @if ($previewUrl)
+                        {{-- Preview state: show image with remove/replace button --}}
+                        <div class="relative inline-block group">
+                            <img
+                                src="{{ $previewUrl }}"
+                                alt="{{ __('Featured image preview') }}"
+                                class="h-40 w-40 rounded-[var(--hs-radius-card)] object-cover border border-[var(--hs-neutral-200)]"
+                            />
+                            <button
+                                type="button"
+                                wire:click="clearFeaturedImage"
+                                aria-label="{{ __('Remove image') }}"
+                                class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white opacity-0 transition group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
+                            >
+                                <flux:icon name="x-mark" variant="mini" class="size-3.5" />
+                            </button>
+                            <p class="mt-1.5 text-xs text-[var(--hs-neutral-500)]">
+                                {{ __('Hover to remove and replace.') }}
+                            </p>
                         </div>
+                    @else
+                        {{-- Dropzone state --}}
+                        <x-hs-dropzone
+                            input-id="featured-image-input"
+                            wire-model="featured_image"
+                            accept="image/*"
+                            :multiple="false"
+                            hint="{{ __('JPEG, PNG, WebP — up to 5MB') }}"
+                            loading-target="featured_image"
+                        >
+                            @error('featured_image') <p class="mt-2 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p> @enderror
+                        </x-hs-dropzone>
                     @endif
                 </div>
 
@@ -219,7 +252,7 @@
     <x-hs-confirm
         name="confirm-reload-schema"
         title="{{ __('Reload Product Options') }}"
-        message="{{ __("This will replace all product options with the new category's defaults. Continue?") }}"
+        message="{{ __('This will replace all product options with the selected categories defaults. Continue?') }}"
         variant="warning"
         confirmText="{{ __('Reload') }}"
     >

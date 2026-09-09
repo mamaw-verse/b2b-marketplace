@@ -15,13 +15,13 @@
         @if ($this->isOnboarded && $this->shop)
             <a href="{{ route('storefront.company', $this->shop) }}" wire:navigate
                class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)] transition shrink-0">
-                {{ __('View My Shop') }}
+                {{ __('View Business') }}
                 <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
             </a>
         @elseif (! $this->shop)
             <a href="{{ route('account.onboarding') }}" wire:navigate
                class="inline-flex items-center justify-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--hs-green-700)] transition shadow-[var(--hs-shadow-sm)] shrink-0">
-                {{ __('Start Selling') }}
+                {{ __('Register Business') }}
             </a>
         @endif
     </div>
@@ -85,7 +85,7 @@
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('My RFQs') }}</p>
             </a>
 
-            <a href="{{ route('hub.certifications.index') }}" wire:navigate
+            <a href="{{ route('apply.certificate') }}" wire:navigate
                class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-4 text-center hover:border-[var(--hs-green-300)] transition col-span-2 sm:col-span-1">
                 <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
                     @if ($this->certificationApplication?->status === 'approved')
@@ -107,7 +107,7 @@
                     <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Apply for Halal Certification') }}</h2>
                     <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('Boost buyer trust with a verified halal certification badge on your shop.') }}</p>
                 </div>
-                <flux:button href="{{ route('hub.certifications.index') }}" variant="primary" wire:navigate class="shrink-0">
+                <flux:button href="{{ route('apply.certificate') }}" variant="primary" wire:navigate class="shrink-0">
                     {{ __('Apply Now') }}
                 </flux:button>
             </div>
@@ -145,7 +145,7 @@
         <a href="{{ route('storefront.companies') }}" wire:navigate
            class="flex flex-col items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-4 text-center hover:border-[var(--hs-green-300)] shadow-[var(--hs-shadow-sm)] transition">
             <svg class="size-6 text-[var(--hs-green-600)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
-            <span class="text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('Browse Companies') }}</span>
+            <span class="text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('Browse Businesses') }}</span>
         </a>
         <a href="{{ route('storefront.products') }}" wire:navigate
            class="flex flex-col items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-4 text-center hover:border-[var(--hs-green-300)] shadow-[var(--hs-shadow-sm)] transition">

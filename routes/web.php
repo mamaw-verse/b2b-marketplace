@@ -2,14 +2,23 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\OrderPaymentCallbackController;
+use App\Http\Controllers\SponsoredContentClickController;
+use App\Http\Controllers\SubscriptionPaymentCallbackController;
+use App\Models\CertificationApplication;
+use App\Models\Media;
+use App\Models\SourcingRequest;
+use App\Models\SponsoredContent;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
 | Public Storefront Routes (home page + discovery)
 |--------------------------------------------------------------------------
 */
-Route::post('/locale', function (Illuminate\Http\Request $request) {
+Route::post('/locale', function (Request $request) {
     $validLocales = collect(config('marketplace.portals', []))->pluck('locale')->unique()->implode(',');
     $request->validate(['locale' => 'required|string|in:'.$validLocales]);
     session(['locale' => $request->locale]);
@@ -22,6 +31,8 @@ Route::livewire('/companies', 'storefront.company-directory')->name('storefront.
 Route::livewire('/companies/{shop}', 'storefront.company-profile')->name('storefront.company');
 Route::livewire('/products', 'storefront.product-directory')->name('storefront.products');
 Route::livewire('/products/{product}', 'storefront.product-detail')->name('storefront.product');
+Route::livewire('/certification/apply', 'storefront.apply-for-certificate')->name('apply.certificate');
+Route::livewire('/request-a-product', 'storefront.product-sourcing-form')->name('sourcing-request.create');
 
 /*
 | Media viewer.
@@ -29,7 +40,7 @@ Route::livewire('/products/{product}', 'storefront.product-detail')->name('store
 | (accessible to all, even unauthenticated users). Any other media requires an
 | authenticated admin, the original uploader, or the relevant buyer/seller.
 */
-Route::get('media/{media}/view', function (App\Models\Media $media) {
+Route::get('media/{media}/view', function (Media $media) {
     $isPublicProductDocument = $media->products()
         ->where('status', 'published')
         ->whereHas('shop', fn ($query) => $query
@@ -40,7 +51,10 @@ Route::get('media/{media}/view', function (App\Models\Media $media) {
 
     // Sponsored content creatives are public — they appear on the storefront
     // for unauthenticated visitors so their images must be accessible to all.
-    $isSponsoredContentCreative = App\Models\SponsoredContent::where('media_id', $media->id)->exists();
+    $isSponsoredContentCreative = SponsoredContent::where('wide_media_id', $media->id)
+        ->orWhere('tall_media_id', $media->id)
+        ->orWhere('media_id', $media->id)
+        ->exists();
 
     if (! $isPublicProductDocument && ! $isSponsoredContentCreative) {
         $user = auth()->user();
@@ -73,7 +87,7 @@ Route::get('media/{media}/view', function (App\Models\Media $media) {
         }
     }
 
-    return Illuminate\Support\Facades\Storage::disk('s3')->response(
+    return Storage::disk('s3')->response(
         $media->storage_path,
         $media->original_filename
     );
@@ -147,7 +161,6 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     // (existing links, emails, etc.) and redirects to the unified dashboard.
     Route::redirect('dashboard', '/portal/dashboard')->name('hub-dashboard');
     Route::livewire('shop/profile', 'company-hub.shop-profile-form')->name('shop.profile');
-    Route::livewire('certifications', 'company-hub.certification-application-form')->name('certifications.index');
     Route::middleware('feature:subscriptions_enabled')->group(function () {
         Route::livewire('subscription', 'company-hub.subscription-page')->name('subscription');
         Route::livewire('subscription/{subscription}/pay', 'company-hub.subscription-payment-page')->name('subscription.pay');
@@ -195,6 +208,9 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::livewire('customers', 'company-hub.hub.customers-list')->name('customers.index');
     Route::livewire('reports', 'company-hub.hub.reports')->name('reports');
 
+    // Certificates (seller)
+    Route::livewire('certifications', 'company-hub.certificate-list')->name('certifications.index');
+
     // Earnings (seller)
     Route::livewire('earnings', 'company-hub.earnings.earnings-overview')->name('earnings');
 
@@ -214,6 +230,44 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::livewire('onboardings', 'admin.onboarding-queue')->name('onboardings.index');
     Route::livewire('onboardings/{onboarding}', 'admin.onboarding-review')->name('onboardings.show');
     Route::livewire('certifications', 'admin.certification-queue')->name('certifications.index');
+    // Streams a certification application's uploaded document through the app.
+    // Streaming through the app (not S3 presigned URLs) avoids MinIO signature
+    // host mismatches between the internal endpoint and the public URL.
+    Route::get('certifications/applications/{application}/document', function (CertificationApplication $application) {
+        if ($application->document_path === null || ! Storage::disk('s3')->exists($application->document_path)) {
+            abort(404);
+        }
+
+        $filename = basename($application->document_path);
+        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
+
+        return Storage::disk('s3')->response(
+            $application->document_path,
+            $filename,
+            ['Content-Disposition' => "{$disposition}; filename=\"{$filename}\""],
+        );
+    })->name('certifications.applications.document');
+
+    Route::livewire('sourcing-requests', 'admin.sourcing-queue')->name('sourcing-requests.index');
+    Route::livewire('sourcing-requests/{sourcingRequest}', 'admin.sourcing-request-detail')->name('sourcing-requests.show');
+    // Streams a sourcing request's reference file through the app.
+    // Streaming through the app (not S3 presigned URLs) avoids MinIO signature
+    // host mismatches between the internal endpoint and the public URL.
+    Route::get('sourcing-requests/{sourcingRequest}/document', function (SourcingRequest $sourcingRequest) {
+        if ($sourcingRequest->reference_file_path === null || ! Storage::disk('s3')->exists($sourcingRequest->reference_file_path)) {
+            abort(404);
+        }
+
+        $filename = basename($sourcingRequest->reference_file_path);
+        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
+
+        return Storage::disk('s3')->response(
+            $sourcingRequest->reference_file_path,
+            $filename,
+            ['Content-Disposition' => "{$disposition}; filename=\"{$filename}\""],
+        );
+    })->name('sourcing-requests.document');
+
     Route::livewire('subscriptions', 'admin.subscription-queue')->name('subscriptions.index');
     Route::livewire('categories', 'admin.category-manager')->name('categories.index');
     Route::livewire('categories/create', 'admin.category-create')->name('categories.create');
@@ -265,7 +319,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 });
 
 // Sponsored content click-tracking (public — no auth required)
-Route::get('/ads/{sponsoredContent}/click', App\Http\Controllers\SponsoredContentClickController::class)
+Route::get('/ads/{sponsoredContent}/click', SponsoredContentClickController::class)
     ->name('sponsored-content.click');
 
 /*
@@ -274,16 +328,16 @@ Route::get('/ads/{sponsoredContent}/click', App\Http\Controllers\SponsoredConten
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'feature:orders_enabled'])->group(function () {
-    Route::get('/orders/{order}/payment/success', [App\Http\Controllers\OrderPaymentCallbackController::class, 'success'])
+    Route::get('/orders/{order}/payment/success', [OrderPaymentCallbackController::class, 'success'])
         ->name('orders.payment.success');
-    Route::get('/orders/{order}/payment/failure', [App\Http\Controllers\OrderPaymentCallbackController::class, 'failure'])
+    Route::get('/orders/{order}/payment/failure', [OrderPaymentCallbackController::class, 'failure'])
         ->name('orders.payment.failure');
 });
 
 Route::middleware(['auth', 'feature:subscriptions_enabled'])->group(function () {
-    Route::get('/hub/subscription/{subscription}/payment/success', [App\Http\Controllers\SubscriptionPaymentCallbackController::class, 'success'])
+    Route::get('/hub/subscription/{subscription}/payment/success', [SubscriptionPaymentCallbackController::class, 'success'])
         ->name('hub.subscriptions.payment.success');
-    Route::get('/hub/subscription/{subscription}/payment/failure', [App\Http\Controllers\SubscriptionPaymentCallbackController::class, 'failure'])
+    Route::get('/hub/subscription/{subscription}/payment/failure', [SubscriptionPaymentCallbackController::class, 'failure'])
         ->name('hub.subscriptions.payment.failure');
 });
 

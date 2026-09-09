@@ -14,7 +14,9 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $sponsored_content_tier_id
  * @property string $title
- * @property int $media_id
+ * @property int|null $media_id
+ * @property int|null $wide_media_id
+ * @property int|null $tall_media_id
  * @property string $destination_url
  * @property Carbon $starts_at
  * @property Carbon $ends_at
@@ -31,6 +33,8 @@ final class SponsoredContent extends Model
         'sponsored_content_tier_id',
         'title',
         'media_id',
+        'wide_media_id',
+        'tall_media_id',
         'destination_url',
         'starts_at',
         'ends_at',
@@ -46,6 +50,16 @@ final class SponsoredContent extends Model
     public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);
+    }
+
+    public function wideMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'wide_media_id');
+    }
+
+    public function tallMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'tall_media_id');
     }
 
     public function createdBy(): BelongsTo

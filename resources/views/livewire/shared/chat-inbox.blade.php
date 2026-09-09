@@ -368,7 +368,7 @@
                     </svg>
                 </div>
                 <h3 class="mt-4 text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('Select a conversation') }}</h3>
-                <p class="mt-1.5 max-w-xs text-xs text-[var(--hs-neutral-500)]">{{ __('Choose a company from the left to view your messages.') }}</p>
+                <p class="mt-1.5 max-w-xs text-xs text-[var(--hs-neutral-500)]">{{ __('Choose a business from the left to view your messages.') }}</p>
             </div>
         @endif
     </section>

@@ -54,9 +54,8 @@
                             $flagMap = ['PH'=>'🇵🇭','MY'=>'🇲🇾','SA'=>'🇸🇦','BN'=>'🇧🇳','ID'=>'🇮🇩','TR'=>'🇹🇷'];
                             $flag = $flagMap[config('marketplace.instance_country')] ?? '🌐';
                         @endphp
-                        <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-[var(--hs-neutral-50)] ring-1 ring-[var(--hs-neutral-200)] px-2 py-0.5 text-xs font-medium text-[var(--hs-neutral-600)]" title="{{ config('marketplace.instance_country') }}">
-                            <span class="text-sm leading-none">{{ $flag }}</span>
-                            {{ config('marketplace.instance_country') }}
+                        <span class="hidden sm:inline-flex items-start border-l-2 border-[var(--hs-neutral-300)] h-7 size-8 text-lg leading-none" title="{{ config('marketplace.instance_country') }}">
+                            {{ $flag }}
                         </span>
                     @endunless
                 </a>
@@ -93,7 +92,7 @@
                                 'text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]' => ! (request()->routeIs('storefront.companies') || request()->routeIs('storefront.company')),
                             ])
                         >
-                            {{ __('Companies') }}
+                            {{ __('Businesses') }}
                         </a>
                         <a
                             href="{{ route('storefront.products') }}"
@@ -105,6 +104,17 @@
                             ])
                         >
                             {{ __('Products') }}
+                        </a>
+                        <a
+                            href="{{ route('apply.certificate') }}"
+                            wire:navigate
+                            @class([
+                                'relative px-3 py-2 text-sm font-medium transition pb-[calc(0.5rem+2px)]',
+                                'text-[var(--hs-neutral-900)] font-semibold after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-[var(--hs-gold-500)] after:rounded-full' => request()->routeIs('apply.certificate'),
+                                'text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]' => ! request()->routeIs('apply.certificate'),
+                            ])
+                        >
+                            {{ __('Certification') }}
                         </a>
 
                         {{-- Homepage anchor links — scroll in-page or navigate to home with hash --}}

@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Jobs\IndexProductJob;
 use App\Livewire\Admin\Products\ProductModerationList;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
 use App\Notifications\ProductFlaggedNotification;
-use App\Notifications\ProductUnpublishedNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -24,6 +25,7 @@ beforeEach(function () {
 
 it('can flag a product and notifies the seller', function () {
     Notification::fake();
+    Queue::fake();
 
     $shop = Shop::factory()->create();
     $product = Product::factory()->create([
@@ -39,28 +41,44 @@ it('can flag a product and notifies the seller', function () {
     expect($product->fresh()->moderation_status)->toBe('flagged');
 
     Notification::assertSentTo($shop->user, ProductFlaggedNotification::class);
+    Queue::assertPushed(IndexProductJob::class, fn (IndexProductJob $job) => $job->product->id === $product->id);
 });
 
-it('can unpublish a product and notifies the seller', function () {
-    Notification::fake();
-
+it('shows the flag toggle for active products', function () {
     $shop = Shop::factory()->create();
-    $product = Product::factory()->create([
+    Product::factory()->create([
         'shop_id' => $shop->id,
+        'name' => 'Toggle Check Product',
         'moderation_status' => 'active',
     ]);
 
     Livewire::actingAs($this->admin)
         ->test(ProductModerationList::class)
         ->assertOk()
-        ->call('unpublishProduct', $product->id);
+        ->assertSee('Toggle Check Product')
+        ->assertSee('Flag')
+        ->assertDontSee('Restore');
+});
 
-    expect($product->fresh()->moderation_status)->toBe('admin_unpublished');
+it('shows the restore toggle for flagged products', function () {
+    $shop = Shop::factory()->create();
+    Product::factory()->create([
+        'shop_id' => $shop->id,
+        'name' => 'Toggle Check Product',
+        'moderation_status' => 'flagged',
+    ]);
 
-    Notification::assertSentTo($shop->user, ProductUnpublishedNotification::class);
+    Livewire::actingAs($this->admin)
+        ->test(ProductModerationList::class)
+        ->assertOk()
+        ->assertSee('Toggle Check Product')
+        ->assertSee('Restore')
+        ->assertDontSee('Flag Product');
 });
 
 it('can restore a product to active', function () {
+    Queue::fake();
+
     $shop = Shop::factory()->create();
     $product = Product::factory()->create([
         'shop_id' => $shop->id,
@@ -73,4 +91,6 @@ it('can restore a product to active', function () {
         ->call('restoreProduct', $product->id);
 
     expect($product->fresh()->moderation_status)->toBe('active');
+
+    Queue::assertPushed(IndexProductJob::class, fn (IndexProductJob $job) => $job->product->id === $product->id);
 });

@@ -36,7 +36,7 @@
                     @empty
                         <flux:table.row>
                             <flux:table.cell colspan="4" class="text-center">
-                                <x-hs-empty-state icon="folder" title="{{ __('No categories yet') }}" subtitle="{{ __("Click 'Add Category' to create one.") }}" />
+                                <x-hs-empty-state icon="folder" title="{{ __('No categories yet') }}" :subtitle='__("Click Add Category to create one.")' />
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse

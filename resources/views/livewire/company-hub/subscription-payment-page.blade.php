@@ -143,14 +143,6 @@
                 <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Redirecting you to the secure checkout page...') }}</p>
             </div>
 
-        {{-- Step: Verifying (returned from DLT, syncing status) --}}
-        @elseif ($step === 'verifying')
-            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-8 text-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--hs-green-700)] mx-auto"></div>
-                <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Verifying Payment') }}</h2>
-                <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Confirming your payment status, please wait...') }}</p>
-            </div>
-
         {{-- Step: Success --}}
         @elseif ($step === 'success')
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-green-200)] shadow-[var(--hs-shadow-sm)] p-8 text-center">

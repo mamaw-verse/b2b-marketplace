@@ -31,7 +31,7 @@
                                 </div>
                                 <div>
                                     <b class="block text-sm font-bold text-[var(--hs-neutral-900)]">{{ __('Certification, verified') }}</b>
-                                    <span class="text-xs text-[var(--hs-neutral-500)] leading-relaxed">{{ __('Every listed company is checked against valid halal certification.') }}</span>
+                                    <span class="text-xs text-[var(--hs-neutral-500)] leading-relaxed">{{ __('Every listed business is checked against valid halal certification.') }}</span>
                                 </div>
                             </div>
 

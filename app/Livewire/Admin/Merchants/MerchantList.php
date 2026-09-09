@@ -13,7 +13,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.portal', ['portal' => 'admin'])]
-#[Title('Merchants')]
+#[Title('Businesses')]
 final class MerchantList extends Component
 {
     use WithPagination;
@@ -38,7 +38,7 @@ final class MerchantList extends Component
     #[Computed]
     public function merchants(): LengthAwarePaginator
     {
-        $query = Shop::with(['user', 'latestSubscription']);
+        $query = Shop::with(['user', 'latestSubscription', 'certificates']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -67,10 +67,12 @@ final class MerchantList extends Component
         }
 
         if ($this->certificationFilter) {
+            $validCerts = fn ($q) => $q->whereIn('status', ['active', 'expiring_soon']);
+
             if ($this->certificationFilter === 'certified') {
-                $query->where('is_halal_certified', true);
+                $query->whereHas('certificates', $validCerts);
             } elseif ($this->certificationFilter === 'not_certified') {
-                $query->where('is_halal_certified', false);
+                $query->whereDoesntHave('certificates', $validCerts);
             }
         }
 

@@ -78,7 +78,7 @@ it('can create sponsored content via livewire composer', function () {
         ->set('form.endsAt', now()->addDays(5)->format('Y-m-d\TH:i'))
         ->set('form.isActive', true)
         ->set('form.placements', ['homepage', 'category_page'])
-        ->set('creative', $file)
+        ->set('wideCreative', $file)
         ->call('save')
         ->assertRedirect(route('admin.sponsored-content.index'));
 
@@ -135,7 +135,7 @@ it('dispatches impression event on banner render', function () {
         'title' => 'Test Banner',
         'destination_url' => 'https://test.com',
         'sponsored_content_tier_id' => $this->goldTier->id,
-        'media_id' => $this->media->id,
+        'wide_media_id' => $this->media->id,
         'created_by' => $this->admin->id,
         'starts_at' => now()->subHour(),
         'ends_at' => now()->addHour(),
@@ -182,7 +182,7 @@ it('does not render banner if feature flag is disabled', function () {
         'title' => 'Test Banner',
         'destination_url' => 'https://test.com',
         'sponsored_content_tier_id' => $this->goldTier->id,
-        'media_id' => $this->media->id,
+        'wide_media_id' => $this->media->id,
         'created_by' => $this->admin->id,
         'starts_at' => now()->subHour(),
         'ends_at' => now()->addHour(),

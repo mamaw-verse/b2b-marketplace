@@ -8,9 +8,8 @@ use App\Events\SubscriptionStatusChanged;
 use App\Models\PaymentAttempt;
 use App\Models\Subscription;
 use App\Services\DltPaymentService;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -26,7 +25,7 @@ final class SubscriptionPaymentPage extends Component
     #[Locked]
     public int $subscriptionId;
 
-    /** @var string brands|payment_form|processing|verifying|success|pending|failed */
+    /** @var string brands|payment_form|processing|success|pending|failed */
     public string $step = 'brands';
 
     public bool $loadingBrands = true;
@@ -77,20 +76,11 @@ final class SubscriptionPaymentPage extends Component
         $shop = Auth::user()?->shop;
         abort_unless($shop && $shop->id === $subscription->shop_id, 403);
 
-        $this->subscriptionId = $subscription->id;
-
-        // Detect DLT callback return — DLT appends return_token and transaction_id
-        // (its internal ID) to the callback_url. We look up our stored
-        // merchant_transaction_id from the pending attempt instead of relying on params.
-        if (request()->query('return_token') || request()->query('transaction_id')) {
-            $this->step = 'verifying';
-            $this->handleDltReturn($subscription);
-
-            return;
-        }
-
-        // Fresh page load — must be pending_payment to show the payment form
+        // Must be pending_payment — any return from DLT lands on the callback controller,
+        // not back on this page.
         abort_unless($subscription->status === 'pending_payment', 403);
+
+        $this->subscriptionId = $subscription->id;
 
         $user = Auth::user();
         $this->firstName = $user->first_name ?? '';
@@ -180,9 +170,11 @@ final class SubscriptionPaymentPage extends Component
             $dlt = app(DltPaymentService::class);
             $result = $dlt->submitPayment([
                 'merchant_transaction_id' => $merchantTxnId,
+                'is_card_payment' => $this->selectedBrand['is_card'],
                 'time_offset' => '+08:00',
-                'channel' => 1,
-                'amount' => (float) $subscription->plan->price,
+                'channel' => 4,
+                'amount' => number_format((float) $subscription->plan->price, 2, '.', ''),
+                'currency' => 'PHP',
                 'payment_brand' => $this->selectedBrand['value'],
                 'payment_brand_code' => $this->selectedBrand['code'],
                 'product_name' => Str::limit($subscription->plan->name, 80, ''),
@@ -197,9 +189,8 @@ final class SubscriptionPaymentPage extends Component
                 'state_province_region' => $this->province,
                 'country_code' => $this->countryCode,
                 'postal_code' => $this->postalCode,
-                'callback_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
-                'success_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
-                'failure_url' => route('hub.subscription.pay', ['subscription' => $subscription->id]),
+                'success_url' => route('hub.subscriptions.payment.success', ['subscription' => $subscription->id, 'attempt' => $attempt->id]),
+                'failure_url' => route('hub.subscriptions.payment.failure', ['subscription' => $subscription->id, 'attempt' => $attempt->id]),
             ]);
 
             $paymentData = $result['data'] ?? [];
@@ -218,6 +209,7 @@ final class SubscriptionPaymentPage extends Component
                 $attempt->update(['status' => 'failed', 'failed_at' => now()]);
                 $subscription->update(['status' => 'cancelled']);
                 event(new SubscriptionStatusChanged($subscription->fresh()));
+                Flux::toast(__('Payment could not be initiated. Please try again.'), variant: 'danger');
                 $this->step = 'failed';
                 $this->errorMessage = 'Payment could not be initiated. Please try again.';
             }
@@ -229,6 +221,7 @@ final class SubscriptionPaymentPage extends Component
             ]);
             $subscription->update(['status' => 'cancelled']);
             event(new SubscriptionStatusChanged($subscription->fresh()));
+            Flux::toast(__('Payment failed. Please try again.'), variant: 'danger');
             $this->step = 'failed';
             $this->errorMessage = 'Payment failed. Please try again.';
             report($e);
@@ -248,111 +241,5 @@ final class SubscriptionPaymentPage extends Component
         return view('livewire.company-hub.subscription-payment-page', [
             'subscription' => $this->subscription,
         ]);
-    }
-
-    /**
-     * Called from mount() when DLT redirects back to this page.
-     * DLT appends return_token and transaction_id (its internal ID) to the URL —
-     * we don't use those. Instead we look up the pending PaymentAttempt for this
-     * subscription to get our merchant_transaction_id, then call /sync.
-     */
-    private function handleDltReturn(Subscription $subscription): void
-    {
-        $attempt = PaymentAttempt::where('subscription_id', $subscription->id)
-            ->where('status', 'pending')
-            ->latest('created_at')
-            ->first();
-
-        if (! $attempt) {
-            // No pending attempt — check if already settled
-            $succeededAttempt = PaymentAttempt::where('subscription_id', $subscription->id)
-                ->where('status', 'succeeded')
-                ->first();
-
-            if ($succeededAttempt) {
-                $this->step = 'success';
-            } else {
-                $this->step = 'failed';
-                $this->errorMessage = 'Payment record not found. Please contact support.';
-            }
-
-            return;
-        }
-
-        // Call /sync with our stored merchant_transaction_id
-        try {
-            $dlt = app(DltPaymentService::class);
-            $syncResult = $dlt->syncPaymentStatus($attempt->dlt_merchant_transaction_id);
-            $paymentStatus = $syncResult['payment_status'] ?? 'PENDING';
-        } catch (RuntimeException $e) {
-            Log::error('DLT: /sync failed on callback return', [
-                'subscription_id' => $subscription->id,
-                'attempt_id' => $attempt->id,
-                'merchant_transaction_id' => $attempt->dlt_merchant_transaction_id,
-                'error' => $e->getMessage(),
-            ]);
-            $paymentStatus = 'PENDING';
-            report($e);
-        }
-
-        $attempt->update(['dlt_payment_status' => $paymentStatus]);
-
-        if ($paymentStatus === 'PAID') {
-            $this->activateSubscription($attempt, $subscription);
-            $this->step = 'success';
-        } elseif ($paymentStatus === 'REJECTED') {
-            DB::transaction(function () use ($attempt, $subscription): void {
-                $subscription->update(['status' => 'cancelled']);
-                $attempt->update(['status' => 'failed', 'failed_at' => now()]);
-            });
-            event(new SubscriptionStatusChanged($subscription->fresh()));
-            $this->step = 'failed';
-            $this->errorMessage = 'Your payment was declined.';
-        } else {
-            // PENDING — payment not yet settled
-            $this->step = 'pending';
-        }
-    }
-
-    private function activateSubscription(PaymentAttempt $attempt, Subscription $subscription): void
-    {
-        $previousSubscriptions = collect();
-
-        DB::transaction(function () use ($attempt, $subscription, &$previousSubscriptions): void {
-            $previousSubscriptions = Subscription::query()
-                ->where('shop_id', $subscription->shop_id)
-                ->whereIn('status', ['active', 'trialing'])
-                ->where('id', '<>', $subscription->id)
-                ->get();
-
-            $periodStart = now();
-            $previousEnd = $previousSubscriptions->max('current_period_end');
-            if ($previousEnd && $previousEnd->isFuture()) {
-                $periodStart = $previousEnd;
-            }
-
-            $previousSubscriptions->each->update(['status' => 'lapsed']);
-
-            $subscription->update([
-                'status' => 'active',
-                'trial_ends_at' => null,
-                'current_period_start' => $periodStart,
-                'current_period_end' => $periodStart->copy()->addYear(),
-                'last_renewal_alert_threshold_days' => null,
-            ]);
-
-            $attempt->update([
-                'status' => 'succeeded',
-                'dlt_payment_status' => 'PAID',
-                'failed_at' => null,
-                'succeeded_at' => now(),
-            ]);
-        });
-
-        foreach ($previousSubscriptions as $prev) {
-            event(new SubscriptionStatusChanged($prev->fresh()));
-        }
-
-        event(new SubscriptionStatusChanged($subscription->fresh()));
     }
 }

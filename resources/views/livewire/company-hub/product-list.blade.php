@@ -17,6 +17,26 @@
             </flux:button>
         </div>
 
+        {{-- Subscription banner --}}
+        @if (! $this->isSubscribed)
+            <div class="mx-6 mt-5 rounded-[var(--hs-radius-card)] border border-yellow-200 bg-yellow-50 p-4">
+                <div class="flex items-start gap-3">
+                    <flux:icon name="exclamation-triangle" class="mt-0.5 size-5 shrink-0 text-yellow-600" />
+                    <div class="flex-1 text-sm">
+                        <p class="font-semibold text-yellow-900">{{ __('Your business profile and products are not visible on the marketplace') }}</p>
+                        <p class="mt-0.5 text-yellow-700">
+                            {{ __('Subscribe to make your company profile and products discoverable to buyers.') }}
+                            <a
+                                href="{{ route('hub.subscription') }}"
+                                wire:navigate
+                                class="font-medium underline hover:text-yellow-900"
+                            >{{ __('Go to Subscription') }}</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Filters --}}
         <div class="px-6 pt-5">
             <div class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-fit">

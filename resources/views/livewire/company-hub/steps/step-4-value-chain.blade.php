@@ -4,7 +4,7 @@
         <flux:text class="mt-1">{{ __('Select where you operate in the value chain and your capabilities.') }}</flux:text>
     </div>
 
-    <flux:checkbox.group wire:model="form.value_chain_positions" :label="__('Value Chain Positions')" :description="__('Select all that apply to your business.')">
+    <flux:checkbox.group wire:model="form.value_chain_positions" :label="__('Value Chain Positions')">
         <flux:checkbox value="farm" :label="__('Farm / Raw Materials')" />
         <flux:checkbox value="processing" :label="__('Processing')" />
         <flux:checkbox value="manufacturing" :label="__('Manufacturing')" />
@@ -15,7 +15,7 @@
 
     <flux:separator />
 
-    <flux:checkbox.group wire:model="form.capabilities" :label="__('Capabilities')" :description="__('Select all capabilities your company offers.')">
+    <flux:checkbox.group wire:model="form.capabilities" :label="__('Capabilities')" :description="__('Select all capabilities your business offers.')">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <flux:checkbox value="processing" :label="__('Processing')" />
             <flux:checkbox value="contract_processing" :label="__('Contract Processing')" />

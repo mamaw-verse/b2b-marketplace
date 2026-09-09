@@ -28,28 +28,32 @@
                 </div>
                 <div class="p-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Registered Business Name') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->registered_business_name }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Registered Business Name') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->registered_business_name ?: '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Storefront Name') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->storefront_name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Business Structure') }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Business Structure') }}</p>
                         <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ str_replace('_', ' ', ucfirst($onboarding->business_structure ?? '—')) }}</p>
                     </div>
-                    <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('DTI/SEC Number') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->dti_sec_number }}</p>
+                    <div class="md:col-span-2">
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Tell us about your business') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->company_description ?? '—' }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Tell us about the products you sell') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->products_description ?? '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('TIN') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->tax_identification_number }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('DTI/SEC Number') }} <span class="normal-case font-normal">({{ __('optional') }})</span></p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->dti_sec_number ?: '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('FDA/LTO Number') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->fda_lto_number ?? '—' }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('TIN') }} <span class="normal-case font-normal">({{ __('optional') }})</span></p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->tax_identification_number ?: '—' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('FDA/LTO Number') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->fda_lto_number ?: '—' }}</p>
                     </div>
                 </div>
             </div>
@@ -61,20 +65,30 @@
                 </div>
                 <div class="p-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Phone') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->phone ?? '—' }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Phone') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->phone ?: '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Email') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->email ?? '—' }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Email') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->email ?: '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Address') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->address_1 }}{{ $onboarding->address_2 ? ', ' . $onboarding->address_2 : '' }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Address') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">
+                            @php
+                                $addressParts = array_filter([$onboarding->address_1, $onboarding->address_2]);
+                            @endphp
+                            {{ $addressParts ? implode(', ', $addressParts) : '—' }}
+                        </p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('City / Province') }}</p>
-                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->city ?? '' }}, {{ $onboarding->province ?? '' }} {{ $onboarding->zip_code ?? '' }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('City / Province') }}</p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">
+                            @php
+                                $locationParts = array_filter([$onboarding->city, $onboarding->province, $onboarding->zip_code]);
+                            @endphp
+                            {{ $locationParts ? implode(', ', $locationParts) : '—' }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -86,7 +100,7 @@
                 </div>
                 <div class="p-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Product Categories') }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Product Categories') }}</p>
                         <div class="mt-2 flex flex-wrap gap-1.5">
                             @if($this->productCategoryNames && count($this->productCategoryNames) > 0)
                                 @foreach($this->productCategoryNames as $name)
@@ -98,15 +112,15 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Avg. Production Lead Time') }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Avg. Production Lead Time') }}</p>
                         <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $onboarding->average_production_lead_time ? $onboarding->average_production_lead_time . ' days' : '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Export Readiness') }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Export Readiness') }}</p>
                         <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ str_replace('_', ' ', ucfirst($onboarding->export_readiness_status ?? '—')) }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Value Chain Positions') }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Value Chain Positions') }}</p>
                         <div class="mt-2 flex flex-wrap gap-1.5">
                             @if(is_array($onboarding->value_chain_positions) && count($onboarding->value_chain_positions) > 0)
                                 @foreach($onboarding->value_chain_positions as $pos)
@@ -118,9 +132,9 @@
                         </div>
                     </div>
                     <div class="md:col-span-2">
-                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wider">{{ __('Capabilities') }}</p>
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Capabilities') }}</p>
                         <div class="mt-2 flex flex-wrap gap-1.5">
-                            @if(is_array($onboarding->capabilities))
+                            @if(is_array($onboarding->capabilities) && count($onboarding->capabilities) > 0)
                                 @foreach($onboarding->capabilities as $cap)
                                     <x-hs-badge variant="tag" :label="ucfirst(str_replace('_', ' ', $cap))" />
                                 @endforeach

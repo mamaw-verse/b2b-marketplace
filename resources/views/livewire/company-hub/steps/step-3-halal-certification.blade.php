@@ -184,6 +184,30 @@
         {{ __('Add Certificate') }}
     </flux:button>
 
+    {{-- Promotion banner for sellers without a certificate --}}
+    @if(config('marketplace.features.certification_apply_enabled'))
+    <a
+        href="{{ url('/certification/apply') }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group flex flex-col gap-4 rounded-[var(--hs-radius-card)] bg-[var(--hs-neutral-100)] p-4 transition hover:bg-[var(--hs-neutral-200)] sm:flex-row sm:items-center sm:justify-between"
+    >
+        <div class="flex items-center gap-3">
+            <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-100)] text-[var(--hs-green-700)]">
+                <flux:icon name="check-badge" class="size-5" />
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">{{ __('No certificate yet?') }}</p>
+                <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('If you\'re interested in applying for halal certification, click here to get started.') }}</p>
+            </div>
+        </div>
+        <span class="inline-flex shrink-0 items-center gap-2 rounded-[var(--hs-radius-md)] bg-[var(--hs-gold-500)] px-4 py-2.5 text-sm font-semibold text-white transition group-hover:bg-[var(--hs-gold-600)] sm:self-auto">
+            {{ __('Apply Here') }}
+            <flux:icon name="arrow-right" class="size-4" />
+        </span>
+    </a>
+    @endif
+
     <x-hs-confirm
         name="confirm-remove-certificate"
         title="{{ __('Remove Certificate') }}"

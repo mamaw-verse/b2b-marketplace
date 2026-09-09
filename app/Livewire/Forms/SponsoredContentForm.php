@@ -16,8 +16,8 @@ final class SponsoredContentForm extends Form
     #[Validate('required|url|max:500')]
     public string $destinationUrl = '';
 
-    #[Validate('required|integer|exists:sponsored_content_tiers,id')]
-    public ?int $tierId = null;
+    #[Validate('required|exists:sponsored_content_tiers,id')]
+    public ?string $tierId = null;
 
     #[Validate('required|date|before:endsAt')]
     public string $startsAt = '';
@@ -36,18 +36,22 @@ final class SponsoredContentForm extends Form
     #[Validate('required|array|min:1')]
     public array $placements = [];
 
-    /** Validated separately via request-layer mimes rule in the component. */
-    public ?int $mediaId = null;
+    /** Saved media ID for the wide (landscape) creative. */
+    public ?int $wideMediaId = null;
+
+    /** Saved media ID for the tall (portrait) creative. */
+    public ?int $tallMediaId = null;
 
     public function setSponsoredContent(SponsoredContent $content): void
     {
         $this->title = $content->title;
         $this->destinationUrl = $content->destination_url;
-        $this->tierId = $content->sponsored_content_tier_id;
+        $this->tierId = (string) $content->sponsored_content_tier_id;
         $this->startsAt = $content->starts_at->format('Y-m-d\TH:i');
         $this->endsAt = $content->ends_at->format('Y-m-d\TH:i');
         $this->isActive = $content->is_active;
         $this->placements = $content->placements->pluck('placement_key')->toArray();
-        $this->mediaId = $content->media_id;
+        $this->wideMediaId = $content->wide_media_id;
+        $this->tallMediaId = $content->tall_media_id;
     }
 }

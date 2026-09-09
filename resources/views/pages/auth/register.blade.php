@@ -1,6 +1,6 @@
 <x-layouts::auth :title="__('Register')" activeTab="register">
     <p class="mb-5 text-sm text-[var(--hs-neutral-500)] leading-relaxed">
-        {{ __('Set up your company profile in a few minutes.') }}
+        {{ __('Set up your business profile in a few minutes.') }}
     </p>
 
     <!-- Session Status -->
@@ -40,7 +40,7 @@
             type="email"
             required
             autocomplete="email"
-            placeholder="you@company.com"
+            placeholder="you@business.com"
         />
 
         <!-- Password -->
@@ -94,6 +94,11 @@
             </div>
             <flux:error name="password_confirmation" />
         </flux:field>
+
+        <!-- Turnstile -->
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}"></div>
+        @error('cf-turnstile-response') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
 
         <flux:button type="submit" variant="primary" class="!w-full" data-test="register-user-button">
             {{ __('Create account') }}

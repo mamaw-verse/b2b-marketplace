@@ -163,4 +163,91 @@
             @enderror
         </flux:card>
     @endforeach
+
+    {{-- Optional: Other Supporting Documents (multi-file) --}}
+    <flux:card class="p-4">
+        <div class="flex flex-wrap items-center gap-2">
+            <flux:heading size="sm">{{ __('Other Supporting Documents') }}</flux:heading>
+            <flux:badge color="zinc" size="sm">{{ __('Optional') }}</flux:badge>
+        </div>
+        <flux:text class="mt-1 text-sm">{{ __('Upload any additional documents that support your application.') }}</flux:text>
+
+        {{-- Already-uploaded files list --}}
+        @if (count($supportingDocuments) > 0)
+            <div class="mt-3 space-y-2">
+                @foreach ($supportingDocuments as $index => $doc)
+                    <div
+                        wire:key="supporting-doc-{{ $index }}"
+                        @class([
+                            'flex items-center gap-3 rounded-[var(--hs-radius-card)] border px-4 py-3',
+                            'border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)]' => ($doc['scan_status'] ?? null) === 'clean',
+                            'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' => ($doc['scan_status'] ?? null) === 'pending',
+                            'border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]' => ($doc['scan_status'] ?? null) === 'infected',
+                            'border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]' => ! in_array($doc['scan_status'] ?? null, ['clean', 'pending', 'infected']),
+                        ])
+                    >
+                        @if (($doc['scan_status'] ?? null) === 'clean')
+                            <flux:icon name="document-check" class="size-5 shrink-0 text-[var(--hs-green-600)]" />
+                        @elseif (($doc['scan_status'] ?? null) === 'pending')
+                            <flux:icon name="clock" class="size-5 shrink-0 text-[var(--hs-warning-700)]" />
+                        @elseif (($doc['scan_status'] ?? null) === 'infected')
+                            <flux:icon name="exclamation-circle" class="size-5 shrink-0 text-[var(--hs-danger-600)]" />
+                        @else
+                            <flux:icon name="document" class="size-5 shrink-0 text-[var(--hs-neutral-500)]" />
+                        @endif
+
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-medium text-[var(--hs-neutral-900)]">{{ $doc['filename'] }}</p>
+                            @if (($doc['scan_status'] ?? null) === 'pending')
+                                <p class="text-xs text-[var(--hs-warning-700)]">{{ __('Security scan in progress…') }}</p>
+                            @elseif (($doc['scan_status'] ?? null) === 'infected')
+                                <p class="text-xs text-[var(--hs-danger-700)]">{{ __('Failed security scan — please remove and re-upload.') }}</p>
+                            @endif
+                        </div>
+
+                        @if (($doc['scan_status'] ?? null) === 'clean')
+                            <flux:icon name="check-circle" class="size-5 shrink-0 text-[var(--hs-green-600)]" />
+                        @endif
+
+                        <flux:button
+                            wire:click="removeSupportingDocument({{ $index }})"
+                            wire:loading.attr="disabled"
+                            wire:target="removeSupportingDocument({{ $index }})"
+                            variant="ghost"
+                            size="sm"
+                            icon="trash"
+                            class="shrink-0 text-red-500 hover:text-red-700"
+                        />
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+        {{-- Supporting documents error (e.g. scan pending/infected on submit) --}}
+        @error('supportingDocuments')
+            <p class="mt-2 flex items-center gap-1.5 text-xs text-[var(--hs-danger-700)]">
+                <flux:icon name="exclamation-circle" class="size-4 shrink-0" />
+                {{ $message }}
+            </p>
+        @enderror
+
+        {{-- Dropzone for adding more files --}}
+        <x-hs-dropzone
+            input-id="supporting-doc-input"
+            wire-model="supportingDocumentUploads"
+            accept=".pdf,.jpg,.jpeg,.png"
+            :multiple="true"
+            hint="{{ __('PDF, JPG, PNG — max 20MB each') }}"
+            on-finish="$wire.uploadSupportingDocuments()"
+            loading-target="supportingDocumentUploads,uploadSupportingDocuments"
+            class="mt-3"
+        />
+
+        @error('supportingDocumentUploads')
+            <p class="mt-2 flex items-center gap-1.5 text-xs text-[var(--hs-danger-700)]">
+                <flux:icon name="exclamation-circle" class="size-4 shrink-0" />
+                {{ $message }}
+            </p>
+        @enderror
+    </flux:card>
 </div>

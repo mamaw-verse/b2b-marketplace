@@ -10,6 +10,9 @@ $map = [
     'archived' => 'neutral',
     'clean' => 'verified',
     'infected' => 'danger',
+    'in_progress' => 'info',
+    'resolved' => 'verified',
+    'closed' => 'neutral',
 ];
 $labels = [
     'pending' => __('Pending'),
@@ -21,6 +24,9 @@ $labels = [
     'archived' => __('Archived'),
     'clean' => __('Clean'),
     'infected' => __('Infected'),
+    'in_progress' => __('In Progress'),
+    'resolved' => __('Resolved'),
+    'closed' => __('Closed'),
 ];
 @endphp
 <x-hs-badge :variant="$map[$status] ?? 'neutral'" :label="$labels[$status] ?? ucfirst(str_replace('_', ' ', $status))" {{ $attributes }} />

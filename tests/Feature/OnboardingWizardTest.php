@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\CompanyHub\OnboardingWizard;
+use App\Models\Category;
 use App\Models\Media;
 use App\Models\ShopOnboarding;
 use App\Models\User;
@@ -35,7 +36,6 @@ test('wizard hydrates form object from existing onboarding', function () {
     ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Acme Foods Inc',
-        'storefront_name' => 'Acme Halal',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-12345',
         'tax_identification_number' => 'TIN-98765',
@@ -50,7 +50,6 @@ test('wizard hydrates form object from existing onboarding', function () {
 
     Livewire::test(OnboardingWizard::class)
         ->assertSet('form.registered_business_name', 'Acme Foods Inc')
-        ->assertSet('form.storefront_name', 'Acme Halal')
         ->assertSet('form.business_structure', 'corporation')
         ->assertSet('form.dti_sec_number', 'SEC-12345')
         ->assertSet('form.company_description', 'We produce halal food.')
@@ -65,11 +64,9 @@ test('step 1 validation fails when required fields are empty', function () {
 
     Livewire::test(OnboardingWizard::class)
         ->set('form.registered_business_name', '')
-        ->set('form.storefront_name', '')
         ->call('nextStep')
         ->assertHasErrors([
             'form.registered_business_name' => 'required',
-            'form.storefront_name' => 'required',
             'form.company_description' => 'required',
             'form.products_description' => 'required',
         ])
@@ -84,7 +81,6 @@ test('step 1 advances to step 2 when valid', function () {
 
     Livewire::test(OnboardingWizard::class)
         ->set('form.registered_business_name', 'Valid Business')
-        ->set('form.storefront_name', 'Valid Storefront')
         ->set('form.business_structure', 'sole_proprietorship')
         ->set('form.dti_sec_number', 'DTI-111')
         ->set('form.tax_identification_number', 'TIN-222')
@@ -103,7 +99,6 @@ test('step 1 persists form data including descriptions to the database', functio
 
     Livewire::test(OnboardingWizard::class)
         ->set('form.registered_business_name', 'Persisted Co')
-        ->set('form.storefront_name', 'Persisted Shop')
         ->set('form.business_structure', 'partnership')
         ->set('form.dti_sec_number', 'DTI-333')
         ->set('form.tax_identification_number', 'TIN-444')
@@ -114,7 +109,6 @@ test('step 1 persists form data including descriptions to the database', functio
     $this->assertDatabaseHas('shop_onboardings', [
         'user_id' => $seller->id,
         'registered_business_name' => 'Persisted Co',
-        'storefront_name' => 'Persisted Shop',
         'business_structure' => 'partnership',
         'company_description' => 'Our company sells premium goods.',
         'products_description' => 'A wide range of certified items.',
@@ -129,7 +123,7 @@ test('wizard has 4 total steps', function () {
 
     $component = Livewire::test(OnboardingWizard::class)->instance();
 
-    expect(OnboardingWizard::TOTAL_STEPS)->toBe(4);
+    expect(OnboardingWizard::TOTAL_STEPS)->toBe(5);
 });
 
 test('resetDocument detaches the media and clears the stuck document', function () {
@@ -139,7 +133,6 @@ test('resetDocument detaches the media and clears the stuck document', function 
     $onboarding = ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Doc Co',
-        'storefront_name' => 'Doc Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-2',
         'tax_identification_number' => 'TIN-2',
@@ -182,7 +175,6 @@ test('resetDocument ignores unknown document types', function () {
     ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Doc Co',
-        'storefront_name' => 'Doc Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-3',
         'tax_identification_number' => 'TIN-3',
@@ -202,13 +194,12 @@ test('step 2 stores selected product categories as a comma-separated list', func
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
-    $catA = App\Models\Category::factory()->create(['name' => 'Bakery']);
-    $catB = App\Models\Category::factory()->create(['name' => 'Spices']);
+    $catA = Category::factory()->create(['name' => 'Bakery']);
+    $catB = Category::factory()->create(['name' => 'Spices']);
 
     ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Cat Store Co',
-        'storefront_name' => 'Cat Store Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-CS',
         'tax_identification_number' => 'TIN-CS',
@@ -235,13 +226,12 @@ test('step 2 hydrates stored categories back into an array', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
-    $catA = App\Models\Category::factory()->create();
-    $catB = App\Models\Category::factory()->create();
+    $catA = Category::factory()->create();
+    $catB = Category::factory()->create();
 
     ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Cat Co',
-        'storefront_name' => 'Cat Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-C',
         'tax_identification_number' => 'TIN-C',
@@ -266,7 +256,6 @@ test('step 1 uses the configured marketplace instance country', function () {
 
     Livewire::test(OnboardingWizard::class)
         ->set('form.registered_business_name', 'Country Co')
-        ->set('form.storefront_name', 'Country Shop')
         ->set('form.business_structure', 'corporation')
         ->set('form.dti_sec_number', 'DTI-C')
         ->set('form.tax_identification_number', 'TIN-C')
@@ -287,7 +276,6 @@ test('reapply moves a rejected application back to pending and resets to step 1'
     $onboarding = ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Rejected Co',
-        'storefront_name' => 'Rejected Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-R',
         'tax_identification_number' => 'TIN-R',
@@ -320,7 +308,6 @@ test('wizard shows the approved confirmation screen with CTAs when onboarding is
     ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Approved Co',
-        'storefront_name' => 'Approved Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-A',
         'tax_identification_number' => 'TIN-A',
@@ -344,7 +331,6 @@ test('submit is a no-op when the application is already submitted', function () 
     $onboarding = ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Submitted Co',
-        'storefront_name' => 'Submitted Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-S',
         'tax_identification_number' => 'TIN-S',
@@ -357,7 +343,7 @@ test('submit is a no-op when the application is already submitted', function () 
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 4)
+        ->set('currentStep', 5)
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -405,7 +391,7 @@ test('stepForErrorKey maps field keys and prefixes to the correct step', functio
         ->and($component->stepForErrorKey('form.export_readiness_status'))->toBe(2)
         ->and($component->stepForErrorKey('form.value_chain_positions'))->toBe(3)
         ->and($component->stepForErrorKey('form.capabilities'))->toBe(3)
-        ->and($component->stepForErrorKey('documentUploads.business_permit'))->toBe(4)
+        ->and($component->stepForErrorKey('documentUploads.business_permit'))->toBe(5)
         ->and($component->stepForErrorKey('unknown.key'))->toBeNull();
 });
 
@@ -445,7 +431,6 @@ test('the wizard renders its error summary without referencing undefined propert
     // (including the error summary that calls stepForErrorKey) renders cleanly.
     Livewire::test(OnboardingWizard::class)
         ->set('form.registered_business_name', '')
-        ->set('form.storefront_name', '')
         ->call('nextStep')
         ->assertHasErrors('form.registered_business_name')
         ->assertOk()
@@ -459,7 +444,6 @@ test('a verified document can be replaced when the application requires revision
     $onboarding = ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Revision Co',
-        'storefront_name' => 'Revision Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-R',
         'tax_identification_number' => 'TIN-R',
@@ -481,9 +465,9 @@ test('a verified document can be replaced when the application requires revision
 
     $this->actingAs($seller);
 
-    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 4);
+    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 5);
 
-    // The verified document loads and step 4 offers a way to replace it.
+    // The verified document loads and step 5 offers a way to replace it.
     expect($component->get('uploadedDocuments'))->toHaveKey('business_permit');
     $component->assertSee(__('Replace'));
 
@@ -504,7 +488,6 @@ test('setting documentUploads auto-triggers uploadDocument without manual button
     $onboarding = ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Auto Upload Co',
-        'storefront_name' => 'Auto Upload Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-AU',
         'tax_identification_number' => 'TIN-AU',
@@ -516,7 +499,7 @@ test('setting documentUploads auto-triggers uploadDocument without manual button
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 4)
+        ->set('currentStep', 5)
         ->call('uploadDocument', 'business_permit', app(MediaUploadService::class))
         // No file set — uploadDocument returns early gracefully
         ->assertHasNoErrors();
@@ -533,7 +516,7 @@ test('step 4 document upload dropzone has no manual upload button', function () 
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 4)
+        ->set('currentStep', 5)
         ->assertDontSee('wire:click="uploadDocument')
         ->assertSee('Drag & drop, or click to browse');
 });
@@ -545,7 +528,7 @@ test('step 4 document dropzone wires a dropped file to the hidden input', functi
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 4)
+        ->set('currentStep', 5)
         ->assertSee('dataTransfer?.files', escape: false)
         ->assertSee('dispatchEvent(new Event(\'change\', { bubbles: true }))', escape: false);
 });
@@ -557,7 +540,6 @@ test('the revision-required banner prominently shows the reviewer notes', functi
     ShopOnboarding::create([
         'user_id' => $seller->id,
         'registered_business_name' => 'Banner Co',
-        'storefront_name' => 'Banner Shop',
         'business_structure' => 'corporation',
         'dti_sec_number' => 'SEC-B',
         'tax_identification_number' => 'TIN-B',
@@ -597,7 +579,7 @@ test('a stale or out-of-range step in the URL is clamped to valid bounds', funct
 
     Livewire::withQueryParams(['currentStep' => 99])
         ->test(OnboardingWizard::class)
-        ->assertSet('currentStep', 4);
+        ->assertSet('currentStep', 5);
 
     Livewire::withQueryParams(['currentStep' => 0])
         ->test(OnboardingWizard::class)
@@ -612,7 +594,7 @@ test('step 4 only requires business_permit and optionally other_supporting_docum
 
     $component = Livewire::test(OnboardingWizard::class)->instance();
 
-    expect(array_keys(OnboardingWizard::REQUIRED_DOCUMENTS))->toBe(['business_permit', 'other_supporting_document']);
+    expect(array_keys(OnboardingWizard::REQUIRED_DOCUMENTS))->toBe(['business_permit']);
 });
 
 test('company_description and products_description are saved to shop_onboardings', function () {
@@ -623,7 +605,6 @@ test('company_description and products_description are saved to shop_onboardings
 
     Livewire::test(OnboardingWizard::class)
         ->set('form.registered_business_name', 'Test Co')
-        ->set('form.storefront_name', 'Test Shop')
         ->set('form.business_structure', 'corporation')
         ->set('form.dti_sec_number', 'DTI-T')
         ->set('form.tax_identification_number', 'TIN-T')

@@ -68,7 +68,7 @@
                                 @if ($review->response)
                                     <div class="mt-3 rounded-lg bg-[var(--hs-green-50)] border border-[var(--hs-green-100)] px-4 py-3">
                                         <div class="flex items-center gap-1.5 mb-1">
-                                            <svg class="size-3.5 text-[var(--hs-green-600)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                            <svg class="size-3.5 text-[var(--hs-green-700)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                                             <p class="text-xs font-semibold text-[var(--hs-green-700)]">{{ __('Seller Response') }}</p>
                                         </div>
                                         <p class="text-sm text-[var(--hs-green-800)] leading-relaxed">{{ $review->response->body }}</p>

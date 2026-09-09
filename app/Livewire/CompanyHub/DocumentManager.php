@@ -4,26 +4,30 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\Media;
 use App\Models\Product;
 use App\Services\MediaUploadService;
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.portal', ['portal' => 'hub'])]
 #[Title('Document Manager')]
 final class DocumentManager extends Component
 {
+    use HasDocumentViewer;
     use WithFileUploads;
 
     public Product $product;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    /** @var array<int, TemporaryUploadedFile> */
     public array $newDocuments = [];
 
     public ?int $confirmingDocumentId = null;
@@ -49,13 +53,13 @@ final class DocumentManager extends Component
         $this->reset('newDocuments');
         unset($this->documents, $this->hasPendingDocuments);
 
-        \Flux\Flux::toast('Documents uploaded successfully.', variant: 'success');
+        Flux::toast('Documents uploaded successfully.', variant: 'success');
     }
 
     public function confirmRemoveDocument(int $mediaId): void
     {
         $this->confirmingDocumentId = $mediaId;
-        \Flux\Flux::modal('remove-document-confirm')->show();
+        Flux::modal('remove-document-confirm')->show();
     }
 
     public function removeDocument(): void
@@ -69,7 +73,7 @@ final class DocumentManager extends Component
         $this->confirmingDocumentId = null;
         unset($this->documents, $this->hasPendingDocuments);
 
-        \Flux\Flux::toast('Document removed.', variant: 'success');
+        Flux::toast('Document removed.', variant: 'success');
     }
 
     /**
@@ -92,6 +96,11 @@ final class DocumentManager extends Component
         return $this->documents->contains(
             fn (Media $document): bool => $document->scan_status === 'pending'
         );
+    }
+
+    public function refreshDocuments(): void
+    {
+        unset($this->documents, $this->hasPendingDocuments);
     }
 
     public function render()

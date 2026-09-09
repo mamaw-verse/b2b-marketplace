@@ -1,6 +1,6 @@
 <div class="space-y-6">
 
-    {{-- Welcome / Start Selling CTA --}}
+    {{-- Welcome / Register Business CTA --}}
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Welcome back, :name', ['name' => auth()->user()->first_name]) }}</h1>
@@ -9,7 +9,7 @@
         @unless ($this->hasShop)
             <a href="{{ route('account.onboarding') }}" wire:navigate
                class="inline-flex items-center justify-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--hs-green-700)] transition shadow-[var(--hs-shadow-sm)]">
-                {{ __('Start Selling') }}
+                {{ __('Register Business') }}
             </a>
         @endunless
     </div>

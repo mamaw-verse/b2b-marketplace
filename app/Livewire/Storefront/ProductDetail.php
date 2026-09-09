@@ -19,6 +19,7 @@ final class ProductDetail extends Component
         $product->loadMissing('shop');
 
         $visible = $product->status === 'published'
+            && $product->moderation_status === 'active'
             && $product->shop->status === 'active';
 
         if ($visible && config('marketplace.features.subscriptions_enabled')) {

@@ -1,11 +1,9 @@
 {{--
-    While any document is still scanning, poll every 5s so the Scan Status
-    column updates on its own. The `documents` computed re-queries on each
-    poll, so a bare wire:poll is enough to pick up the job's result. Polling
-    stops automatically once hasPendingDocuments is false, so a settled list
-    is idle.
+    Poll every 5s while any document is pending scan. Calls refreshDocuments
+    to bust the computed cache so the table re-renders with fresh statuses.
+    Polling stops automatically once hasPendingDocuments is false.
 --}}
-<div @if ($this->hasPendingDocuments) wire:poll.5s @endif>
+<div @if ($this->hasPendingDocuments) wire:poll.5s="refreshDocuments" @endif>
     @include('livewire.company-hub.partials.product-tabs')
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
@@ -19,24 +17,20 @@
 
         <div class="p-6">
 
-            {{-- Upload section --}}
-            <div class="mb-6 rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-50)] p-6">
-                <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Upload Documents') }}</h3>
-                <div>
-                    <input type="file" wire:model="newDocuments" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp" multiple class="block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]" />
-                    @error('newDocuments.*') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
-                </div>
+            {{-- Upload dropzone --}}
+            <x-hs-dropzone
+                input-id="doc-manager-input"
+                wire-model="newDocuments"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp"
+                hint="{{ __('PDF, DOC, XLS, JPG, PNG, WebP — up to 20MB each') }}"
+                on-finish="$wire.uploadDocuments()"
+                loading-target="newDocuments,uploadDocuments"
+                class="mb-6"
+            >
+                @error('newDocuments.*') <p class="mt-2 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p> @enderror
+            </x-hs-dropzone>
 
-                @if ($newDocuments)
-                    <div class="mt-4">
-                        <flux:button variant="primary" size="sm" wire:click="uploadDocuments">
-                            {{ __('Upload :count :label', ['count' => count($newDocuments), 'label' => count($newDocuments) === 1 ? __('Document') : __('Documents')]) }}
-                        </flux:button>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Live status line so the user knows the page is checking on its own --}}
+            {{-- Scanning notice --}}
             @if ($this->hasPendingDocuments)
                 <div class="mb-4 flex items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] px-4 py-2.5 text-sm text-[var(--hs-warning-700)]" aria-live="polite">
                     <flux:icon name="arrow-path" class="size-4 shrink-0 animate-spin" />
@@ -57,17 +51,43 @@
 
                     <flux:table.rows>
                         @forelse ($this->documents as $document)
-                            <flux:table.row :key="$document->id" class="hover:bg-[var(--hs-neutral-50)] transition">
-                                <flux:table.cell variant="strong">{{ $document->original_filename }}</flux:table.cell>
+                            <flux:table.row :key="$document->id" wire:key="doc-row-{{ $document->id }}">
+                                <flux:table.cell variant="strong">
+                                    <div class="flex items-center gap-2">
+                                        @if ($document->scan_status === 'infected')
+                                            <flux:icon name="exclamation-circle" class="size-4 shrink-0 text-[var(--hs-danger-500)]" />
+                                        @elseif ($document->scan_status === 'clean')
+                                            <flux:icon name="document-check" class="size-4 shrink-0 text-[var(--hs-green-600)]" />
+                                        @else
+                                            <flux:icon name="document" class="size-4 shrink-0 text-[var(--hs-neutral-400)]" />
+                                        @endif
+                                        <span class="truncate max-w-[200px]">{{ $document->original_filename }}</span>
+                                    </div>
+                                </flux:table.cell>
                                 <flux:table.cell>
                                     <x-hs-badge variant="tag" :label="strtoupper($document->extension)" />
                                 </flux:table.cell>
                                 <flux:table.cell>{{ $document->created_at->format('M d, Y') }}</flux:table.cell>
                                 <flux:table.cell class="py-0">
-                                    <x-hs-status-pill :status="$document->scan_status" />
+                                    @switch($document->scan_status)
+                                        @case('clean')
+                                            <flux:badge color="green" size="sm" icon="check-circle">{{ __('Verified') }}</flux:badge>
+                                            @break
+                                        @case('pending')
+                                            <flux:badge color="yellow" size="sm">{{ __('Scanning…') }}</flux:badge>
+                                            @break
+                                        @case('infected')
+                                            <flux:badge color="red" size="sm" icon="x-circle">{{ __('Failed scan') }}</flux:badge>
+                                            @break
+                                        @default
+                                            <flux:badge size="sm">{{ __('Uploaded') }}</flux:badge>
+                                    @endswitch
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmRemoveDocument({{ $document->id }})" />
+                                    <div class="flex items-center gap-1">
+                                        <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $document->id }})" />
+                                        <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmRemoveDocument({{ $document->id }})" />
+                                    </div>
                                 </flux:table.cell>
                             </flux:table.row>
                         @empty
@@ -97,4 +117,7 @@
             </flux:button>
         </x-slot>
     </x-hs-confirm>
+
+    {{-- Document Preview Modal --}}
+    @include('livewire.admin.document-viewer')
 </div>

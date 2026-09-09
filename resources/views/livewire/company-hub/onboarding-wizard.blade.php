@@ -2,8 +2,8 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Company Onboarding') }}</h1>
-            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Complete all steps to register your company on the marketplace.') }}</p>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Business Onboarding') }}</h1>
+            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Complete all steps to register your business on the marketplace.') }}</p>
         </div>
 
         <div class="p-6">
@@ -14,7 +14,7 @@
                     @for ($step = 1; $step <= 5; $step++)
                         @php
                             $stepLabel = match ($step) {
-                                1 => __('Company'),
+                                1 => __('Business'),
                                 2 => __('Operations'),
                                 3 => __('Value Chain'),
                                 4 => __('Certificates'),
@@ -58,7 +58,7 @@
                 {{-- Mobile-only caption, since labels hide below sm: --}}
                 <p class="mt-2 text-xs font-medium text-[var(--hs-green-700)] sm:hidden">
                     {{ __('Step :current of 5 — :label', ['current' => $currentStep, 'label' => match ($currentStep) {
-                        1 => __('Company'), 2 => __('Operations'),
+                        1 => __('Business'), 2 => __('Operations'),
                         3 => __('Value Chain'), 4 => __('Certificates'), 5 => __('Documents'),
                     }]) }}
                 </p>
@@ -118,7 +118,7 @@
                             {{ __('Go to Dashboard') }}
                         </flux:button>
                         @if(config('marketplace.features.certification_apply_enabled'))
-                        <flux:button href="{{ route('hub.certifications.index') }}" variant="subtle">
+                        <flux:button href="{{ route('apply.certificate') }}" variant="subtle">
                             {{ __('I\'m Interested in Halal Certification') }}
                         </flux:button>
                         @endif
@@ -144,7 +144,9 @@
                                 {{ __('Revision Required') }}
                             </h2>
                             <p class="mt-0.5 text-sm text-[var(--hs-neutral-700)]">
-                                {{ __('An administrator has asked you to update your application before it can be reviewed again.') }}
+                                {{ __('An administrator has asked you to update your application before it can be reviewed again. If you have any questions or need assistance, please e-mail us at ') }} <a href="mailto:{{ $this->adminEmail }}" class="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)]">
+                                    {{ $this->adminEmail }}
+                                </a>
                             </p>
                             @if ($adminNotes)
                                 <div class="mt-3 rounded-[var(--hs-radius-sm)] border border-[var(--hs-warning-200)] bg-[var(--hs-neutral-0)] p-3">
@@ -187,7 +189,7 @@
                 @endif
 
                 {{-- Step content --}}
-                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-6">
+                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-6 [&_[data-flux-error]]:mt-1 [&_*:data-flux-label]:mb-1.5">
                     @switch($currentStep)
                         @case(1)
                             @include('livewire.company-hub.steps.step-1-company-profile')

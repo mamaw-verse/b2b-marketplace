@@ -43,7 +43,7 @@
             @if ($this->rfqs->isEmpty())
                 <x-hs-empty-state
                     title="{{ __('No RFQs found') }}"
-                    description="{{ __("You haven't received any requests for quotation yet.") }}"
+                    :description='__("No requests for quotation have been received yet.")'
                 />
             @else
                 <div class="space-y-3">

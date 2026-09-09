@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Jobs\IndexProductJob;
 use App\Models\Product;
+use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -36,7 +38,7 @@ final class ProductList extends Component
         $this->confirmingProductId = $productId;
         $this->confirmingAction = $action;
 
-        \Flux\Flux::modal($action === 'archive' ? 'archive-product-confirm' : 'publish-product-confirm')->show();
+        Flux::modal($action === 'archive' ? 'archive-product-confirm' : 'publish-product-confirm')->show();
     }
 
     public function toggleStatus(): void
@@ -55,10 +57,26 @@ final class ProductList extends Component
         }
 
         $product->update(['status' => $newStatus]);
-        \App\Jobs\IndexProductJob::dispatch($product)->afterCommit();
+        IndexProductJob::dispatch($product)->afterCommit();
 
         $this->confirmingProductId = null;
         $this->confirmingAction = null;
+    }
+
+    /**
+     * Whether the authenticated shop has an active or trialing subscription.
+     * Used to show the subscription prompt banner on this page.
+     */
+    #[Computed]
+    public function isSubscribed(): bool
+    {
+        if (! config('marketplace.features.subscriptions_enabled')) {
+            return true;
+        }
+
+        $shop = Auth::user()?->shop;
+
+        return $shop !== null && $shop->hasActiveOrTrialingSubscription();
     }
 
     /**

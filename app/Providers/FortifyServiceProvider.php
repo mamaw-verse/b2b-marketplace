@@ -6,12 +6,15 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\PasswordResetLinkRequest;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Requests\SendPasswordResetLinkRequest;
 
 final class FortifyServiceProvider extends ServiceProvider
 {
@@ -20,7 +23,10 @@ final class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Swap Fortify's stock form requests for subclasses that also require a
+        // valid Cloudflare Turnstile token before authentication runs.
+        $this->app->bind(\Laravel\Fortify\Http\Requests\LoginRequest::class, LoginRequest::class);
+        $this->app->bind(SendPasswordResetLinkRequest::class, PasswordResetLinkRequest::class);
     }
 
     /**

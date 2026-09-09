@@ -230,3 +230,15 @@ select:focus[data-flux-control] {
 :is(.dark, .dark *) [data-flux-button].dark\:hover\:bg-white\/15:hover {
     background-color: var(--hs-green-950) !important;
 }
+
+/* ============================================================
+   SCROLLBAR HIDE — Utility class
+   Hides scrollbar while preserving horizontal scroll.
+   ============================================================ */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}

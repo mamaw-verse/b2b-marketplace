@@ -110,6 +110,7 @@ final class SearchController extends Controller
 
         if (
             $product->status !== 'published'
+            || $product->moderation_status !== 'active'
             || ! $product->shop
             || ! $product->shop->hasActiveOrTrialingSubscription()
             || $product->shop->status !== 'active'

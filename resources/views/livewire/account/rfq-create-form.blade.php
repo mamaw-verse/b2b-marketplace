@@ -30,9 +30,6 @@
             </div>
             <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('RFQ submitted') }}</h2>
             <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[var(--hs-neutral-500)]">
-                @if ($shop)
-                    {{ __('Sent to') }} <span class="font-medium text-[var(--hs-neutral-700)]">{{ $shop->storefront_name }}</span>.
-                @endif
                 {{ __('You can track replies and compare quotations under My RFQs.') }}
             </p>
 
@@ -60,14 +57,14 @@
             </div>
             <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-800)]">{{ __('Choose a supplier first') }}</h2>
             <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[var(--hs-neutral-500)]">
-                {{ __('An RFQ is always addressed to one verified supplier. Open a company or product page and use the Request Quote button there.') }}
+                {{ __('An RFQ is always addressed to one verified supplier. Open a business or product page and use the Request Quote button there.') }}
             </p>
             @error('shop_id')
                 <p class="mt-3 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>
             @enderror
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <flux:button variant="primary" icon="magnifying-glass" href="{{ route('storefront.companies') }}" wire:navigate>
-                    {{ __('Browse companies') }}
+                    {{ __('Browse businesses') }}
                 </flux:button>
                 <flux:button variant="ghost" href="{{ route('storefront.products') }}" wire:navigate>
                     {{ __('Browse products') }}
@@ -114,7 +111,7 @@
                     <flux:input
                         wire:model="business_name"
                         label="{{ __('Business Name') }}"
-                        placeholder="{{ __('Your business or company name') }}"
+                        placeholder="{{ __('Your business name') }}"
                         badge="{{ __('Required') }}"
                         required
                     />
@@ -123,7 +120,7 @@
                     <div class="space-y-4">
                         <h3 class="text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('Billing Address') }}</h3>
 
-                        <flux:input wire:model="billing_address_1" label="{{ __('Address Line 1') }}" placeholder="{{ __('Street address, P.O. box, company name') }}" />
+                        <flux:input wire:model="billing_address_1" label="{{ __('Address Line 1') }}" placeholder="{{ __('Street address, P.O. box, business name') }}" />
                         <flux:input wire:model="billing_address_2" label="{{ __('Address Line 2') }}" placeholder="{{ __('Apartment, suite, unit, floor, etc.') }}" />
 
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -151,7 +148,7 @@
                         </label>
 
                         @unless ($useShippingSameAsBilling)
-                            <flux:input wire:model="shipping_address_1" label="{{ __('Address Line 1') }}" placeholder="{{ __('Street address, P.O. box, company name') }}" />
+                            <flux:input wire:model="shipping_address_1" label="{{ __('Address Line 1') }}" placeholder="{{ __('Street address, P.O. box, business name') }}" />
                             <flux:input wire:model="shipping_address_2" label="{{ __('Address Line 2') }}" placeholder="{{ __('Apartment, suite, unit, floor, etc.') }}" />
 
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -175,7 +172,7 @@
 
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <flux:input wire:model="contact_phone" label="{{ __('Phone') }}" placeholder="+63 917 123 4567" type="tel" />
-                            <flux:input wire:model="contact_email" label="{{ __('Email') }}" placeholder="purchasing@yourcompany.ph" type="email" />
+                            <flux:input wire:model="contact_email" label="{{ __('Email') }}" placeholder="purchasing@yourbusiness.ph" type="email" />
                         </div>
                     </div>
                 </div>
@@ -203,45 +200,8 @@
         {{-- STEP 2 — RFQ form                                                  --}}
         {{-- ------------------------------------------------------------------ --}}
 
-        {{-- Step indicator (only shown when we went through step 1 this session) --}}
-        <div class="mb-6 flex items-center gap-3">
-            <div class="flex items-center gap-2">
-                <span class="flex size-7 items-center justify-center rounded-full bg-[var(--hs-success-100)] text-xs font-bold text-[var(--hs-success-700)]">
-                    <flux:icon name="check" variant="mini" class="size-4" />
-                </span>
-                <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Your Profile') }}</span>
-            </div>
-            <div class="h-px flex-1 bg-[var(--hs-neutral-200)]"></div>
-            <div class="flex items-center gap-2">
-                <span class="flex size-7 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-xs font-bold text-white">2</span>
-                <span class="text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('Your Request') }}</span>
-            </div>
-        </div>
-
         <div class="overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)]">
-            {{-- Recipient strip --}}
-            <div class="flex items-center gap-4 border-b border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] px-6 py-4">
-                <x-hs-avatar :initials="strtoupper(mb_substr($shop->storefront_name, 0, 2))" class="shrink-0" />
-                <div class="min-w-0 flex-1">
-                    <p class="text-xs font-medium uppercase tracking-[0.05em] text-[var(--hs-neutral-500)]">{{ __('Sending to') }}</p>
-                    <div class="mt-0.5 flex flex-wrap items-center gap-2">
-                        <a href="{{ route('storefront.company', $shop) }}" wire:navigate
-                           class="truncate font-semibold text-[var(--hs-neutral-900)] hover:text-[var(--hs-green-600)] transition">
-                            {{ $shop->storefront_name }}
-                        </a>
-                        @if ($shop->certificates->contains(fn ($certificate) => $certificate->status === 'active'))
-                            <x-hs-badge variant="verified" label="{{ __('Verified') }}" />
-                        @endif
-                    </div>
-                </div>
-                {{-- Edit profile link --}}
-                <a href="{{ route('account.profile') }}" wire:navigate
-                   class="shrink-0 text-xs text-[var(--hs-neutral-500)] underline underline-offset-2 hover:text-[var(--hs-green-600)] transition">
-                    {{ __('Edit profile') }}
-                </a>
-            </div>
-
-            {{-- Reference product (display only — RFQs are not persisted against a product) --}}
+            {{-- Reference product (shown for context and persisted with the RFQ) --}}
             @if ($product)
                 <div class="flex items-center gap-4 border-b border-[var(--hs-neutral-100)] px-6 py-4">
                     <div class="size-16 shrink-0 overflow-hidden rounded-[var(--hs-radius-md)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">

@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Rfq;
 
 use App\Models\Rfq;
 use App\Models\RfqRecipient;
+use App\Notifications\RfqStatusUpdatedNotification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -25,7 +26,7 @@ final class RfqDetail extends Component
 
     public function mount(Rfq $rfq): void
     {
-        $this->rfq = $rfq->load(['buyer', 'attachments']);
+        $this->rfq = $rfq->load(['buyer.shop', 'attachments', 'product.variants']);
         // For Phase 1, each RFQ targets exactly one shop (recipient)
         $this->recipient = $rfq->recipients()->with(['shop', 'managedBy'])->firstOrFail();
 
@@ -40,6 +41,8 @@ final class RfqDetail extends Component
             'adminNotes' => ['nullable', 'string', 'max:5000'],
         ]);
 
+        $previousStatus = $this->recipient->admin_status ?? 'pending';
+
         $updates = [
             'admin_status' => $this->adminStatus,
             'admin_notes' => $this->adminNotes,
@@ -53,8 +56,13 @@ final class RfqDetail extends Component
 
         $this->recipient->update($updates);
 
-        // If the admin status becomes terminal, also touch activity and maybe close the main RFQ?
-        // Let's just update the recipient for now.
+        // Notify the buyer when the admin status actually changes so they can
+        // track the negotiation (in-app database notification + email).
+        if ($previousStatus !== $this->adminStatus && $this->rfq->buyer) {
+            $this->rfq->buyer->notify(
+                new RfqStatusUpdatedNotification($this->recipient, $previousStatus, $this->adminStatus)
+            );
+        }
 
         $this->dispatch('toast', message: 'RFQ admin details updated successfully.');
     }

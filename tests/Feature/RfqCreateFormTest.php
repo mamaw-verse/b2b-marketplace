@@ -189,6 +189,68 @@ test('without a shop_id the buyer is pointed at the directory instead of a raw s
         ->assertDontSee('wire:model="shop_id"', false);
 });
 
+test('submitting with a published reference product persists it on the RFQ', function () {
+    $product = Product::factory()->published()->create([
+        'shop_id' => $this->shop->id,
+        'name' => 'Halal Frozen Whole Chicken',
+    ]);
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, [
+            'shop_id' => $this->shop->id,
+            'product_id' => $product->id,
+            'title' => 'Quote for chicken',
+        ])
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    expect(Rfq::where('title', 'Quote for chicken')->first()->product_id)->toBe($product->id);
+});
+
+test('submitting without a reference product leaves product_id null', function () {
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Generic RFQ'])
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    expect(Rfq::where('title', 'Generic RFQ')->first()->product_id)->toBeNull();
+});
+
+test('submitting with a product from another shop does not persist product_id', function () {
+    $otherShopProduct = Product::factory()->published()->create([
+        'name' => 'Other Shop Product',
+    ]);
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, [
+            'shop_id' => $this->shop->id,
+            'product_id' => $otherShopProduct->id,
+            'title' => 'Cross shop RFQ',
+        ])
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    expect(Rfq::where('title', 'Cross shop RFQ')->first()->product_id)->toBeNull();
+});
+
+test('submitting with an unpublished product does not persist product_id', function () {
+    $archivedProduct = Product::factory()->archived()->create([
+        'shop_id' => $this->shop->id,
+        'name' => 'Archived Product',
+    ]);
+
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, [
+            'shop_id' => $this->shop->id,
+            'product_id' => $archivedProduct->id,
+            'title' => 'Archived RFQ',
+        ])
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    expect(Rfq::where('title', 'Archived RFQ')->first()->product_id)->toBeNull();
+});
+
 test('an inactive shop is not treated as a valid recipient', function () {
     $inactiveShop = Shop::factory()->create(['status' => 'suspended']);
 

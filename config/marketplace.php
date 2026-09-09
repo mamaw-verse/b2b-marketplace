@@ -33,12 +33,12 @@ return [
     |
     */
     'portals' => [
-        ['country_code' => 'PH', 'display_name' => 'Philippines',          'flag' => '🇵🇭', 'locale' => 'en', 'url' => env('PORTAL_PH_URL', null)],
-        ['country_code' => 'MY', 'display_name' => 'Malaysia',              'flag' => '🇲🇾', 'locale' => 'ms', 'url' => env('PORTAL_MY_URL', null)],
-        ['country_code' => 'SA', 'display_name' => 'Saudi Arabia',          'flag' => '🇸🇦', 'locale' => 'ar', 'url' => env('PORTAL_SA_URL', null)],
-        ['country_code' => 'BN', 'display_name' => 'Brunei',                'flag' => '🇧🇳', 'locale' => 'ms', 'url' => env('PORTAL_BN_URL', null)],
-        ['country_code' => 'ID', 'display_name' => 'Indonesia',             'flag' => '🇮🇩', 'locale' => 'id', 'url' => env('PORTAL_ID_URL', null)],
-        ['country_code' => 'TR', 'display_name' => 'Turkey',                'flag' => '🇹🇷', 'locale' => 'tr', 'url' => env('PORTAL_TR_URL', null)],
+        ['country_code' => 'PH', 'display_name' => 'Philippines',          'card_heading' => 'PHILIPPINES',             'flag' => '🇵🇭', 'locale' => 'en', 'url' => env('PORTAL_PH_URL', null), 'landmark_image' => '/images/countries/ph.jpg'],
+        ['country_code' => 'MY', 'display_name' => 'Malaysia',              'card_heading' => 'MALAYSIA',                'flag' => '🇲🇾', 'locale' => 'ms', 'url' => env('PORTAL_MY_URL', null), 'landmark_image' => '/images/countries/my.jpg'],
+        ['country_code' => 'SA', 'display_name' => 'Saudi Arabia',          'card_heading' => 'KINGDOM OF SAUDI ARABIA', 'flag' => '🇸🇦', 'locale' => 'ar', 'url' => env('PORTAL_SA_URL', null), 'landmark_image' => '/images/countries/sa.jpg'],
+        ['country_code' => 'BN', 'display_name' => 'Brunei',                'card_heading' => 'BRUNEI DARUSSALAM',       'flag' => '🇧🇳', 'locale' => 'ms', 'url' => env('PORTAL_BN_URL', null), 'landmark_image' => '/images/countries/bn.jpg'],
+        ['country_code' => 'ID', 'display_name' => 'Indonesia',             'card_heading' => 'INDONESIA',               'flag' => '🇮🇩', 'locale' => 'id', 'url' => env('PORTAL_ID_URL', null), 'landmark_image' => '/images/countries/id.jpg'],
+        ['country_code' => 'TR', 'display_name' => 'Turkey',                'card_heading' => 'TÜRKIYE',                 'flag' => '🇹🇷', 'locale' => 'tr', 'url' => env('PORTAL_TR_URL', null), 'landmark_image' => '/images/countries/tr.jpg'],
     ],
 
     /*

@@ -7,6 +7,7 @@ namespace App\Livewire\CompanyHub;
 use App\Jobs\IndexProductJob;
 use App\Models\Category;
 use App\Models\Product;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -33,6 +34,8 @@ final class ProductForm extends Component
     public array $variantAttributesSchema = [];
 
     public $featured_image = null;
+
+    public bool $removeFeaturedImage = false;
 
     public ?string $confirmingAttributeKey = null;
 
@@ -80,7 +83,7 @@ final class ProductForm extends Component
         $this->populateSchemaFromCategories();
 
         if (empty($this->variantAttributesSchema)) {
-            \Flux\Flux::toast('None of the selected categories have options defined.', variant: 'warning');
+            Flux::toast('None of the selected categories have options defined.', variant: 'warning');
 
             return;
         }
@@ -88,7 +91,7 @@ final class ProductForm extends Component
         // On edit, persist immediately so the reload survives a page refresh.
         $this->product?->update(['variant_attributes_schema' => $this->variantAttributesSchema]);
 
-        \Flux\Flux::toast('Product options reloaded from selected categories.', variant: 'success');
+        Flux::toast('Product options reloaded from selected categories.', variant: 'success');
     }
 
     public function addAttribute(): void
@@ -105,7 +108,7 @@ final class ProductForm extends Component
     public function confirmRemoveAttribute(string $key): void
     {
         $this->confirmingAttributeKey = $key;
-        \Flux\Flux::modal('confirm-remove-attribute')->show();
+        Flux::modal('confirm-remove-attribute')->show();
     }
 
     public function removeAttribute(): void
@@ -116,6 +119,12 @@ final class ProductForm extends Component
 
         unset($this->variantAttributesSchema[$this->confirmingAttributeKey]);
         $this->confirmingAttributeKey = null;
+    }
+
+    public function clearFeaturedImage(): void
+    {
+        $this->featured_image = null;
+        $this->removeFeaturedImage = true;
     }
 
     public function save(): void
@@ -135,6 +144,8 @@ final class ProductForm extends Component
         if ($this->featured_image) {
             $path = $this->featured_image->store('products/images', 's3');
             $data['featured_image_path'] = $path;
+        } elseif ($this->removeFeaturedImage) {
+            $data['featured_image_path'] = null;
         }
 
         if ($this->product) {
@@ -147,7 +158,7 @@ final class ProductForm extends Component
         }
         $product->categories()->sync($this->category_ids);
 
-        \Flux\Flux::toast($this->product ? 'Product updated.' : 'Product created.', variant: 'success');
+        Flux::toast($this->product ? 'Product updated.' : 'Product created.', variant: 'success');
 
         $this->redirect(route('hub.products.edit', $product), navigate: true);
     }
@@ -163,7 +174,7 @@ final class ProductForm extends Component
         $this->product->update(['status' => 'published']);
         IndexProductJob::dispatch($this->product)->afterCommit();
 
-        \Flux\Flux::toast(__('Product published.'), variant: 'success');
+        Flux::toast(__('Product published.'), variant: 'success');
     }
 
     /**
@@ -177,7 +188,7 @@ final class ProductForm extends Component
         $this->product->update(['status' => 'archived']);
         IndexProductJob::dispatch($this->product)->afterCommit();
 
-        \Flux\Flux::toast(__('Product archived.'), variant: 'success');
+        Flux::toast(__('Product archived.'), variant: 'success');
     }
 
     /**

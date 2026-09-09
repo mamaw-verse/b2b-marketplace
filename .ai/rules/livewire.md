@@ -29,3 +29,15 @@ Do NOT expose full Eloquent models as public Livewire properties — they get se
 
 ## rfq_recipient_status enum has no 'awarded' value — awarding lives on quotations
 The rfq_recipient_status Postgres enum is only: received, reviewed, in_progress, no_bid, closed. There is NO 'awarded' recipient status — awarding is a quotation status. Never write whereNotIn('status', ['no_bid','awarded']) on rfq_recipients: Postgres casts the literal 'awarded' to the enum and throws SQLSTATE 22P02. To exclude recipients with an awarded quotation, use ->whereDoesntHave('quotations', fn($q)=>$q->where('status','awarded')) instead. 'closed' was added additively via migration 2026_08_28_110000 for the buyer close-RFQ cascade (S4.T9).
+
+## HasDocumentViewer trait for document/image preview modals
+Use the `HasDocumentViewer` trait (app/Livewire/Concerns/HasDocumentViewer.php) in any Livewire component that needs a document/image preview modal.
+
+The trait provides: `$viewingMediaId`, `$documentPreviewUrl`, `$showDocumentViewer` properties, plus `viewDocument(int $mediaId)` and `closeDocumentViewer()` methods.
+
+In the view, add a button with `wire:click="viewDocument($id)"` and include the modal at the bottom:
+```blade
+@include('livewire.admin.document-viewer')
+```
+
+The `document-viewer` partial at `resources/views/livewire/admin/document-viewer.blade.php` is shared — it handles both images (renders an `<img>`) and other files (renders an `<iframe>`), with an "Open in new tab" button.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Jobs\IndexShopJob;
 use Database\Factories\ShopFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Laravel\Scout\Searchable;
@@ -41,6 +43,7 @@ use Laravel\Scout\Searchable;
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read bool $is_halal_certified
  */
 final class Shop extends Model
 {
@@ -122,6 +125,17 @@ final class Shop extends Model
     public function onboarding(): HasOne
     {
         return $this->hasOne(ShopOnboarding::class);
+    }
+
+    /**
+     * Whether this shop has at least one valid (non-expired) halal certificate.
+     * Includes certificates with status 'active' or 'expiring_soon'.
+     */
+    public function getIsHalalCertifiedAttribute(): bool
+    {
+        return $this->certificates->contains(
+            fn (ShopCertificate $cert) => in_array($cert->status, ['active', 'expiring_soon'], true)
+        );
     }
 
     /**
@@ -226,7 +240,7 @@ final class Shop extends Model
     /**
      * Reviews for this shop.
      */
-    public function reviews(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
     }
@@ -242,13 +256,13 @@ final class Shop extends Model
     public function suspend(): void
     {
         $this->update(['status' => 'suspended']);
-        $this->searchable();
+        IndexShopJob::dispatch($this)->afterCommit();
     }
 
     public function reactivate(): void
     {
         $this->update(['status' => 'active']);
-        $this->searchable();
+        IndexShopJob::dispatch($this)->afterCommit();
     }
 
     /**

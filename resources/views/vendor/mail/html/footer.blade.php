@@ -11,7 +11,7 @@ From Farm to Plate &mdash; Bringing Halal Products, Services and Opportunities t
 &middot;
 <a href="{{ route('storefront.products') }}">Products</a>
 &middot;
-<a href="{{ route('storefront.companies') }}">Verified Companies</a>
+<a href="{{ route('storefront.companies') }}">Verified Businesses</a>
 </p>
 <p class="footer-legal" style="margin:0;">
 &copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}<br />

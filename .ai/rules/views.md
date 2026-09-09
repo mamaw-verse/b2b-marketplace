@@ -59,3 +59,48 @@ Always verify a token exists in tokens.css before using it in a class like `bg-[
 
 ## No native <select> or <input type="date"> — use Flux UI components
 Native HTML `<select>` and `<input type="date">` render inconsistently across browsers (especially Safari). Always use `<flux:select>` / `<flux:select.option>` for dropdowns and `<flux:date-picker>` for date inputs. Exception: the pattern in views-livewire rules for custom-styled inputs when flux label auto-rendering causes layout issues — but those must still avoid native date pickers.
+
+## Blade component attribute quoting: apostrophes and single quotes
+When passing translated strings containing apostrophes (e.g. "won't", "category's", "haven't") or typographic single quotes (e.g. 'Add Variant') as Blade component attributes:
+
+1. NEVER use `{{ __("string with apostrophe") }}` inside a double-quoted HTML attribute — the inner `"` breaks the attribute.
+2. NEVER use `{{ __('string with apostrophe') }}` — the `'` terminates the PHP string, causing a parse error or `&#039;` entity rendering.
+3. NEVER use `{!! !!}` inside any HTML attribute — Blade does not process it there; it renders as literal text.
+
+CORRECT patterns:
+- No apostrophe in string: use `{{ __('Normal string') }}` inside double-quoted HTML attribute.
+- Apostrophe in string, on a `:prop` binding: use single-quoted HTML attribute + double-quoted PHP string:
+  `:description='__("No requests have been received yet.")'`
+- String with both apostrophes and typographic quotes: rephrase to remove one type of quote, OR extract to a PHP variable in `@php` and pass `:prop="$var"`.
+- For body text (not attributes): `{{ __("string with apostrophe") }}` is fine; browsers decode `&#039;` in text nodes correctly.
+
+## Use x-hs-dropzone for file upload drop zones
+The `x-hs-dropzone` component (resources/views/components/hs-dropzone.blade.php) provides a consistent click-to-open / drag-and-drop file input that auto-uploads via Livewire's `livewire-upload-finish` event.
+
+Props:
+- `input-id` (required) — unique id for the hidden `<input>`, must be unique per page
+- `wire-model` (required) — Livewire property name, e.g. `"newPhotos"`
+- `accept` — file accept string, e.g. `"image/jpeg,image/png"` or `".pdf,.docx"`
+- `hint` — small subtitle text shown under the label, e.g. `"JPEG, PNG — up to 5MB"`
+- `on-finish` — JS expression called on `livewire-upload-finish`, e.g. `"$wire.uploadPhotos()"`; omit if the parent handles upload differently (e.g. via wire:model watchers)
+- `loading-target` — `wire:target` value for the uploading spinner, e.g. `"newPhotos,uploadPhotos"`
+- `class` — forwarded to the wrapper div (use for margin, e.g. `class="mb-6"`)
+- Default slot — rendered inside the wrapper below the label, use for `@error` messages
+
+Do NOT use this for step-5-documents in onboarding — that dropzone has per-field error-state border styling (red when field has errors) and does not use `on-finish`, so it stays inline.
+
+## Use x-hs-dropzone for file upload drop zones
+The `x-hs-dropzone` component (resources/views/components/hs-dropzone.blade.php) provides a consistent click-to-open / drag-and-drop file input that auto-uploads via Livewire's `livewire-upload-finish` event.
+
+Props:
+- `input-id` (required) — unique id for the hidden `<input>`, must be unique per page
+- `wire-model` (required) — Livewire property name, e.g. `"newPhotos"`
+- `accept` — file accept string, e.g. `"image/jpeg,image/png"` or `".pdf,.docx"` (default: `"*"`)
+- `multiple` — allow multiple file selection, default `true`; pass `:multiple="false"` for single-file inputs
+- `hint` — small subtitle text shown under the label, e.g. `"JPEG, PNG — up to 5MB"`
+- `on-finish` — JS expression called on `livewire-upload-finish`, e.g. `"$wire.uploadPhotos()"`; omit when the upload is deferred to form submit (e.g. featured image)
+- `loading-target` — `wire:target` value for the uploading spinner, e.g. `"newPhotos,uploadPhotos"`
+- `class` — forwarded to the wrapper div (use for margin, e.g. `class="mb-6"`)
+- Default slot — rendered inside the wrapper below the label, use for `@error` messages and preview images
+
+Do NOT use this for step-5-documents in onboarding — that dropzone has per-field error-state border styling and does not use `on-finish`, so it stays inline.

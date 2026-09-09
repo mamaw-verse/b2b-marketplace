@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Products;
 
+use App\Jobs\IndexProductJob;
 use App\Models\Product;
 use App\Notifications\ProductFlaggedNotification;
-use App\Notifications\ProductUnpublishedNotification;
+use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -52,7 +53,7 @@ final class ProductModerationList extends Component
         $this->previewProductId = $productId;
         unset($this->previewProduct);
 
-        \Flux\Flux::modal('product-preview')->show();
+        Flux::modal('product-preview')->show();
     }
 
     #[Computed]
@@ -69,7 +70,7 @@ final class ProductModerationList extends Component
     #[Computed]
     public function products(): LengthAwarePaginator
     {
-        $query = Product::with(['shop']);
+        $query = Product::with(['shop.latestSubscription']);
 
         if ($this->search) {
             $query->where('name', 'ilike', '%'.$this->search.'%');
@@ -92,24 +93,11 @@ final class ProductModerationList extends Component
 
         $product = Product::with('shop.user')->findOrFail($productId);
         $product->update(['moderation_status' => 'flagged']);
-        $product->searchable(); // Triggers update in typesense
+        IndexProductJob::dispatch($product)->afterCommit();
 
         $product->shop->user->notify(new ProductFlaggedNotification($product));
 
         $this->dispatch('toast', message: 'Product flagged.');
-    }
-
-    public function unpublishProduct(int $productId): void
-    {
-        Gate::authorize('product.moderate');
-
-        $product = Product::with('shop.user')->findOrFail($productId);
-        $product->update(['moderation_status' => 'admin_unpublished']);
-        $product->searchable(); // Triggers update in typesense
-
-        $product->shop->user->notify(new ProductUnpublishedNotification($product));
-
-        $this->dispatch('toast', message: 'Product unpublished.');
     }
 
     public function restoreProduct(int $productId): void
@@ -118,7 +106,7 @@ final class ProductModerationList extends Component
 
         $product = Product::findOrFail($productId);
         $product->update(['moderation_status' => 'active']);
-        $product->searchable(); // Triggers update in typesense
+        IndexProductJob::dispatch($product)->afterCommit();
 
         $this->dispatch('toast', message: 'Product restored to active.');
     }

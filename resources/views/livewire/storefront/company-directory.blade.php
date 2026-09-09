@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">{{ __('Company Directory') }}</h1>
+        <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">{{ __('Business Directory') }}</h1>
         <p class="mt-1 text-[var(--hs-neutral-500)]">{{ __('Discover verified halal-certified businesses') }}</p>
     </div>
 
@@ -26,11 +26,14 @@
                 <button
                     wire:click="$set('categoryId', null)"
                     @class([
-                        'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition',
-                        'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border-l-2 border-[var(--hs-green-600)]' => $categoryId === null,
+                        'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+                        'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-inset ring-[var(--hs-green-200)]' => $categoryId === null,
                         'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => $categoryId !== null,
                     ])
                 >
+                    @if ($categoryId === null)
+                        <span class="mr-2 flex size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]" aria-hidden="true"></span>
+                    @endif
                     {{ __('All Categories') }}
                 </button>
 
@@ -38,11 +41,14 @@
                     <button
                         wire:click="$set('categoryId', {{ $category->id }})"
                         @class([
-                            'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition',
-                            'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border-l-2 border-[var(--hs-green-600)]' => $categoryId === $category->id,
+                            'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+                            'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-inset ring-[var(--hs-green-200)]' => $categoryId === $category->id,
                             'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => $categoryId !== $category->id,
                         ])
                     >
+                        @if ($categoryId === $category->id)
+                            <span class="mr-2 flex size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]" aria-hidden="true"></span>
+                        @endif
                         {{ $category->name }}
                     </button>
                 @endforeach
@@ -58,7 +64,7 @@
                     <input
                         wire:model.live.debounce.300ms="query"
                         type="search"
-                        placeholder="{{ __('Search companies...') }}"
+                        placeholder="{{ __('Search businesses...') }}"
                         class="w-full rounded-[var(--hs-radius-pill)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent shadow-[var(--hs-shadow-sm)]"
                     />
                 </div>
@@ -75,7 +81,7 @@
                 </div>
             </div>
 
-            {{-- Company Grid --}}
+            {{-- Business Grid --}}
             @if ($this->shops->count() > 0)
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     @foreach ($this->shops as $shop)
@@ -87,7 +93,7 @@
                     {{ $this->shops->links() }}
                 </div>
             @else
-                <x-hs-empty-state icon="search" title="{{ __('No companies found') }}" subtitle="{{ __('Try adjusting your search or category filter.') }}" />
+                <x-hs-empty-state icon="search" title="{{ __('No businesses found') }}" subtitle="{{ __('Try adjusting your search or category filter.') }}" />
             @endif
         </div>
     </div>

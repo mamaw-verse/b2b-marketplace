@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Account;
 
-use App\Actions\AwardQuotationAction;
-use App\Actions\CloseRfqAction;
-use App\Actions\RejectQuotationAction;
-use App\Events\QuotationAwarded;
-use App\Events\QuotationRejected;
-use App\Models\Quotation;
 use App\Models\Rfq;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -23,139 +17,27 @@ final class RfqDetail extends Component
 {
     public Rfq $rfq;
 
-    public bool $showCloseConfirmation = false;
-
-    public ?int $confirmingRejectQuotationId = null;
-
-    public ?int $confirmingAwardQuotationId = null;
-
-    public bool $showQuotationDetail = false;
-
-    public ?int $viewingQuotationId = null;
-
     public function mount(Rfq $rfq): void
     {
         Gate::authorize('view', $rfq);
         $this->rfq = $rfq;
     }
 
-    public function viewQuotation(int $quotationId): void
-    {
-        $this->viewingQuotationId = $quotationId;
-        unset($this->viewingQuotation);
-        $this->showQuotationDetail = true;
-    }
-
     /**
-     * The quotation currently displayed in the detail modal.
+     * The admin-managed status for this RFQ's recipient.
+     *
+     * Buyer-admin negotiation means the buyer sees the status driven by admin
+     * actions (pending / in_progress / resolved / closed), not the RFQ lifecycle.
      */
     #[Computed]
-    public function viewingQuotation(): ?Quotation
+    public function adminStatus(): string
     {
-        if (! $this->viewingQuotationId) {
-            return null;
-        }
-
-        return $this->rfq->quotations
-            ->where('status', '!=', 'draft')
-            ->firstWhere('id', $this->viewingQuotationId);
-    }
-
-    public function confirmAwardQuotation(int $quotationId): void
-    {
-        $this->confirmingAwardQuotationId = $quotationId;
-        $this->showQuotationDetail = false;
-        \Flux\Flux::modal('confirm-award-quotation')->show();
-    }
-
-    public function awardQuotation(?int $quotationId = null): void
-    {
-        $quotationId = $quotationId ?? $this->confirmingAwardQuotationId;
-
-        if (! $quotationId) {
-            return;
-        }
-
-        $quotation = Quotation::findOrFail($quotationId);
-        Gate::authorize('award', $quotation);
-
-        $result = app(AwardQuotationAction::class)->execute($quotation);
-
-        if (! $result['success']) {
-            \Flux\Flux::toast($result['error'], variant: 'danger');
-
-            return;
-        }
-
-        $result['quotation']->rfq->touchActivity();
-        QuotationAwarded::dispatch($result['quotation']);
-
-        \Flux\Flux::toast('Quotation awarded.', variant: 'success');
-        $this->rfq->refresh();
-    }
-
-    public function confirmRejectQuotation(int $quotationId): void
-    {
-        $this->confirmingRejectQuotationId = $quotationId;
-        $this->showQuotationDetail = false;
-        \Flux\Flux::modal('confirm-reject-quotation')->show();
-    }
-
-    public function rejectQuotation(?int $quotationId = null): void
-    {
-        $quotationId = $quotationId ?? $this->confirmingRejectQuotationId;
-
-        if (! $quotationId) {
-            return;
-        }
-
-        $quotation = Quotation::findOrFail($quotationId);
-        Gate::authorize('reject', $quotation);
-
-        $result = app(RejectQuotationAction::class)->execute($quotation);
-
-        if (! $result['success']) {
-            \Flux\Flux::toast($result['error'], variant: 'danger');
-
-            return;
-        }
-
-        $result['quotation']->rfq->touchActivity();
-        QuotationRejected::dispatch($result['quotation']);
-
-        \Flux\Flux::toast('Quotation rejected.', variant: 'warning');
-        $this->confirmingRejectQuotationId = null;
-        $this->rfq->refresh();
-    }
-
-    public function closeRfq(): void
-    {
-        Gate::authorize('close', $this->rfq);
-
-        $result = app(CloseRfqAction::class)->execute($this->rfq);
-
-        if (! $result['success']) {
-            \Flux\Flux::toast($result['error'], variant: 'danger');
-
-            return;
-        }
-
-        // Cascade: close every recipient that is not already in a terminal state.
-        // This mirrors the seller-side close — all non-terminal recipients (including
-        // those with awarded quotations) are moved to 'closed'.
-        $this->rfq->recipients()
-            ->whereNotIn('status', ['closed', 'no_bid'])
-            ->update(['status' => 'closed']);
-
-        $this->showCloseConfirmation = false;
-        $this->rfq->refresh();
-
-        \Flux\Flux::toast('RFQ closed.', variant: 'success');
+        return $this->rfq->recipients->first()?->admin_status ?? 'pending';
     }
 
     public function render()
     {
-        $this->rfq->load(['recipients.shop', 'attachments', 'quotations.items']);
+        $this->rfq->load(['recipients', 'attachments', 'product.variants']);
 
         return view('livewire.account.rfq-detail');
     }

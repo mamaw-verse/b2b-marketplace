@@ -127,7 +127,7 @@
                 <x-hs-empty-state
                     icon="squares-2x2"
                     title="{{ __('No variants yet') }}"
-                    subtitle="{{ __("Click 'Add Variant' to define the first SKU, price, and options for this product.") }}"
+                    :subtitle='__("Click Add Variant to define the first SKU, price, and options for this product.")'
                 />
             @endforelse
 

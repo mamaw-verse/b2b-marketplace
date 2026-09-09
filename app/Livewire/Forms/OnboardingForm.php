@@ -17,8 +17,6 @@ final class OnboardingForm extends Form
 
     public string $products_description = '';
 
-    public string $storefront_name = '';
-
     public string $business_structure = '';
 
     public string $dti_sec_number = '';
@@ -72,7 +70,6 @@ final class OnboardingForm extends Form
             'registered_business_name' => 'Registered Business Name',
             'company_description' => 'Company Description',
             'products_description' => 'Products Description',
-            'storefront_name' => 'Storefront Name',
             'business_structure' => 'Business Structure',
             'dti_sec_number' => 'DTI/SEC Number',
             'tax_identification_number' => 'TIN',
@@ -102,12 +99,11 @@ final class OnboardingForm extends Form
         return match ($step) {
             1 => [
                 'registered_business_name' => ['required', 'string', 'max:255'],
-                'storefront_name' => ['required', 'string', 'max:255'],
                 'business_structure' => ['required', 'string'],
                 'company_description' => ['required', 'string', 'max:2000'],
                 'products_description' => ['required', 'string', 'max:2000'],
-                'dti_sec_number' => ['required', 'string', 'max:100'],
-                'tax_identification_number' => ['required', 'string', 'max:50'],
+                'dti_sec_number' => ['nullable', 'string', 'max:100'],
+                'tax_identification_number' => ['nullable', 'string', 'max:50'],
                 'phone' => ['nullable', 'string', 'max:30'],
                 'email' => ['nullable', 'email', 'max:255'],
                 'address_1' => ['nullable', 'string', 'max:255'],
@@ -140,7 +136,6 @@ final class OnboardingForm extends Form
         return match ($step) {
             1 => [
                 'registered_business_name' => $this->registered_business_name,
-                'storefront_name' => $this->storefront_name,
                 'business_structure' => $this->business_structure ?: null,
                 'company_description' => $this->company_description ?: null,
                 'products_description' => $this->products_description ?: null,
@@ -177,7 +172,6 @@ final class OnboardingForm extends Form
     public function setOnboarding(ShopOnboarding $onboarding): void
     {
         $this->registered_business_name = $onboarding->registered_business_name ?? '';
-        $this->storefront_name = $onboarding->storefront_name ?? '';
         $this->business_structure = $onboarding->business_structure ?? '';
         $this->company_description = $onboarding->company_description ?? '';
         $this->products_description = $onboarding->products_description ?? '';

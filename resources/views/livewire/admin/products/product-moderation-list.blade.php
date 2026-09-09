@@ -22,7 +22,6 @@
                     <flux:select wire:model.live="statusFilter" class="w-48" placeholder="{{ __('All Moderation Statuses') }}">
                         <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
                         <flux:select.option value="flagged">{{ __('Flagged') }}</flux:select.option>
-                        <flux:select.option value="admin_unpublished">{{ __('Admin Unpublished') }}</flux:select.option>
                     </flux:select>
                 </div>
             </div>
@@ -33,7 +32,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Product') }}</flux:table.column>
-                    <flux:table.column>{{ __('Merchant') }}</flux:table.column>
+                    <flux:table.column>{{ __('Business') }}</flux:table.column>
                     <flux:table.column>{{ __('Status') }}</flux:table.column>
                     <flux:table.column>{{ __('Moderation') }}</flux:table.column>
                     <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
@@ -65,8 +64,18 @@
                             </flux:table.cell>
                             <flux:table.cell>
                                 <a href="{{ route('admin.merchants.show', $product->shop_id) }}" class="text-blue-600 hover:underline">
-                                    {{ $product->shop->storefront_name }}
+                                    {{ $product->shop->registered_business_name }}
                                 </a>
+                                @if($product->shop->latestSubscription)
+                                    <div class="mt-1">
+                                        Subscription: 
+                                        <flux:badge size="sm" color="{{ in_array($product->shop->latestSubscription->status, ['active', 'trialing']) ? 'green' : 'zinc' }}">
+                                            {{ ucfirst(str_replace('_', ' ', $product->shop->latestSubscription->status)) }}
+                                        </flux:badge>
+                                    </div>
+                                @else
+                                    <div class="mt-1 text-xs text-[var(--hs-neutral-500)]">{{ __('None') }}</div>
+                                @endif
                             </flux:table.cell>
                             <flux:table.cell>
                                 <flux:badge color="{{ $product->status === 'published' ? 'green' : 'zinc' }}">
@@ -79,29 +88,15 @@
                                 </flux:badge>
                             </flux:table.cell>
                             <flux:table.cell class="text-right">
-                                <flux:dropdown>
-                                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" />
-
-                                    <flux:menu>
-                                        @if($product->moderation_status !== 'flagged')
-                                            <flux:menu.item x-on:click="$flux.modal('confirm-flag-{{ $product->id }}').show()">
-                                                {{ __('Flag') }}
-                                            </flux:menu.item>
-                                        @endif
-
-                                        @if($product->moderation_status !== 'admin_unpublished')
-                                            <flux:menu.item x-on:click="$flux.modal('confirm-unpublish-{{ $product->id }}').show()" class="text-red-600">
-                                                {{ __('Unpublish') }}
-                                            </flux:menu.item>
-                                        @endif
-
-                                        @if($product->moderation_status !== 'active')
-                                            <flux:menu.item x-on:click="$flux.modal('confirm-restore-{{ $product->id }}').show()">
-                                                {{ __('Restore (Active)') }}
-                                            </flux:menu.item>
-                                        @endif
-                                    </flux:menu>
-                                </flux:dropdown>
+                                @if($product->moderation_status === 'flagged')
+                                    <flux:button variant="primary" size="sm" x-on:click="$flux.modal('confirm-restore-{{ $product->id }}').show()">
+                                        {{ __('Restore') }}
+                                    </flux:button>
+                                @else
+                                    <flux:button variant="ghost" size="sm" x-on:click="$flux.modal('confirm-flag-{{ $product->id }}').show()" class="text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700">
+                                        {{ __('Flag') }}
+                                    </flux:button>
+                                @endif
                             </flux:table.cell>
                         </flux:table.row>
                     @empty
@@ -128,7 +123,7 @@
             <x-hs-confirm
                 name="confirm-flag-{{ $product->id }}"
                 title="{{ __('Flag Product') }}"
-                message="{{ __('Are you sure you want to flag ":name"?', ['name' => $product->name]) }}"
+                message="{{ __('Are you sure you want to flag :name?', ['name' => $product->name]) }}"
                 variant="warning"
                 confirmText="{{ __('Flag') }}"
             >
@@ -138,25 +133,11 @@
             </x-hs-confirm>
         @endif
 
-        @if($product->moderation_status !== 'admin_unpublished')
-            <x-hs-confirm
-                name="confirm-unpublish-{{ $product->id }}"
-                title="{{ __('Unpublish Product') }}"
-                message="{{ __('Are you sure you want to unpublish ":name"? It will be removed from search.', ['name' => $product->name]) }}"
-                variant="danger"
-                confirmText="{{ __('Unpublish') }}"
-            >
-                <x-slot name="action">
-                    <flux:button variant="danger" wire:click="unpublishProduct({{ $product->id }})" wire:loading.attr="disabled">{{ __('Unpublish') }}</flux:button>
-                </x-slot>
-            </x-hs-confirm>
-        @endif
-
         @if($product->moderation_status !== 'active')
             <x-hs-confirm
                 name="confirm-restore-{{ $product->id }}"
                 title="{{ __('Restore Product') }}"
-                message="{{ __('Are you sure you want to restore ":name"? It will be set back to active.', ['name' => $product->name]) }}"
+                message="{{ __('Are you sure you want to restore :name? It will be set back to active.', ['name' => $product->name]) }}"
                 confirmText="{{ __('Restore') }}"
             >
                 <x-slot name="action">

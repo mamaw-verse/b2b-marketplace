@@ -25,6 +25,7 @@ final class DatabaseSeeder extends Seeder
             SubscriptionPlanSeeder::class,
             DemoSubscriptionSeeder::class,   // Phase 6 — give seeded shops a free trial
             SponsoredContentTierSeeder::class,
+            SponsoredContentSeeder::class,
             // Phase3Seeder and PayoutSettingsSeeder are preserved in the codebase
             // but excluded from the default seed — orders/payouts are disabled in
             // Phase 6. Re-add them manually when testing transactional features.

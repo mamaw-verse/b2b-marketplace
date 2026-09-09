@@ -8,6 +8,7 @@ use App\Events\SubscriptionStatusChanged;
 use App\Models\Shop;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +21,6 @@ use Livewire\Component;
 #[Title('Subscription')]
 final class SubscriptionPage extends Component
 {
-    public ?string $message = null;
-
     public function mount(): void
     {
         $this->ensureActiveShop();
@@ -35,7 +34,7 @@ final class SubscriptionPage extends Component
             ->findOrFail($planId);
 
         if ($shop->subscriptions()->where('status', 'pending_payment')->exists()) {
-            $this->message = __('You already have a subscription payment in progress.');
+            Flux::toast(__('You already have a subscription payment in progress.'), variant: 'warning');
 
             return;
         }
@@ -54,7 +53,7 @@ final class SubscriptionPage extends Component
 
             event(new SubscriptionStatusChanged($subscription));
 
-            $this->message = __('Your free trial is now active.');
+            Flux::toast(__('Your free trial is now active.'), variant: 'success');
 
             return;
         }
@@ -71,7 +70,7 @@ final class SubscriptionPage extends Component
 
             event(new SubscriptionStatusChanged($subscription));
 
-            $this->message = __('Your subscription is now active.');
+            Flux::toast(__('Your subscription is now active.'), variant: 'success');
 
             return;
         }
@@ -98,8 +97,6 @@ final class SubscriptionPage extends Component
                 $subscription->update(['status' => 'cancelled']);
                 event(new SubscriptionStatusChanged($subscription->fresh()));
             });
-
-        $this->message = null;
     }
 
     public function resumePayment(): void

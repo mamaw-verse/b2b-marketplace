@@ -66,6 +66,15 @@ test('navigation header contains anchor links for homepage sections', function (
     $response->assertSee('Join Us');
 });
 
+test('homepage renders custom sourcing section', function () {
+    $response = $this->get(route('home'));
+
+    $response->assertSee('Can’t Find What You’re Looking For?');
+    $response->assertSee('We can source it for you.');
+    $response->assertSee('Request a Product');
+    $response->assertSee(route('sourcing-request.create'));
+});
+
 test('google analytics snippet is not rendered when measurement id is missing', function () {
     config([
         'services.google_analytics.measurement_id' => null,

@@ -25,6 +25,11 @@
                 @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <!-- Turnstile -->
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}"></div>
+            @error('cf-turnstile-response') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+
             <button type="submit" class="w-full py-2.5 rounded-lg bg-[var(--hs-green-600)] hover:bg-[var(--hs-green-700)] text-white text-sm font-semibold transition shadow-[var(--hs-shadow-sm)]">
                 {{ __('Send reset link') }}
             </button>

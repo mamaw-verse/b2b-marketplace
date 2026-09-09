@@ -1,25 +1,18 @@
 <div>
-    <div class="mb-6">
-        <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route('admin.merchants.index') }}">{{ __('Merchants') }}</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item>{{ $shop->storefront_name }}</flux:breadcrumbs.item>
-        </flux:breadcrumbs>
-    </div>
-
     <div class="flex items-center justify-between mb-8">
         <div>
             <flux:heading size="xl">{{ $shop->storefront_name }}</flux:heading>
-            <flux:subheading>{{ __('Manage merchant details and status.') }}</flux:subheading>
+            <flux:subheading>{{ __('Manage business details and status.') }}</flux:subheading>
         </div>
 
         <div class="flex gap-2">
             @if($shop->status === 'active')
                 <flux:modal.trigger name="confirm-suspend">
-                    <flux:button variant="danger">{{ __('Suspend Merchant') }}</flux:button>
+                    <flux:button variant="danger">{{ __('Suspend Business') }}</flux:button>
                 </flux:modal.trigger>
             @elseif($shop->status === 'suspended')
                 <flux:modal.trigger name="confirm-reactivate">
-                    <flux:button variant="primary">{{ __('Reactivate Merchant') }}</flux:button>
+                    <flux:button variant="primary">{{ __('Reactivate Business') }}</flux:button>
                 </flux:modal.trigger>
             @endif
         </div>
@@ -27,8 +20,8 @@
 
     <x-hs-confirm
         name="confirm-suspend"
-        title="{{ __('Suspend Merchant') }}"
-        message="{{ __('Are you sure you want to suspend this merchant? Their products will be hidden from search.') }}"
+        title="{{ __('Suspend Business') }}"
+        message="{{ __('Are you sure you want to suspend this business? Their products will be hidden from search.') }}"
         variant="danger"
     >
         <x-slot name="action">
@@ -38,8 +31,8 @@
 
     <x-hs-confirm
         name="confirm-reactivate"
-        title="{{ __('Reactivate Merchant') }}"
-        message="{{ __('Are you sure you want to reactivate this merchant?') }}"
+        title="{{ __('Reactivate Business') }}"
+        message="{{ __('Are you sure you want to reactivate this business?') }}"
     >
         <x-slot name="action">
             <flux:button variant="primary" wire:click="reactivate" wire:loading.attr="disabled">{{ __('Reactivate') }}</flux:button>
@@ -50,18 +43,28 @@
         <div class="space-y-6 md:col-span-2">
             <flux:card>
                 <flux:heading size="lg" class="mb-4">{{ __('Overview') }}</flux:heading>
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+
+                {{-- ── Business Identity ──────────────────────────────────────── --}}
+                <flux:heading size="sm" class="mb-3">{{ __('Business Identity') }}</flux:heading>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 mb-6">
                     <div>
                         <dt class="text-sm font-medium text-zinc-500">{{ __('Registered Business Name') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->registered_business_name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Account Owner') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->user->name }} ({{ $shop->user->email }})</dd>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Business Structure') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                            {{ match ($shop->business_structure) {
+                                'sole_proprietorship' => __('Sole Proprietorship'),
+                                'partnership'         => __('Partnership'),
+                                'corporation'         => __('Corporation'),
+                                default               => ucfirst((string) $shop->business_structure),
+                            } }}
+                        </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Location') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->city }}, {{ $shop->province }}, {{ $shop->country_code }}</dd>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Account Owner') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->user->name }} ({{ $shop->user->email }})</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-zinc-500">{{ __('Status') }}</dt>
@@ -69,6 +72,150 @@
                             <flux:badge color="{{ $shop->status === 'active' ? 'green' : ($shop->status === 'suspended' ? 'red' : 'zinc') }}">
                                 {{ ucfirst($shop->status) }}
                             </flux:badge>
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="border-t border-[var(--hs-neutral-100)] my-5"></div>
+
+                {{-- ── Contact ─────────────────────────────────────────────────── --}}
+                <flux:heading size="sm" class="mb-3">{{ __('Contact') }}</flux:heading>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 mb-6">
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Phone') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->phone ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Email') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->email ?: '—' }}</dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Address') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                            {{ implode(', ', array_filter([
+                                $shop->address_1,
+                                $shop->address_2,
+                                $shop->city,
+                                $shop->province,
+                                $shop->zip_code,
+                                $shop->country_code,
+                            ])) ?: '—' }}
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="border-t border-[var(--hs-neutral-100)] my-5"></div>
+
+                {{-- ── Legal Identifiers ───────────────────────────────────────── --}}
+                <flux:heading size="sm" class="mb-3">{{ __('Legal Identifiers') }}</flux:heading>
+                <dl class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-5 mb-6">
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('DTI/SEC Number') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->dti_sec_number ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('TIN') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->tax_identification_number ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('FDA LTO Number') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->fda_lto_number ?: '—' }}</dd>
+                    </div>
+                </dl>
+
+                <div class="border-t border-[var(--hs-neutral-100)] my-5"></div>
+
+                {{-- ── Operations ──────────────────────────────────────────────── --}}
+                <flux:heading size="sm" class="mb-3">{{ __('Operations') }}</flux:heading>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 mb-6">
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Product Categories') }}</dt>
+                        <dd class="mt-1">
+                            @if ($shop->categories->isEmpty())
+                                <span class="text-sm text-zinc-500">—</span>
+                            @else
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach ($shop->categories as $category)
+                                        <flux:badge color="zinc" size="sm">{{ $category->name }}</flux:badge>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Export Readiness') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                            {{ match ($shop->export_readiness_status) {
+                                'never_exported'       => __('Never Exported'),
+                                'exporting_regionally' => __('Exporting Regionally'),
+                                'exporting_globally'   => __('Exporting Globally'),
+                                default                => ucfirst((string) $shop->export_readiness_status),
+                            } }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Avg. Production Lead Time') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                            {{ $shop->average_production_lead_time ? __(':days days', ['days' => $shop->average_production_lead_time]) : '—' }}
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="border-t border-[var(--hs-neutral-100)] my-5"></div>
+
+                {{-- ── Value Chain & Capabilities ──────────────────────────────── --}}
+                <flux:heading size="sm" class="mb-3">{{ __('Value Chain & Capabilities') }}</flux:heading>
+                @php
+                    $vcLabels = [
+                        'farm'         => __('Farm / Raw Materials'),
+                        'processing'   => __('Processing'),
+                        'manufacturing'=> __('Manufacturing'),
+                        'distribution' => __('Distribution'),
+                        'retail'       => __('Retail'),
+                        'food_service' => __('Food Service'),
+                    ];
+                    $capLabels = [
+                        'processing'            => __('Processing'),
+                        'contract_processing'   => __('Contract Processing'),
+                        'packaging'             => __('Packaging'),
+                        'contract_manufacturing'=> __('Contract Manufacturing'),
+                        'oem_odm'               => __('OEM / ODM'),
+                        'private_label'         => __('Private Label'),
+                        'cold_storage'          => __('Cold Storage'),
+                        'warehousing'           => __('Warehousing'),
+                        'distribution'          => __('Distribution'),
+                        'wholesale'             => __('Wholesale'),
+                        'importing'             => __('Importing'),
+                        'exporting'             => __('Exporting'),
+                    ];
+                @endphp
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-5">
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Value Chain Positions') }}</dt>
+                        <dd class="mt-1">
+                            @if (!empty($shop->value_chain_positions))
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach ($shop->value_chain_positions as $pos)
+                                        <flux:badge color="zinc" size="sm">{{ $vcLabels[$pos] ?? ucfirst($pos) }}</flux:badge>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-sm text-zinc-500">—</span>
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Capabilities') }}</dt>
+                        <dd class="mt-1">
+                            @if (!empty($shop->capabilities))
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach ($shop->capabilities as $cap)
+                                        <flux:badge color="zinc" size="sm">{{ $capLabels[$cap] ?? ucfirst($cap) }}</flux:badge>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-sm text-zinc-500">—</span>
+                            @endif
                         </dd>
                     </div>
                 </dl>
@@ -81,7 +228,7 @@
                 </div>
 
                 @if($this->products->isEmpty())
-                    <p class="text-sm text-zinc-500 py-4 text-center">{{ __('This merchant has no products yet.') }}</p>
+                    <p class="text-sm text-zinc-500 py-4 text-center">{{ __('This business has no products yet.') }}</p>
                 @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach($this->products as $product)
@@ -189,28 +336,83 @@
             </flux:card>
 
             <flux:card>
-                <flux:heading size="lg" class="mb-4">{{ __('Certification Status') }}</flux:heading>
-                <div class="space-y-4">
-                    <div>
-                        <div class="text-sm font-medium text-zinc-500">{{ __('Halal Certified') }}</div>
-                        <div class="mt-1">
-                            @if($shop->is_halal_certified)
-                                <flux:badge color="green">{{ __('Yes') }}</flux:badge>
-                            @else
-                                <flux:badge color="zinc">{{ __('No') }}</flux:badge>
-                            @endif
-                        </div>
-                    </div>
-                    
-                    @if($shop->is_halal_certified && $shop->certified_expiry_date)
-                        <div>
-                            <div class="text-sm font-medium text-zinc-500">{{ __('Expiry Date') }}</div>
-                            <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ \Carbon\Carbon::parse($shop->certified_expiry_date)->format('M d, Y') }}</div>
-                        </div>
-                    @endif
-                </div>
+                <flux:heading size="lg" class="mb-4">{{ __('Halal Certificates') }}</flux:heading>
+
+                @if ($shop->certificates->isEmpty())
+                    <p class="text-sm text-zinc-500">{{ __('No certificates on file.') }}</p>
+                @else
+                    <ul class="space-y-2">
+                        @foreach ($shop->certificates as $certificate)
+                            @php
+                                $certStatusColor = match ($certificate->status) {
+                                    'active'        => 'green',
+                                    'expiring_soon' => 'yellow',
+                                    'expired'       => 'red',
+                                    default         => 'zinc',
+                                };
+                                $certStatusLabel = match ($certificate->status) {
+                                    'active'        => __('Active'),
+                                    'expiring_soon' => __('Expiring Soon'),
+                                    'expired'       => __('Expired'),
+                                    default         => ucfirst($certificate->status),
+                                };
+                            @endphp
+                            <li class="flex items-center justify-between gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] px-4 py-3" wire:key="cert-{{ $certificate->id }}">
+                                <div class="flex items-center gap-3">
+                                    <flux:badge color="{{ $certStatusColor }}" size="sm">{{ $certStatusLabel }}</flux:badge>
+                                    @if ($certificate->expiry_date)
+                                        <span class="text-xs text-zinc-500">
+                                            {{ __('Expires :date', ['date' => $certificate->expiry_date->format('M d, Y')]) }}
+                                        </span>
+                                    @endif
+                                </div>
+                                @if ($certificate->media_id)
+                                    <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $certificate->media_id }})">
+                                        {{ __('View') }}
+                                    </flux:button>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </flux:card>
             
+            <flux:card>
+                <flux:heading size="lg" class="mb-4">{{ __('Submitted Documents') }}</flux:heading>
+
+                @if ($shop->documents->isEmpty())
+                    <p class="text-sm text-zinc-500">{{ __('No documents on file.') }}</p>
+                @else
+                    @php
+                        $documentLabels = \App\Livewire\CompanyHub\OnboardingWizard::REQUIRED_DOCUMENTS;
+                    @endphp
+                    <ul class="divide-y divide-[var(--hs-neutral-100)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)]">
+                        @foreach ($shop->documents as $document)
+                            <li class="flex items-center gap-3 px-4 py-3" wire:key="doc-{{ $document->id }}">
+                                <flux:icon name="document" class="size-5 shrink-0 text-[var(--hs-neutral-500)]" />
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-zinc-900 dark:text-white">
+                                        {{ __($documentLabels[$document->description] ?? ($document->description ?: __('Document'))) }}
+                                    </p>
+                                    <p class="truncate text-xs text-zinc-500">{{ $document->original_filename }}</p>
+                                </div>
+                                @if ($document->pivot->is_verified)
+                                    <flux:badge color="green" size="sm" icon="check-circle">{{ __('Verified') }}</flux:badge>
+                                @endif
+                                <flux:button
+                                    wire:click="viewDocument({{ $document->id }})"
+                                    variant="ghost"
+                                    size="sm"
+                                    icon="eye"
+                                >
+                                    {{ __('View') }}
+                                </flux:button>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </flux:card>
+
             <flux:card>
                 <flux:heading size="lg" class="mb-4">{{ __('Onboarding History') }}</flux:heading>
                 @if($shop->onboarding)
@@ -333,5 +535,8 @@
             <div class="py-12 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('Loading…') }}</div>
         @endif
     </flux:modal>
+
+    {{-- ── Certificate / Document Viewer Modal ─────────────────────── --}}
+    @include('livewire.admin.document-viewer')
 
 </div>

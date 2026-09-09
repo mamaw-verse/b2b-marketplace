@@ -6,7 +6,7 @@
     - My RFQs + Messages (buyer): always visible for non-admin users.
     - Seller section (Shop Profile, Products, Subscription, Certification): only when
       the user's shop status is 'active' (i.e., approved / onboarded).
-    - "Start Selling" link: shown when user has no shop at all.
+    - "Register Business" link: shown when user has no shop at all.
     - "Complete Onboarding" link: shown when a shop exists but is not yet approved.
     - Orders, Earnings, Payouts, Reviews: gated by their Phase 6 feature flags (off by default).
     - Admin portal keeps its own dedicated nav — never merged into this partial.
@@ -53,6 +53,34 @@
             {{ __('Onboarding Queue') }}
         </a>
 
+        @if(config('marketplace.features.admin_rfq_management_enabled'))
+            <a
+                href="{{ route('admin.rfqs.index') }}"
+                @class([
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
+                    'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('admin.rfqs.*'),
+                    'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('admin.rfqs.*'),
+                ])
+                wire:navigate
+            >
+                <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" /></svg>
+                {{ __('Request for Quotations') }}
+            </a>
+        @endif
+
+         <a
+            href="{{ route('admin.sourcing-requests.index') }}"
+            @class([
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
+                'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('admin.sourcing-requests.*'),
+                'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('admin.sourcing-requests.*'),
+            ])
+            wire:navigate
+        >
+            <flux:icon name="magnifying-glass" class="size-5 shrink-0" />
+            {{ __('Sourcing Requests') }}
+        </a>
+
         <a
             href="{{ route('admin.merchants.index') }}"
             @class([
@@ -63,7 +91,7 @@
             wire:navigate
         >
             <flux:icon name="building-storefront" class="size-5 shrink-0" />
-            {{ __('Sellers') }}
+            {{ __('Businesses') }}
         </a>
 
         <a
@@ -76,7 +104,7 @@
             wire:navigate
         >
             <flux:icon name="check-badge" class="size-5 shrink-0" />
-            {{ __('Certifications') }}
+            {{ __('Halal Certifications') }}
         </a>
 
         <a
@@ -118,28 +146,13 @@
             {{ __('Product Categories') }}
         </a>
 
-        @if(config('marketplace.features.admin_rfq_management_enabled'))
-            <a
-                href="{{ route('admin.rfqs.index') }}"
-                @class([
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
-                    'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('admin.rfqs.*'),
-                    'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('admin.rfqs.*'),
-                ])
-                wire:navigate
-            >
-                <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" /></svg>
-                {{ __('RFQs') }}
-            </a>
-        @endif
-
         @if(config('marketplace.features.sponsored_content_enabled'))
             <a
                 href="{{ route('admin.sponsored-content.index') }}"
                 @class([
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
-                    'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('admin.sponsored-content.*'),
-                    'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('admin.sponsored-content.*'),
+                    'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('admin.sponsored-content.index') || request()->routeIs('admin.sponsored-content.create') || request()->routeIs('admin.sponsored-content.edit'),
+                    'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('admin.sponsored-content.index') && !request()->routeIs('admin.sponsored-content.create') && !request()->routeIs('admin.sponsored-content.edit'),
                 ])
                 wire:navigate
             >
@@ -217,7 +230,7 @@
         {{-- ─── Seller section (approved/onboarded accounts only) ───────── --}}
         @if ($isOnboarded)
             <div class="pt-4 mt-2 border-t border-[var(--hs-neutral-200)]">
-                <p class="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-400)]">{{ __('Selling') }}</p>
+                <p class="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-400)]">{{ __('Business') }}</p>
 
                 <a href="{{ route('hub.shop.profile') }}" @class([
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
@@ -225,7 +238,7 @@
                     'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('hub.shop.profile'),
                 ]) wire:navigate>
                     <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72" /></svg>
-                    {{ __('Shop Profile') }}
+                    {{ __('Business Profile') }}
                 </a>
 
                 <a href="{{ route('hub.products.index') }}" @class([
@@ -338,14 +351,14 @@
             </a>
 
         @else
-            {{-- ─── Buyer-only (no shop) — prompt to start selling ─────────── --}}
+            {{-- ─── Buyer-only (no shop) — prompt to Register Business ─────────── --}}
             <a href="{{ route('account.onboarding') }}" @class([
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
                 'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('account.onboarding'),
                 'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('account.onboarding'),
             ]) wire:navigate>
                 <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" /></svg>
-                {{ __('Start Selling') }}
+                {{ __('Register Business') }}
             </a>
         @endif
 

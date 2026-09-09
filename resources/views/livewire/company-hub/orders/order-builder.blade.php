@@ -335,7 +335,7 @@
     <x-hs-confirm
         name="submit-order-confirm"
         title="{{ __('Submit Order for Payment?') }}"
-        message='{{ __("The buyer will be notified and prompted to pay. You won\'t be able to edit the order after submission.") }}'
+        message="{{ __('The buyer will be notified and prompted to pay. The order cannot be edited after submission.') }}"
         variant="primary"
         confirmText="{{ __('Submit') }}"
     >

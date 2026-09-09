@@ -156,7 +156,7 @@
 
                 {{-- Trust/certification strip --}}
                 <div class="flex items-center gap-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] px-3.5 py-2.5">
-                    <flux:icon name="check-badge" variant="mini" class="size-4 text-[var(--hs-green-600)] shrink-0" />
+                    <flux:icon name="check-badge" variant="mini" class="size-4 text-[var(--hs-green-700)] shrink-0" />
                     <p class="text-xs font-medium text-[var(--hs-green-800)]">{{ __('Halal chain of custody verified — certified supplier') }}</p>
                 </div>
             @else
@@ -394,4 +394,31 @@
             <livewire:storefront.review-list reviewable-type="product" :reviewable-id="$product->id" />
         </section>
     @endif
+
+    {{-- ============ SOURCING / LOOKING FOR SOMETHING ELSE ============ --}}
+    <section id="sourcing-form" class="mt-12 pt-12 border-t border-[var(--hs-neutral-200)] scroll-mt-24">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
+            <div class="lg:sticky lg:top-6">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
+                    <flux:icon name="magnifying-glass" class="size-3.5" />
+                    {{ __('Custom Sourcing') }}
+                </span>
+                <h2 class="mt-4 text-2xl sm:text-3xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight">
+                    {{ __('Looking for Something Else?') }}
+                </h2>
+                <p class="mt-3 text-base font-semibold text-[var(--hs-neutral-900)]">
+                    {{ __('Don’t see exactly what you need? We can help.') }}
+                </p>
+                <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] leading-relaxed">
+                    {{ __('If this product isn’t quite right, or you’re looking for something that isn’t listed on our website, send us your requirements. Our sourcing team can help find products that match your specifications.') }}
+                </p>
+                <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] leading-relaxed">
+                    {{ __('Whether you have a product name, photo, specification, or just an idea of what you need, tell us what you’re looking for and we’ll take it from there.') }}
+                </p>
+            </div>
+            <livewire:storefront.product-sourcing-form :prefill-product-name="$product->name" />
+        </div>
+    </section>
 </div>
+
+

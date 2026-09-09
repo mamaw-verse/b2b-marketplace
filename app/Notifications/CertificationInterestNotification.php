@@ -10,6 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 final class CertificationInterestNotification extends Notification implements ShouldQueue
 {
@@ -29,12 +31,23 @@ final class CertificationInterestNotification extends Notification implements Sh
 
     public function toMail(object $notifiable): MailMessage
     {
-        $shopName = $this->application->shop->storefront_name;
+        $applicant = $this->applicantName();
 
-        return (new MailMessage)
-            ->subject("{$shopName} is interested in halal certification")
-            ->line("{$shopName} has expressed interest in applying for external halal certification.")
+        $message = (new MailMessage)
+            ->subject("{$applicant} is interested in Halal Certification")
+            ->line("{$applicant} has expressed interest in applying for external Halal Certification.")
             ->action('View Certification Interests', route('admin.certifications.index'));
+
+        if ($this->application->document_path !== null) {
+            $message->attachFromStorageDisk(
+                's3',
+                $this->application->document_path,
+                $this->attachmentName(),
+                ['mime' => (string) Storage::disk('s3')->mimeType($this->application->document_path)],
+            );
+        }
+
+        return $message;
     }
 
     /**
@@ -42,12 +55,15 @@ final class CertificationInterestNotification extends Notification implements Sh
      */
     public function toArray(object $notifiable): array
     {
+        $applicant = $this->applicantName();
+
         return [
             'type' => 'certification_interest',
             'application_id' => $this->application->id,
             'shop_id' => $this->application->shop_id,
-            'shop_name' => $this->application->shop->storefront_name,
-            'message' => $this->application->shop->storefront_name.' is interested in halal certification.',
+            'applicant_name' => $applicant,
+            'email' => $this->application->email,
+            'message' => "{$applicant} is interested in Halal Certification.",
             'url' => route('admin.certifications.index'),
         ];
     }
@@ -55,5 +71,20 @@ final class CertificationInterestNotification extends Notification implements Sh
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage($this->toArray($notifiable));
+    }
+
+    private function applicantName(): string
+    {
+        return $this->application->company_name
+            ?? $this->application->shop?->storefront_name
+            ?? 'A company';
+    }
+
+    private function attachmentName(): string
+    {
+        $slug = Str::slug($this->applicantName(), '_');
+        $extension = Str::afterLast($this->application->document_path ?? '', '.');
+
+        return "letter_of_intent_{$slug}.{$extension}";
     }
 }

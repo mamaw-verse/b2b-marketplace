@@ -40,7 +40,7 @@
             </div>
 
             {{-- Heading --}}
-            <h1 class="font-[var(--hs-font-display)] font-semibold text-4xl sm:text-[46px] tracking-tight leading-tight text-[var(--hs-green-950)] mb-3">
+            <h1 class="font-[var(--hs-font-display)] font-semibold text-4xl sm:text-[46px] tracking-tight leading-tight text-[var(--hs-neutral-900)] mb-3">
                 {{ __('Product Directory') }}
             </h1>
 
@@ -138,7 +138,7 @@
                             'px-[18px] py-3',
                             'whitespace-nowrap',
                             'border-b-2 transition-colors duration-150',
-                            'text-[var(--hs-green-950)] border-[var(--hs-gold-500)] font-semibold' => $categoryId === null,
+                            'text-[var(--hs-neutral-900)] border-[var(--hs-gold-500)] font-semibold' => $categoryId === null,
                             'text-[var(--hs-neutral-500)] border-transparent hover:text-[var(--hs-neutral-800)]' => $categoryId !== null,
                         ])
                     >
@@ -166,7 +166,7 @@
                                 'px-[18px] py-3',
                                 'whitespace-nowrap',
                                 'border-b-2 transition-colors duration-150',
-                                'text-[var(--hs-green-950)] border-[var(--hs-gold-500)] font-semibold' => $categoryId === $cat->id,
+                                'text-[var(--hs-neutral-900)] border-[var(--hs-gold-500)] font-semibold' => $categoryId === $cat->id,
                                 'text-[var(--hs-neutral-500)] border-transparent hover:text-[var(--hs-neutral-800)]' => $categoryId !== $cat->id,
                             ])
                         >

@@ -4,11 +4,28 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\DltDisbursementServiceInterface;
+use App\Events\OrderReturned;
+use App\Events\RfqCreated;
+use App\Events\SubscriptionStatusChanged;
+use App\Listeners\NotifyAdminRfqReceived;
+use App\Listeners\NotifyBuyerOrderReturned;
+use App\Listeners\PostDisputeStatusMessage;
+use App\Listeners\PostOrderStatusMessage;
+use App\Listeners\ReindexProductsForSubscriptionChange;
+use App\Models\User;
+use App\Notifications\Channels\ArabicGreetingMailChannel;
+use App\Services\DltDisbursementService;
+use App\Services\DltPaymentService;
+use App\Services\MockDltDisbursementService;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -20,20 +37,20 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(\App\Services\DltPaymentService::class);
+        $this->app->singleton(DltPaymentService::class);
 
         // Route the notification "mail" channel through our channel that
         // prepends a shared Arabic salutation addressed to the recipient.
         $this->app->bind(
-            \Illuminate\Notifications\Channels\MailChannel::class,
-            \App\Notifications\Channels\ArabicGreetingMailChannel::class,
+            MailChannel::class,
+            ArabicGreetingMailChannel::class,
         );
 
         $this->app->singleton(
-            \App\Contracts\DltDisbursementServiceInterface::class,
+            DltDisbursementServiceInterface::class,
             fn () => config('services.dlt.disbursement_enabled', false)
-                ? new \App\Services\DltDisbursementService
-                : new \App\Services\MockDltDisbursementService,
+                ? new DltDisbursementService
+                : new MockDltDisbursementService,
         );
     }
 
@@ -42,19 +59,24 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\PostOrderStatusMessage::class);
-        \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\PostDisputeStatusMessage::class);
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\SubscriptionStatusChanged::class,
-            \App\Listeners\ReindexProductsForSubscriptionChange::class,
+        Event::subscribe(PostOrderStatusMessage::class);
+        Event::subscribe(PostDisputeStatusMessage::class);
+        Event::listen(
+            SubscriptionStatusChanged::class,
+            ReindexProductsForSubscriptionChange::class,
         );
 
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\OrderReturned::class,
-            \App\Listeners\NotifyBuyerOrderReturned::class,
+        Event::listen(
+            OrderReturned::class,
+            NotifyBuyerOrderReturned::class,
         );
 
-        \Illuminate\Support\Facades\Gate::define('accessHub', function (\App\Models\User $user) {
+        Event::listen(
+            RfqCreated::class,
+            NotifyAdminRfqReceived::class,
+        );
+
+        Gate::define('accessHub', function (User $user) {
             return $user->shop !== null
                 && $user->shop->status === 'active'
                 && $user->shop->deleted_at === null;

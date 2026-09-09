@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\CertificationApplication;
+use App\Models\ShopCertificate;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -17,55 +18,102 @@ use Livewire\WithPagination;
 #[Title('Certification Queue')]
 final class CertificationQueue extends Component
 {
+    use HasDocumentViewer;
     use WithPagination;
 
-    public string $statusFilter = 'interested';
+    public string $search = '';
 
+    public string $statusFilter = '';
+
+    public function updated($property): void
+    {
+        if (in_array($property, ['search', 'statusFilter'])) {
+            $this->resetPage();
+        }
+    }
+
+    /**
+     * Halal certifications across all shops, newest first.
+     */
+    #[Computed]
+    public function certificates(): LengthAwarePaginator
+    {
+        return ShopCertificate::query()
+            ->with('shop')
+            ->when($this->search !== '', fn ($query) => $query->whereHas(
+                'shop',
+                fn ($shopQuery) => $shopQuery->where('registered_business_name', 'ilike', '%'.$this->search.'%')
+            ))
+            ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter))
+            ->orderByDesc('expiry_date')
+            ->paginate(15);
+    }
+
+    /**
+     * Certification applications logged for reference, newest first.
+     */
     #[Computed]
     public function applications(): LengthAwarePaginator
     {
         return CertificationApplication::query()
             ->with('shop.user')
-            ->when($this->statusFilter !== 'all', fn ($query) => $query->where('status', $this->statusFilter))
             ->latest('created_at')
             ->paginate(15);
     }
 
-    public function filterByStatus(string $status): void
+    /**
+     * Open an application's uploaded document in the preview modal.
+     */
+    public function viewApplicationDocument(int $applicationId): void
     {
-        $this->statusFilter = $status;
-        $this->resetPage();
+        $application = CertificationApplication::query()->findOrFail($applicationId);
+
+        if (! $this->canPreviewApplicationDocument($application->document_path)) {
+            return;
+        }
+
+        $this->viewingMediaId = null;
+        $this->documentPreviewUrl = $this->applicationDocumentUrl($application->id);
+        $this->showDocumentViewer = true;
     }
 
     /**
-     * @return array<string, int>
+     * Whether an application's uploaded document can be previewed inline
+     * (PDFs and images) as opposed to only being downloadable (docx, doc...).
      */
-    #[Computed]
-    public function tabCounts(): array
+    public function canPreviewApplicationDocument(?string $documentPath): bool
     {
-        $counts = CertificationApplication::query()
-            ->selectRaw('status, count(*) as aggregate')
-            ->groupBy('status')
-            ->pluck('aggregate', 'status');
+        if ($documentPath === null) {
+            return false;
+        }
 
-        return [
-            'all' => (int) $counts->sum(),
-            'interested' => (int) $counts->get('interested', 0),
-            'contacted' => (int) $counts->get('contacted', 0),
-        ];
+        return in_array(
+            str(pathinfo($documentPath, PATHINFO_EXTENSION))->lower()->toString(),
+            ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+            true
+        );
     }
 
-    public function markContacted(int $applicationId): void
+    /**
+     * In-app streaming URL for an application's uploaded document. Files that
+     * cannot be previewed inline stream as an attachment download. Returns null
+     * when the application has no uploaded document.
+     */
+    public function applicationDocumentUrl(int $applicationId, bool $download = false): ?string
     {
-        $application = CertificationApplication::query()->with('shop')->findOrFail($applicationId);
-        $application->update([
-            'status' => 'contacted',
-            'addressed_by' => Auth::id(),
-            'addressed_at' => now(),
-        ]);
+        $application = CertificationApplication::query()->find($applicationId);
 
-        unset($this->applications);
-        session()->flash('message', 'Seller marked as contacted.');
+        if ($application === null || $application->document_path === null) {
+            return null;
+        }
+
+        $parameters = ['application' => $application->id];
+
+        if ($download) {
+            $parameters['download'] = '1';
+        }
+
+        return route('admin.certifications.applications.document', $parameters);
     }
 
     public function render()

@@ -6,12 +6,6 @@
         </div>
 
         <div class="p-6 space-y-6">
-            @if ($message || session('message'))
-                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-success-200)] bg-[var(--hs-success-50)] p-4 text-sm text-[var(--hs-success-700)]">
-                    {{ $message ?: session('message') }}
-                </div>
-            @endif
-
             {{-- Pending payment banner --}}
             @if ($this->pendingSubscription)
                 <div class="rounded-[var(--hs-radius-card)] border border-yellow-200 bg-yellow-50 p-5">

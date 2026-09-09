@@ -7,12 +7,14 @@ namespace App\Livewire\CompanyHub;
 use App\Models\Product;
 use App\Models\ProductGallery;
 use App\Services\MediaUploadService;
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.portal', ['portal' => 'hub'])]
@@ -23,7 +25,7 @@ final class GalleryManager extends Component
 
     public Product $product;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    /** @var array<int, TemporaryUploadedFile> */
     public array $newPhotos = [];
 
     public ?int $confirmingImageId = null;
@@ -54,7 +56,8 @@ final class GalleryManager extends Component
         }
 
         $this->reset('newPhotos');
-        \Flux\Flux::toast('Photos uploaded successfully.', variant: 'success');
+        unset($this->galleryItems, $this->hasPendingPhotos);
+        Flux::toast('Photos uploaded successfully.', variant: 'success');
     }
 
     public function updateGalleryOrder(int|string $id, int $position): void
@@ -75,7 +78,7 @@ final class GalleryManager extends Component
     public function confirmRemoveImage(int $galleryId): void
     {
         $this->confirmingImageId = $galleryId;
-        \Flux\Flux::modal('remove-image-confirm')->show();
+        Flux::modal('remove-image-confirm')->show();
     }
 
     public function removeImage(): void
@@ -89,7 +92,8 @@ final class GalleryManager extends Component
             ->delete();
 
         $this->confirmingImageId = null;
-        \Flux\Flux::toast('Image removed.', variant: 'success');
+        unset($this->galleryItems, $this->hasPendingPhotos);
+        Flux::toast('Image removed.', variant: 'success');
     }
 
     /**
@@ -99,6 +103,22 @@ final class GalleryManager extends Component
     public function galleryItems(): Collection
     {
         return $this->product->gallery()->with('media')->orderBy('sort_order')->get();
+    }
+
+    /**
+     * Whether any gallery image is still awaiting its antivirus scan.
+     */
+    #[Computed]
+    public function hasPendingPhotos(): bool
+    {
+        return $this->galleryItems->contains(
+            fn (ProductGallery $item): bool => $item->media?->scan_status === 'pending'
+        );
+    }
+
+    public function refreshPhotos(): void
+    {
+        unset($this->galleryItems, $this->hasPendingPhotos);
     }
 
     public function render()

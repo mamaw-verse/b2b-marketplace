@@ -3,8 +3,8 @@
 
         {{-- Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Shop Profile') }}</h1>
-            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Update your company details shown on the storefront.') }}</p>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Business Profile') }}</h1>
+            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Update your business details shown on the storefront.') }}</p>
         </div>
 
         <form wire:submit="save" class="p-6 space-y-8">
@@ -19,19 +19,16 @@
                         @error('registered_business_name') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <flux:input wire:model="storefront_name" :label="__('Storefront Name')" required />
-                        @error('storefront_name') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        <flux:select wire:model="business_structure" :label="__('Business Structure')">
+                            <flux:select.option value="sole_proprietorship">{{ __('Sole Proprietorship') }}</flux:select.option>
+                            <flux:select.option value="partnership">{{ __('Partnership') }}</flux:select.option>
+                            <flux:select.option value="corporation">{{ __('Corporation') }}</flux:select.option>
+                        </flux:select>
+                        @error('business_structure') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                <div>
-                    <flux:select wire:model="business_structure" :label="__('Business Structure')">
-                        <flux:select.option value="sole_proprietorship">{{ __('Sole Proprietorship') }}</flux:select.option>
-                        <flux:select.option value="partnership">{{ __('Partnership') }}</flux:select.option>
-                        <flux:select.option value="corporation">{{ __('Corporation') }}</flux:select.option>
-                    </flux:select>
-                    @error('business_structure') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                </div>
+                
             </section>
 
             {{-- ── Contact ───────────────────────────────────────────────── --}}
@@ -138,7 +135,7 @@
                 </flux:checkbox.group>
                 @error('value_chain_positions') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
 
-                <flux:checkbox.group wire:model="capabilities" :label="__('Capabilities')" :description="__('Select all capabilities your company offers.')">
+                <flux:checkbox.group wire:model="capabilities" :label="__('Capabilities')" :description="__('Select all capabilities your business offers.')">
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                         <flux:checkbox value="processing" :label="__('Processing')" />
                         <flux:checkbox value="contract_processing" :label="__('Contract Processing')" />
@@ -206,51 +203,62 @@
                 <flux:heading size="sm">{{ __('Halal Certificates') }}</flux:heading>
                 @if ($verified['certificates']->isEmpty())
                     <p class="mt-3 text-sm text-[var(--hs-neutral-500)]">{{ __('No certificates on file.') }}</p>
+                    <div class="mt-3">
+                        <flux:button href="{{ route('apply.certificate') }}" variant="primary" size="sm" icon="plus" wire:navigate>
+                            {{ __('Apply for Certificate') }}
+                        </flux:button>
+                    </div>
                 @else
-                    @php
-                        $bodyLabels = [
-                            'IDCP' => __('IDCP'),
-                            'HDIP' => __('HDIP'),
-                            'PRIME_CERTIFICATION' => __('Prime Certification'),
-                            'OTHER_NCMF' => __('Other (NCMF)'),
-                        ];
-                    @endphp
                     <ul class="mt-3 space-y-3">
                         @foreach ($verified['certificates'] as $certificate)
-                            <li class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-4" wire:key="shop-cert-{{ $certificate->id }}">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="text-sm font-medium text-[var(--hs-neutral-900)]">
-                                        {{ $certificate->certification_body === 'OTHER_NCMF' && $certificate->certification_body_other
-                                            ? $certificate->certification_body_other
-                                            : ($bodyLabels[$certificate->certification_body] ?? $certificate->certification_body) }}
-                                    </span>
-                                    @if ($certificate->is_verified)
-                                        <flux:badge color="green" size="sm" icon="check-circle">{{ __('Verified') }}</flux:badge>
+                            @php
+                                $certStatusColor = match ($certificate->status) {
+                                    'active'        => 'green',
+                                    'expiring_soon' => 'yellow',
+                                    'expired'       => 'red',
+                                    default         => 'zinc',
+                                };
+                                $certStatusLabel = match ($certificate->status) {
+                                    'active'        => __('Active'),
+                                    'expiring_soon' => __('Expiring Soon'),
+                                    'expired'       => __('Expired'),
+                                    default         => ucfirst($certificate->status),
+                                };
+                                $needsRenewal = in_array($certificate->status, ['expiring_soon', 'expired'], true);
+                            @endphp
+                            <li class="flex items-center justify-between gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] px-4 py-3" wire:key="shop-cert-{{ $certificate->id }}">
+                                <div class="flex items-center gap-3">
+                                    <flux:badge color="{{ $certStatusColor }}" size="sm">{{ $certStatusLabel }}</flux:badge>
+                                    @if ($certificate->expiry_date)
+                                        <span class="text-xs text-[var(--hs-neutral-500)]">
+                                            {{ __('Expires :date', ['date' => $certificate->expiry_date->format('M j, Y')]) }}
+                                        </span>
                                     @endif
                                 </div>
-                                <dl class="mt-2 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
-                                    <div>
-                                        <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Registration No.') }}</dt>
-                                        <dd class="text-[var(--hs-neutral-900)]">{{ $certificate->registration_number ?: '—' }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Expiry Date') }}</dt>
-                                        <dd class="text-[var(--hs-neutral-900)]">{{ $certificate->expiry_date?->format('M j, Y') ?? '—' }}</dd>
-                                    </div>
-                                    <div class="flex items-end">
-                                        @if ($certificate->media_id)
-                                            <flux:button
-                                                :href="route('media.view', $certificate->media_id)"
-                                                target="_blank"
-                                                variant="ghost"
-                                                size="sm"
-                                                icon="arrow-top-right-on-square"
-                                            >
-                                                {{ __('View file') }}
-                                            </flux:button>
-                                        @endif
-                                    </div>
-                                </dl>
+                                <div class="flex items-center gap-2">
+                                    @if ($certificate->media_id)
+                                        <flux:button
+                                            :href="route('media.view', $certificate->media_id)"
+                                            target="_blank"
+                                            variant="ghost"
+                                            size="sm"
+                                            icon="arrow-top-right-on-square"
+                                        >
+                                            {{ __('View file') }}
+                                        </flux:button>
+                                    @endif
+                                    @if ($needsRenewal)
+                                        <flux:button
+                                            href="{{ route('apply.certificate') }}"
+                                            variant="primary"
+                                            size="sm"
+                                            icon="arrow-path"
+                                            wire:navigate
+                                        >
+                                            {{ __('Renew Certificate') }}
+                                        </flux:button>
+                                    @endif
+                                </div>
                             </li>
                         @endforeach
                     </ul>

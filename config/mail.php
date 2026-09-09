@@ -117,4 +117,17 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Inbox Address
+    |--------------------------------------------------------------------------
+    |
+    | Fallback recipient for gated mailbox notifications (e.g. public
+    | certification applications) when no admin-role user exists in the
+    | database to route them to.
+    |
+    */
+
+    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'admin@example.com'),
+
 ];

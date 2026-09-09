@@ -7,11 +7,14 @@ namespace App\Livewire\CompanyHub;
 use App\Events\OnboardingSubmitted;
 use App\Livewire\Forms\OnboardingForm;
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\ShopOnboarding;
 use App\Models\ShopOnboardingCertificate;
 use App\Services\MediaUploadService;
+use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -19,6 +22,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Throwable;
 
@@ -32,7 +36,6 @@ final class OnboardingWizard extends Component
 
     public const array REQUIRED_DOCUMENTS = [
         'business_permit' => 'Business Permit',
-        'other_supporting_document' => 'Other Supporting Document',
     ];
 
     /**
@@ -45,7 +48,6 @@ final class OnboardingWizard extends Component
         'form.registered_business_name' => 'Registered Business Name',
         'form.company_description' => 'Company Description',
         'form.products_description' => 'Products Description',
-        'form.storefront_name' => 'Storefront Name',
         'form.business_structure' => 'Business Structure',
         'form.dti_sec_number' => 'DTI/SEC Number',
         'form.tax_identification_number' => 'TIN',
@@ -63,7 +65,6 @@ final class OnboardingWizard extends Component
         'form.value_chain_positions' => 'Value Chain Positions',
         'form.capabilities' => 'Capabilities',
         'documentUploads.business_permit' => 'Business Permit',
-        'documentUploads.other_supporting_document' => 'Other Supporting Document',
     ];
 
     /**
@@ -76,7 +77,6 @@ final class OnboardingWizard extends Component
         'form.registered_business_name' => 1,
         'form.company_description' => 1,
         'form.products_description' => 1,
-        'form.storefront_name' => 1,
         'form.business_structure' => 1,
         'form.dti_sec_number' => 1,
         'form.tax_identification_number' => 1,
@@ -106,17 +106,30 @@ final class OnboardingWizard extends Component
 
     public OnboardingForm $form;
 
-    /** @var array<string, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> */
+    /** @var array<string, TemporaryUploadedFile|null> */
     public array $documentUploads = [];
 
     /** @var array<string, array<string, mixed>> */
     public array $uploadedDocuments = [];
 
+    /**
+     * Uploaded "Other Supporting Documents" (multi-file, optional).
+     * Each entry: ['media_id' => int, 'filename' => string, 'scan_status' => string]
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $supportingDocuments = [];
+
+    /** Temporary file slots for the multi-file supporting document dropzone. */
+    public array $supportingDocumentUploads = [];
+
     /** @var array<int, array<string, mixed>> */
     public array $certificates = [];
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> */
+    /** @var array<int, TemporaryUploadedFile|null> */
     public array $certificateFiles = [];
+
+    public ?int $confirmingRemoveCertificateIndex = null;
 
     public function mount(): void
     {
@@ -145,6 +158,12 @@ final class OnboardingWizard extends Component
             $this->loadUploadedDocuments($onboarding);
         } else {
             $this->form->country_code = config('marketplace.instance_country', 'PH');
+        }
+
+        // Ensure at least one blank certificate fieldset is shown so the user
+        // doesn't have to click "Add Certificate" for their first entry.
+        if (empty($this->certificates)) {
+            $this->addCertificate();
         }
     }
 
@@ -222,6 +241,8 @@ final class OnboardingWizard extends Component
         }
 
         $this->resetErrorBag('documents');
+        $this->resetErrorBag('supportingDocuments');
+        $this->resetErrorBag('supportingDocumentUploads');
 
         foreach (self::REQUIRED_DOCUMENTS as $type => $label) {
             if (! in_array($type, $uploadedTypes, true)) {
@@ -240,6 +261,20 @@ final class OnboardingWizard extends Component
             } elseif ($doc->scan_status === 'infected') {
                 $this->addError("documentUploads.{$type}", "{$label}: Failed security scan — please re-upload a clean file.");
                 $hasErrors = true;
+            }
+        }
+
+        // Supporting documents are optional but must not have pending/infected scans.
+        foreach ($this->supportingDocuments as $index => $doc) {
+            if (($doc['scan_status'] ?? null) === 'pending') {
+                $this->addError('supportingDocuments', 'A supporting document scan is still in progress — please wait and try again.');
+                $hasErrors = true;
+                break;
+            }
+            if (($doc['scan_status'] ?? null) === 'infected') {
+                $this->addError('supportingDocuments', 'A supporting document failed its security scan — please remove it and upload a clean file.');
+                $hasErrors = true;
+                break;
             }
         }
 
@@ -276,7 +311,7 @@ final class OnboardingWizard extends Component
     public function confirmRemoveCertificate(int $index): void
     {
         $this->confirmingRemoveCertificateIndex = $index;
-        \Flux\Flux::modal('confirm-remove-certificate')->show();
+        Flux::modal('confirm-remove-certificate')->show();
     }
 
     public function removeCertificate(?int $index = null): void
@@ -485,6 +520,70 @@ final class OnboardingWizard extends Component
     }
 
     /**
+     * Auto-upload supporting documents after the Livewire temp-upload finishes.
+     * Called via x-on:livewire-upload-finish on the dropzone.
+     */
+    public function uploadSupportingDocuments(MediaUploadService $uploadService): void
+    {
+        $this->resetErrorBag('supportingDocumentUploads');
+
+        if (empty($this->supportingDocumentUploads)) {
+            return;
+        }
+
+        $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+
+        foreach ($this->supportingDocumentUploads as $file) {
+            if (! $file instanceof TemporaryUploadedFile) {
+                continue;
+            }
+
+            try {
+                $media = $uploadService->store($file, Auth::id(), 'other_supporting_document');
+            } catch (Throwable $e) {
+                $this->addError('supportingDocumentUploads', $e->getMessage());
+
+                continue;
+            }
+
+            if ($onboarding) {
+                $onboarding->documents()->syncWithoutDetaching([$media->id]);
+            }
+
+            $this->supportingDocuments[] = [
+                'media_id' => $media->id,
+                'filename' => $media->original_filename,
+                'scan_status' => $media->scan_status,
+            ];
+        }
+
+        $this->reset('supportingDocumentUploads');
+    }
+
+    /**
+     * Remove a single supporting document by its index.
+     * Detaches the media record from the onboarding so it no longer counts.
+     */
+    public function removeSupportingDocument(int $index): void
+    {
+        $doc = $this->supportingDocuments[$index] ?? null;
+
+        if (! $doc) {
+            return;
+        }
+
+        $mediaId = $doc['media_id'] ?? null;
+
+        if ($mediaId) {
+            $onboarding = ShopOnboarding::where('user_id', Auth::id())->first();
+            $onboarding?->documents()->detach($mediaId);
+        }
+
+        unset($this->supportingDocuments[$index]);
+        $this->supportingDocuments = array_values($this->supportingDocuments);
+    }
+
+    /**
      * Re-open a rejected application for editing so the seller can correct it
      * and resubmit. Moves the record back to the editable "pending" state.
      */
@@ -511,9 +610,8 @@ final class OnboardingWizard extends Component
             'submitted_at' => null,
             'reviewed_at' => null,
             'reviewed_by_id' => null,
-            'registered_business_name' => null,
-            'storefront_name' => null,
-            'business_structure' => null,
+            'registered_business_name' => '',
+            'business_structure' => 'sole_proprietorship',
             'company_description' => null,
             'products_description' => null,
             'dti_sec_number' => null,
@@ -528,9 +626,9 @@ final class OnboardingWizard extends Component
             'product_categories' => null,
             'fda_lto_number' => null,
             'average_production_lead_time' => null,
-            'export_readiness_status' => null,
-            'value_chain_positions' => null,
-            'capabilities' => null,
+            'export_readiness_status' => 'never_exported',
+            'value_chain_positions' => [],
+            'capabilities' => [],
         ]);
 
         // Reset all local component state.
@@ -539,6 +637,8 @@ final class OnboardingWizard extends Component
         $this->certificateFiles = [];
         $this->uploadedDocuments = [];
         $this->documentUploads = [];
+        $this->supportingDocuments = [];
+        $this->supportingDocumentUploads = [];
         $this->onboardingStatus = 'pending';
         $this->adminNotes = null;
         $this->currentStep = 1;
@@ -567,6 +667,16 @@ final class OnboardingWizard extends Component
     }
 
     /**
+     * Contact email shown in the "Revision Required" banner.
+     * Reads from marketplace.support_email, falling back to mail.from.address.
+     */
+    #[Computed]
+    public function adminEmail(): string
+    {
+        return config('marketplace.support_email', config('mail.from.address', ''));
+    }
+
+    /**
      * Whether any uploaded document is still awaiting its security scan.
      * Drives the checklist's auto-refresh: the view polls only while this is
      * true, and stops once every document is clean/infected (settled).
@@ -575,6 +685,12 @@ final class OnboardingWizard extends Component
     public function hasPendingDocuments(): bool
     {
         foreach ($this->uploadedDocuments as $document) {
+            if (($document['scan_status'] ?? null) === 'pending') {
+                return true;
+            }
+        }
+
+        foreach ($this->supportingDocuments as $document) {
             if (($document['scan_status'] ?? null) === 'pending') {
                 return true;
             }
@@ -617,7 +733,7 @@ final class OnboardingWizard extends Component
             return;
         }
 
-        $scanStatuses = \App\Models\Media::whereIn('id', $mediaIds)
+        $scanStatuses = Media::whereIn('id', $mediaIds)
             ->pluck('scan_status', 'id');
 
         foreach ($this->certificates as $index => $certificate) {
@@ -640,7 +756,7 @@ final class OnboardingWizard extends Component
             return self::STEP_FOR_FIELD[$errorKey];
         }
 
-        $prefix = \Illuminate\Support\Str::before($errorKey, '.');
+        $prefix = Str::before($errorKey, '.');
 
         return self::STEP_FOR_FIELD[$prefix] ?? null;
     }
@@ -736,11 +852,19 @@ final class OnboardingWizard extends Component
 
     private function loadUploadedDocuments(ShopOnboarding $onboarding): void
     {
+        $this->supportingDocuments = [];
+
         foreach ($onboarding->documents as $media) {
             $documentType = $media->description;
 
             if ($documentType && array_key_exists($documentType, self::REQUIRED_DOCUMENTS)) {
                 $this->uploadedDocuments[$documentType] = [
+                    'media_id' => $media->id,
+                    'filename' => $media->original_filename,
+                    'scan_status' => $media->scan_status,
+                ];
+            } elseif ($documentType === 'other_supporting_document') {
+                $this->supportingDocuments[] = [
                     'media_id' => $media->id,
                     'filename' => $media->original_filename,
                     'scan_status' => $media->scan_status,

@@ -11,6 +11,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
     @fonts
+    @fluxAppearance
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
@@ -34,7 +35,8 @@
     <div x-show="sfNav"
          x-transition.opacity.duration.200ms
          @click="sfNav = false"
-         style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);">
+         class="fixed inset-0 z-[9998] bg-black/50"
+         style="display:none;">
     </div>
 
     {{-- Drawer --}}
@@ -45,35 +47,44 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="transform translate-x-0"
          x-transition:leave-end="transform -translate-x-full"
-         style="display:none;position:fixed;top:0;left:0;height:100vh;width:290px;z-index:9999;background:#fff;box-shadow:8px 0 32px rgba(0,0,0,0.15);overflow-y:auto;font-family:inherit;">
+         class="fixed top-0 left-0 h-screen w-[290px] z-[9999] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-lg)] overflow-y-auto"
+         style="display:none;">
 
         {{-- Header --}}
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e5e5;">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--hs-neutral-200)]">
             <a href="{{ route('home') }}" wire:navigate @click="sfNav = false">
-                <img src="/images/brand-logo.png" alt="1Halal Store" style="height:32px;width:auto;">
+                <img src="/images/brand-logo.png" alt="1Halal Store" class="h-8 w-auto">
             </a>
             <button @click="sfNav = false"
-                    style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:none;border:none;cursor:pointer;color:#555;">
+                    class="size-8 flex items-center justify-center rounded-lg text-[var(--hs-neutral-500)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)] transition border-none bg-transparent cursor-pointer">
                 <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
         {{-- Nav links --}}
-        <nav style="padding:16px 12px;">
+        <nav class="p-3 space-y-0.5">
 
             <a href="{{ route('storefront.companies') }}" wire:navigate @click="sfNav = false"
-               style="display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:10px;font-size:0.9rem;font-weight:600;color:{{ request()->routeIs('storefront.companies','storefront.company') ? '#175636' : '#1a1a1a' }};background:{{ request()->routeIs('storefront.companies','storefront.company') ? '#EAF4EE' : 'transparent' }};text-decoration:none;margin-bottom:2px;">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="color:#888;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2H3a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V9l-9-7z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 9v11h18V9"/></svg>
-                {{ __('Companies') }}
+               @class([
+                   'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
+                   'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.companies', 'storefront.company'),
+                   'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('storefront.companies', 'storefront.company'),
+               ])>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2H3a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V9l-9-7z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 9v11h18V9"/></svg>
+                {{ __('Businesses') }}
             </a>
 
             <a href="{{ route('storefront.products') }}" wire:navigate @click="sfNav = false"
-               style="display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:10px;font-size:0.9rem;font-weight:600;color:{{ request()->routeIs('storefront.products','storefront.product') ? '#175636' : '#1a1a1a' }};background:{{ request()->routeIs('storefront.products','storefront.product') ? '#EAF4EE' : 'transparent' }};text-decoration:none;margin-bottom:2px;">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="color:#888;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 8h12l1 12H5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+               @class([
+                   'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
+                   'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.products', 'storefront.product'),
+                   'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('storefront.products', 'storefront.product'),
+               ])>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M6 8h12l1 12H5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
                 {{ __('Products') }}
             </a>
 
-            <div style="padding:16px 12px 6px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#999;">
+            <div class="px-3 pt-4 pb-1.5 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[var(--hs-neutral-400)]">
                 {{ __('Discover') }}
             </div>
 
@@ -89,29 +100,39 @@
                        if (t) t.scrollIntoView({ behavior:'smooth' });
                        else window.location.href = '{{ route('home') }}#{{ $item['anchor'] }}';
                    }, 200);"
-                   style="display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:10px;font-size:0.9rem;font-weight:600;color:#1a1a1a;text-decoration:none;margin-bottom:2px;">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="color:#888;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                   class="flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)] no-underline">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                     {{ $item['label'] }}
                 </a>
             @endforeach
+
+            <a href="{{ route('apply.certificate') }}" wire:navigate @click="sfNav = false"
+               @class([
+                   'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
+                   'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('apply.certificate'),
+                   'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('apply.certificate'),
+               ])>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+                {{ __('Halal Certification') }}
+            </a>
         </nav>
 
         {{-- Auth footer --}}
         @auth
-            <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;border-top:1px solid #e5e5e5;background:#fff;">
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f5f5f5;border-radius:10px;margin-bottom:8px;">
-                    <span style="width:32px;height:32px;border-radius:50%;background:#1E6B45;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]">
+                <div class="flex items-center gap-2.5 px-3 py-2.5 bg-[var(--hs-neutral-100)] rounded-[10px] mb-2">
+                    <span class="size-8 rounded-full bg-[var(--hs-green-600)] text-white flex items-center justify-center text-xs font-bold shrink-0">
                         {{ strtoupper(mb_substr(auth()->user()->first_name,0,1).mb_substr(auth()->user()->last_name,0,1)) }}
                     </span>
-                    <div style="min-width:0;">
-                        <div style="font-size:0.85rem;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
-                        <div style="font-size:0.72rem;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->email }}</div>
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold text-[var(--hs-neutral-900)] truncate">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
+                        <div class="text-xs text-[var(--hs-neutral-500)] truncate">{{ auth()->user()->email }}</div>
                     </div>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;background:none;border:none;cursor:pointer;font-size:0.875rem;font-weight:600;color:#932E2E;">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+                    <button type="submit" class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-[10px] bg-transparent border-none cursor-pointer text-sm font-semibold text-[var(--hs-danger-700)] hover:bg-[var(--hs-danger-50)] transition">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
                         {{ __('Log out') }}
                     </button>
                 </form>
@@ -153,17 +174,17 @@
                             <li><a href="{{ route('home') }}#who-we-serve" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Who We Serve') }}</a></li>
                             <li><a href="{{ route('home') }}#what-we-offer" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('What We Offer') }}</a></li>
                             <li><a href="{{ route('home') }}#supply-chain" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Supply Chain') }}</a></li>
-                            <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Browse Companies') }}</a></li>
+                            <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Browse Businesses') }}</a></li>
                             <li><a href="{{ route('storefront.products') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Browse Products') }}</a></li>
                         </ul>
                     </div>
 
-                    {{-- Company --}}
+                    {{-- Business --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Company') }}</h4>
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Business') }}</h4>
                         <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('About Us') }}</a></li>
-                            <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
+                            <li><a href="{{ route('apply.certificate') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Events & Training') }}</a></li>
                         </ul>
                     </div>

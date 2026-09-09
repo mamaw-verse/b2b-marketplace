@@ -1,0 +1,7 @@
+<input
+            id="sourcing-reference-file"
+            type="file"
+            wire:model="reference_file"
+            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"
+                        class="hidden"
+        />

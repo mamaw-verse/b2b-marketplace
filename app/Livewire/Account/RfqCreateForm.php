@@ -8,6 +8,7 @@ use App\Events\RfqCreated;
 use App\Models\Product;
 use App\Models\Rfq;
 use App\Models\Shop;
+use App\Services\MediaUploadService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -15,6 +16,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.storefront')]
@@ -31,8 +33,8 @@ final class RfqCreateForm extends Component
     public ?int $shop_id = null;
 
     /**
-     * The product the buyer came from, used purely as visual reference on the form.
-     * RFQs are not persisted against a product, so this is never saved.
+     * The product the buyer came from. Used as visual reference on the form and
+     * persisted as product_id on the created RFQ so it can be shown on detail pages.
      */
     #[Url]
     public ?int $product_id = null;
@@ -88,7 +90,7 @@ final class RfqCreateForm extends Component
 
     public string $description = '';
 
-    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
+    /** @var TemporaryUploadedFile|null */
     public $attachment = null;
 
     /**
@@ -182,10 +184,19 @@ final class RfqCreateForm extends Component
             return;
         }
 
+        // Persist the product the RFQ is asking a quotation for, so it can be
+        // shown on the buyer and admin RFQ detail pages. Only link products that
+        // are published and actually belong to the targeted shop.
+        $productId = $this->product_id
+            ? Product::published()
+                ->where('shop_id', $shop->id)
+                ->value('id')
+            : null;
+
         // Store single attachment as a media record if provided
         $mediaIds = [];
         if ($this->attachment) {
-            $media = app(\App\Services\MediaUploadService::class)->store(
+            $media = app(MediaUploadService::class)->store(
                 $this->attachment,
                 $user->id,
                 'rfq_attachment',
@@ -193,9 +204,10 @@ final class RfqCreateForm extends Component
             $mediaIds[] = $media->id;
         }
 
-        $rfq = DB::transaction(function () use ($user, $buyerProfile, $shop, $mediaIds) {
+        $rfq = DB::transaction(function () use ($user, $buyerProfile, $shop, $productId, $mediaIds) {
             $rfq = Rfq::create([
                 'user_id' => $user->id,
+                'product_id' => $productId,
                 'title' => $this->title,
                 'description' => $this->description ?: null,
                 'status' => 'open',

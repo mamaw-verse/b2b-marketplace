@@ -58,7 +58,7 @@
             <a href="{{ route('storefront.companies') }}" wire:navigate
                class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3.5 py-1.5 text-xs font-medium text-[var(--hs-neutral-600)] hover:border-[var(--hs-green-300)] hover:text-[var(--hs-green-700)] transition">
                 <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2H3a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V9l-9-7z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 9v11h18V9"/></svg>
-                {{ __('Companies') }}
+                {{ __('Businesses') }}
             </a>
             <a href="{{ route('storefront.products') }}" wire:navigate
                class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3.5 py-1.5 text-xs font-medium text-[var(--hs-neutral-600)] hover:border-[var(--hs-green-300)] hover:text-[var(--hs-green-700)] transition">

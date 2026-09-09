@@ -26,6 +26,7 @@ final class ProductFactory extends Factory
             'description' => fake()->optional()->paragraph(),
             'featured_image_path' => fake()->optional()->imageUrl(640, 480, 'food'),
             'status' => 'archived',
+            'moderation_status' => 'active',
         ];
     }
 
@@ -46,6 +47,26 @@ final class ProductFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'archived',
+        ]);
+    }
+
+    /**
+     * Indicate the product's moderation status is flagged.
+     */
+    public function flagged(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'moderation_status' => 'flagged',
+        ]);
+    }
+
+    /**
+     * Indicate the product has been admin-unpublished.
+     */
+    public function adminUnpublished(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'moderation_status' => 'admin_unpublished',
         ]);
     }
 }

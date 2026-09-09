@@ -17,7 +17,7 @@
                     <flux:input
                         wire:model="business_name"
                         label="{{ __('Business Name') }}"
-                        placeholder="{{ __('Enter your business or company name') }}"
+                        placeholder="{{ __('Enter your business name') }}"
                         required
                     />
                     @error('business_name') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -30,7 +30,7 @@
                     <flux:input
                         wire:model="billing_address_1"
                         label="{{ __('Address Line 1') }}"
-                        placeholder="{{ __('Street address, P.O. box, company name') }}"
+                        placeholder="{{ __('Street address, P.O. box, business name') }}"
                     />
                     @error('billing_address_1') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
@@ -100,7 +100,7 @@
                         <flux:input
                             wire:model="shipping_address_1"
                             label="{{ __('Address Line 1') }}"
-                            placeholder="{{ __('Street address, P.O. box, company name') }}"
+                            placeholder="{{ __('Street address, P.O. box, business name') }}"
                         />
                         @error('shipping_address_1') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
 
@@ -171,7 +171,7 @@
                             <flux:input
                                 wire:model="contact_email"
                                 label="{{ __('Email') }}"
-                                placeholder="purchasing@yourcompany.ph"
+                                placeholder="purchasing@yourbusiness.ph"
                                 type="email"
                             />
                             @error('contact_email') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror

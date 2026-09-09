@@ -1,4 +1,8 @@
-<div>
+{{--
+    Poll every 5s while any photo is pending scan. Calls refreshPhotos to bust
+    the computed cache. Stops automatically once hasPendingPhotos is false.
+--}}
+<div @if ($this->hasPendingPhotos) wire:poll.5s="refreshPhotos" @endif>
     @include('livewire.company-hub.partials.product-tabs')
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
@@ -12,39 +16,59 @@
 
         <div class="p-6">
 
-            {{-- Upload section --}}
-            <div class="mb-6 rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-50)] p-6">
-                <div class="text-center">
-                    <svg class="mx-auto size-10 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-                    <p class="mt-2 text-sm text-[var(--hs-neutral-600)]">{{ __('Upload product images') }}</p>
-                    <p class="text-xs text-[var(--hs-neutral-400)]">{{ __('JPEG, PNG, WebP up to 5MB each') }}</p>
-                </div>
-                <div class="mt-4">
-                    <input type="file" wire:model="newPhotos" accept="image/jpeg,image/png,image/webp" multiple class="block w-full text-sm text-[var(--hs-neutral-500)] file:mr-4 file:rounded-[var(--hs-radius-pill)] file:border-0 file:bg-[var(--hs-green-50)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--hs-green-700)] hover:file:bg-[var(--hs-green-100)]" />
-                    @error('newPhotos.*') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
-                </div>
+            {{-- Upload dropzone --}}
+            <x-hs-dropzone
+                input-id="gallery-photo-input"
+                wire-model="newPhotos"
+                accept="image/jpeg,image/png,image/webp"
+                hint="{{ __('JPEG, PNG, WebP — up to 5MB each') }}"
+                on-finish="$wire.uploadPhotos()"
+                loading-target="newPhotos,uploadPhotos"
+                class="mb-6"
+            >
+                @error('newPhotos.*') <p class="mt-2 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p> @enderror
+            </x-hs-dropzone>
 
-                @if ($newPhotos)
-                    <div class="mt-4 flex justify-center">
-                        <flux:button variant="primary" size="sm" wire:click="uploadPhotos">
-                            {{ __('Upload :count :label', ['count' => count($newPhotos), 'label' => count($newPhotos) === 1 ? __('Photo') : __('Photos')]) }}
-                        </flux:button>
-                    </div>
-                @endif
-            </div>
+            {{-- Scanning notice --}}
+            @if ($this->hasPendingPhotos)
+                <div class="mb-4 flex items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] px-4 py-2.5 text-sm text-[var(--hs-warning-700)]" aria-live="polite">
+                    <flux:icon name="arrow-path" class="size-4 shrink-0 animate-spin" />
+                    {{ __('Checking scan status automatically…') }}
+                </div>
+            @endif
 
             {{-- Sortable gallery grid --}}
             @if ($this->galleryItems->isNotEmpty())
                 <div wire:sort="updateGalleryOrder" class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                     @foreach ($this->galleryItems as $item)
-                        <div wire:key="gallery-{{ $item->id }}" wire:sort:item="{{ $item->id }}" class="group relative cursor-grab overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)]">
+                        @php $scanStatus = $item->media?->scan_status ?? 'pending'; @endphp
+                        <div
+                            wire:key="gallery-{{ $item->id }}"
+                            wire:sort:item="{{ $item->id }}"
+                            class="group relative overflow-hidden rounded-[var(--hs-radius-card)] border bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)] {{ $scanStatus === 'infected' ? 'border-[var(--hs-danger-300)]' : 'border-[var(--hs-neutral-200)]' }} {{ $scanStatus === 'pending' ? '' : 'cursor-grab' }}"
+                        >
                             <div wire:sort:handle class="aspect-square">
                                 <img
                                     src="{{ $item->image_url }}"
                                     alt="{{ __('Gallery image') }}"
-                                    class="h-full w-full object-cover"
+                                    class="h-full w-full object-cover {{ $scanStatus !== 'clean' ? 'opacity-50' : '' }}"
                                 />
                             </div>
+
+                            {{-- Scan status overlay (pending / infected) --}}
+                            @if ($scanStatus === 'pending')
+                                <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[var(--hs-neutral-900)]/40">
+                                    <flux:icon name="arrow-path" class="size-6 text-white animate-spin" />
+                                    <span class="text-xs font-medium text-white">{{ __('Scanning…') }}</span>
+                                </div>
+                            @elseif ($scanStatus === 'infected')
+                                <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[var(--hs-danger-900)]/50">
+                                    <flux:icon name="x-circle" class="size-6 text-[var(--hs-danger-200)]" />
+                                    <span class="text-xs font-medium text-[var(--hs-danger-100)]">{{ __('Scan failed') }}</span>
+                                </div>
+                            @endif
+
+                            {{-- Remove button --}}
                             <button
                                 type="button"
                                 wire:click="confirmRemoveImage({{ $item->id }})"
@@ -53,11 +77,15 @@
                             >
                                 <flux:icon name="x-mark" variant="mini" class="size-3.5" />
                             </button>
-                            <div class="absolute top-2 left-2">
-                                <span class="inline-flex items-center justify-center size-6 rounded-full bg-[var(--hs-neutral-0)]/90 text-xs font-bold text-[var(--hs-neutral-700)] shadow-sm">
-                                    {{ $loop->iteration }}
-                                </span>
-                            </div>
+
+                            {{-- Position badge --}}
+                            @if ($scanStatus === 'clean')
+                                <div class="absolute top-1.5 left-1.5">
+                                    <span class="inline-flex items-center justify-center size-6 rounded-full bg-[var(--hs-neutral-0)]/90 text-xs font-bold text-[var(--hs-neutral-700)] shadow-sm">
+                                        {{ $loop->iteration }}
+                                    </span>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>

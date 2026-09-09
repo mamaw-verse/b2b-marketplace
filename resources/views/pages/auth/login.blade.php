@@ -1,6 +1,6 @@
 <x-layouts::auth :title="__('Log in')" activeTab="login">
     <p class="mb-5 text-sm text-[var(--hs-neutral-500)] leading-relaxed">
-        {{ __('Log in to manage your company profile and listings.') }}
+        {{ __('Log in to manage your business profile and listings.') }}
     </p>
 
     <!-- Session Status -->
@@ -20,7 +20,7 @@
             required
             autofocus
             autocomplete="email"
-            placeholder="you@company.com"
+            placeholder="you@business.com"
         />
 
         <!-- Password -->
@@ -59,6 +59,11 @@
             @endif
         </div>
 
+        <!-- Turnstile -->
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}"></div>
+        @error('cf-turnstile-response') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+
         <flux:button variant="primary" type="submit" class="!w-full" data-test="login-button">
             {{ __('Log in') }}
         </flux:button>
@@ -66,6 +71,6 @@
 
     <p class="mt-5 text-center text-sm text-[var(--hs-neutral-500)]">
         {{ __('No account yet?') }}
-        <a href="{{ route('register') }}" wire:navigate class="font-bold text-[var(--hs-green-600)] hover:underline">{{ __('Register your company') }}</a>
+        <a href="{{ route('register') }}" wire:navigate class="font-bold text-[var(--hs-green-600)] hover:underline">{{ __('Register your business') }}</a>
     </p>
 </x-layouts::auth>

@@ -72,7 +72,7 @@
                 <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Interested in halal certification?') }}</h2>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('Let us know and we will connect you with the appropriate external certification entity.') }}</p>
             </div>
-            <flux:button href="{{ route('hub.certifications.index') }}" variant="primary" wire:navigate>
+            <flux:button href="{{ route('apply.certificate') }}" variant="primary" wire:navigate>
                 {{ __("I'm Interested") }}
             </flux:button>
         </div>

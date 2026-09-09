@@ -140,7 +140,7 @@ td,th,div,p,a,h1 {font-family:Arial, sans-serif; mso-line-height-rule:exactly;}
          &middot;
         <a href="{{ $productsUrl }}" style="color:#00312B; text-decoration:underline;">{{ __('Products') }}</a>
          &middot;
-        <a href="{{ $companiesUrl }}" style="color:#00312B; text-decoration:underline;">{{ __('Verified Companies') }}</a>
+        <a href="{{ $companiesUrl }}" style="color:#00312B; text-decoration:underline;">{{ __('Verified Businesses') }}</a>
       </p>
       <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#999999; text-align:center;">
         &copy; {{ date('Y') }} {{ $appName }}. {{ __('All rights reserved.') }}<br />

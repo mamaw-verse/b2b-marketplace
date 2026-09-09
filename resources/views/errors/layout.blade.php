@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $statusCode ?? 500 }} — {{ config('app.name', 'Laravel') }}</title>
+    <title>{{ $statusCode ?? (isset($exception) ? $exception->getStatusCode() : 500) }} — {{ config('app.name', 'Laravel') }}</title>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -35,7 +35,7 @@
                 <div class="flex items-center gap-1">
                     <a href="{{ route('storefront.companies') }}" wire:navigate
                        class="hidden sm:inline-flex px-3 py-2 text-sm font-medium text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)] transition">
-                        {{ __('Companies') }}
+                        {{ __('Businesses') }}
                     </a>
                     <a href="{{ route('storefront.products') }}" wire:navigate
                        class="hidden sm:inline-flex px-3 py-2 text-sm font-medium text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)] transition">

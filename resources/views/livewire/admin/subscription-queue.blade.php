@@ -31,7 +31,7 @@
     <div class="mt-5 overflow-x-auto">
         <flux:table>
             <flux:table.columns>
-                <flux:table.column>{{ __('Merchant') }}</flux:table.column>
+                <flux:table.column>{{ __('Business') }}</flux:table.column>
                 <flux:table.column>{{ __('Plan') }}</flux:table.column>
                 <flux:table.column>{{ __('Country') }}</flux:table.column>
                 <flux:table.column>{{ __('Status') }}</flux:table.column>
@@ -42,7 +42,7 @@
                 @forelse ($this->subscriptions as $subscription)
                     <flux:table.row :key="$subscription->id" class="hover:bg-[var(--hs-neutral-50)] transition">
                         <flux:table.cell variant="strong">
-                            {{ $subscription->shop->storefront_name }}
+                            {{ $subscription->shop->registered_business_name }}
                             <flux:text size="sm">{{ $subscription->shop->user?->email }}</flux:text>
                         </flux:table.cell>
                         <flux:table.cell>{{ $subscription->plan->name }}</flux:table.cell>

@@ -188,13 +188,15 @@
     --hs-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.7);
     --hs-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6), 0 8px 10px rgba(0, 0, 0, 0.4);
 
-    /* Brand Colors - deep greens for dark bg, brighter greens mapped for readable text */
-    --hs-green-50: #001311;  /* Was light green, now deep forest for dark bg */
+    /* Brand Colors — dark bg surfaces use deep forest, text greens remapped to bright emerald */
+    --hs-green-50: #001311;  /* light bg → deep forest surface */
     --hs-green-100: #001B18;
     --hs-green-200: #00221E;
-    --hs-green-700: #8CA2A0; /* Map dark text greens to a brighter readable green (300) */
-    --hs-green-800: #B3C1BF; /* Map deeper text greens to (200) */
-    --hs-green-900: #D9E0DF; /* Map darkest text greens to (100) */
+    --hs-green-600: #4ADE80; /* primary action green → bright readable emerald */
+    --hs-green-700: #4ADE80; /* dark text green → bright emerald (readable on dark surface) */
+    --hs-green-800: #86EFAC; /* deeper text green → light emerald */
+    --hs-green-900: #BBF7D0; /* darkest text green → very light emerald */
+    --hs-green-950: #001311; /* hero/footer surfaces stay deep forest */
 
     /* Semantic Backgrounds */
     --hs-success-50: #05291B;

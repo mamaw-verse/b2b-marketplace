@@ -21,10 +21,9 @@ final class Step1Request extends FormRequest
     {
         return [
             'registered_business_name' => ['required', 'string', 'max:255'],
-            'storefront_name' => ['required', 'string', 'max:255'],
             'business_structure' => ['required', Rule::in(['sole_proprietorship', 'partnership', 'corporation'])],
-            'dti_sec_number' => ['required', 'string', 'max:100'],
-            'tax_identification_number' => ['required', 'string', 'max:50'],
+            'dti_sec_number' => ['nullable', 'string', 'max:100'],
+            'tax_identification_number' => ['nullable', 'string', 'max:50'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'address_1' => ['nullable', 'string', 'max:255'],

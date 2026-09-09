@@ -9,6 +9,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +26,7 @@ final class DemoUsersSeeder extends Seeder
     {
         $this->seedBuyer();
         $this->seedSeller();
+        $this->seedUnsubscribedSeller();
     }
 
     // -------------------------------------------------------------------------
@@ -137,6 +140,109 @@ final class DemoUsersSeeder extends Seeder
         }
 
         return $merged;
+    }
+
+    /**
+     * Seed a seller whose 30-day trial has already expired and whose subscription
+     * is lapsed. Use this account to verify:
+     *  - The subscription banner appears on the hub /products page.
+     *  - Visiting their storefront company profile redirects to the subscription page.
+     *  - Their products return 404 on the storefront product detail page.
+     *
+     * Login: unsubscribed@gmail.com / password
+     */
+    private function seedUnsubscribedSeller(): void
+    {
+        $seller = User::firstOrCreate(
+            ['email' => 'unsubscribed@gmail.com'],
+            [
+                'first_name' => 'Ahmad',
+                'last_name' => 'Pendatun',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $seller->assignRole('seller');
+
+        /** @var Shop $shop */
+        $shop = Shop::firstOrCreate(
+            ['email' => 'info@pendatunorganics.ph'],
+            [
+                'user_id' => $seller->id,
+                'registered_business_name' => 'Pendatun Organic Farms Inc.',
+                'storefront_name' => 'Pendatun Organic Farms',
+                'business_structure' => 'corporation',
+                'dti_sec_number' => 'SEC-2022-01192',
+                'tax_identification_number' => '614-220-875-000',
+                'phone' => '+63 64 555 0101',
+                'address_1' => 'Barangay Bagua III',
+                'city' => 'Cotabato City',
+                'province' => 'Maguindanao del Norte',
+                'zip_code' => '9600',
+                'country_code' => 'PH',
+                'average_production_lead_time' => 10,
+                'export_readiness_status' => 'never_exported',
+                'value_chain_positions' => ['farming', 'processing'],
+                'capabilities' => ['wholesale', 'processing'],
+                'status' => 'active',
+            ]
+        );
+
+        // Attach a relevant category so the shop looks realistic.
+        $categoryId = Category::where('slug', 'spices-seasonings')->value('id');
+        if ($categoryId && ! $shop->categories()->where('category_id', $categoryId)->exists()) {
+            $shop->categories()->attach($categoryId);
+        }
+
+        // Seed one published product so the storefront detail gate can be tested.
+        /** @var Product $product */
+        $product = Product::firstOrCreate(
+            [
+                'shop_id' => $shop->id,
+                'name' => 'Organic Turmeric Powder (Halal)',
+            ],
+            [
+                'shop_id' => $shop->id,
+                'name' => 'Organic Turmeric Powder (Halal)',
+                'description' => 'Single-origin turmeric powder from Maguindanao highland farms. Cold-milled, no additives. Halal-certified by IDCP.',
+                'featured_image_path' => 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800&q=80',
+                'status' => 'published',
+            ]
+        );
+
+        ProductVariant::firstOrCreate(
+            ['sku' => 'POF-TURMERIC-200G'],
+            [
+                'product_id' => $product->id,
+                'sku' => 'POF-TURMERIC-200G',
+                'description' => '200g kraft stand-up pouch',
+                'attributes' => ['attr_weight' => '200g', 'attr_packaging' => 'Kraft pouch'],
+                'price' => 95.00,
+                'minimum_order_quantity' => 24,
+                'unit' => 'pouch',
+                'currency' => 'PHP',
+                'available_quantity' => 3000,
+                'lead_time_days' => 10,
+                'status' => 'published',
+            ]
+        );
+
+        // Give the shop a lapsed trial subscription (expired 30 days ago).
+        // DemoSubscriptionSeeder skips shops that already have a subscription,
+        // so this record won't be overwritten on a full re-seed.
+        $plan = SubscriptionPlan::where('is_active', true)->first();
+
+        if ($plan && ! $shop->subscriptions()->exists()) {
+            Subscription::create([
+                'shop_id' => $shop->id,
+                'subscription_plan_id' => $plan->id,
+                'status' => 'lapsed',
+                'trial_ends_at' => now()->subDays(30),
+                'current_period_start' => now()->subDays(30 + 30),
+                'current_period_end' => now()->subDays(30),
+            ]);
+        }
     }
 
     private function seedProducts(Shop $shop): void

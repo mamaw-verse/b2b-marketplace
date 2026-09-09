@@ -6,6 +6,7 @@ namespace App\Livewire\Storefront;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SponsoredContent;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -58,6 +59,27 @@ final class HeroSearch extends Component
     public function categories(): Collection
     {
         return Category::orderBy('name')->get();
+    }
+
+    /**
+     * Active sponsored content with tall creatives for the hero carousel.
+     * Loaded directly here so slides render as native blade without a nested Livewire component.
+     *
+     * @return Collection<int, SponsoredContent>
+     */
+    #[Computed]
+    public function heroSponsoredSlides(): Collection
+    {
+        if (! config('marketplace.features.sponsored_content_enabled')) {
+            return new Collection;
+        }
+
+        return SponsoredContent::with('tallMedia')
+            ->active()
+            ->forPlacement('homepage')
+            ->whereNotNull('tall_media_id')
+            ->orderByDesc('id')
+            ->get();
     }
 
     /**

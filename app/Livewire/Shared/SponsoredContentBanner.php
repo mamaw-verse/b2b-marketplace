@@ -7,6 +7,7 @@ namespace App\Livewire\Shared;
 use App\Jobs\RecordSponsoredContentEventJob;
 use App\Models\SponsoredContent;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -15,48 +16,103 @@ final class SponsoredContentBanner extends Component
     #[Locked]
     public string $placement;
 
-    /** @var int|null The ID of the selected content item for this render. */
+    /**
+     * Rendering orientation: "wide" renders a single weighted banner,
+     * "tall" renders a rotating carousel of all tall-creative items.
+     */
+    #[Locked]
+    public string $orientation = 'wide';
+
+    /** Selected content ID for the wide single-pick render. */
     #[Locked]
     public ?int $selectedContentId = null;
 
-    public function mount(string $placement): void
+    /** Ordered IDs for the tall carousel render (used server-side for impression tracking). */
+    #[Locked]
+    public array $carouselIds = [];
+
+    public function mount(string $placement, string $orientation = 'wide'): void
     {
         $this->placement = $placement;
+        $this->orientation = $orientation;
 
         if (! config('marketplace.features.sponsored_content_enabled')) {
             return;
         }
 
-        $selected = $this->selectContent();
-
-        if ($selected) {
-            $this->selectedContentId = $selected->id;
-            // Fire impression event asynchronously — off the page-load critical path.
-            RecordSponsoredContentEventJob::dispatch($selected->id, 'impression');
+        if ($this->orientation === 'tall' || $this->orientation === 'row') {
+            $this->initCarousel();
+        } else {
+            $this->initSinglePick();
         }
     }
 
     public function render(): View
     {
-        $content = $this->selectedContentId
-            ? SponsoredContent::with('media')->find($this->selectedContentId)
-            : null;
+        $content = null;
+        $carouselItems = collect();
+
+        if ($this->orientation === 'tall' || $this->orientation === 'row') {
+            /** @var Collection<int, SponsoredContent> $carouselItems */
+            $carouselItems = SponsoredContent::with(['tier', 'tallMedia'])
+                ->whereIn('id', $this->carouselIds)
+                ->get()
+                ->sortBy(fn ($c) => array_search($c->id, $this->carouselIds, true));
+        } else {
+            $content = $this->selectedContentId
+                ? SponsoredContent::with('wideMedia')->find($this->selectedContentId)
+                : null;
+        }
 
         return view('livewire.shared.sponsored-content-banner', [
             'content' => $content,
+            'carouselItems' => $carouselItems,
         ]);
     }
 
-    /**
-     * Perform a tier-weighted random selection of one sponsored content item
-     * for the configured placement. Higher priority_weight = proportionally
-     * higher chance of being selected.
-     */
-    private function selectContent(): ?SponsoredContent
+    // ── Private helpers ─────────────────────────────────────────────
+
+    private function initSinglePick(): void
     {
-        $candidates = SponsoredContent::with(['tier', 'media'])
+        $selected = $this->selectWeighted();
+
+        if ($selected) {
+            $this->selectedContentId = $selected->id;
+            RecordSponsoredContentEventJob::dispatch($selected->id, 'impression');
+        }
+    }
+
+    private function initCarousel(): void
+    {
+        /** @var Collection<int, SponsoredContent> $items */
+        $items = SponsoredContent::with('tier')
             ->active()
             ->forPlacement($this->placement)
+            ->whereNotNull('tall_media_id')
+            ->orderByDesc('id')
+            ->get();
+
+        if ($items->isEmpty()) {
+            return;
+        }
+
+        // Store IDs; dispatch impressions for all items shown in the carousel.
+        $this->carouselIds = $items->pluck('id')->toArray();
+
+        foreach ($this->carouselIds as $id) {
+            RecordSponsoredContentEventJob::dispatch($id, 'impression');
+        }
+    }
+
+    /**
+     * Tier-weighted random selection for the wide single-pick variant.
+     */
+    private function selectWeighted(): ?SponsoredContent
+    {
+        $candidates = SponsoredContent::with(['tier', 'wideMedia'])
+            ->active()
+            ->forPlacement($this->placement)
+            ->whereNotNull('wide_media_id')
             ->get();
 
         if ($candidates->isEmpty()) {

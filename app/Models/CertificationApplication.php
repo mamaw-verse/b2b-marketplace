@@ -12,7 +12,10 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $shop_id
+ * @property int|null $shop_id
+ * @property string|null $email
+ * @property string|null $company_name
+ * @property string|null $document_path
  * @property string $status
  * @property int|null $addressed_by
  * @property Carbon|null $addressed_at
@@ -26,6 +29,9 @@ final class CertificationApplication extends Model
 
     protected $fillable = [
         'shop_id',
+        'email',
+        'company_name',
+        'document_path',
         'status',
         'addressed_by',
         'addressed_at',

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Merchants;
 
+use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\Product;
 use App\Models\Shop;
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -17,6 +20,8 @@ use Livewire\Component;
 #[Title('Merchant Details')]
 final class MerchantShow extends Component
 {
+    use HasDocumentViewer;
+
     public Shop $shop;
 
     public ?int $previewProductId = null;
@@ -31,6 +36,9 @@ final class MerchantShow extends Component
             'subscriptions',
             'certificationApplications',
             'latestSubscription',
+            'certificates.media',
+            'categories',
+            'documents',
         ]);
     }
 
@@ -41,7 +49,7 @@ final class MerchantShow extends Component
         $this->previewProductId = $productId;
         unset($this->previewProduct);
 
-        \Flux\Flux::modal('product-preview')->show();
+        Flux::modal('product-preview')->show();
     }
 
     /**
@@ -93,7 +101,7 @@ final class MerchantShow extends Component
         $this->dispatch('toast', message: 'Merchant reactivated successfully.');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.admin.merchants.merchant-show');
     }

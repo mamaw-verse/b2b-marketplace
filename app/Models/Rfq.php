@@ -10,18 +10,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $user_id
+ * @property int|null $product_id
  * @property string $title
  * @property string|null $description
  * @property string $status
  * @property array $buyer_snapshot
- * @property \Illuminate\Support\Carbon|null $last_activity_at
- * @property \Illuminate\Support\Carbon|null $closed_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $last_activity_at
+ * @property Carbon|null $closed_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Rfq extends Model
 {
@@ -32,6 +34,7 @@ final class Rfq extends Model
 
     protected $fillable = [
         'user_id',
+        'product_id',
         'title',
         'description',
         'status',
@@ -54,6 +57,14 @@ final class Rfq extends Model
     public function buyer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * The product this RFQ is asking a quotation for.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     /**
