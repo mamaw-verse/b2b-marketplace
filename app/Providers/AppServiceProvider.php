@@ -6,9 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\DltDisbursementServiceInterface;
 use App\Events\OrderReturned;
-use App\Events\RfqCreated;
 use App\Events\SubscriptionStatusChanged;
-use App\Listeners\NotifyAdminRfqReceived;
 use App\Listeners\NotifyBuyerOrderReturned;
 use App\Listeners\PostDisputeStatusMessage;
 use App\Listeners\PostOrderStatusMessage;
@@ -69,11 +67,6 @@ final class AppServiceProvider extends ServiceProvider
         Event::listen(
             OrderReturned::class,
             NotifyBuyerOrderReturned::class,
-        );
-
-        Event::listen(
-            RfqCreated::class,
-            NotifyAdminRfqReceived::class,
         );
 
         Gate::define('accessHub', function (User $user) {

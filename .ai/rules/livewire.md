@@ -3,6 +3,7 @@ paths:
   - 'app/Livewire/**'
   - 'app/Livewire/**/*.php'
   - 'app/Livewire/**/RfqDetail.php'
+  - 'app/Livewire/**/*Certificate*'
 ---
 
 # Livewire
@@ -41,3 +42,6 @@ In the view, add a button with `wire:click="viewDocument($id)"` and include the 
 ```
 
 The `document-viewer` partial at `resources/views/livewire/admin/document-viewer.blade.php` is shared — it handles both images (renders an `<img>`) and other files (renders an `<iframe>`), with an "Open in new tab" button.
+
+## Certificate review workflow: under_review → active
+Seller-submitted certificates start with status='under_review' (not 'active'). CertificateList fires CertificateSubmittedNotification to all admins on save. Admin approves via CertificationQueue.approveCertificate(), which sets status='active', is_verified=true, and sends CertificateApprovedNotification to the shop owner. The shop_cert_status enum has four values: active, expiring_soon, expired, under_review.

@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.seller_rfq_queue_enabled')) {
+        $this->markTestSkipped('seller_rfq_queue_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->buyer = User::factory()->create();

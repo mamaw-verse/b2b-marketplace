@@ -10,6 +10,10 @@ use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
+    if (! config('marketplace.features.orders_enabled')) {
+        $this->markTestSkipped('orders_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->buyer = User::factory()->create(['email_verified_at' => now()]);

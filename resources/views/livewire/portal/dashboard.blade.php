@@ -1,6 +1,6 @@
 <div class="space-y-6">
 
-    {{-- Welcome banner --}}
+    {{-- ── Welcome banner ──────────────────────────────────────────────────── --}}
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Welcome back, :name', ['name' => auth()->user()->first_name]) }}</h1>
@@ -26,12 +26,11 @@
         @endif
     </div>
 
-    {{-- ───────────────────────────────────────────────────────────────
-         SELLER SECTION — only visible for approved merchants
-         ─────────────────────────────────────────────────────────────── --}}
+    {{-- ── SELLER SECTION — only visible for approved merchants ────────────── --}}
     @if ($this->isOnboarded)
-        {{-- Subscription status banner (if subscriptions feature is on) --}}
-        @if(config('marketplace.features.subscriptions_enabled'))
+
+        {{-- Subscription status banner --}}
+        @if (config('marketplace.features.subscriptions_enabled'))
             @if ($this->activeSubscription)
                 @php
                     $sub = $this->activeSubscription;
@@ -73,35 +72,41 @@
 
         {{-- Seller quick-stats --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+
+            {{-- Published products --}}
             <a href="{{ route('hub.products.index') }}" wire:navigate
                class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-4 text-center hover:border-[var(--hs-green-300)] transition">
                 <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">{{ $this->sellerStats['published_products'] }}</p>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Published Products') }}</p>
             </a>
 
+            {{-- My RFQs (count) --}}
             <a href="{{ route('account.rfqs.index') }}" wire:navigate
                class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-4 text-center hover:border-[var(--hs-green-300)] transition">
                 <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">{{ $this->buyerRfqCount }}</p>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('My RFQs') }}</p>
             </a>
 
-            <a href="{{ route('apply.certificate') }}" wire:navigate
+            {{-- Halal certificates — uses bestCertificate priority: active > expiring_soon > under_review > expired --}}
+            @php
+                $bestCert = $this->bestCertificate;
+                $certIsManageable = $bestCert && in_array($bestCert->status, ['active', 'expiring_soon', 'under_review'], true);
+            @endphp
+            <a href="{{ $certIsManageable ? route('hub.certifications.index') : route('apply.certificate') }}" wire:navigate
                class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-4 text-center hover:border-[var(--hs-green-300)] transition col-span-2 sm:col-span-1">
-                <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
-                    @if ($this->certificationApplication?->status === 'approved')
-                        <span class="text-[var(--hs-green-600)]">✓</span>
-                    @elseif ($this->certificationApplication)
-                        <span class="text-[var(--hs-warning-700)] text-base font-semibold">{{ str($this->certificationApplication->status)->headline() }}</span>
-                    @else
-                        <span class="text-base font-medium text-[var(--hs-neutral-400)]">—</span>
-                    @endif
-                </p>
+                @if ($certIsManageable)
+                    <div class="flex items-center justify-center">
+                        <x-hs-status-pill :status="$bestCert->status" />
+                    </div>
+                @else
+                    <p class="text-2xl font-bold text-[var(--hs-neutral-400)]">—</p>
+                @endif
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Halal Certification') }}</p>
             </a>
         </div>
 
-        {{-- Certification CTA (when no application exists) --}}
-        @if (! $this->certificationApplication)
+        {{-- Certification CTA (when no certificates and no pending application) --}}
+        @if ($this->bestCertificate === null && ! $this->certificationApplication)
             <div class="flex flex-col gap-4 rounded-[var(--hs-radius-card)] border border-[var(--hs-green-200)] bg-[var(--hs-green-50)] p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Apply for Halal Certification') }}</h2>
@@ -111,14 +116,21 @@
                     {{ __('Apply Now') }}
                 </flux:button>
             </div>
+        @elseif ($this->certificationApplication && $this->bestCertificate === null)
+            {{-- Application in progress, no live cert yet --}}
+            <div class="flex items-center gap-4 rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] px-5 py-4">
+                <svg class="size-5 shrink-0 text-[var(--hs-warning-700)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                <p class="text-sm text-[var(--hs-neutral-700)]">
+                    {{ __('Your certification application is') }}
+                    <span class="font-semibold">{{ str($this->certificationApplication->status)->headline() }}</span>.
+                </p>
+            </div>
         @endif
 
     @endif
     {{-- /SELLER SECTION --}}
 
-    {{-- ───────────────────────────────────────────────────────────────
-         BUYER SECTION — always visible
-         ─────────────────────────────────────────────────────────────── --}}
+    {{-- ── My RFQs ──────────────────────────────────────────────────────────── --}}
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--hs-neutral-100)]">
             <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('My RFQs') }}</h2>
@@ -127,20 +139,35 @@
             </a>
         </div>
 
-        @if ($this->buyerRfqCount > 0)
-            <div class="px-6 py-5 flex items-center gap-4">
-                <span class="text-3xl font-bold text-[var(--hs-neutral-900)]">{{ $this->buyerRfqCount }}</span>
-                <span class="text-sm text-[var(--hs-neutral-500)]">{{ __('active request(s) awaiting response') }}</span>
+        @if ($this->recentRfqs->isEmpty())
+            <div class="px-6 py-10 text-center">
+                <p class="text-sm text-[var(--hs-neutral-500)]">
+                    {{ __('No RFQs yet.') }}
+                    <a href="{{ route('storefront.products') }}" wire:navigate class="text-[var(--hs-green-700)] font-medium hover:underline ml-1">{{ __('Browse products') }}</a>
+                </p>
             </div>
         @else
-            <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">
-                {{ __('No open RFQs.') }}
-                <a href="{{ route('storefront.products') }}" wire:navigate class="text-[var(--hs-green-700)] font-medium hover:underline ml-1">{{ __('Browse products') }}</a>
+            <div class="divide-y divide-[var(--hs-neutral-100)]">
+                @foreach ($this->recentRfqs as $rfq)
+                    <a href="{{ route('account.rfqs.show', $rfq) }}" wire:navigate
+                       class="group flex items-center gap-3 px-6 py-4 hover:bg-[var(--hs-neutral-50)] transition">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex min-w-0 items-center gap-2">
+                                    <p class="truncate text-sm font-medium text-[var(--hs-neutral-900)]">{{ $rfq->title }}</p>
+                                    <span class="shrink-0 text-xs text-[var(--hs-neutral-400)]">{{ $rfq->created_at->diffForHumans() }}</span>
+                                </div>
+                                <x-hs-status-pill :status="$rfq->recipients->first()?->admin_status ?? 'pending'" class="shrink-0" />
+                            </div>
+                        </div>
+                        <flux:icon name="chevron-right" variant="mini" class="shrink-0 text-[var(--hs-neutral-300)] group-hover:text-[var(--hs-neutral-400)] transition" />
+                    </a>
+                @endforeach
             </div>
         @endif
     </div>
 
-    {{-- Quick links --}}
+    {{-- ── Quick links ──────────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <a href="{{ route('storefront.companies') }}" wire:navigate
            class="flex flex-col items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-4 text-center hover:border-[var(--hs-green-300)] shadow-[var(--hs-shadow-sm)] transition">

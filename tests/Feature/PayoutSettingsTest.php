@@ -7,8 +7,13 @@ use App\Models\Shop;
 use App\Models\User;
 use Database\Seeders\PayoutSettingsSeeder;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(function () {
+    if (! config('marketplace.features.payouts_enabled')) {
+        $this->markTestSkipped('payouts_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
     $this->seed(PayoutSettingsSeeder::class);
 });
@@ -117,7 +122,7 @@ test('invalid values are rejected - commission rate exceeds 1', function () {
 
     $response->assertUnprocessable()
         ->assertJsonPath('error.code', 'VALIDATION_ERROR')
-        ->assertJson(fn (Illuminate\Testing\Fluent\AssertableJson $json) => $json->has('error.fields.commission_fee_rate')
+        ->assertJson(fn (AssertableJson $json) => $json->has('error.fields.commission_fee_rate')
             ->etc()
         );
 });
@@ -133,7 +138,7 @@ test('invalid values are rejected - non-numeric dispute hold days', function () 
 
     $response->assertUnprocessable()
         ->assertJsonPath('error.code', 'VALIDATION_ERROR')
-        ->assertJson(fn (Illuminate\Testing\Fluent\AssertableJson $json) => $json->has('error.fields.dispute_hold_days')
+        ->assertJson(fn (AssertableJson $json) => $json->has('error.fields.dispute_hold_days')
             ->etc()
         );
 });

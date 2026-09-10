@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Events\OrderCancelled;
 use App\Livewire\Account\Orders\OrderDetail;
 use App\Models\Order;
 use App\Models\Shop;
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.orders_enabled')) {
+        $this->markTestSkipped('orders_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->buyer = User::factory()->create(['email_verified_at' => now()]);
@@ -45,7 +50,7 @@ test('back link points to the orders index route', function () {
 });
 
 test('cancelling a pending payment order dispatches the OrderCancelled event', function () {
-    Event::fake([App\Events\OrderCancelled::class]);
+    Event::fake([OrderCancelled::class]);
 
     $order = Order::factory()->pendingPayment()->create([
         'buyer_user_id' => $this->buyer->id,
@@ -58,11 +63,11 @@ test('cancelling a pending payment order dispatches the OrderCancelled event', f
 
     expect($order->fresh()->status)->toBe('cancelled');
 
-    Event::assertDispatched(App\Events\OrderCancelled::class, fn ($event) => $event->order->id === $order->id);
+    Event::assertDispatched(OrderCancelled::class, fn ($event) => $event->order->id === $order->id);
 });
 
 test('cancelling a non-pending order does not dispatch the OrderCancelled event', function () {
-    Event::fake([App\Events\OrderCancelled::class]);
+    Event::fake([OrderCancelled::class]);
 
     $order = Order::factory()->paid()->create([
         'buyer_user_id' => $this->buyer->id,
@@ -75,5 +80,5 @@ test('cancelling a non-pending order does not dispatch the OrderCancelled event'
 
     expect($order->fresh()->status)->toBe('paid');
 
-    Event::assertNotDispatched(App\Events\OrderCancelled::class);
+    Event::assertNotDispatched(OrderCancelled::class);
 });

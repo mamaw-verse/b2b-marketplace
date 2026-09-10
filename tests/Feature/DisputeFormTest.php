@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.disputes_enabled')) {
+        $this->markTestSkipped('disputes_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
     Storage::fake('s3');
     Storage::fake('local');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\CreatePayoutBatchAction;
 use App\Actions\ReleasePayoutAction;
+use App\Contracts\DltDisbursementServiceInterface;
 use App\Models\Dispute;
 use App\Models\LedgerEntry;
 use App\Models\Order;
@@ -12,11 +13,20 @@ use App\Models\PayoutItem;
 use App\Models\SellerPayoutAccount;
 use App\Models\Shop;
 use App\Models\User;
+use App\Services\DltDisbursementService;
+use Database\Seeders\PayoutSettingsSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function () {
-    $this->seed(Database\Seeders\RolePermissionSeeder::class);
-    $this->seed(Database\Seeders\PayoutSettingsSeeder::class);
+    if (! config('marketplace.features.payouts_enabled')) {
+        $this->markTestSkipped('payouts_enabled is disabled');
+    }
+
+    $this->seed(RolePermissionSeeder::class);
+    $this->seed(PayoutSettingsSeeder::class);
 });
 
 function createEligibleSetup(float $orderTotal = 1000.00): array
@@ -210,8 +220,8 @@ test('release transitions pending to processing to completed with mock success',
 test('release with real service failure sets status failed', function () {
     // Bind real (always-fails) service
     app()->singleton(
-        App\Contracts\DltDisbursementServiceInterface::class,
-        App\Services\DltDisbursementService::class,
+        DltDisbursementServiceInterface::class,
+        DltDisbursementService::class,
     );
 
     $setup = createEligibleSetup();
@@ -273,9 +283,9 @@ test('admin without payout.release permission cannot release', function () {
     $admin->assignRole('admin');
 
     // Remove payout.release from the admin role for this test
-    $adminRole = Spatie\Permission\Models\Role::findByName('admin', 'web');
+    $adminRole = Role::findByName('admin', 'web');
     $adminRole->revokePermissionTo('payout.release');
-    app()[Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
     $this->actingAs($admin)
         ->postJson("/api/v1/admin/payouts/{$payout->id}/release")

@@ -7,8 +7,11 @@ namespace App\Livewire\Portal;
 use App\Models\CertificationApplication;
 use App\Models\Rfq;
 use App\Models\Shop;
+use App\Models\ShopCertificate;
 use App\Models\Subscription;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -37,6 +40,26 @@ final class Dashboard extends Component
     public function shop(): ?Shop
     {
         return Auth::user()?->shop;
+    }
+
+    /**
+     * The best halal certificate for the stat card, chosen by status priority:
+     * active > expiring_soon > under_review > expired.
+     *
+     * Returns null when the shop has no certificates at all.
+     */
+    #[Computed]
+    public function bestCertificate(): ?ShopCertificate
+    {
+        if (! $this->shop) {
+            return null;
+        }
+
+        $priority = ['active', 'expiring_soon', 'under_review', 'expired'];
+
+        return $this->shop->certificates()->get()
+            ->sortBy(fn (ShopCertificate $cert) => array_search($cert->status, $priority, true))
+            ->first();
     }
 
     /**
@@ -75,7 +98,23 @@ final class Dashboard extends Component
     }
 
     /**
-     * Count of pending/in-progress RFQs the buyer has sent.
+     * Recent RFQs the buyer has submitted, with recipients eager-loaded
+     * so admin_status is available without N+1 queries.
+     *
+     * @return Collection<int, Rfq>
+     */
+    #[Computed]
+    public function recentRfqs(): Collection
+    {
+        return Rfq::where('user_id', Auth::id())
+            ->with('recipients')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+    }
+
+    /**
+     * Count of non-closed RFQs the buyer has sent.
      * Used for the buyer's quick-stats summary.
      */
     #[Computed]
@@ -106,7 +145,7 @@ final class Dashboard extends Component
         ];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.portal.dashboard');
     }

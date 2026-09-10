@@ -14,7 +14,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Livewire/CompanyHub/Fulfilment/** | .ai/rules/fulfilment.md |
 | resources/js/** | .ai/rules/js.md |
 | resources/views/livewire/company-hub/rfq-detail.blade.php, resources/views/livewire/company-hub/quotation-builder.blade.php, resources/views/livewire/company-hub/** | .ai/rules/livewire-company-hub.md |
-| app/Livewire/**, app/Livewire/**/*.php, app/Livewire/**/RfqDetail.php | .ai/rules/livewire.md |
+| app/Livewire/**, app/Livewire/**/*.php, app/Livewire/**/RfqDetail.php, app/Livewire/**/*Certificate* | .ai/rules/livewire.md |
 | resources/views/vendor/mail/** | .ai/rules/mail.md |
 | app/Models/Review.php | .ai/rules/models.md |
 | resources/views/livewire/company-hub/orders/** | .ai/rules/orders.md |

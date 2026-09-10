@@ -38,6 +38,9 @@ final class SponsoredContentList extends Component
     #[Locked]
     public ?int $confirmingDeleteId = null;
 
+    #[Locked]
+    public ?int $confirmingToggleId = null;
+
     // ── Tier modal state ────────────────────────────────────────────
 
     #[Locked]
@@ -135,15 +138,26 @@ final class SponsoredContentList extends Component
 
     // ── Content actions ─────────────────────────────────────────────
 
-    public function toggleActive(int $id): void
+    public function confirmToggleActive(int $id): void
+    {
+        $this->confirmingToggleId = $id;
+        Flux::modal('toggle-confirm')->show();
+    }
+
+    public function toggleActive(): void
     {
         Gate::authorize('sponsored_content.manage');
 
-        $item = SponsoredContent::findOrFail($id);
+        if (! $this->confirmingToggleId) {
+            return;
+        }
+
+        $item = SponsoredContent::findOrFail($this->confirmingToggleId);
         $item->update(['is_active' => ! $item->is_active]);
+        $this->confirmingToggleId = null;
         unset($this->items);
 
-        flux()->toast($item->is_active ? 'Content activated.' : 'Content deactivated.');
+        Flux::toast($item->is_active ? __('Content activated.') : __('Content deactivated.'), variant: 'success');
     }
 
     public function confirmDelete(int $id): void
@@ -164,7 +178,7 @@ final class SponsoredContentList extends Component
         $this->confirmingDeleteId = null;
         unset($this->items);
 
-        flux()->toast('Sponsored content deleted.');
+        Flux::toast(__('Sponsored content deleted.'), variant: 'success');
     }
 
     // ── Tier actions (modal) ────────────────────────────────────────
@@ -198,7 +212,7 @@ final class SponsoredContentList extends Component
         $this->tierEditWeight = 50;
         unset($this->allTiers, $this->tiers);
 
-        flux()->toast(__('Tier updated.'));
+        Flux::toast(__('Tier updated.'), variant: 'success');
     }
 
     public function cancelTierEdit(): void
@@ -216,7 +230,7 @@ final class SponsoredContentList extends Component
         $tier->update(['is_active' => ! $tier->is_active]);
         unset($this->allTiers, $this->tiers);
 
-        flux()->toast($tier->is_active ? __('Tier activated.') : __('Tier deactivated.'));
+        Flux::toast($tier->is_active ? __('Tier activated.') : __('Tier deactivated.'), variant: 'success');
     }
 
     public function createTier(): void
@@ -237,7 +251,7 @@ final class SponsoredContentList extends Component
         $this->newTierWeight = 50;
         unset($this->allTiers, $this->tiers);
 
-        flux()->toast(__('Tier created.'));
+        Flux::toast(__('Tier created.'), variant: 'success');
     }
 
     public function confirmTierDelete(int $id): void
@@ -257,7 +271,7 @@ final class SponsoredContentList extends Component
         $tier = SponsoredContentTier::findOrFail($this->confirmingTierDeleteId);
 
         if ($tier->sponsoredContent()->exists()) {
-            flux()->toast(__('Cannot delete — tier is in use by sponsored content entries.'), variant: 'danger');
+            Flux::toast(__('Cannot delete — tier is in use by sponsored content entries.'), variant: 'danger');
             $this->confirmingTierDeleteId = null;
 
             return;
@@ -267,7 +281,7 @@ final class SponsoredContentList extends Component
         $this->confirmingTierDeleteId = null;
         unset($this->allTiers, $this->tiers);
 
-        flux()->toast(__('Tier deleted.'));
+        Flux::toast(__('Tier deleted.'), variant: 'success');
     }
 
     public function render(): View

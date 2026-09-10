@@ -33,16 +33,7 @@
                         <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Reference File') }}</h2>
                     </div>
                     <div class="p-6">
-                        @if ($this->isImage())
-                            <div class="overflow-hidden rounded-lg border border-[var(--hs-neutral-200)]">
-                                <img
-                                    src="{{ $this->referenceFileUrl() }}"
-                                    alt="{{ __('Reference image') }}"
-                                    class="max-h-96 w-full object-contain"
-                                    loading="lazy"
-                                />
-                            </div>
-                        @elseif ($sourcingRequest->reference_file_path)
+                        @if ($sourcingRequest->reference_file_path)
                             <div class="flex items-center gap-3 rounded-lg border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] px-4 py-3">
                                 <flux:icon name="document-text" class="size-5 shrink-0 text-[var(--hs-neutral-400)]" />
                                 <div class="min-w-0 flex-1">

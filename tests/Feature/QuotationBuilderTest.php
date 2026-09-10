@@ -15,6 +15,10 @@ use Database\Seeders\RolePermissionSeeder;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.quotations_enabled')) {
+        $this->markTestSkipped('quotations_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->seller = User::factory()->create();

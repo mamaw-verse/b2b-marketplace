@@ -1,4 +1,9 @@
-<div x-data="dashboardCharts()" x-effect="$wire.metrics && $nextTick(() => updateCharts($wire.metrics))" class="space-y-6">
+<div
+    x-data="dashboardCharts()"
+    x-init="init()"
+    x-effect="$wire.metrics && $nextTick(() => updateCharts($wire.metrics))"
+    class="space-y-6"
+>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">{{ __('Platform Dashboard') }}</flux:heading>
@@ -39,6 +44,7 @@
                 </div>
             </flux:card>
         @endif
+
         @if(config('marketplace.features.payouts_enabled'))
             <flux:card>
                 <div class="flex flex-col">
@@ -47,12 +53,16 @@
                 </div>
             </flux:card>
         @endif
-        <flux:card>
-            <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Sellers') }}</span>
-                <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['total_active_sellers'] ?? 0 }}</span>
-            </div>
-        </flux:card>
+
+        <a href="{{ route('admin.merchants.index') }}" wire:navigate class="block group">
+            <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Businesses') }}</span>
+                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['total_active_sellers'] ?? 0 }}</span>
+                </div>
+            </flux:card>
+        </a>
+
         @if(config('marketplace.features.reviews_enabled'))
             <flux:card>
                 <div class="flex flex-col">
@@ -67,8 +77,43 @@
                 </div>
             </flux:card>
         @endif
-        
-        {{-- GA Stats Integrated --}}
+
+        {{-- Open RFQs (pending + in_progress) --}}
+        @if(config('marketplace.features.admin_rfq_management_enabled'))
+            <a href="{{ route('admin.rfqs.index', ['status' => 'pending']) }}" wire:navigate class="block group">
+                <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Open RFQs') }}</span>
+                        <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['open_rfq_count'] ?? 0 }}</span>
+                        <span class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ __('pending & in progress') }}</span>
+                    </div>
+                </flux:card>
+            </a>
+        @endif
+
+        {{-- Open Sourcing Requests (pending + in_progress) --}}
+        <a href="{{ route('admin.sourcing-requests.index', ['status' => 'pending']) }}" wire:navigate class="block group">
+            <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Open Sourcing') }}</span>
+                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['open_sourcing_count'] ?? 0 }}</span>
+                    <span class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ __('pending & in progress') }}</span>
+                </div>
+            </flux:card>
+        </a>
+
+        {{-- Expiring / Expired Certificates --}}
+        <a href="{{ route('admin.certifications.index', ['status' => 'expiring_soon']) }}" wire:navigate class="block group">
+            <flux:card class="h-full transition {{ ($metrics['expiring_cert_count'] ?? 0) > 0 ? 'group-hover:ring-2 group-hover:ring-red-400/60' : 'group-hover:ring-2 group-hover:ring-amber-400/60' }}">
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Expiring Certs') }}</span>
+                    <span class="text-2xl font-semibold {{ ($metrics['expiring_cert_count'] ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white' }} mt-1 tabular-nums">{{ $metrics['expiring_cert_count'] ?? 0 }}</span>
+                    <span class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ __('expiring soon & expired') }}</span>
+                </div>
+            </flux:card>
+        </a>
+
+        {{-- GA Stats --}}
         <flux:card>
             <div class="flex flex-col">
                 <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Users (GA)') }}</span>
@@ -105,7 +150,7 @@
                 <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
                     @if (isset($metrics['ga']) && $metrics['ga'] !== null && ($metrics['ga']['avg_session_duration'] ?? null) !== null)
                         @php
-                            $seconds = (int) $metrics['ga']['avg_session_duration'];
+                            $seconds = max(0, (int) $metrics['ga']['avg_session_duration']);
                             $minutes = floor($seconds / 60);
                             $secs = $seconds % 60;
                         @endphp
@@ -160,14 +205,14 @@
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Subscriptions') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
-                    <div class="relative" style="width: 180px; height: 180px;">
-                        <canvas x-ref="subscriptionsDonut"></canvas>
+                    <div class="shrink-0" style="width: 180px; height: 180px;">
+                        <canvas x-ref="subscriptionsDonut" width="180" height="180"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
-                        <p class="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{{ __('Counts by Plan') }}</p>
+                        <p class="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{{ __('Counts by Status') }}</p>
                         @forelse($metrics['subscriptions']['counts'] ?? [] as $count)
                             <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ $count->plan_name }} — <span class="capitalize">{{ $count->status }}</span></span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ $count->status }}</span>
                                 <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $count->count }}</span>
                             </div>
                         @empty
@@ -186,8 +231,8 @@
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Certifications') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
-                    <div class="relative" style="width: 180px; height: 180px;">
-                        <canvas x-ref="certificationsDonut"></canvas>
+                    <div class="shrink-0" style="width: 180px; height: 180px;">
+                        <canvas x-ref="certificationsDonut" width="180" height="180"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
                         @foreach(['pending', 'approved', 'rejected'] as $status)
@@ -202,33 +247,13 @@
         @endif
     </div>
 
-    {{-- RFQs & Sponsored Content --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        @if(config('marketplace.features.admin_rfq_management_enabled'))
-            <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('RFQs') }}</flux:heading>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Total RFQs Created') }}</span>
-                        <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['rfqs']['volume'] ?? 0 }}</span>
-                    </div>
-                    <div class="flex flex-col p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                        @php
-                            $rfqSeconds = $metrics['rfqs']['avg_resolution_time_seconds'] ?? 0;
-                            $rfqHours = floor($rfqSeconds / 3600);
-                        @endphp
-                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Avg Resolution Time') }}</span>
-                        <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ __(':hours hrs', ['hours' => $rfqHours]) }}</span>
-                    </div>
-                </div>
-            </flux:card>
-        @endif
-
-        @if(config('marketplace.features.sponsored_content_enabled'))
+    {{-- Sponsored Content --}}
+    @if(config('marketplace.features.sponsored_content_enabled'))
+        <div class="grid grid-cols-1 gap-6">
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Sponsored Content Performance') }}</flux:heading>
                 <div class="relative" style="height: 200px;">
-                    <canvas x-ref="sponsoredChart"></canvas>
+                    <canvas x-ref="sponsoredChart" style="height: 200px;"></canvas>
                 </div>
                 <div class="mt-6">
                     @forelse($metrics['sponsored_content'] ?? [] as $event)
@@ -241,14 +266,20 @@
                     @endforelse
                 </div>
             </flux:card>
-        @endif
-    </div>
+        </div>
+    @endif
 
     {{-- Chart.js + Alpine dashboard component --}}
     <script>
         window.dashboardCharts = function () {
             return {
                 instances: {},
+
+                // Pending build configs waiting for their canvas to be sized.
+                pending: {},
+
+                // Single shared ResizeObserver for all unsized canvases.
+                resizeObserver: null,
 
                 colors: {
                     green: '#10b981',
@@ -263,17 +294,34 @@
                     text: '#71717a',
                 },
 
+                // Called once by x-init. x-effect handles subsequent metric updates.
+                init() {
+                    this.$nextTick(() => this.updateCharts(this.$wire.metrics));
+                },
+
                 defaultOptions() {
                     return {
-                        responsive: true,
+                        responsive: false,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        animation: { duration: 250 },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { mode: 'index', intersect: false },
+                        },
+                        interaction: { mode: 'index', intersect: false },
                         scales: {
                             x: {
                                 grid: { display: false },
-                                ticks: { color: this.colors.text, font: { size: 11 }, maxTicksLimit: 10 },
+                                ticks: {
+                                    color: this.colors.text,
+                                    font: { size: 11 },
+                                    maxTicksLimit: 10,
+                                    autoSkip: true,
+                                    maxRotation: 0,
+                                },
                             },
                             y: {
+                                beginAtZero: true,
                                 grid: { color: 'rgba(161, 161, 170, 0.1)' },
                                 ticks: { color: this.colors.text, font: { size: 11 } },
                             },
@@ -281,39 +329,153 @@
                     };
                 },
 
-                updateCharts(metrics) {
-                    this.initRevenueChart(metrics.revenue_trend || []);
-                    this.initOrdersChart(metrics.revenue_trend || []);
-                    this.initSubscriptionsDonut(metrics.subscriptions || {});
-                    this.initCertificationsDonut(metrics.certifications || {});
-                    this.initSponsoredChart(metrics.sponsored_content || []);
+                /**
+                 * Stamp explicit pixel width/height onto a canvas so Chart.js
+                 * never has to call getContext() on a zero-size element.
+                 * Uses the parent container's dimensions with a fallback.
+                 */
+                stampCanvasSize(canvas, fallbackWidth, fallbackHeight) {
+                    const parent = canvas.parentElement;
+                    const w = (parent && parent.offsetWidth > 0) ? parent.offsetWidth : fallbackWidth;
+                    const h = (parent && parent.offsetHeight > 0) ? parent.offsetHeight : fallbackHeight;
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.style.width = w + 'px';
+                    canvas.style.height = h + 'px';
+                },
+
+                isLiveCanvas(canvas) {
+                    return !!(canvas && canvas.isConnected && canvas instanceof HTMLCanvasElement);
+                },
+
+                toNumber(value, fallback = 0) {
+                    const n = Number(value);
+                    return Number.isFinite(n) ? n : fallback;
+                },
+
+                normalizeArray(value) {
+                    return Array.isArray(value) ? value : [];
                 },
 
                 destroyChart(key) {
-                    if (this.instances[key]) {
-                        this.instances[key].destroy();
-                        this.instances[key] = null;
+                    const chart = this.instances[key];
+                    if (chart) {
+                        try { chart.destroy(); } catch (e) { /* already gone */ }
                     }
+                    this.instances[key] = null;
+                },
+
+                // Cancel a pending build and stop observing its canvas.
+                cancelPending(key) {
+                    const item = this.pending[key];
+                    if (!item) return;
+                    if (item.canvas && this.resizeObserver) {
+                        try { this.resizeObserver.unobserve(item.canvas); } catch (e) { /* already removed */ }
+                    }
+                    delete this.pending[key];
+                },
+
+                ensureResizeObserver() {
+                    if (this.resizeObserver || typeof ResizeObserver === 'undefined') return;
+
+                    this.resizeObserver = new ResizeObserver((entries) => {
+                        entries.forEach((entry) => {
+                            const canvas = entry.target;
+                            const match = Object.entries(this.pending)
+                                .find(([, item]) => item.canvas === canvas);
+                            if (!match) return;
+                            const [key, item] = match;
+                            if (!this.isLiveCanvas(canvas) || canvas.offsetWidth <= 0 || canvas.offsetHeight <= 0) return;
+                            this.cancelPending(key);
+                            this.destroyChart(key);
+                            // FIX #1: the canvas must be stamped with its real (or fallback)
+                            // pixel dimensions before Chart.js builds against it, exactly
+                            // like the immediate-build and requestAnimationFrame paths do.
+                            // Without this, Chart.js falls back to the HTML canvas default
+                            // of 300x150 and gets stretched by CSS, distorting the chart.
+                            this.stampCanvasSize(canvas, item.fallbackWidth, item.fallbackHeight);
+                            try { this.instances[key] = item.build(canvas); } catch (e) { console.error(`Chart "${key}" init failed`, e); }
+                        });
+                        if (Object.keys(this.pending).length === 0) {
+                            this.resizeObserver.disconnect();
+                            this.resizeObserver = null;
+                        }
+                    });
+                },
+
+                /**
+                 * Safely initialise a Chart.js instance.
+                 *
+                 * Draws immediately when the canvas already has dimensions.
+                 * Otherwise queues it for a ResizeObserver callback so Chart.js
+                 * never receives a zero-size (null-context) canvas.
+                 */
+                safeInit(key, canvas, buildFn, fallbackWidth = 600, fallbackHeight = 260) {
+                    this.cancelPending(key);
+                    this.destroyChart(key);
+
+                    if (!this.isLiveCanvas(canvas)) return;
+
+                    if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
+                        this.stampCanvasSize(canvas, fallbackWidth, fallbackHeight);
+                        try { this.instances[key] = buildFn(canvas); } catch (e) { console.error(`Chart "${key}" init failed`, e); }
+                        return;
+                    }
+
+                    // Canvas not yet laid out — queue and observe.
+                    this.pending[key] = { canvas, build: buildFn, fallbackWidth, fallbackHeight };
+                    this.ensureResizeObserver();
+                    if (this.resizeObserver) {
+                        this.resizeObserver.observe(canvas);
+                    } else {
+                        // Fallback for environments without ResizeObserver.
+                        requestAnimationFrame(() => {
+                            const item = this.pending[key];
+                            if (!item || item.canvas !== canvas) return;
+                            if (!this.isLiveCanvas(canvas) || canvas.offsetWidth <= 0) return;
+                            this.cancelPending(key);
+                            this.stampCanvasSize(canvas, fallbackWidth, fallbackHeight);
+                            try { this.instances[key] = buildFn(canvas); } catch (e) { console.error(`Chart "${key}" init failed`, e); }
+                        });
+                    }
+                },
+
+                updateCharts(metrics) {
+                    if (!metrics || typeof metrics !== 'object') {
+                        this.destroyAllCharts();
+                        return;
+                    }
+
+                    // revenue_trend already contains both gmv and orders per day.
+                    const trend = this.normalizeArray(metrics.revenue_trend);
+
+                    this.initRevenueChart(trend);
+                    this.initOrdersChart(trend);
+                    this.initSubscriptionsDonut(metrics.subscriptions || {});
+                    this.initCertificationsDonut(metrics.certifications || {});
+                    this.initSponsoredChart(this.normalizeArray(metrics.sponsored_content));
                 },
 
                 initRevenueChart(trend) {
                     const canvas = this.$refs.revenueChart;
-                    if (!canvas) return;
-                    this.destroyChart('revenue');
+                    if (!canvas) { this.destroyChart('revenue'); this.cancelPending('revenue'); return; }
 
-                    this.instances.revenue = new Chart(canvas, {
+                    const data = trend.map(d => ({ date: d?.date ?? '', gmv: this.toNumber(d?.gmv) }));
+
+                    this.safeInit('revenue', canvas, (c) => new Chart(c, {
                         type: 'line',
                         data: {
-                            labels: trend.map(d => d.date),
+                            labels: data.map(d => d.date),
                             datasets: [{
                                 label: 'GMV (PHP)',
-                                data: trend.map(d => d.gmv),
+                                data: data.map(d => d.gmv),
                                 borderColor: this.colors.green,
                                 backgroundColor: this.colors.greenLight + '80',
                                 fill: true,
                                 tension: 0.3,
-                                pointRadius: trend.length > 30 ? 0 : 3,
+                                pointRadius: data.length > 30 ? 0 : 3,
                                 pointHoverRadius: 5,
+                                borderWidth: 2,
                             }],
                         },
                         options: {
@@ -322,131 +484,141 @@
                                 legend: { display: false },
                                 tooltip: {
                                     callbacks: {
-                                        label: (ctx) => 'PHP ' + ctx.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 }),
+                                        label: (ctx) => 'PHP ' + this.toNumber(ctx.parsed.y).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                                     },
                                 },
                             },
                         },
-                    });
+                    }), 600, 260); // FIX #2: explicit fallback matching this container's fixed 260px height.
                 },
 
                 initOrdersChart(trend) {
                     const canvas = this.$refs.ordersChart;
-                    if (!canvas) return;
-                    this.destroyChart('orders');
+                    if (!canvas) { this.destroyChart('orders'); this.cancelPending('orders'); return; }
 
-                    this.instances.orders = new Chart(canvas, {
+                    // revenue_trend rows include an 'orders' field — use it directly.
+                    const data = trend.map(d => ({ date: d?.date ?? '', orders: this.toNumber(d?.orders) }));
+
+                    this.safeInit('orders', canvas, (c) => new Chart(c, {
                         type: 'bar',
                         data: {
-                            labels: trend.map(d => d.date),
+                            labels: data.map(d => d.date),
                             datasets: [{
                                 label: 'Orders',
-                                data: trend.map(d => d.orders),
+                                data: data.map(d => d.orders),
                                 backgroundColor: this.colors.blue,
                                 borderRadius: 4,
                                 maxBarThickness: 24,
                             }],
                         },
-                        options: this.defaultOptions(),
-                    });
+                        options: {
+                            ...this.defaultOptions(),
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => 'Orders: ' + this.toNumber(ctx.parsed.y).toLocaleString(),
+                                    },
+                                },
+                            },
+                        },
+                    }), 600, 260); // FIX #2: explicit fallback matching this container's fixed 260px height.
                 },
 
                 initSubscriptionsDonut(subs) {
                     const canvas = this.$refs.subscriptionsDonut;
-                    if (!canvas) return;
-                    this.destroyChart('subsDonut');
+                    if (!canvas) { this.destroyChart('subsDonut'); this.cancelPending('subsDonut'); return; }
 
-                    const counts = subs.counts || [];
-                    const statusTotals = {};
+                    const counts = this.normalizeArray(subs?.counts);
+                    const totals = {};
                     counts.forEach(c => {
-                        statusTotals[c.status] = (statusTotals[c.status] || 0) + c.count;
+                        if (!c?.status) return;
+                        totals[c.status] = (totals[c.status] || 0) + this.toNumber(c?.count);
                     });
 
-                    const labels = Object.keys(statusTotals);
-                    const data = Object.values(statusTotals);
-                    const bgColors = labels.map(s => {
-                        if (s === 'active') return this.colors.green;
-                        if (s === 'trialing') return this.colors.blue;
-                        return this.colors.neutral;
-                    });
+                    const labels = Object.keys(totals);
+                    const data = labels.map(l => totals[l]);
 
-                    if (data.length === 0) return;
+                    // Destroy old chart when data disappears — prevents stale donuts.
+                    if (data.length === 0) { this.destroyChart('subsDonut'); this.cancelPending('subsDonut'); return; }
 
-                    this.instances.subsDonut = new Chart(canvas, {
+                    const bgColors = labels.map(s => s === 'active' ? this.colors.green : s === 'trialing' ? this.colors.blue : this.colors.neutral);
+
+                    this.safeInit('subsDonut', canvas, (c) => new Chart(c, {
                         type: 'doughnut',
                         data: {
                             labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
                             datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }],
                         },
                         options: {
-                            responsive: true,
+                            responsive: false,
                             maintainAspectRatio: false,
                             cutout: '65%',
                             plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 },
-                                },
+                                legend: { position: 'bottom', labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 } },
+                                tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + this.toNumber(ctx.raw).toLocaleString() } },
                             },
                         },
-                    });
+                    }), 180, 180); // FIX #2: this container is a fixed 180x180 square — was previously
+                                   // falling back to the generic 600x260 default, squishing the donut
+                                   // into the thin sliver seen in the screenshot.
                 },
 
                 initCertificationsDonut(certs) {
                     const canvas = this.$refs.certificationsDonut;
-                    if (!canvas) return;
-                    this.destroyChart('certDonut');
+                    if (!canvas) { this.destroyChart('certDonut'); this.cancelPending('certDonut'); return; }
 
                     const labels = ['pending', 'approved', 'rejected'];
-                    const data = labels.map(s => certs[s] || 0);
+                    const data = labels.map(s => this.toNumber(certs?.[s]));
+
+                    // Destroy old chart when data disappears.
+                    if (data.every(v => v === 0)) { this.destroyChart('certDonut'); this.cancelPending('certDonut'); return; }
+
                     const bgColors = [this.colors.amber, this.colors.green, this.colors.red];
 
-                    if (data.every(v => v === 0)) return;
-
-                    this.instances.certDonut = new Chart(canvas, {
+                    this.safeInit('certDonut', canvas, (c) => new Chart(c, {
                         type: 'doughnut',
                         data: {
                             labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
                             datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }],
                         },
                         options: {
-                            responsive: true,
+                            responsive: false,
                             maintainAspectRatio: false,
                             cutout: '65%',
                             plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 },
-                                },
+                                legend: { position: 'bottom', labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 } },
+                                tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + this.toNumber(ctx.raw).toLocaleString() } },
                             },
                         },
-                    });
+                    }), 180, 180); // FIX #2: same 180x180 fixed container as the subscriptions donut.
                 },
 
                 initSponsoredChart(events) {
                     const canvas = this.$refs.sponsoredChart;
-                    if (!canvas) return;
-                    this.destroyChart('sponsored');
+                    if (!canvas) { this.destroyChart('sponsored'); this.cancelPending('sponsored'); return; }
 
-                    if (!events.length) return;
+                    if (!events.length) { this.destroyChart('sponsored'); this.cancelPending('sponsored'); return; }
 
-                    const tiers = [...new Set(events.map(e => e.tier_name))];
-                    const eventTypes = [...new Set(events.map(e => e.event_type))];
+                    const tiers = [...new Set(events.map(e => e?.tier_name).filter(Boolean))];
+                    const eventTypes = [...new Set(events.map(e => e?.event_type).filter(Boolean))];
+
+                    if (!tiers.length || !eventTypes.length) { this.destroyChart('sponsored'); this.cancelPending('sponsored'); return; }
 
                     const colorPalette = [this.colors.green, this.colors.blue, this.colors.amber, this.colors.red];
 
                     const datasets = eventTypes.map((type, i) => ({
                         label: type.charAt(0).toUpperCase() + type.slice(1),
                         data: tiers.map(tier => {
-                            const match = events.find(e => e.tier_name === tier && e.event_type === type);
-                            return match ? match.count : 0;
+                            const match = events.find(e => e?.tier_name === tier && e?.event_type === type);
+                            return match ? this.toNumber(match.count) : 0;
                         }),
                         backgroundColor: colorPalette[i % colorPalette.length],
                         borderRadius: 4,
                         maxBarThickness: 20,
                     }));
 
-                    this.instances.sponsored = new Chart(canvas, {
+                    this.safeInit('sponsored', canvas, (c) => new Chart(c, {
                         type: 'bar',
                         data: { labels: tiers, datasets },
                         options: {
@@ -464,11 +636,21 @@
                                 y: { ...this.defaultOptions().scales.y, stacked: true },
                             },
                         },
-                    });
+                    }), 800, 200); // FIX #2: this container's CSS height is fixed at 200px, not the
+                                   // generic 260px default — mismatched height was scaling/positioning
+                                   // the bars outside the visible plot area, which is why the screenshot
+                                   // shows gridlines/legend but no bars despite real data (233, 235, 1...).
                 },
 
-                init() {
-                    this.$nextTick(() => this.updateCharts(this.$wire.metrics));
+                destroyAllCharts() {
+                    Object.keys(this.instances).forEach(k => this.destroyChart(k));
+                    Object.keys(this.pending).forEach(k => this.cancelPending(k));
+                    if (this.resizeObserver) { this.resizeObserver.disconnect(); this.resizeObserver = null; }
+                },
+
+                // Alpine calls this when the component is torn down (wire:navigate away).
+                destroy() {
+                    this.destroyAllCharts();
                 },
             };
         };

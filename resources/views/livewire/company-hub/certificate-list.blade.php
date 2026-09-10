@@ -51,6 +51,9 @@
                                     @case('expired')
                                         <flux:badge color="red" size="sm" icon="x-circle">{{ __('Expired') }}</flux:badge>
                                         @break
+                                    @case('under_review')
+                                        <flux:badge color="blue" size="sm" icon="magnifying-glass">{{ __('Under Review') }}</flux:badge>
+                                        @break
                                     @default
                                         <flux:badge size="sm">{{ str($certificate->status)->headline() }}</flux:badge>
                                 @endswitch
@@ -87,7 +90,7 @@
 
     {{-- Add Certificate Modal --}}
     <flux:modal wire:model="showAddModal" class="md:w-[32rem]">
-        <form wire:submit="saveCertificate" class="space-y-5">
+        <form wire:submit="saveCertificate" class="space-y-5" @if ($uploadedScanStatus === 'pending') wire:poll.5s="refreshScanStatus" @endif>
             <div>
                 <flux:heading size="lg">{{ __('Add Certificate') }}</flux:heading>
                 <flux:text class="mt-1">{{ __('Provide the expiry date and upload the certificate file.') }}</flux:text>
@@ -95,7 +98,7 @@
 
             <flux:field>
                 <flux:label>{{ __('Expiry Date') }}</flux:label>
-                <flux:input wire:model="expiry_date" type="date" />
+                <flux:input wire:model.live="expiry_date" type="date" min="{{ now()->addDay()->format('Y-m-d') }}" />
                 <flux:error name="expiry_date" />
             </flux:field>
 
@@ -155,9 +158,22 @@
 
             <div class="flex justify-end gap-3">
                 <flux:button variant="ghost" wire:click="$set('showAddModal', false)">{{ __('Cancel') }}</flux:button>
-                <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-                    {{ __('Save Certificate') }}
-                </flux:button>
+                @php $ready = $this->isReadyToSave(); @endphp
+                @if (! $ready)
+                    <flux:button
+                        type="submit"
+                        variant="primary"
+                        wire:loading.attr="disabled"
+                        disabled
+                        tooltip="{{ $uploadedScanStatus === 'pending' ? __('Waiting for security scan to complete…') : __('Please fill in all fields and upload a certificate file.') }}"
+                    >
+                        {{ __('Save Certificate') }}
+                    </flux:button>
+                @else
+                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
+                        {{ __('Save Certificate') }}
+                    </flux:button>
+                @endif
             </div>
         </form>
     </flux:modal>

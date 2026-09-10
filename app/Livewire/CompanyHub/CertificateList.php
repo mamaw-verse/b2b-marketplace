@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub;
 
 use App\Livewire\Concerns\HasDocumentViewer;
+use App\Models\Media;
 use App\Models\ShopCertificate;
+use App\Models\User;
+use App\Notifications\CertificateSubmittedNotification;
 use App\Services\MediaUploadService;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -102,6 +106,38 @@ final class CertificateList extends Component
         $this->resetErrorBag('certificateFile');
     }
 
+    /**
+     * Polled every 5 s while the uploaded file is still scanning.
+     * Re-reads scan_status from the DB and updates the local property.
+     */
+    public function refreshScanStatus(): void
+    {
+        if (! $this->uploadedMediaId) {
+            return;
+        }
+
+        $media = Media::find($this->uploadedMediaId);
+
+        if ($media === null) {
+            return;
+        }
+
+        $this->uploadedScanStatus = $media->scan_status;
+    }
+
+    /**
+     * True only when the form is fully ready to submit:
+     * expiry date filled, a file uploaded, and that file passed its scan.
+     * Not cached — evaluated fresh on every render so the button reacts
+     * immediately as the user fills each field.
+     */
+    public function isReadyToSave(): bool
+    {
+        return $this->expiry_date !== ''
+            && $this->uploadedMediaId !== null
+            && $this->uploadedScanStatus === 'clean';
+    }
+
     public function saveCertificate(): void
     {
         $this->validate(['expiry_date' => ['required', 'date', 'after:today']]);
@@ -114,20 +150,23 @@ final class CertificateList extends Component
 
         $shop = Auth::user()->shop;
 
-        ShopCertificate::create([
+        $certificate = ShopCertificate::create([
             'shop_id' => $shop->id,
             'expiry_date' => $this->expiry_date,
             'media_id' => $this->uploadedMediaId,
-            'status' => 'active',
+            'status' => 'under_review',
             'is_verified' => false,
         ]);
+
+        $admins = User::role('admin')->get();
+        NotificationFacade::send($admins, new CertificateSubmittedNotification($certificate->load('shop')));
 
         unset($this->certificates);
 
         $this->showAddModal = false;
         $this->resetAddFields();
 
-        Flux::toast(__('Certificate added successfully.'), variant: 'success');
+        Flux::toast(__('Certificate submitted for review.'), variant: 'success');
     }
 
     public function render()

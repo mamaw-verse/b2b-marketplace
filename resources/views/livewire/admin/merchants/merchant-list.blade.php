@@ -2,7 +2,7 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Sellers') }}</h1>
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Businesses') }}</h1>
             <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Manage sellers across the marketplace.') }}</p>
         </div>
 
@@ -18,13 +18,6 @@
                         <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
                         <flux:select.option value="suspended">{{ __('Suspended') }}</flux:select.option>
                         <flux:select.option value="onboarding">{{ __('Onboarding') }}</flux:select.option>
-                    </flux:select>
-
-                    <flux:select wire:model.live="countryFilter" class="w-40" placeholder="{{ __('All Countries') }}">
-                        <flux:select.option value="PH">{{ __('Philippines') }}</flux:select.option>
-                        <flux:select.option value="MY">{{ __('Malaysia') }}</flux:select.option>
-                        <flux:select.option value="ID">{{ __('Indonesia') }}</flux:select.option>
-                        <flux:select.option value="SA">{{ __('Saudi Arabia') }}</flux:select.option>
                     </flux:select>
 
                     <flux:select wire:model.live="subscriptionFilter" class="w-40" placeholder="{{ __('Any Subscription') }}">

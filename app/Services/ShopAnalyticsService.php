@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Shop;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,7 @@ final class ShopAnalyticsService
      *
      * @return array<string, mixed>
      */
-    public function reports(Shop $shop, int $windowDays, \Carbon\CarbonInterface $from, \Carbon\CarbonInterface $to): array
+    public function reports(Shop $shop, int $windowDays, CarbonInterface $from, CarbonInterface $to): array
     {
         $ordersQuery = Order::where('shop_id', $shop->id)
             ->whereIn('status', ['completed', 'refunded'])
@@ -218,7 +219,7 @@ final class ShopAnalyticsService
      *
      * @return array<int, array{date: string, gmv: float, orders: int}>
      */
-    public function platformRevenueTrend(\Carbon\CarbonInterface $from, \Carbon\CarbonInterface $to): array
+    public function platformRevenueTrend(CarbonInterface $from, CarbonInterface $to): array
     {
         $rows = Order::whereIn('status', ['completed', 'refunded'])
             ->whereBetween('paid_at', [$from, $to])
@@ -293,9 +294,8 @@ final class ShopAnalyticsService
     public function platformSubscriptions(): array
     {
         $counts = DB::table('subscriptions')
-            ->join('subscription_plans', 'subscription_plans.id', '=', 'subscriptions.subscription_plan_id')
-            ->select('subscriptions.status', 'subscription_plans.name as plan_name', DB::raw('COUNT(*) as count'))
-            ->groupBy('subscriptions.status', 'subscription_plans.name')
+            ->select('subscriptions.status', DB::raw('COUNT(*) as count'))
+            ->groupBy('subscriptions.status')
             ->get();
 
         $trialToPaid = DB::table('subscriptions')
@@ -325,7 +325,7 @@ final class ShopAnalyticsService
             ->toArray();
     }
 
-    public function platformRfqs(\Carbon\CarbonInterface $from, \Carbon\CarbonInterface $to): array
+    public function platformRfqs(CarbonInterface $from, CarbonInterface $to): array
     {
         $volume = DB::table('rfqs')
             ->whereBetween('created_at', [$from, $to])

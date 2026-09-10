@@ -8,6 +8,10 @@ use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 
 beforeEach(function () {
+    if (! config('marketplace.features.orders_enabled')) {
+        $this->markTestSkipped('orders_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->seller = User::factory()->create();

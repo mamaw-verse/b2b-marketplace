@@ -22,15 +22,13 @@ final class MerchantList extends Component
 
     public string $statusFilter = '';
 
-    public string $countryFilter = '';
-
     public string $subscriptionFilter = '';
 
     public string $certificationFilter = '';
 
     public function updated($property): void
     {
-        if (in_array($property, ['search', 'statusFilter', 'countryFilter', 'subscriptionFilter', 'certificationFilter'])) {
+        if (in_array($property, ['search', 'statusFilter', 'subscriptionFilter', 'certificationFilter'])) {
             $this->resetPage();
         }
     }
@@ -50,10 +48,6 @@ final class MerchantList extends Component
 
         if ($this->statusFilter) {
             $query->where('status', $this->statusFilter);
-        }
-
-        if ($this->countryFilter) {
-            $query->where('country_code', $this->countryFilter);
         }
 
         if ($this->subscriptionFilter) {

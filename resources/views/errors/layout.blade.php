@@ -65,7 +65,7 @@
                                         </a>
                                     @endunless
                                     @if(auth()->user()->hasRole('admin'))
-                                        <a href="{{ route('admin.onboardings.index') }}" wire:navigate @click="open = false"
+                                        <a href="{{ route('admin.dashboard.index') }}" wire:navigate @click="open = false"
                                            class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
                                             {{ __('Admin Console') }}
                                         </a>

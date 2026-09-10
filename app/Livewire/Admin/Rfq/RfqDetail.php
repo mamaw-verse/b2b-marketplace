@@ -26,7 +26,7 @@ final class RfqDetail extends Component
 
     public function mount(Rfq $rfq): void
     {
-        $this->rfq = $rfq->load(['buyer.shop', 'attachments', 'product.variants']);
+        $this->rfq = $rfq->load(['buyer.shop', 'buyer.buyerProfile', 'attachments', 'product.variants', 'product.shop']);
         // For Phase 1, each RFQ targets exactly one shop (recipient)
         $this->recipient = $rfq->recipients()->with(['shop', 'managedBy'])->firstOrFail();
 

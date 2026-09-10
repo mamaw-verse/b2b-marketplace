@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.orders_enabled')) {
+        $this->markTestSkipped('orders_enabled is disabled');
+    }
+
     Http::fake([
         '*/oauth/token' => Http::response([
             'access_token' => 'fake-bearer-token',

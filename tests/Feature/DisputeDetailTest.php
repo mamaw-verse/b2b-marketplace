@@ -10,9 +10,14 @@ use App\Models\OrderItem;
 use App\Models\Shop;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.disputes_enabled')) {
+        $this->markTestSkipped('disputes_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->buyer = User::factory()->create(['email_verified_at' => now()]);
@@ -100,4 +105,4 @@ test('a buyer cannot open a dispute that does not belong to the order', function
         ->test(DisputeDetail::class, ['order' => $this->order])
         ->call('openModal', $foreignDispute->id)
         ->assertSet('show', false);
-})->throws(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+})->throws(ModelNotFoundException::class);

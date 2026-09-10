@@ -14,6 +14,10 @@ use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
+    if (! config('marketplace.features.reviews_enabled')) {
+        $this->markTestSkipped('reviews_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
     $this->buyer = User::factory()->create();
     $this->seller = User::factory()->create();

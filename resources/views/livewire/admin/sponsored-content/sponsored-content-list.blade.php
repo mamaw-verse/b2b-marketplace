@@ -125,7 +125,7 @@
                                         icon="pencil-square"
                                     />
                                     <flux:button
-                                        wire:click="toggleActive({{ $item->id }})"
+                                        wire:click="confirmToggleActive({{ $item->id }})"
                                         size="sm"
                                         variant="ghost"
                                         icon="{{ $item->is_active ? 'eye-slash' : 'eye' }}"
@@ -285,6 +285,18 @@
             </div>
         </div>
     </flux:modal>
+
+    {{-- Toggle active confirmation --}}
+    <x-hs-confirm
+        name="toggle-confirm"
+        title="{{ __('Toggle Visibility') }}"
+        message="{{ __('Are you sure you want to change the active status of this content?') }}"
+        variant="warning"
+    >
+        <x-slot name="action">
+            <flux:button variant="primary" wire:click="toggleActive" wire:loading.attr="disabled">{{ __('Confirm') }}</flux:button>
+        </x-slot>
+    </x-hs-confirm>
 
     {{-- Delete content confirmation --}}
     <x-hs-confirm

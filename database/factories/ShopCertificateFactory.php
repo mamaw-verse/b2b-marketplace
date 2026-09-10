@@ -56,6 +56,17 @@ final class ShopCertificateFactory extends Factory
     }
 
     /**
+     * Indicate the certificate is under admin review.
+     */
+    public function underReview(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'under_review',
+            'is_verified' => false,
+        ]);
+    }
+
+    /**
      * Indicate the certificate has OTHER_NCMF body with a custom name.
      */
     public function otherBody(string $name = 'Custom Halal Board'): static

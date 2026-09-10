@@ -1,6 +1,6 @@
 {{-- Document Viewer Modal --}}
-<flux:modal wire:model="showDocumentViewer" class="w-full md:w-[64rem] lg:w-[76rem] max-w-[calc(100vw-2rem)]">
-    <div class="flex max-h-[85vh] flex-col gap-4">
+<flux:modal wire:model="showDocumentViewer" class="w-full md:w-[64rem] lg:w-[76rem] max-w-[calc(100vw-2rem)] h-[85vh] max-h-[85vh] overflow-hidden flex flex-col">
+    <div class="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
         @if ($documentPreviewUrl)
             @php
                 $media = $viewingMediaId ? \App\Models\Media::find($viewingMediaId) : null;

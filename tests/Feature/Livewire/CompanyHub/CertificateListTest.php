@@ -7,10 +7,13 @@ use App\Models\Media;
 use App\Models\Shop;
 use App\Models\ShopCertificate;
 use App\Models\User;
+use App\Notifications\CertificateSubmittedNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 it('renders the certificate list for the seller shop', function () {
     $user = User::factory()->create();
@@ -98,7 +101,13 @@ it('uploads the certificate file on selection', function () {
     expect(Media::count())->toBe(1);
 });
 
-it('saves a new certificate to the shop', function () {
+it('saves a new certificate with under_review status and notifies admins', function () {
+    Notification::fake();
+
+    $adminRole = Role::firstOrCreate(['name' => 'admin']);
+    $admin = User::factory()->create();
+    $admin->assignRole($adminRole);
+
     $user = User::factory()->create();
     $shop = Shop::factory()->create(['user_id' => $user->id, 'status' => 'active']);
     $media = Media::factory()->create(['scan_status' => 'clean']);
@@ -119,7 +128,10 @@ it('saves a new certificate to the shop', function () {
         ->and($cert->shop_id)->toBe($shop->id)
         ->and($cert->expiry_date->format('Y-m-d'))->toBe(now()->addYear()->format('Y-m-d'))
         ->and($cert->media_id)->toBe($media->id)
-        ->and($cert->status)->toBe('active');
+        ->and($cert->status)->toBe('under_review')
+        ->and($cert->is_verified)->toBeFalse();
+
+    Notification::assertSentTo($admin, CertificateSubmittedNotification::class);
 });
 
 it('rejects saving without a certificate file', function () {

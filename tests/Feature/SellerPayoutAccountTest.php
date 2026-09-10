@@ -6,9 +6,14 @@ use App\Models\SellerPayoutAccount;
 use App\Models\Shop;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
+    if (! config('marketplace.features.payouts_enabled')) {
+        $this->markTestSkipped('payouts_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 });
 
@@ -165,7 +170,7 @@ it('enforces unique constraint — cannot have two accounts for same shop', func
 
     // Attempting to create a second one should fail at DB level
     expect(fn () => SellerPayoutAccount::factory()->create(['shop_id' => $shop->id]))
-        ->toThrow(Illuminate\Database\UniqueConstraintViolationException::class);
+        ->toThrow(UniqueConstraintViolationException::class);
 });
 
 it('denies buyer from accessing payout account endpoints', function () {

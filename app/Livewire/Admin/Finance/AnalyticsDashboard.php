@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Finance;
 
 use App\Models\Order;
+use App\Models\RfqRecipient;
 use App\Models\Shop;
+use App\Models\ShopCertificate;
+use App\Models\SourcingRequest;
 use App\Services\GoogleAnalyticsService;
+use App\Services\ShopAnalyticsService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -102,8 +107,8 @@ final class AnalyticsDashboard extends Component
 
     private function loadMetrics(): void
     {
-        $from = $this->from ? \Carbon\Carbon::parse($this->from)->startOfDay() : now()->subDays(30);
-        $to = $this->to ? \Carbon\Carbon::parse($this->to)->endOfDay() : now();
+        $from = $this->from ? Carbon::parse($this->from)->startOfDay() : now()->subDays(30);
+        $to = $this->to ? Carbon::parse($this->to)->endOfDay() : now();
 
         $gmv = (float) Order::whereIn('status', ['completed', 'refunded'])
             ->whereBetween('paid_at', [$from, $to])
@@ -144,7 +149,19 @@ final class AnalyticsDashboard extends Component
             $to->format('Y-m-d'),
         );
 
-        $analyticsService = app(\App\Services\ShopAnalyticsService::class);
+        $analyticsService = app(ShopAnalyticsService::class);
+
+        $openRfqCount = RfqRecipient::query()
+            ->whereIn('admin_status', ['pending', 'in_progress'])
+            ->count();
+
+        $openSourcingCount = SourcingRequest::query()
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->count();
+
+        $expiringCertCount = ShopCertificate::query()
+            ->whereIn('status', ['expiring_soon', 'expired'])
+            ->count();
 
         $this->metrics = [
             'gmv' => $gmv,
@@ -154,6 +171,9 @@ final class AnalyticsDashboard extends Component
             'total_commission_fees_collected' => $totalCommissionFees,
             'platform_average_rating' => round($platformAverageRating, 2),
             'total_active_sellers' => $totalActiveSellers,
+            'open_rfq_count' => $openRfqCount,
+            'open_sourcing_count' => $openSourcingCount,
+            'expiring_cert_count' => $expiringCertCount,
             'ga' => $gaOverview,
             'subscriptions' => $analyticsService->platformSubscriptions(),
             'certifications' => $analyticsService->platformCertifications(),

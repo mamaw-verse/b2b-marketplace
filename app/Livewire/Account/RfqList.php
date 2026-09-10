@@ -17,7 +17,9 @@ final class RfqList extends Component
 
     public function render()
     {
-        $query = Auth::user()->rfqs()->withCount('recipients', 'quotations');
+        $query = Auth::user()->rfqs()
+            ->with('recipients')
+            ->withCount('recipients');
 
         if ($this->statusFilter) {
             $query->where('status', $this->statusFilter);

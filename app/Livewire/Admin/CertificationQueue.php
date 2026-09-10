@@ -7,10 +7,14 @@ namespace App\Livewire\Admin;
 use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\CertificationApplication;
 use App\Models\ShopCertificate;
+use App\Notifications\CertificateApprovedNotification;
+use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -23,7 +27,11 @@ final class CertificationQueue extends Component
 
     public string $search = '';
 
+    #[Url(as: 'status', except: '')]
     public string $statusFilter = '';
+
+    /** The certificate currently loaded in the document viewer modal. */
+    public ?int $viewingCertificateId = null;
 
     public function updated($property): void
     {
@@ -62,6 +70,48 @@ final class CertificationQueue extends Component
     }
 
     /**
+     * Open a shop certificate's document in the viewer and track which
+     * certificate it belongs to so the Approve button can reference it.
+     */
+    public function viewCertificate(int $certificateId): void
+    {
+        $certificate = ShopCertificate::query()->findOrFail($certificateId);
+
+        $this->viewingCertificateId = $certificateId;
+        $this->viewDocument($certificate->media_id);
+    }
+
+    /**
+     * Approve a certificate: transition to 'active', mark verified,
+     * and notify the shop owner.
+     */
+    public function approveCertificate(int $certificateId): void
+    {
+        $certificate = ShopCertificate::query()
+            ->with('shop.user')
+            ->findOrFail($certificateId);
+
+        DB::transaction(function () use ($certificate): void {
+            $certificate->update([
+                'status' => 'active',
+                'is_verified' => true,
+            ]);
+        });
+
+        $shopOwner = $certificate->shop?->user;
+
+        if ($shopOwner !== null) {
+            $shopOwner->notify(new CertificateApprovedNotification($certificate));
+        }
+
+        unset($this->certificates);
+        $this->viewingCertificateId = null;
+        $this->showDocumentViewer = false;
+
+        Flux::toast(__('Certificate approved successfully.'), variant: 'success');
+    }
+
+    /**
      * Open an application's uploaded document in the preview modal.
      */
     public function viewApplicationDocument(int $applicationId): void
@@ -72,6 +122,7 @@ final class CertificationQueue extends Component
             return;
         }
 
+        $this->viewingCertificateId = null;
         $this->viewingMediaId = null;
         $this->documentPreviewUrl = $this->applicationDocumentUrl($application->id);
         $this->showDocumentViewer = true;

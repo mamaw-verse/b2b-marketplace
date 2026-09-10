@@ -2,14 +2,97 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <flux:heading size="xl">{{ $rfq->title }}</flux:heading>
-            <flux:subheading>{{ __('Manage RFQ from :buyer', ['buyer' => $recipient->shop->registered_business_name ?? __('Unknown Buyer')]) }}</flux:subheading>
+            <flux:subheading>{{ __('Manage RFQ from :buyer', ['buyer' => $rfq->buyer?->buyerProfile?->business_name ?? $rfq->buyer_snapshot['business_name'] ?? __('Unknown Buyer')]) }}</flux:subheading>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {{-- Left Column: Buyer & RFQ Info --}}
+        {{-- Left Column: Product, RFQ Info, Buyer & Seller --}}
         <div class="space-y-6 md:col-span-2">
-            
+
+            {{-- Product Detail --}}
+            @if($rfq->product)
+                <flux:card>
+                    <flux:heading size="lg" class="mb-4">{{ __('Product for Quotation') }}</flux:heading>
+                    @php
+                        $galleryImages = collect();
+                        if ($rfq->product->featured_image_url) {
+                            $galleryImages->push($rfq->product->featured_image_url);
+                        }
+                        if ($rfq->product->gallery->count() > 0) {
+                            $featured = $rfq->product->featured_image_url ?? null;
+                            $rfq->product->gallery->each(function ($img) use ($galleryImages, $featured) {
+                                if ($img->image_url !== $featured) {
+                                    $galleryImages->push($img->image_url);
+                                }
+                            });
+                        }
+                        $galleryImages = $galleryImages->values();
+                    @endphp
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {{-- Image --}}
+                        <div class="rounded-lg overflow-hidden border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
+                            @if($galleryImages->isNotEmpty())
+                                <img
+                                    src="{{ $galleryImages->first() }}"
+                                    alt="{{ $rfq->product->name }}"
+                                    class="w-full aspect-square object-cover"
+                                    loading="lazy"
+                                />
+                            @else
+                                <div class="flex aspect-square items-center justify-center">
+                                    <flux:icon name="photo" class="size-16 text-[var(--hs-neutral-300)]" />
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Details --}}
+                        <div class="space-y-3">
+                            <a href="{{ route('storefront.product', $rfq->product) }}" target="_blank"
+                               class="block text-lg font-bold text-[var(--hs-neutral-900)] hover:text-[var(--hs-green-700)] transition leading-snug">
+                                {{ $rfq->product->name }}
+                            </a>
+
+                            @if($rfq->product->categories->count())
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach($rfq->product->categories->take(3) as $category)
+                                        <span class="inline-flex items-center rounded-full bg-[var(--hs-neutral-100)] px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--hs-neutral-600)]">
+                                            {{ $category->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            @php $cheapestVariant = $rfq->product->variants->sortBy('price')->first(); @endphp
+                            @if($cheapestVariant)
+                                <div class="pt-2 border-t border-[var(--hs-neutral-100)]">
+                                    <p class="text-[0.65rem] font-semibold uppercase tracking-widest text-[var(--hs-neutral-500)]">{{ __('Starting from') }}</p>
+                                    <p class="mt-0.5 text-xl font-bold text-[var(--hs-neutral-900)] tabular-nums">
+                                        {{ $cheapestVariant->currency ?? 'PHP' }} {{ number_format((float)$cheapestVariant->price, 2) }}
+                                        @if($cheapestVariant->unit)
+                                            <span class="text-sm font-medium text-[var(--hs-neutral-500)]">/ {{ $cheapestVariant->unit }}</span>
+                                        @endif
+                                    </p>
+                                    @if($cheapestVariant->minimum_order_quantity)
+                                        <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">
+                                            {{ __('MOQ: :quantity :unit', ['quantity' => $cheapestVariant->minimum_order_quantity, 'unit' => $cheapestVariant->unit ?? 'pcs']) }}
+                                        </p>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if($rfq->product->description)
+                                <div class="pt-2 border-t border-[var(--hs-neutral-100)]">
+                                    <p class="text-sm text-[var(--hs-neutral-500)] leading-relaxed line-clamp-4">
+                                        {{ $rfq->product->description }}
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </flux:card>
+            @endif
+
             {{-- RFQ Content --}}
             <flux:card>
                 <flux:heading size="lg" class="mb-4">{{ __('RFQ Details') }}</flux:heading>
@@ -23,40 +106,9 @@
                         </div>
                     </div>
 
-                    @if($rfq->product)
-                        <div>
-                            <div class="text-sm font-medium text-zinc-500">{{ __('Product for Quotation') }}</div>
-                            <div class="mt-2 flex items-center gap-3 rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-3">
-                                <div class="size-14 shrink-0 overflow-hidden rounded-md border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]">
-                                    @if($rfq->product->featured_image_path)
-                                        <img src="{{ $rfq->product->featured_image_url }}" alt="{{ $rfq->product->name }}" class="size-full object-cover" loading="lazy" />
-                                    @else
-                                        <div class="flex size-full items-center justify-center">
-                                            <svg class="size-5 text-[var(--hs-neutral-300)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75 5.159 5.159A2.25 2.25 0 0 1 7.322 3.75h9.356a2.25 2.25 0 0 1 2.163 1.409l2.909 10.591M2.25 15.75h19.5M2.25 15.75v4.5a2.25 2.25 0 0 0 2.25 2.25h15a2.25 2.25 0 0 0 2.25-2.25v-4.5M6.75 3V2.25a.75.75 0 0 1 .75-.75h9a.75.75 0 0 1 .75.75V3" /></svg>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <a href="{{ route('storefront.product', $rfq->product) }}" target="_blank" class="block truncate text-sm font-semibold text-[var(--hs-green-700)] hover:underline">
-                                        {{ $rfq->product->name }}
-                                    </a>
-                                    @php $cheapestVariant = $rfq->product->variants->sortBy('price')->first(); @endphp
-                                    @if($cheapestVariant)
-                                        <p class="mt-0.5 text-xs text-zinc-600 dark:text-zinc-400">
-                                            {{ $cheapestVariant->currency ?? 'PHP' }} {{ number_format((float)$cheapestVariant->price, 2) }}
-                                            @if($cheapestVariant->minimum_order_quantity)
-                                                · {{ __('MOQ: :quantity :unit', ['quantity' => $cheapestVariant->minimum_order_quantity, 'unit' => $cheapestVariant->unit ?? 'pcs']) }}
-                                            @endif
-                                        </p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
                     <div>
                         <div class="text-sm font-medium text-zinc-500">{{ __('Description') }}</div>
-                        <div class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">{{ $rfq->description ?: 'No description provided.' }}</div>
+                        <div class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">{{ $rfq->description ?: __('No description provided.') }}</div>
                     </div>
                 </div>
 
@@ -66,35 +118,123 @@
                         <div class="flex flex-col gap-2">
                             @foreach($rfq->attachments as $attachment)
                                 <a href="{{ route('media.view', $attachment) }}" target="_blank" class="flex items-center gap-2 p-3 rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] hover:bg-[var(--hs-neutral-100)] transition group">
-                                    <svg class="size-5 text-[var(--hs-neutral-400)] group-hover:text-[var(--hs-green-600)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
-                                    </svg>
+                                    <flux:icon name="paper-clip" variant="mini" class="size-5 text-[var(--hs-neutral-400)] group-hover:text-[var(--hs-green-600)]" />
                                     <span class="text-sm font-medium text-[var(--hs-neutral-700)]">{{ $attachment->original_filename }}</span>
                                 </a>
                             @endforeach
                         </div>
                     </div>
                 @endif
+
+                @if($rfq->product?->shop)
+                    @php $sellerShop = $rfq->product->shop; @endphp
+                    <div class="mt-6 pt-6 border-t border-[var(--hs-neutral-100)]">
+                        <div class="text-sm font-medium text-zinc-500 mb-3">{{ __('Business Information') }}</div>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                            @if($sellerShop->email)
+                                <div>
+                                    <dt class="font-medium text-zinc-500">{{ __('Email') }}</dt>
+                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->email }}</dd>
+                                </div>
+                            @endif
+                            @if($sellerShop->phone)
+                                <div>
+                                    <dt class="font-medium text-zinc-500">{{ __('Phone') }}</dt>
+                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->phone }}</dd>
+                                </div>
+                            @endif
+                            <div class="sm:col-span-2">
+                                <dt class="font-medium text-zinc-500">{{ __('Address') }}</dt>
+                                <dd class="mt-0.5 text-zinc-900 dark:text-white">
+                                    @if($sellerShop->address_1)
+                                        {{ $sellerShop->address_1 }}<br />
+                                    @endif
+                                    @if($sellerShop->address_2)
+                                        {{ $sellerShop->address_2 }}<br />
+                                    @endif
+                                    {{ collect([$sellerShop->city, $sellerShop->province, $sellerShop->zip_code])->filter()->implode(', ') }}
+                                    {{ $sellerShop->country_code }}
+                                    @if(!$sellerShop->address_1 && !$sellerShop->city && !$sellerShop->country_code)
+                                        —
+                                    @endif
+                                </dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4">
+                            <flux:button
+                                href="{{ route('admin.merchants.show', $sellerShop) }}"
+                                variant="ghost"
+                                size="sm"
+                                icon="arrow-top-right-on-square"
+                                wire:navigate
+                            >
+                                {{ __('View Shop') }}
+                            </flux:button>
+                        </div>
+                    </div>
+                @endif
             </flux:card>
 
-            {{-- Buyer Snapshot --}}
+            {{-- Buyer Information --}}
+            @php
+                $buyerProfile = $rfq->buyer?->buyerProfile;
+                $snapshot = $rfq->buyer_snapshot;
+                // Prefer live buyer profile, fall back to snapshot
+                $displayName = $buyerProfile?->business_name ?? $snapshot['business_name'] ?? null;
+                $displayEmail = $buyerProfile?->contact_email ?? null;
+                $displayPhone = $buyerProfile?->contact_phone ?? null;
+                $displayBilling = $buyerProfile ? collect([
+                    $buyerProfile->billing_address_1,
+                    $buyerProfile->billing_address_2,
+                ])->filter()->implode(', ') : ($snapshot['billing_address']['address_1'] ?? null);
+                $displayBillingCity = $buyerProfile?->billing_city ?? $snapshot['billing_address']['city'] ?? null;
+                $displayBillingCountry = $buyerProfile?->billing_country_code ?? $snapshot['billing_address']['country_code'] ?? null;
+                $displayShipping = $buyerProfile ? collect([
+                    $buyerProfile->shipping_address_1,
+                    $buyerProfile->shipping_address_2,
+                ])->filter()->implode(', ') : ($snapshot['shipping_address']['address_1'] ?? null);
+                $displayShippingCity = $buyerProfile?->shipping_city ?? $snapshot['shipping_address']['city'] ?? null;
+                $displayShippingCountry = $buyerProfile?->shipping_country_code ?? $snapshot['shipping_address']['country_code'] ?? null;
+            @endphp
             <flux:card>
                 <flux:heading size="lg" class="mb-4">{{ __('Buyer Information') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                    @if($displayName)
+                        <div>
+                            <dt class="text-sm font-medium text-zinc-500">{{ __('Business Name') }}</dt>
+                            <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $displayName }}</dd>
+                        </div>
+                    @endif
                     <div>
                         <dt class="text-sm font-medium text-zinc-500">{{ __('Contact Email') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $rfq->buyer_snapshot['contact_email'] ?? 'N/A' }}</dd>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $displayEmail ?: __('N/A') }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-zinc-500">{{ __('Contact Phone') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $rfq->buyer_snapshot['contact_phone'] ?? 'N/A' }}</dd>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $displayPhone ?: __('N/A') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Location') }}</dt>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Billing Address') }}</dt>
                         <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
-                            {{ $rfq->buyer_snapshot['shipping_city'] ?? '—' }}
-                            @if(!empty($rfq->buyer_snapshot['shipping_city']) && !empty($rfq->buyer_snapshot['shipping_country_code'])) , @endif
-                            {{ $rfq->buyer_snapshot['shipping_country_code'] ?? '—' }}
+                            @if($displayBilling)
+                                {{ $displayBilling }}<br />
+                            @endif
+                            {{ $displayBillingCity }}{{ $displayBillingCity && $displayBillingCountry ? ', ' : '' }}{{ $displayBillingCountry }}
+                            @if(!$displayBilling && !$displayBillingCity && !$displayBillingCountry)
+                                —
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-zinc-500">{{ __('Shipping Address') }}</dt>
+                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                            @if($displayShipping)
+                                {{ $displayShipping }}<br />
+                            @endif
+                            {{ $displayShippingCity }}{{ $displayShippingCity && $displayShippingCountry ? ', ' : '' }}{{ $displayShippingCountry }}
+                            @if(!$displayShipping && !$displayShippingCity && !$displayShippingCountry)
+                                —
+                            @endif
                         </dd>
                     </div>
                 </dl>
@@ -119,7 +259,7 @@
             <flux:card>
                 <form wire:submit="saveAdminDetails" class="space-y-5">
                     <flux:heading size="lg" class="mb-2">{{ __('Admin Management') }}</flux:heading>
-                    
+
                     <flux:select wire:model="adminStatus" label="{{ __('Admin Status') }}">
                         <flux:select.option value="pending">{{ __('Pending') }}</flux:select.option>
                         <flux:select.option value="in_progress">{{ __('In Progress') }}</flux:select.option>
@@ -131,14 +271,6 @@
                     <div class="pt-2">
                         <flux:button type="submit" variant="primary" class="w-full">{{ __('Save Changes') }}</flux:button>
                     </div>
-
-                    {{--
-                    @if($recipient->managedBy)
-                        <div class="mt-4 text-xs text-zinc-500 border-t border-[var(--hs-neutral-100)] pt-4">
-                            {{ __('Managed by:') }} <span class="font-medium text-zinc-700">{{ $recipient->managedBy->name }}</span>
-                        </div>
-                    @endif
-                    --}}
                 </form>
             </flux:card>
         </div>

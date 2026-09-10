@@ -263,6 +263,7 @@ final class RfqCreateForm extends Component
         // belongs to the shop this RFQ is addressed to.
         $product = $shop && $this->product_id
             ? Product::published()
+                ->with(['categories', 'variants', 'gallery.media'])
                 ->where('shop_id', $shop->id)
                 ->find($this->product_id)
             : null;
@@ -329,7 +330,7 @@ final class RfqCreateForm extends Component
     {
         return [
             'title' => ['required', 'string', 'max:500'],
-            'description' => ['nullable', 'string'],
+            'description' => ['required', 'string'],
             'shop_id' => ['required', 'integer', 'exists:shops,id'],
             'attachment' => [
                 'nullable',

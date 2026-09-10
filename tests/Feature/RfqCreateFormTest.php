@@ -153,6 +153,7 @@ test('attachment uses a single file input (not multiple)', function () {
 test('text/plain file is rejected with the correct error message', function () {
     Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('description', 'Some requirements')
         ->set('attachment', UploadedFile::fake()->create('spec.txt', 100, 'text/plain'))
         ->call('submit')
         ->assertHasErrors(['attachment']);
@@ -161,6 +162,7 @@ test('text/plain file is rejected with the correct error message', function () {
 test('a PDF attachment passes validation', function () {
     Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('description', 'Some requirements')
         ->set('attachment', UploadedFile::fake()->create('spec.pdf', 100, 'application/pdf'))
         ->call('submit')
         ->assertHasNoErrors(['attachment']);
@@ -169,6 +171,7 @@ test('a PDF attachment passes validation', function () {
 test('no attachment is also valid', function () {
     Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('description', 'Some requirements')
         ->call('submit')
         ->assertHasNoErrors(['attachment']);
 });
@@ -177,7 +180,7 @@ test('the page is wrapped in a storefront page container', function () {
     $this->actingAs($this->buyer)
         ->get(route('account.rfqs.create', ['shop_id' => $this->shop->id]))
         ->assertOk()
-        ->assertSee('mx-auto max-w-3xl px-4 py-10', false)
+        ->assertSee('mx-auto max-w-7xl px-4 py-10', false)
         ->assertSee($this->shop->storefront_name);
 });
 
@@ -201,15 +204,24 @@ test('submitting with a published reference product persists it on the RFQ', fun
             'product_id' => $product->id,
             'title' => 'Quote for chicken',
         ])
+        ->set('description', 'Need 500kg bulk order')
         ->call('submit')
         ->assertHasNoErrors();
 
     expect(Rfq::where('title', 'Quote for chicken')->first()->product_id)->toBe($product->id);
 });
 
+test('submitting without description fails validation', function () {
+    Livewire::actingAs($this->buyer)
+        ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->call('submit')
+        ->assertHasErrors(['description' => 'required']);
+});
+
 test('submitting without a reference product leaves product_id null', function () {
     Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Generic RFQ'])
+        ->set('description', 'General sourcing inquiry')
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -227,6 +239,7 @@ test('submitting with a product from another shop does not persist product_id', 
             'product_id' => $otherShopProduct->id,
             'title' => 'Cross shop RFQ',
         ])
+        ->set('description', 'Cross shop inquiry')
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -245,6 +258,7 @@ test('submitting with an unpublished product does not persist product_id', funct
             'product_id' => $archivedProduct->id,
             'title' => 'Archived RFQ',
         ])
+        ->set('description', 'Archived product inquiry')
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -342,6 +356,7 @@ test('a reference product without a featured image falls back to a placeholder',
 test('submitting stays on the page and shows an in-place success message with a link to My RFQs', function () {
     Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('description', 'Need bulk pricing')
         ->call('submit')
         ->assertHasNoErrors()
         ->assertNoRedirect()
@@ -356,6 +371,7 @@ test('submitting stays on the page and shows an in-place success message with a 
 test('the success state cannot be used to submit the RFQ twice', function () {
     $component = Livewire::actingAs($this->buyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('description', 'Need bulk pricing')
         ->call('submit')
         ->call('submit');
 
@@ -371,6 +387,7 @@ test('submitting the RFQ on step 2 redirects back to step 1 when profile is miss
 
     Livewire::actingAs($noProfileBuyer)
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id, 'title' => 'Test RFQ'])
+        ->set('description', 'Need bulk pricing')
         ->set('step', 2) // force step 2 without having a profile
         ->call('submit')
         ->assertSet('step', 1); // falls back to step 1

@@ -11,6 +11,10 @@ use Database\Seeders\RolePermissionSeeder;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    if (! config('marketplace.features.disputes_enabled')) {
+        $this->markTestSkipped('disputes_enabled is disabled');
+    }
+
     $this->seed(RolePermissionSeeder::class);
 
     $this->seller = User::factory()->create();
