@@ -27,11 +27,11 @@ final class OnboardingSubmittedNotification extends Notification implements Shou
 
     public function toMail(object $notifiable): MailMessage
     {
-        $storefrontName = $this->onboarding->storefront_name ?? 'Unknown';
+        $businessName = $this->onboarding->registered_business_name ?? 'Unknown';
 
         return (new MailMessage)
             ->subject('New Onboarding Application Submitted')
-            ->line("A new onboarding application has been submitted by **{$storefrontName}**.")
+            ->line("A new onboarding application has been submitted by **{$businessName}**.")
             ->line('Please review the application and approve or reject it.')
             ->action('Review Application', url('/admin/onboardings/'.$this->onboarding->id));
     }
@@ -39,13 +39,13 @@ final class OnboardingSubmittedNotification extends Notification implements Shou
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
-        $storefrontName = $this->onboarding->storefront_name ?? 'Unknown';
+        $businessName = $this->onboarding->registered_business_name ?? 'Unknown';
 
         return [
             'type' => 'onboarding_submitted',
             'onboarding_id' => $this->onboarding->id,
-            'storefront_name' => $storefrontName,
-            'message' => "New onboarding application submitted by {$storefrontName}.",
+            'storefront_name' => $businessName,
+            'message' => "New onboarding application submitted by {$businessName}.",
             'url' => url('/admin/onboardings/'.$this->onboarding->id),
         ];
     }

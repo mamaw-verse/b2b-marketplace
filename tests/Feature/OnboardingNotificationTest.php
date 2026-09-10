@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\OnboardingApprovedNotification;
 use App\Notifications\OnboardingRejectedNotification;
 use App\Notifications\OnboardingRevisionRequestedNotification;
+use App\Notifications\OnboardingSubmittedNotification;
 use Database\Seeders\RolePermissionSeeder;
 
 beforeEach(function () {
@@ -52,4 +53,19 @@ test('onboarding mail renders the 1Halal Store brand logo in the header', functi
 
     expect(str_contains($rendered, 'images/brand-logo.png'))->toBeTrue()
         ->and(str_contains($rendered, '1Halal Store'))->toBeTrue();
+});
+
+test('submitted notification mail and array use registered_business_name not storefront_name', function () {
+    // storefront_name is nullable on onboardings — the notification must never rely on it.
+    $this->onboarding->update(['storefront_name' => null]);
+    $this->onboarding->refresh();
+
+    $notification = new OnboardingSubmittedNotification($this->onboarding);
+
+    $mailBody = $notification->toMail($this->user)->render();
+    expect((string) $mailBody)->toContain($this->onboarding->registered_business_name);
+
+    $data = $notification->toArray($this->user);
+    expect($data['message'])->toContain($this->onboarding->registered_business_name)
+        ->and($data['storefront_name'])->toBe($this->onboarding->registered_business_name);
 });

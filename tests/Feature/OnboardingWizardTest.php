@@ -69,6 +69,12 @@ test('step 1 validation fails when required fields are empty', function () {
             'form.registered_business_name' => 'required',
             'form.company_description' => 'required',
             'form.products_description' => 'required',
+            'form.phone' => 'required',
+            'form.email' => 'required',
+            'form.address_1' => 'required',
+            'form.city' => 'required',
+            'form.province' => 'required',
+            'form.zip_code' => 'required',
         ])
         ->assertSet('currentStep', 1);
 });
@@ -86,6 +92,12 @@ test('step 1 advances to step 2 when valid', function () {
         ->set('form.tax_identification_number', 'TIN-222')
         ->set('form.company_description', 'We make great halal products.')
         ->set('form.products_description', 'Snacks, beverages, and more.')
+        ->set('form.phone', '+63 912 345 6789')
+        ->set('form.email', 'contact@validbusiness.com')
+        ->set('form.address_1', '123 Halal Street')
+        ->set('form.city', 'Quezon City')
+        ->set('form.province', 'Metro Manila')
+        ->set('form.zip_code', '1100')
         ->call('nextStep')
         ->assertHasNoErrors()
         ->assertSet('currentStep', 2);
@@ -104,6 +116,12 @@ test('step 1 persists form data including descriptions to the database', functio
         ->set('form.tax_identification_number', 'TIN-444')
         ->set('form.company_description', 'Our company sells premium goods.')
         ->set('form.products_description', 'A wide range of certified items.')
+        ->set('form.phone', '+63 917 000 0000')
+        ->set('form.email', 'info@persisted.com')
+        ->set('form.address_1', '456 Market Ave')
+        ->set('form.city', 'Makati')
+        ->set('form.province', 'Metro Manila')
+        ->set('form.zip_code', '1200')
         ->call('nextStep');
 
     $this->assertDatabaseHas('shop_onboardings', [
@@ -261,6 +279,12 @@ test('step 1 uses the configured marketplace instance country', function () {
         ->set('form.tax_identification_number', 'TIN-C')
         ->set('form.company_description', 'A company.')
         ->set('form.products_description', 'Products.')
+        ->set('form.phone', '+60 12 345 6789')
+        ->set('form.email', 'hello@countryco.com')
+        ->set('form.address_1', '1 Main Road')
+        ->set('form.city', 'Kuala Lumpur')
+        ->set('form.province', 'Wilayah Persekutuan')
+        ->set('form.zip_code', '50000')
         ->call('nextStep');
 
     $this->assertDatabaseHas('shop_onboardings', [
@@ -610,6 +634,12 @@ test('company_description and products_description are saved to shop_onboardings
         ->set('form.tax_identification_number', 'TIN-T')
         ->set('form.company_description', 'We are a halal food company.')
         ->set('form.products_description', 'Premium halal snacks.')
+        ->set('form.phone', '+63 910 000 0001')
+        ->set('form.email', 'test@testco.com')
+        ->set('form.address_1', '789 Commerce St')
+        ->set('form.city', 'Pasig')
+        ->set('form.province', 'Metro Manila')
+        ->set('form.zip_code', '1600')
         ->call('saveCurrentStep');
 
     $this->assertDatabaseHas('shop_onboardings', [

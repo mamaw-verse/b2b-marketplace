@@ -33,6 +33,35 @@ function makeOnboardingFor(User $seller, array $overrides = []): ShopOnboarding
     ], $overrides));
 }
 
+test('storefront_name falls back to registered_business_name when null on the onboarding', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    // Explicitly pass null for storefront_name to simulate onboardings that
+    // were submitted before the wizard collected that field.
+    $onboarding = makeOnboardingFor($seller, ['storefront_name' => null]);
+
+    $media = Media::factory()->create(['uploaded_by_id' => $seller->id]);
+
+    ShopOnboardingCertificate::create([
+        'onboarding_id' => $onboarding->id,
+        'certification_body' => 'IDCP',
+        'registration_number' => 'REG-1',
+        'expiry_date' => now()->addYear()->format('Y-m-d'),
+        'media_id' => $media->id,
+    ]);
+
+    $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
+
+    expect($shop->storefront_name)->toBe($onboarding->registered_business_name);
+    $this->assertDatabaseHas('shops', [
+        'id' => $shop->id,
+        'storefront_name' => $onboarding->registered_business_name,
+    ]);
+});
+
 test('approval fails when a certificate is missing its uploaded file', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');

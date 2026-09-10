@@ -56,12 +56,14 @@
             wire:model.blur="form.phone"
             :label="__('Phone')"
             type="tel"
+            required
         />
 
         <flux:input
             wire:model.blur="form.email"
             :label="__('Email')"
             type="email"
+            required
         />
     </div>
 
@@ -74,11 +76,12 @@
             wire:model.blur="form.address_1"
             :label="__('Address Line 1')"
             type="text"
+            required
         />
 
         <flux:input
             wire:model.blur="form.address_2"
-            :label="__('Address Line 2')"
+            :label="__('Address Line 2 (optional)')"
             type="text"
         />
     </div>
@@ -88,18 +91,21 @@
             wire:model.blur="form.city"
             :label="__('City')"
             type="text"
+            required
         />
 
         <flux:input
             wire:model.blur="form.province"
             :label="__('Province')"
             type="text"
+            required
         />
 
         <flux:input
             wire:model.blur="form.zip_code"
             :label="__('Zip Code')"
             type="text"
+            required
         />
     </div>
 </div>

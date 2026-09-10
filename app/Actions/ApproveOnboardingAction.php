@@ -30,10 +30,12 @@ final class ApproveOnboardingAction
         $onboarding->loadMissing('certificates');
 
         $shop = DB::transaction(function () use ($onboarding, $admin): Shop {
-            // Create shop from onboarding fields
+            // Create shop from onboarding fields.
+            // storefront_name is not collected during onboarding, so fall back to
+            // registered_business_name — the seller can customise it later in their hub.
             $shop = Shop::create([
                 'registered_business_name' => $onboarding->registered_business_name,
-                'storefront_name' => $onboarding->storefront_name,
+                'storefront_name' => $onboarding->storefront_name ?? $onboarding->registered_business_name,
                 'business_structure' => $onboarding->business_structure,
                 'dti_sec_number' => $onboarding->dti_sec_number,
                 'tax_identification_number' => $onboarding->tax_identification_number,
