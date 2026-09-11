@@ -37,7 +37,9 @@ test('login requires a turnstile token', function () {
         'email' => 'buyer@example.com',
         'password' => 'password',
         'cf-turnstile-response' => '',
-    ])->assertSessionHasErrors('cf-turnstile-response');
+    ])->assertSessionHasErrors([
+        'cf-turnstile-response' => 'Please complete the security check.',
+    ]);
 
     $this->assertGuest();
 });
@@ -70,7 +72,9 @@ test('registration requires a turnstile token', function () {
         'password' => 'password',
         'password_confirmation' => 'password',
         'cf-turnstile-response' => '',
-    ])->assertSessionHasErrors('cf-turnstile-response');
+    ])->assertSessionHasErrors([
+        'cf-turnstile-response' => 'Please complete the security check.',
+    ]);
 
     expect(User::where('email', 'newbuyer@example.com')->exists())->toBeFalse();
 });
@@ -106,7 +110,9 @@ test('forgot password requires a turnstile token', function () {
     $this->post(route('password.email'), [
         'email' => 'buyer@example.com',
         'cf-turnstile-response' => '',
-    ])->assertSessionHasErrors('cf-turnstile-response');
+    ])->assertSessionHasErrors([
+        'cf-turnstile-response' => 'Please complete the security check.',
+    ]);
 
     expect(DB::table('password_reset_tokens')->count())->toBe(0);
 });

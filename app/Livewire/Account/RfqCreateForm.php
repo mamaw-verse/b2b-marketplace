@@ -190,7 +190,7 @@ final class RfqCreateForm extends Component
         $productId = $this->product_id
             ? Product::published()
                 ->where('shop_id', $shop->id)
-                ->value('id')
+                ->find($this->product_id)?->id
             : null;
 
         // Store single attachment as a media record if provided

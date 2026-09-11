@@ -22,6 +22,7 @@
                     <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
                     <flux:select.option value="expiring_soon">{{ __('Expiring Soon') }}</flux:select.option>
                     <flux:select.option value="expired">{{ __('Expired') }}</flux:select.option>
+                    <flux:select.option value="rejected">{{ __('Rejected') }}</flux:select.option>
                 </flux:select>
             </div>
         </div>
@@ -44,6 +45,7 @@
                                     'expired' => 'red',
                                     'expiring_soon' => 'yellow',
                                     'under_review' => 'blue',
+                                    'rejected' => 'red',
                                     default => 'green',
                                 }">{{ str($certificate->status)->headline() }}</flux:badge>
                             </flux:table.cell>
@@ -159,7 +161,7 @@
                 </div>
 
                 <div class="flex justify-between items-center shrink-0">
-                    <div>
+                    <div class="flex gap-2">
                         @if ($viewingCert && $viewingCert->status === 'under_review')
                             <flux:button
                                 variant="primary"
@@ -167,6 +169,13 @@
                                 x-on:click="$flux.modal('approve-certificate').show()"
                             >
                                 {{ __('Approve Certificate') }}
+                            </flux:button>
+                            <flux:button
+                                variant="danger"
+                                icon="x-circle"
+                                x-on:click="$flux.modal('reject-certificate').show()"
+                            >
+                                {{ __('Reject Certificate') }}
                             </flux:button>
                         @endif
                     </div>
@@ -191,6 +200,21 @@
             <x-slot name="action">
                 <flux:button variant="primary" wire:click="approveCertificate({{ $viewingCertificateId }})" wire:loading.attr="disabled">
                     {{ __('Approve') }}
+                </flux:button>
+            </x-slot>
+        </x-hs-confirm>
+
+        {{-- Reject Certificate Confirmation --}}
+        <x-hs-confirm
+            name="reject-certificate"
+            title="{{ __('Reject Certificate') }}"
+            message="{{ __('This will mark the certificate as rejected and notify the seller.') }}"
+            variant="danger"
+            :confirmText="__('Reject')"
+        >
+            <x-slot name="action">
+                <flux:button variant="danger" wire:click="rejectCertificate({{ $viewingCertificateId }})" wire:loading.attr="disabled">
+                    {{ __('Reject') }}
                 </flux:button>
             </x-slot>
         </x-hs-confirm>

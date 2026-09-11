@@ -26,6 +26,8 @@ final class CreateNewUser implements CreatesNewUsers
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
             'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
+        ], [
+            'cf-turnstile-response.required' => __('Please complete the security check.'),
         ])->validate();
 
         return User::create([

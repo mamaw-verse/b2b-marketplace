@@ -22,4 +22,14 @@ final class LoginRequest extends FortifyLoginRequest
             'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'cf-turnstile-response.required' => __('Please complete the security check.'),
+        ];
+    }
 }

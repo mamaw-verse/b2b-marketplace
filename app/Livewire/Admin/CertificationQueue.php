@@ -8,6 +8,7 @@ use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\CertificationApplication;
 use App\Models\ShopCertificate;
 use App\Notifications\CertificateApprovedNotification;
+use App\Notifications\CertificateRejectedNotification;
 use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -109,6 +110,35 @@ final class CertificationQueue extends Component
         $this->showDocumentViewer = false;
 
         Flux::toast(__('Certificate approved successfully.'), variant: 'success');
+    }
+
+    /**
+     * Reject a certificate: transition to 'rejected', and notify the shop owner.
+     */
+    public function rejectCertificate(int $certificateId): void
+    {
+        $certificate = ShopCertificate::query()
+            ->with('shop.user')
+            ->findOrFail($certificateId);
+
+        DB::transaction(function () use ($certificate): void {
+            $certificate->update([
+                'status' => 'rejected',
+                'is_verified' => false,
+            ]);
+        });
+
+        $shopOwner = $certificate->shop?->user;
+
+        if ($shopOwner !== null) {
+            $shopOwner->notify(new CertificateRejectedNotification($certificate));
+        }
+
+        unset($this->certificates);
+        $this->viewingCertificateId = null;
+        $this->showDocumentViewer = false;
+
+        Flux::toast(__('Certificate rejected.'), variant: 'danger');
     }
 
     /**

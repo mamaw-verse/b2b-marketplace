@@ -136,6 +136,7 @@ final class ApplyForCertificate extends Component
         return [
             'document.mimes' => 'Only DOC, DOCX and PDF files are accepted.',
             'document.max' => 'The Letter of Intent must not exceed 10 MB.',
+            'turnstile_token.required' => 'Please complete the security check.',
         ];
     }
 

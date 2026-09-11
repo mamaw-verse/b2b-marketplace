@@ -8,6 +8,7 @@ use App\Jobs\IndexProductJob;
 use App\Models\Category;
 use App\Models\Product;
 use Flux\Flux;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -169,7 +170,14 @@ final class ProductForm extends Component
     public function publish(): void
     {
         abort_unless($this->product !== null, 403);
-        $this->authorize('publish', $this->product);
+
+        try {
+            $this->authorize('publish', $this->product);
+        } catch (AuthorizationException) {
+            Flux::modal('subscription-required')->show();
+
+            return;
+        }
 
         $this->product->update(['status' => 'published']);
         IndexProductJob::dispatch($this->product)->afterCommit();

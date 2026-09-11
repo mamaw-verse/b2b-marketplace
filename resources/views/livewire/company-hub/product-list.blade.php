@@ -209,4 +209,33 @@
             </flux:button>
         </x-slot>
     </x-hs-confirm>
+
+    {{-- Subscription Required --}}
+    <flux:modal name="subscription-required" class="md:w-[420px] !p-0">
+        <div class="flex flex-col">
+            <div class="px-6 py-5">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-yellow-600 bg-yellow-50">
+                        <flux:icon name="exclamation-triangle" variant="mini" class="size-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Active Subscription Required') }}</h3>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">
+                            {{ __('You need an active subscription to publish products and make them visible to buyers on the marketplace.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-6 py-4">
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close>
+                        <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                    </flux:modal.close>
+                    <flux:button variant="primary" href="{{ route('hub.subscription') }}" wire:navigate>
+                        {{ __('Go to Subscription') }}
+                    </flux:button>
+                </div>
+            </div>
+        </div>
+    </flux:modal>
 </div>

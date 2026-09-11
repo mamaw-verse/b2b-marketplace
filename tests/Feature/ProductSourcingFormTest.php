@@ -86,7 +86,8 @@ test('validation fails when required fields are missing', function () {
         ->set('product_name', '')
         ->set('turnstile_token', '')
         ->call('submit')
-        ->assertHasErrors(['name', 'email', 'product_name', 'turnstile_token']);
+        ->assertHasErrors(['name', 'email', 'product_name', 'turnstile_token'])
+        ->assertHasErrors(['turnstile_token' => 'Please complete the security check.']);
 });
 
 test('validation fails when captcha token is invalid', function () {

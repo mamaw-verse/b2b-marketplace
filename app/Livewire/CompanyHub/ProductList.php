@@ -7,6 +7,7 @@ namespace App\Livewire\CompanyHub;
 use App\Jobs\IndexProductJob;
 use App\Models\Product;
 use Flux\Flux;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -50,10 +51,18 @@ final class ProductList extends Component
         $product = $this->findOwnedProduct($this->confirmingProductId);
         $newStatus = $product->status === 'published' ? 'archived' : 'published';
 
-        if ($newStatus === 'published') {
-            Gate::authorize('publish', $product);
-        } else {
-            Gate::authorize('update', $product);
+        try {
+            if ($newStatus === 'published') {
+                Gate::authorize('publish', $product);
+            } else {
+                Gate::authorize('update', $product);
+            }
+        } catch (AuthorizationException) {
+            $this->confirmingProductId = null;
+            $this->confirmingAction = null;
+            Flux::modal('subscription-required')->show();
+
+            return;
         }
 
         $product->update(['status' => $newStatus]);

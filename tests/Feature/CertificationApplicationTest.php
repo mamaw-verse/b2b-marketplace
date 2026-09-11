@@ -72,7 +72,8 @@ test('validation fails when required fields are missing', function () {
         ->set('email', '')
         ->set('turnstile_token', '')
         ->call('submit')
-        ->assertHasErrors(['email', 'company_name', 'document', 'turnstile_token']);
+        ->assertHasErrors(['email', 'company_name', 'document', 'turnstile_token'])
+        ->assertHasErrors(['turnstile_token' => 'Please complete the security check.']);
 });
 
 test('validation fails when the captcha token is invalid', function () {
@@ -126,9 +127,7 @@ test('the admin queue is a read-only log without actions', function () {
         ->assertSee($application->company_name)
         ->assertSee('Download')
         ->assertDontSee('View Document')
-        ->assertDontSee('Mark as Contacted')
-        ->assertDontSee('Approve')
-        ->assertDontSee('Reject');
+        ->assertDontSee('Mark as Contacted');
 });
 
 test('previewable uploaded documents show a view button instead of download', function () {

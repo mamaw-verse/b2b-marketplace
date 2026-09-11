@@ -7,6 +7,7 @@ use App\Models\Shop;
 use App\Models\ShopCertificate;
 use App\Models\User;
 use App\Notifications\CertificateApprovedNotification;
+use App\Notifications\CertificateRejectedNotification;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -94,6 +95,52 @@ it('closes the document viewer after approving a certificate', function () {
         ->set('showDocumentViewer', true)
         ->set('viewingCertificateId', $cert->id)
         ->call('approveCertificate', $cert->id)
+        ->assertSet('showDocumentViewer', false)
+        ->assertSet('viewingCertificateId', null);
+});
+
+it('rejects a certificate and transitions status to rejected', function () {
+    Notification::fake();
+
+    $seller = User::factory()->create();
+    $shop = Shop::factory()->create(['user_id' => $seller->id]);
+    $cert = ShopCertificate::factory()->underReview()->create(['shop_id' => $shop->id]);
+
+    Livewire::actingAs($this->admin)
+        ->test(CertificationQueue::class)
+        ->call('rejectCertificate', $cert->id);
+
+    $cert->refresh();
+    expect($cert->status)->toBe('rejected')
+        ->and($cert->is_verified)->toBeFalse();
+});
+
+it('sends CertificateRejectedNotification to the shop owner on reject', function () {
+    Notification::fake();
+
+    $seller = User::factory()->create();
+    $shop = Shop::factory()->create(['user_id' => $seller->id]);
+    $cert = ShopCertificate::factory()->underReview()->create(['shop_id' => $shop->id]);
+
+    Livewire::actingAs($this->admin)
+        ->test(CertificationQueue::class)
+        ->call('rejectCertificate', $cert->id);
+
+    Notification::assertSentTo($seller, CertificateRejectedNotification::class);
+});
+
+it('closes the document viewer after rejecting a certificate', function () {
+    Notification::fake();
+
+    $seller = User::factory()->create();
+    $shop = Shop::factory()->create(['user_id' => $seller->id]);
+    $cert = ShopCertificate::factory()->underReview()->create(['shop_id' => $shop->id]);
+
+    Livewire::actingAs($this->admin)
+        ->test(CertificationQueue::class)
+        ->set('showDocumentViewer', true)
+        ->set('viewingCertificateId', $cert->id)
+        ->call('rejectCertificate', $cert->id)
         ->assertSet('showDocumentViewer', false)
         ->assertSet('viewingCertificateId', null);
 });

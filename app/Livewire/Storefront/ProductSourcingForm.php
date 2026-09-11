@@ -137,6 +137,7 @@ final class ProductSourcingForm extends Component
         return [
             'reference_file.mimes' => 'Accepted file types: JPG, PNG, GIF, WebP, PDF, DOC, DOCX.',
             'reference_file.max' => 'The reference file must not exceed 10 MB.',
+            'turnstile_token.required' => 'Please complete the security check.',
         ];
     }
 
