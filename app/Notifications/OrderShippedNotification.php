@@ -28,9 +28,9 @@ final class OrderShippedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Order Has Been Shipped')
-            ->line('Your order #'.$this->order->id.' has been shipped.')
-            ->action('Track Order', url('/account/orders/'.$this->order->id));
+            ->subject(__('Your Order Has Been Shipped'))
+            ->line(__('Your order #:id has been shipped.', ['id' => $this->order->id]))
+            ->action(__('Track Order'), url('/account/orders/'.$this->order->id));
     }
 
     public function toArray(object $notifiable): array

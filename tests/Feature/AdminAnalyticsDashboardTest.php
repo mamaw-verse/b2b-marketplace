@@ -67,7 +67,7 @@ test('metrics include trend data arrays', function () {
         ->assertSet('metrics.certification_trend', []);
 });
 
-test('website traffic section is hidden when google analytics is not configured', function () {
+test('google analytics stat cards are hidden when ga is not configured', function () {
     config([
         'services.google_analytics.property_id' => null,
         'services.google_analytics.credentials' => null,
@@ -83,7 +83,7 @@ test('website traffic section is hidden when google analytics is not configured'
         ->assertSet('gaConfigured', false);
 });
 
-test('website traffic section renders google analytics metrics when configured', function () {
+test('google analytics stat cards render metrics when configured', function () {
     config([
         'services.google_analytics.property_id' => '123456789',
         'services.google_analytics.credentials' => '/tmp/credentials.json',
@@ -104,15 +104,14 @@ test('website traffic section renders google analytics metrics when configured',
 
     Livewire::test(AnalyticsDashboard::class)
         ->assertSet('gaConfigured', true)
-        ->assertSee('Website Traffic')
-        ->assertSee('Active Users')
+        ->assertSee('Active Users (GA)')
         ->assertSee('320')
-        ->assertSee('Sessions')
+        ->assertSee('Sessions (GA)')
         ->assertSee('410')
-        ->assertSee('Page Views')
+        ->assertSee('Page Views (GA)')
         ->assertSee('980')
         ->assertSee('42.3%')
-        ->assertSee('Avg. Session Duration')
+        ->assertSee('Avg. Session (GA)')
         ->assertSee('1:35');
 });
 
@@ -131,10 +130,9 @@ test('dashboard renders without error when ga api call fails', function () {
 
     Livewire::test(AnalyticsDashboard::class)
         ->assertSet('gaConfigured', true)
-        ->assertSee('Website Traffic')
-        ->assertSee('Active Users')
-        ->assertSee('Bounce Rate')
-        ->assertSee('Avg. Session Duration');
+        ->assertSee('Active Users (GA)')
+        ->assertSee('Bounce Rate (GA)')
+        ->assertSee('Avg. Session (GA)');
 });
 
 test('dashboard page title is Platform Dashboard', function () {

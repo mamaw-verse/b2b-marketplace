@@ -45,16 +45,16 @@ test('status counts reflect the buyer orders', function () {
         ->and($component->instance()->statusCounts()['completed'])->toBe(1);
 });
 
-test('shows Start Selling CTA when the user has no shop', function () {
+test('shows Register Business CTA when the user has no shop', function () {
     Livewire::actingAs($this->buyer)
         ->test(Dashboard::class)
-        ->assertSee('Start Selling');
+        ->assertSee('Register Business');
 });
 
-test('hides Start Selling CTA when the user owns a shop', function () {
+test('hides Register Business CTA when the user owns a shop', function () {
     Shop::factory()->create(['user_id' => $this->buyer->id, 'status' => 'active']);
 
     Livewire::actingAs($this->buyer)
         ->test(Dashboard::class)
-        ->assertDontSee('Start Selling');
+        ->assertDontSee('Register Business');
 });

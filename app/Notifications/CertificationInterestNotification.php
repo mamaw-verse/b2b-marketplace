@@ -34,9 +34,9 @@ final class CertificationInterestNotification extends Notification implements Sh
         $applicant = $this->applicantName();
 
         $message = (new MailMessage)
-            ->subject("{$applicant} is interested in Halal Certification")
-            ->line("{$applicant} has expressed interest in applying for Halal Certification.")
-            ->action('View Certification Interests', route('admin.certifications.index'));
+            ->subject(__(':applicant is interested in Halal Certification', ['applicant' => $applicant]))
+            ->line(__(':applicant has expressed interest in applying for Halal Certification.', ['applicant' => $applicant]))
+            ->action(__('View Certification Interests'), route('admin.certifications.index'));
 
         if ($this->application->document_path !== null) {
             $message->attachFromStorageDisk(

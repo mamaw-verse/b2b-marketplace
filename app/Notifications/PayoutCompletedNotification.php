@@ -33,9 +33,9 @@ final class PayoutCompletedNotification extends Notification implements ShouldQu
         $amount = number_format((float) $this->payout->net_amount, 2);
 
         return (new MailMessage)
-            ->subject("Payout Completed — ₱{$amount} Disbursed")
-            ->line("Your payout of ₱{$amount} has been successfully disbursed to your bank account ({$bankName} ending in ****{$last4}).")
-            ->action('View Payout Details', url("/hub/payouts/{$this->payout->id}"));
+            ->subject(__('Payout Completed — ₱:amount Disbursed', ['amount' => $amount]))
+            ->line(__('Your payout of ₱:amount has been successfully disbursed to your bank account (:bankName ending in ****:last4).', ['amount' => $amount, 'bankName' => $bankName, 'last4' => $last4]))
+            ->action(__('View Payout Details'), url("/hub/payouts/{$this->payout->id}"));
     }
 
     /** @return array<string, mixed> */

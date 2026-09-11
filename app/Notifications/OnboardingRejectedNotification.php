@@ -30,11 +30,11 @@ final class OnboardingRejectedNotification extends Notification implements Shoul
         $storefrontName = $this->onboarding->storefront_name ?? 'your business';
 
         return (new MailMessage)
-            ->subject('Your Onboarding Application Has Been Rejected')
-            ->line("Unfortunately, your onboarding application for **{$storefrontName}** has been rejected.")
-            ->when($this->onboarding->admin_notes, fn (MailMessage $mail) => $mail->line('**Reason:** '.$this->onboarding->admin_notes))
-            ->line('If you believe this is in error, please contact support.')
-            ->action('View Application', route('account.onboarding'));
+            ->subject(__('Your Onboarding Application Has Been Rejected'))
+            ->line(__('Unfortunately, your onboarding application for **:storefrontName** has been rejected.', ['storefrontName' => $storefrontName]))
+            ->when($this->onboarding->admin_notes, fn (MailMessage $mail) => $mail->line(__('**Reason:** :notes', ['notes' => $this->onboarding->admin_notes])))
+            ->line(__('If you believe this is in error, please contact support.'))
+            ->action(__('View Application'), route('account.onboarding'));
     }
 
     /** @return array<string, mixed> */

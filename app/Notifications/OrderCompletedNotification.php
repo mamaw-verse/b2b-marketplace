@@ -28,9 +28,9 @@ final class OrderCompletedNotification extends Notification implements ShouldQue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Order Completed - Payout Processed')
-            ->line('Order #'.$this->order->id.' has been completed and payout processed.')
-            ->action('View Order', url('/hub/orders/'.$this->order->id));
+            ->subject(__('Order Completed - Payout Processed'))
+            ->line(__('Order #:orderId has been completed and payout processed.', ['orderId' => $this->order->id]))
+            ->action(__('View Order'), url('/hub/orders/'.$this->order->id));
     }
 
     public function toArray(object $notifiable): array

@@ -37,9 +37,9 @@ final class StaleOnboardingReminderNotification extends Notification implements 
         $storefrontName = $this->onboarding->storefront_name ?? 'your business';
 
         return (new MailMessage)
-            ->subject('Your shop onboarding is still pending')
-            ->line("Your onboarding application for **{$storefrontName}** has been inactive for over 30 days.")
-            ->line('Please complete and submit your application to get your shop listed on the marketplace.');
+            ->subject(__('Your shop onboarding is still pending'))
+            ->line(__('Your onboarding application for **:storefrontName** has been inactive for over 30 days.', ['storefrontName' => $storefrontName]))
+            ->line(__('Please complete and submit your application to get your shop listed on the marketplace.'));
     }
 
     /**

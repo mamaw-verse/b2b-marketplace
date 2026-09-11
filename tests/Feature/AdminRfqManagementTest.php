@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\Rfq;
 use App\Models\RfqRecipient;
 use App\Models\Shop;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Notifications\RfqStatusUpdatedNotification;
 use App\Notifications\RfqSubmittedAdminNotification;
@@ -196,6 +197,10 @@ test('rfq submission does not create a conversation thread when admin management
 
 test('direct message this company creates a conversation thread', function () {
     Config::set('marketplace.features.chat_enabled', true);
+
+    // CompanyProfile requires an active/trialing subscription to be visible when
+    // subscriptions_enabled is true. Give the shop a trial subscription.
+    Subscription::factory()->trialing()->create(['shop_id' => $this->shop->id]);
 
     Livewire::actingAs($this->buyer)
         ->test(CompanyProfile::class, ['shop' => $this->shop])

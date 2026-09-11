@@ -30,9 +30,9 @@ final class PayoutAccountVerifiedNotification extends Notification implements Sh
         $last4 = mb_substr($this->account->account_number, -4);
 
         return (new MailMessage)
-            ->subject('Your Payout Account Has Been Verified')
-            ->line("Your bank account ({$this->account->bank_name} ending in ****{$last4}) has been verified. You're now eligible to receive payouts.")
-            ->action('View Payout Account', url('/hub/payout-account'));
+            ->subject(__('Your Payout Account Has Been Verified'))
+            ->line(__('Your bank account (:bankName ending in ****:last4) has been verified. You\'re now eligible to receive payouts.', ['bankName' => $this->account->bank_name, 'last4' => $last4]))
+            ->action(__('View Payout Account'), url('/hub/payout-account'));
     }
 
     /** @return array<string, mixed> */

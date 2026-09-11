@@ -19,7 +19,7 @@ test('the home page uses the 1Halal Store brand and new logo asset', function ()
         ->assertDontSee('One Halal Global');
 });
 
-test('the auth dropdown shows Buyer Hub and Seller Hub for a seller', function () {
+test('the auth dropdown shows My Portal for a seller', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
     $user->assignRole('seller');
     Shop::factory()->create(['user_id' => $user->id, 'status' => 'active']);
@@ -27,34 +27,31 @@ test('the auth dropdown shows Buyer Hub and Seller Hub for a seller', function (
     $response = $this->actingAs($user)->get(route('home'));
 
     $response->assertOk()
-        ->assertSee('Buyer Hub')
-        ->assertSee('Seller Hub')
+        ->assertSee('My Portal')
+        ->assertDontSee('Buyer Hub')
+        ->assertDontSee('Seller Hub')
         ->assertDontSee('Company Hub');
 });
 
-test('the auth dropdown shows only Buyer Hub for a non-seller buyer', function () {
+test('the auth dropdown shows My Portal for a non-seller buyer', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
     $user->assignRole('buyer');
 
     $response = $this->actingAs($user)->get(route('home'));
 
     $response->assertOk()
-        ->assertSee('Buyer Hub')
-        ->assertDontSee('Seller Hub');
+        ->assertSee('My Portal')
+        ->assertDontSee('Buyer Hub');
 });
 
-test('storefront homepage shows country portals coming soon section', function () {
+test('storefront homepage shows global halal network country portals section', function () {
     $this->get(route('home'))
         ->assertOk()
-        ->assertSee('More Halal business portals are coming soon')
+        ->assertSee('Global Halal Network')
+        ->assertSee('1HalalStore across the Halal world')
         ->assertSee('Coming Soon')
-        ->assertSee('India')
-        ->assertSee('Vietnam')
-        ->assertSee('Thailand')
-        ->assertSee('Nigeria')
-        ->assertSee('Connect with Indian Halal producers, manufacturers, exporters and buyers.')
-        ->assertSee('/images/countries/india.jpg', false)
-        ->assertSee('/images/countries/vietnam.jpg', false)
-        ->assertSee('/images/countries/thailand.jpg', false)
-        ->assertSee('/images/countries/nigeria.jpg', false);
+        ->assertSee('Malaysia')
+        ->assertSee('Indonesia')
+        ->assertSee('/images/countries/my.jpg', false)
+        ->assertSee('/images/countries/id.jpg', false);
 });

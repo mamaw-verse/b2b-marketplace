@@ -28,12 +28,12 @@ final class QuotationSubmittedNotification extends Notification implements Shoul
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('New Quotation Received')
-            ->line('A seller has submitted a quotation for your RFQ.')
-            ->line('RFQ: '.$this->quotation->rfq->title)
-            ->line('Total: '.$this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2))
-            ->action('View Quotation', url('/account/rfqs/'.$this->quotation->rfq_id))
-            ->line('Review and award or reject this quotation.');
+            ->subject(__('New Quotation Received'))
+            ->line(__('A seller has submitted a quotation for your RFQ.'))
+            ->line(__('RFQ: :title', ['title' => $this->quotation->rfq->title]))
+            ->line(__('Total: :total', ['total' => $this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2)]))
+            ->action(__('View Quotation'), url('/account/rfqs/'.$this->quotation->rfq_id))
+            ->line(__('Review and award or reject this quotation.'));
     }
 
     public function toArray(object $notifiable): array

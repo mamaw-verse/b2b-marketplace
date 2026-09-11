@@ -30,10 +30,10 @@ final class CertificateSubmittedNotification extends Notification implements Sho
         $businessName = $this->certificate->shop?->registered_business_name ?? 'Unknown';
 
         return (new MailMessage)
-            ->subject('New Halal Certificate Submitted for Review')
-            ->line("**{$businessName}** has submitted a new halal certificate for review.")
-            ->line('Please review the certificate and approve or reject it.')
-            ->action('Review Certificate', route('admin.certifications.index'));
+            ->subject(__('New Halal Certificate Submitted for Review'))
+            ->line(__('**:businessName** has submitted a new halal certificate for review.', ['businessName' => $businessName]))
+            ->line(__('Please review the certificate and approve or reject it.'))
+            ->action(__('Review Certificate'), route('admin.certifications.index'));
     }
 
     /** @return array<string, mixed> */

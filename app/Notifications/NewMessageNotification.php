@@ -34,10 +34,10 @@ final class NewMessageNotification extends Notification implements ShouldQueue
             : url('/account/messages');
 
         return (new MailMessage)
-            ->subject("New message from {$senderName}")
-            ->line("{$senderName} sent you a message:")
+            ->subject(__('New message from :senderName', ['senderName' => $senderName]))
+            ->line(__(':senderName sent you a message:', ['senderName' => $senderName]))
             ->line('"'.str()->limit($this->message->body, 200).'"')
-            ->action('View Conversation', $url);
+            ->action(__('View Conversation'), $url);
     }
 
     public function toArray(object $notifiable): array

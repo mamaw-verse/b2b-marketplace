@@ -34,12 +34,12 @@ final class ReviewReceivedNotification extends Notification implements ShouldQue
         $body = $this->review->title
             ? "\"{$this->review->title}\" — "
             : '';
-        $body .= "A buyer left a {$rating}-star review on {$reviewableName}.";
+        $body .= __('A buyer left a :rating-star review on :reviewableName.', ['rating' => $rating, 'reviewableName' => $reviewableName]);
 
         return (new MailMessage)
-            ->subject("New {$rating}★ Review on {$reviewableName}")
+            ->subject(__('New :rating★ Review on :reviewableName', ['rating' => $rating, 'reviewableName' => $reviewableName]))
             ->line($body)
-            ->action('View Reviews', url('/hub/reviews'));
+            ->action(__('View Reviews'), url('/hub/reviews'));
     }
 
     /** @return array<string, mixed> */

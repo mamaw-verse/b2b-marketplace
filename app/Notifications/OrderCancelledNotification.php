@@ -28,9 +28,9 @@ final class OrderCancelledNotification extends Notification implements ShouldQue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Order Cancelled')
-            ->line('Order #'.$this->order->id.' has been cancelled.')
-            ->action('View Details', $this->urlForRecipient($notifiable));
+            ->subject(__('Order Cancelled'))
+            ->line(__('Order #:orderId has been cancelled.', ['orderId' => $this->order->id]))
+            ->action(__('View Details'), $this->urlForRecipient($notifiable));
     }
 
     public function toArray(object $notifiable): array

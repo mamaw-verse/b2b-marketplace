@@ -28,10 +28,10 @@ final class OrderPaidNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Order Paid - Ready to Fulfil')
-            ->line('A buyer has paid for order #'.$this->order->id.'.')
-            ->line('Total: PHP '.number_format((float) $this->order->order_total, 2))
-            ->action('View Order', url('/hub/orders/'.$this->order->id));
+            ->subject(__('Order Paid - Ready to Fulfil'))
+            ->line(__('A buyer has paid for order #:id.', ['id' => $this->order->id]))
+            ->line(__('Total: PHP :total', ['total' => number_format((float) $this->order->order_total, 2)]))
+            ->action(__('View Order'), url('/hub/orders/'.$this->order->id));
     }
 
     public function toArray(object $notifiable): array

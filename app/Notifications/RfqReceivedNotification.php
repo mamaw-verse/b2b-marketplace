@@ -28,12 +28,12 @@ final class RfqReceivedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('New RFQ Received: '.$this->recipient->rfq->title)
-            ->line('You have received a new Request for Quotation.')
-            ->line('Title: '.$this->recipient->rfq->title)
-            ->line('From: '.($this->recipient->rfq->buyer_snapshot['business_name'] ?? 'A buyer'))
-            ->action('View RFQ', url('/hub/rfqs/'.$this->recipient->id))
-            ->line('Please review and respond to this inquiry.');
+            ->subject(__('New RFQ Received: :title', ['title' => $this->recipient->rfq->title]))
+            ->line(__('You have received a new Request for Quotation.'))
+            ->line(__('Title: :title', ['title' => $this->recipient->rfq->title]))
+            ->line(__('From: :name', ['name' => $this->recipient->rfq->buyer_snapshot['business_name'] ?? __('A buyer')]))
+            ->action(__('View RFQ'), url('/hub/rfqs/'.$this->recipient->id))
+            ->line(__('Please review and respond to this inquiry.'));
     }
 
     public function toArray(object $notifiable): array

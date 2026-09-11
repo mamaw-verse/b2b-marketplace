@@ -28,10 +28,10 @@ final class OrderPendingPaymentNotification extends Notification implements Shou
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('New Order Awaiting Payment')
-            ->line('An order from '.$this->order->shop->storefront_name.' requires your payment.')
-            ->line('Total: PHP '.number_format((float) $this->order->order_total, 2))
-            ->action('Pay Now', url('/account/orders/'.$this->order->id));
+            ->subject(__('New Order Awaiting Payment'))
+            ->line(__('An order from :storefront requires your payment.', ['storefront' => $this->order->shop->storefront_name]))
+            ->line(__('Total: PHP :total', ['total' => number_format((float) $this->order->order_total, 2)]))
+            ->action(__('Pay Now'), url('/account/orders/'.$this->order->id));
     }
 
     public function toArray(object $notifiable): array

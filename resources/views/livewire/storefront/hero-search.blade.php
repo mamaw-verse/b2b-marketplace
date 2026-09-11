@@ -266,7 +266,7 @@
                                             type="button"
                                             @click="goTo(i, true)"
                                             :aria-current="index === i ? 'true' : 'false'"
-                                            :aria-label="`Go to slide ${i + 1}`"
+                                            :aria-label="`{{ __('Go to slide :n', ['n' => '${i + 1}']) }}`"
                                             class="h-1.5 rounded-full border-none p-0 transition-all duration-300 cursor-pointer"
                                             :class="index === i ? 'w-5 bg-[var(--hs-gold-400)]' : 'w-1.5 bg-white/35 hover:bg-white/60'"
                                             role="tab"
@@ -354,7 +354,7 @@
                             </div>
                             <div class="p-3">
                                 <p class="truncate text-sm font-semibold text-[var(--hs-neutral-900)] group-hover:text-[var(--hs-green-700)]">
-                                    {{ $result['name'] ?? 'Unknown' }}
+                                    {{ $result['name'] ?? __('Unknown') }}
                                 </p>
                                 <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)] truncate">
                                     {{ $result['shop_name'] ?? '' }}
@@ -623,7 +623,7 @@
                         {{-- Full-bleed landmark photo --}}
                         @if (!empty($p['landmark_image']))
                             <img src="{{ $p['landmark_image'] }}"
-                                 alt="{{ $p['display_name'] }} landmark"
+                                 alt="{{ __(':name landmark', ['name' => $p['display_name']]) }}"
                                  class="absolute inset-0 w-full h-full object-cover object-center">
                         @endif
 
@@ -663,7 +663,7 @@
                             {{-- Full-bleed landmark photo --}}
                             @if (!empty($portal['landmark_image']))
                                 <img src="{{ $portal['landmark_image'] }}"
-                                     alt="{{ $portal['display_name'] }} landmark"
+                                     alt="{{ __(':name landmark', ['name' => $portal['display_name']]) }}"
                                      class="absolute inset-0 w-full h-full object-cover object-center {{ $isActive ? 'transition-transform duration-500 group-hover:scale-105' : '' }}">
                             @endif
 

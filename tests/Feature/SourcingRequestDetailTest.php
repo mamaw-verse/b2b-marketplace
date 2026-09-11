@@ -84,9 +84,11 @@ test('detail page shows reference file for image', function () {
 
     $this->actingAs($admin);
 
+    // Detail page shows file info with filename, type, and a Download button for all file types.
     Livewire::test(SourcingRequestDetail::class, ['sourcingRequest' => $request])
         ->assertSee('Reference File')
-        ->assertSeeHtml('<img');
+        ->assertSee('ref.jpg')
+        ->assertSee('Download');
 });
 
 test('detail page shows file info for non-image', function () {

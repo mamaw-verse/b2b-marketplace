@@ -80,12 +80,12 @@ test('a poll refresh picks up the scan status written by the scan job', function
     $media = attachDocument($product, 'pending');
 
     $component = Livewire::test(DocumentManager::class, ['product' => $product])
-        ->assertSee('Pending');
+        ->assertSee('Scanning…');
 
     // Simulate ScanUploadedFileJob completing between polls.
     $media->update(['scan_status' => 'clean']);
 
     $component->refresh()
-        ->assertSee('Clean')
-        ->assertDontSee('Pending');
+        ->assertSee('Verified')
+        ->assertDontSee('Scanning…');
 });

@@ -103,7 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = auth()->user();
 
         if ($user->hasRole('admin')) {
-            return redirect()->route('admin.onboardings.index');
+            return redirect()->route('admin.dashboard.index');
         }
 
         return redirect()->route('portal.dashboard');

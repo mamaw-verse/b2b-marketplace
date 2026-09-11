@@ -53,7 +53,7 @@
         {{-- Header --}}
         <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--hs-neutral-200)]">
             <a href="{{ route('home') }}" wire:navigate @click="sfNav = false">
-                <img src="/images/brand-logo.png" alt="1Halal Store" class="h-8 w-auto">
+                <img src="/images/brand-logo.png" alt="{{ __('1Halal Store') }}" class="h-8 w-auto">
             </a>
             <button @click="sfNav = false"
                     class="size-8 flex items-center justify-center rounded-lg text-[var(--hs-neutral-500)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)] transition border-none bg-transparent cursor-pointer">
@@ -159,7 +159,7 @@
                     {{-- Brand column --}}
                     <div class="text-center sm:text-left col-span-1 sm:col-span-2 lg:col-span-1">
                         <div class="flex items-center justify-center sm:justify-start gap-3 mb-4">
-                            <img src="/images/brand-logo.png" alt="1Halal Store" class="h-10 sm:h-12 w-auto opacity-90">
+                            <img src="/images/brand-logo.png" alt="{{ __('1Halal Store') }}" class="h-10 sm:h-12 w-auto opacity-90">
                             <img src="/images/halal-stamp.png" alt="{{ __('Halal Certified') }}" class="h-10 sm:h-12 w-auto">
                         </div>
                         <p class="text-sm text-white/55 leading-relaxed max-w-[34ch] mx-auto sm:mx-0">
@@ -219,7 +219,7 @@
                             <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-[9px] bg-white/[0.06] text-[var(--hs-gold-400)]">
                                 <flux:icon :icon="$badge['icon']" class="size-[15px] sm:size-[17px]" />
                             </div>
-                            <span class="text-[0.72rem] sm:text-[0.78rem] font-semibold text-white/75 max-w-[14ch] leading-snug">{{ $badge['label'] }}</span>
+                            <span class="text-[0.72rem] sm:text-[0.78rem] font-semibold text-white/75 max-w-[14ch] leading-snug">{{ __($badge['label']) }}</span>
                         </div>
                     @endforeach
                 </div>

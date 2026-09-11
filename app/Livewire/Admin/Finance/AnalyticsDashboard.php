@@ -12,6 +12,7 @@ use App\Models\SourcingRequest;
 use App\Services\GoogleAnalyticsService;
 use App\Services\ShopAnalyticsService;
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -163,7 +164,7 @@ final class AnalyticsDashboard extends Component
             ->whereIn('status', ['expiring_soon', 'expired'])
             ->count();
 
-        $this->metrics = [
+        $this->metrics = $this->toPlainArray([
             'gmv' => $gmv,
             'total_orders' => $totalOrders,
             'total_payouts_disbursed' => $totalPayoutsDisbursed,
@@ -182,6 +183,41 @@ final class AnalyticsDashboard extends Component
             'revenue_trend' => $analyticsService->platformRevenueTrend($from, $to),
             'subscription_trend' => $analyticsService->platformSubscriptionTrend(),
             'certification_trend' => $analyticsService->platformCertificationTrend(),
-        ];
+        ]);
+    }
+
+    /**
+     * Recursively convert Collections/stdClass/Arrayable values into plain
+     * arrays and scalars.
+     *
+     * $metrics is a public Livewire property, so its entire tree must be
+     * synth-safe (arrays + scalars only) to survive Livewire's snapshot
+     * serialization on every subsequent request — not just the very first
+     * page load. Several of the values coming out of ShopAnalyticsService
+     * (e.g. platformSubscriptions()/platformSponsoredContent()) are raw
+     * `DB::table(...)->get()` results: an Illuminate\Support\Collection of
+     * stdClass rows. Collections of stdClass are not guaranteed to
+     * round-trip correctly through Livewire's dehydrate/hydrate cycle,
+     * which can silently leave $wire.metrics out of sync with what Blade
+     * rendered server-side on the very same request — exactly the kind of
+     * "the list below has numbers but the chart doesn't" symptom this
+     * dashboard was showing. Flattening everything to plain arrays here
+     * removes that ambiguity entirely.
+     */
+    private function toPlainArray(mixed $value): mixed
+    {
+        if ($value instanceof Arrayable) {
+            $value = $value->toArray();
+        } elseif ($value instanceof \Traversable) {
+            $value = iterator_to_array($value);
+        } elseif (is_object($value)) {
+            $value = (array) $value;
+        }
+
+        if (is_array($value)) {
+            return array_map(fn ($item) => $this->toPlainArray($item), $value);
+        }
+
+        return $value;
     }
 }

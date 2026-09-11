@@ -27,9 +27,9 @@ final class ProductUnpublishedNotification extends Notification implements Shoul
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Product Has Been Unpublished')
-            ->line("Your product \"{$this->product->name}\" has been unpublished by a moderator and removed from search.")
-            ->line('If you believe this is an error, please contact support.');
+            ->subject(__('Your Product Has Been Unpublished'))
+            ->line(__('Your product ":productName" has been unpublished by a moderator and removed from search.', ['productName' => $this->product->name]))
+            ->line(__('If you believe this is an error, please contact support.'));
     }
 
     /** @return array<string, mixed> */

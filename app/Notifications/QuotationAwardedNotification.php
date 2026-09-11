@@ -28,12 +28,12 @@ final class QuotationAwardedNotification extends Notification implements ShouldQ
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Quotation Was Awarded!')
-            ->line('Great news! The buyer has awarded your quotation.')
-            ->line('RFQ: '.$this->quotation->rfq->title)
-            ->line('Total: '.$this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2))
-            ->action('View Details', url('/hub/rfqs/'.$this->quotation->rfqRecipient->id))
-            ->line('The buyer has accepted your offer.');
+            ->subject(__('Your Quotation Was Awarded!'))
+            ->line(__('Great news! The buyer has awarded your quotation.'))
+            ->line(__('RFQ: :title', ['title' => $this->quotation->rfq->title]))
+            ->line(__('Total: :total', ['total' => $this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2)]))
+            ->action(__('View Details'), url('/hub/rfqs/'.$this->quotation->rfqRecipient->id))
+            ->line(__('The buyer has accepted your offer.'));
     }
 
     public function toArray(object $notifiable): array

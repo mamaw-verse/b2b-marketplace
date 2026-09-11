@@ -11,7 +11,6 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
-use Illuminate\Validation\ValidationException;
 
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
@@ -62,7 +61,7 @@ test('storefront_name falls back to registered_business_name when null on the on
     ]);
 });
 
-test('approval fails when a certificate is missing its uploaded file', function () {
+test('approval succeeds even when a certificate is missing its uploaded file', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
     $seller = User::factory()->create();
@@ -78,12 +77,12 @@ test('approval fails when a certificate is missing its uploaded file', function 
         'media_id' => null,
     ]);
 
-    expect(fn () => app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin))
-        ->toThrow(ValidationException::class);
+    // Certificate validation is no longer enforced at approval time — the admin
+    // can approve and the seller uploads/completes docs in the hub later.
+    $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
 
-    // Onboarding stays un-approved.
-    expect($onboarding->fresh()->status)->toBe('submitted');
-    $this->assertDatabaseCount('shops', 0);
+    expect($shop->status)->toBe('active');
+    expect($onboarding->fresh()->status)->toBe('approved');
 });
 
 test('approval syncs product categories onto the new shop via the pivot', function () {
@@ -148,5 +147,5 @@ test('approval succeeds and creates an active shop when certificates are complet
 
     expect($subscription->status)->toBe('trialing')
         ->and($subscription->subscription_plan_id)->toBe($plan->id)
-        ->and($subscription->trial_ends_at->diffInDays(now()))->toBeBetween(179, 180);
+        ->and($subscription->trial_ends_at->diffInDays(now(), false))->toBeBetween(-180, -179);
 });

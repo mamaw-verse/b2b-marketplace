@@ -13,6 +13,8 @@ use Livewire\Livewire;
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
 
+    config(['marketplace.features.orders_enabled' => true]);
+
     $this->seller = User::factory()->create();
     $this->seller->assignRole('seller');
     $this->shop = Shop::factory()->create(['user_id' => $this->seller->id, 'status' => 'active']);

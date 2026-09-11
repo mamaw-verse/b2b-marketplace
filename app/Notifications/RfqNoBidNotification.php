@@ -35,23 +35,23 @@ final class RfqNoBidNotification extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)
             ->subject($this->reason === 'seller_closed'
-                ? 'Seller closed your RFQ'
-                : 'Seller did not respond to your RFQ');
+                ? __('Seller closed your RFQ')
+                : __('Seller did not respond to your RFQ'));
 
         if ($this->reason === 'seller_closed') {
-            $mail->line('The seller ('.$sellerName.') has closed your request for quotation and will not be submitting a quote.');
+            $mail->line(__('The seller (:sellerName) has closed your request for quotation and will not be submitting a quote.', ['sellerName' => $sellerName]));
 
             if ($this->rfqRecipient->decline_reason) {
-                $mail->line('Reason: '.$this->rfqRecipient->decline_reason);
+                $mail->line(__('Reason: :reason', ['reason' => $this->rfqRecipient->decline_reason]));
             }
         } else {
-            $mail->line('The seller ('.$sellerName.') did not respond to your request for quotation within 7 days.');
+            $mail->line(__('The seller (:sellerName) did not respond to your request for quotation within 7 days.', ['sellerName' => $sellerName]));
         }
 
         return $mail
-            ->line('RFQ: '.$this->rfqRecipient->rfq->title)
-            ->action('View RFQ', url('/account/rfqs/'.$this->rfqRecipient->rfq_id))
-            ->line('You may close this RFQ or wait for it to auto-close.');
+            ->line(__('RFQ: :title', ['title' => $this->rfqRecipient->rfq->title]))
+            ->action(__('View RFQ'), url('/account/rfqs/'.$this->rfqRecipient->rfq_id))
+            ->line(__('You may close this RFQ or wait for it to auto-close.'));
     }
 
     public function toArray(object $notifiable): array

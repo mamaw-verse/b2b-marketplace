@@ -28,9 +28,9 @@ final class OrderReturnedNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Order Has Been Marked as Returned')
-            ->line('The seller has marked order #'.$this->order->order_number.' as returned to seller.')
-            ->action('View Order', url('/account/orders/'.$this->order->id));
+            ->subject(__('Your Order Has Been Marked as Returned'))
+            ->line(__('The seller has marked order #:number as returned to seller.', ['number' => $this->order->order_number]))
+            ->action(__('View Order'), url('/account/orders/'.$this->order->id));
     }
 
     public function toArray(object $notifiable): array

@@ -26,7 +26,7 @@ final class CertificationApplicationAcknowledgment extends Mailable implements S
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'We received your halal certification application',
+            subject: __('We received your halal certification application'),
         );
     }
 

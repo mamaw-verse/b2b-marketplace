@@ -31,8 +31,8 @@ final class ReviewHiddenNotification extends Notification implements ShouldQueue
         $reviewableName = $this->resolveReviewableName();
 
         return (new MailMessage)
-            ->subject('Your Review Has Been Hidden')
-            ->line("Your review on {$reviewableName} has been hidden by a moderator for violating community guidelines. If you believe this is an error, please contact support.");
+            ->subject(__('Your Review Has Been Hidden'))
+            ->line(__('Your review on :reviewableName has been hidden by a moderator for violating community guidelines. If you believe this is an error, please contact support.', ['reviewableName' => $reviewableName]));
     }
 
     /** @return array<string, mixed> */

@@ -30,11 +30,11 @@ final class OnboardingRevisionRequestedNotification extends Notification impleme
         $storefrontName = $this->onboarding->storefront_name ?? 'your business';
 
         return (new MailMessage)
-            ->subject('Your Onboarding Application Requires Revision')
-            ->line("Your onboarding application for **{$storefrontName}** requires some changes before it can be approved.")
-            ->when($this->onboarding->admin_notes, fn (MailMessage $mail) => $mail->line('**Feedback:** '.$this->onboarding->admin_notes))
-            ->line('Please review the feedback and update your application.')
-            ->action('Update Application', route('account.onboarding'));
+            ->subject(__('Your Onboarding Application Requires Revision'))
+            ->line(__('Your onboarding application for **:storefrontName** requires some changes before it can be approved.', ['storefrontName' => $storefrontName]))
+            ->when($this->onboarding->admin_notes, fn (MailMessage $mail) => $mail->line(__('**Feedback:** :notes', ['notes' => $this->onboarding->admin_notes])))
+            ->line(__('Please review the feedback and update your application.'))
+            ->action(__('Update Application'), route('account.onboarding'));
     }
 
     /** @return array<string, mixed> */

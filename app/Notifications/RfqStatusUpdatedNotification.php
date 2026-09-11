@@ -30,12 +30,12 @@ final class RfqStatusUpdatedNotification extends Notification implements ShouldQ
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('RFQ Status Updated: '.$this->recipient->rfq->title)
-            ->line('The status of your Request for Quotation has been updated.')
-            ->line('RFQ: '.$this->recipient->rfq->title)
-            ->line('Status: '.$this->statusLabel($this->currentStatus))
-            ->action('View RFQ', route('account.rfqs.show', $this->recipient->rfq_id))
-            ->line('You can view the latest details of your RFQ in your account.');
+            ->subject(__('RFQ Status Updated: :title', ['title' => $this->recipient->rfq->title]))
+            ->line(__('The status of your Request for Quotation has been updated.'))
+            ->line(__('RFQ: :title', ['title' => $this->recipient->rfq->title]))
+            ->line(__('Status: :status', ['status' => $this->statusLabel($this->currentStatus)]))
+            ->action(__('View RFQ'), route('account.rfqs.show', $this->recipient->rfq_id))
+            ->line(__('You can view the latest details of your RFQ in your account.'));
     }
 
     /** @return array<string, mixed> */
@@ -62,10 +62,10 @@ final class RfqStatusUpdatedNotification extends Notification implements ShouldQ
     public function statusLabel(string $status): string
     {
         return match ($status) {
-            'in_progress' => 'In Progress',
-            'resolved' => 'Resolved',
-            'closed' => 'Closed',
-            default => 'Pending',
+            'in_progress' => __('In Progress'),
+            'resolved' => __('Resolved'),
+            'closed' => __('Closed'),
+            default => __('Pending'),
         };
     }
 }

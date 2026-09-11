@@ -29,9 +29,9 @@ final class PayoutFailedNotification extends Notification implements ShouldQueue
         $storefrontName = $this->payout->shop->storefront_name;
 
         return (new MailMessage)
-            ->subject('Payout Failed — Requires Attention')
-            ->line("Payout #{$this->payout->id} for shop '{$storefrontName}' failed. Reason: {$this->payout->failure_reason}. Please investigate and retry.")
-            ->action('Review Payout', url("/admin/payouts/{$this->payout->id}"));
+            ->subject(__('Payout Failed — Requires Attention'))
+            ->line(__("Payout #:id for shop ':storefront' failed. Reason: :reason. Please investigate and retry.", ['id' => $this->payout->id, 'storefront' => $storefrontName, 'reason' => $this->payout->failure_reason]))
+            ->action(__('Review Payout'), url("/admin/payouts/{$this->payout->id}"));
     }
 
     /** @return array<string, mixed> */

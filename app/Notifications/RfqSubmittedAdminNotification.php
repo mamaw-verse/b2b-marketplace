@@ -32,12 +32,12 @@ final class RfqSubmittedAdminNotification extends Notification implements Should
             ?? 'A buyer';
 
         return (new MailMessage)
-            ->subject('New RFQ Submitted: '.$this->rfq->title)
-            ->line('A new Request for Quotation has been submitted and requires your attention.')
-            ->line('Title: '.$this->rfq->title)
-            ->line('From: '.$buyerName)
-            ->action('Review RFQ', route('admin.rfqs.show', $this->rfq->id))
-            ->line('Please review and assign this RFQ in the admin panel.');
+            ->subject(__('New RFQ Submitted: :title', ['title' => $this->rfq->title]))
+            ->line(__('A new Request for Quotation has been submitted and requires your attention.'))
+            ->line(__('Title: :title', ['title' => $this->rfq->title]))
+            ->line(__('From: :name', ['name' => $buyerName]))
+            ->action(__('Review RFQ'), route('admin.rfqs.show', $this->rfq->id))
+            ->line(__('Please review and assign this RFQ in the admin panel.'));
     }
 
     /** @return array<string, mixed> */

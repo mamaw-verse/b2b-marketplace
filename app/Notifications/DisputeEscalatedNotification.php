@@ -28,10 +28,10 @@ final class DisputeEscalatedNotification extends Notification implements ShouldQ
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Dispute Escalated - Requires Admin Review')
-            ->line('A dispute on order #'.$this->dispute->order_id.' has been escalated for arbitration.')
-            ->action('Review Dispute', url('/admin/disputes'))
-            ->line('Please review and resolve this dispute.');
+            ->subject(__('Dispute Escalated - Requires Admin Review'))
+            ->line(__('A dispute on order #:orderId has been escalated for arbitration.', ['orderId' => $this->dispute->order_id]))
+            ->action(__('Review Dispute'), url('/admin/disputes'))
+            ->line(__('Please review and resolve this dispute.'));
     }
 
     /** @return array<string, mixed> */

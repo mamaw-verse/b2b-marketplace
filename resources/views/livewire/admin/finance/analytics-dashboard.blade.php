@@ -1,6 +1,5 @@
 <div
     x-data="dashboardCharts()"
-    x-init="init()"
     x-effect="$wire.metrics && $nextTick(() => updateCharts($wire.metrics))"
     class="space-y-6"
 >
@@ -186,13 +185,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Revenue Trend') }}</flux:heading>
-                <div class="relative" style="height: 260px;">
+                <div class="relative" style="height: 260px;" wire:ignore>
                     <canvas x-ref="revenueChart"></canvas>
                 </div>
             </flux:card>
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Orders Trend') }}</flux:heading>
-                <div class="relative" style="height: 260px;">
+                <div class="relative" style="height: 260px;" wire:ignore>
                     <canvas x-ref="ordersChart"></canvas>
                 </div>
             </flux:card>
@@ -205,20 +204,20 @@
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Subscriptions') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
-                    <div class="shrink-0" style="width: 180px; height: 180px;">
-                        <canvas x-ref="subscriptionsDonut" width="180" height="180"></canvas>
+                    <div class="shrink-0" style="width: 180px; height: 180px;" wire:ignore>
+                        <canvas x-ref="subscriptionsDonut"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
                         <p class="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{{ __('Counts by Status') }}</p>
                         @forelse($metrics['subscriptions']['counts'] ?? [] as $count)
                             <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ $count->status }}</span>
-                                <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $count->count }}</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ $count['status'] ?? '' }}</span>
+                                <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $count['count'] ?? 0 }}</span>
                             </div>
                         @empty
                             <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No subscription data.') }}</p>
                         @endforelse
-                        <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                        <div class="mt-4 pt-4">
                             <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('Trial to Paid Conversion') }}</p>
                             <p class="text-xl font-bold text-zinc-900 dark:text-white tabular-nums mt-1">{{ $metrics['subscriptions']['trial_to_paid_conversion'] ?? 0 }}%</p>
                         </div>
@@ -231,8 +230,8 @@
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Certifications') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
-                    <div class="shrink-0" style="width: 180px; height: 180px;">
-                        <canvas x-ref="certificationsDonut" width="180" height="180"></canvas>
+                    <div class="shrink-0" style="width: 180px; height: 180px;" wire:ignore>
+                        <canvas x-ref="certificationsDonut"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
                         @foreach(['pending', 'approved', 'rejected'] as $status)
@@ -252,14 +251,14 @@
         <div class="grid grid-cols-1 gap-6">
             <flux:card>
                 <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Sponsored Content Performance') }}</flux:heading>
-                <div class="relative" style="height: 200px;">
-                    <canvas x-ref="sponsoredChart" style="height: 200px;"></canvas>
+                <div class="relative" style="height: 200px;" wire:ignore>
+                    <canvas x-ref="sponsoredChart"></canvas>
                 </div>
                 <div class="mt-6">
                     @forelse($metrics['sponsored_content'] ?? [] as $event)
                         <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                            <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ $event->tier_name }} — <span class="capitalize">{{ $event->event_type }}</span></span>
-                            <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $event->count }}</span>
+                            <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ $event['tier_name'] ?? '' }} — <span class="capitalize">{{ $event['event_type'] ?? '' }}</span></span>
+                            <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $event['count'] ?? 0 }}</span>
                         </div>
                     @empty
                         <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No event data.') }}</p>
@@ -275,12 +274,6 @@
             return {
                 instances: {},
 
-                // Pending build configs waiting for their canvas to be sized.
-                pending: {},
-
-                // Single shared ResizeObserver for all unsized canvases.
-                resizeObserver: null,
-
                 colors: {
                     green: '#10b981',
                     greenLight: '#d1fae5',
@@ -294,14 +287,9 @@
                     text: '#71717a',
                 },
 
-                // Called once by x-init. x-effect handles subsequent metric updates.
-                init() {
-                    this.$nextTick(() => this.updateCharts(this.$wire.metrics));
-                },
-
                 defaultOptions() {
                     return {
-                        responsive: false,
+                        responsive: true,
                         maintainAspectRatio: false,
                         animation: { duration: 250 },
                         plugins: {
@@ -329,21 +317,6 @@
                     };
                 },
 
-                /**
-                 * Stamp explicit pixel width/height onto a canvas so Chart.js
-                 * never has to call getContext() on a zero-size element.
-                 * Uses the parent container's dimensions with a fallback.
-                 */
-                stampCanvasSize(canvas, fallbackWidth, fallbackHeight) {
-                    const parent = canvas.parentElement;
-                    const w = (parent && parent.offsetWidth > 0) ? parent.offsetWidth : fallbackWidth;
-                    const h = (parent && parent.offsetHeight > 0) ? parent.offsetHeight : fallbackHeight;
-                    canvas.width = w;
-                    canvas.height = h;
-                    canvas.style.width = w + 'px';
-                    canvas.style.height = h + 'px';
-                },
-
                 isLiveCanvas(canvas) {
                     return !!(canvas && canvas.isConnected && canvas instanceof HTMLCanvasElement);
                 },
@@ -360,83 +333,32 @@
                 destroyChart(key) {
                     const chart = this.instances[key];
                     if (chart) {
-                        try { chart.destroy(); } catch (e) { /* already gone */ }
+                        try {
+                            // Stop pending animations first so no stale
+                            // requestAnimationFrame fires on a null canvas.
+                            chart.stop();
+                            chart.destroy();
+                        } catch (e) { /* already gone */ }
                     }
                     this.instances[key] = null;
-                },
-
-                // Cancel a pending build and stop observing its canvas.
-                cancelPending(key) {
-                    const item = this.pending[key];
-                    if (!item) return;
-                    if (item.canvas && this.resizeObserver) {
-                        try { this.resizeObserver.unobserve(item.canvas); } catch (e) { /* already removed */ }
-                    }
-                    delete this.pending[key];
-                },
-
-                ensureResizeObserver() {
-                    if (this.resizeObserver || typeof ResizeObserver === 'undefined') return;
-
-                    this.resizeObserver = new ResizeObserver((entries) => {
-                        entries.forEach((entry) => {
-                            const canvas = entry.target;
-                            const match = Object.entries(this.pending)
-                                .find(([, item]) => item.canvas === canvas);
-                            if (!match) return;
-                            const [key, item] = match;
-                            if (!this.isLiveCanvas(canvas) || canvas.offsetWidth <= 0 || canvas.offsetHeight <= 0) return;
-                            this.cancelPending(key);
-                            this.destroyChart(key);
-                            // FIX #1: the canvas must be stamped with its real (or fallback)
-                            // pixel dimensions before Chart.js builds against it, exactly
-                            // like the immediate-build and requestAnimationFrame paths do.
-                            // Without this, Chart.js falls back to the HTML canvas default
-                            // of 300x150 and gets stretched by CSS, distorting the chart.
-                            this.stampCanvasSize(canvas, item.fallbackWidth, item.fallbackHeight);
-                            try { this.instances[key] = item.build(canvas); } catch (e) { console.error(`Chart "${key}" init failed`, e); }
-                        });
-                        if (Object.keys(this.pending).length === 0) {
-                            this.resizeObserver.disconnect();
-                            this.resizeObserver = null;
-                        }
-                    });
                 },
 
                 /**
                  * Safely initialise a Chart.js instance.
                  *
-                 * Draws immediately when the canvas already has dimensions.
-                 * Otherwise queues it for a ResizeObserver callback so Chart.js
-                 * never receives a zero-size (null-context) canvas.
+                 * With responsive:true Chart.js sets up its own
+                 * ResizeObserver and sizes itself to the container.
+                 * We just need the canvas to be connected to the DOM.
                  */
-                safeInit(key, canvas, buildFn, fallbackWidth = 600, fallbackHeight = 260) {
-                    this.cancelPending(key);
+                safeInit(key, canvas, buildFn) {
                     this.destroyChart(key);
 
                     if (!this.isLiveCanvas(canvas)) return;
 
-                    if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
-                        this.stampCanvasSize(canvas, fallbackWidth, fallbackHeight);
-                        try { this.instances[key] = buildFn(canvas); } catch (e) { console.error(`Chart "${key}" init failed`, e); }
-                        return;
-                    }
-
-                    // Canvas not yet laid out — queue and observe.
-                    this.pending[key] = { canvas, build: buildFn, fallbackWidth, fallbackHeight };
-                    this.ensureResizeObserver();
-                    if (this.resizeObserver) {
-                        this.resizeObserver.observe(canvas);
-                    } else {
-                        // Fallback for environments without ResizeObserver.
-                        requestAnimationFrame(() => {
-                            const item = this.pending[key];
-                            if (!item || item.canvas !== canvas) return;
-                            if (!this.isLiveCanvas(canvas) || canvas.offsetWidth <= 0) return;
-                            this.cancelPending(key);
-                            this.stampCanvasSize(canvas, fallbackWidth, fallbackHeight);
-                            try { this.instances[key] = buildFn(canvas); } catch (e) { console.error(`Chart "${key}" init failed`, e); }
-                        });
+                    try {
+                        this.instances[key] = buildFn(canvas);
+                    } catch (e) {
+                        console.error(`Chart "${key}" init failed`, e);
                     }
                 },
 
@@ -458,7 +380,7 @@
 
                 initRevenueChart(trend) {
                     const canvas = this.$refs.revenueChart;
-                    if (!canvas) { this.destroyChart('revenue'); this.cancelPending('revenue'); return; }
+                    if (!canvas) { this.destroyChart('revenue'); return; }
 
                     const data = trend.map(d => ({ date: d?.date ?? '', gmv: this.toNumber(d?.gmv) }));
 
@@ -489,12 +411,12 @@
                                 },
                             },
                         },
-                    }), 600, 260); // FIX #2: explicit fallback matching this container's fixed 260px height.
+                    }));
                 },
 
                 initOrdersChart(trend) {
                     const canvas = this.$refs.ordersChart;
-                    if (!canvas) { this.destroyChart('orders'); this.cancelPending('orders'); return; }
+                    if (!canvas) { this.destroyChart('orders'); return; }
 
                     // revenue_trend rows include an 'orders' field — use it directly.
                     const data = trend.map(d => ({ date: d?.date ?? '', orders: this.toNumber(d?.orders) }));
@@ -522,12 +444,12 @@
                                 },
                             },
                         },
-                    }), 600, 260); // FIX #2: explicit fallback matching this container's fixed 260px height.
+                    }));
                 },
 
                 initSubscriptionsDonut(subs) {
                     const canvas = this.$refs.subscriptionsDonut;
-                    if (!canvas) { this.destroyChart('subsDonut'); this.cancelPending('subsDonut'); return; }
+                    if (!canvas) { this.destroyChart('subsDonut'); return; }
 
                     const counts = this.normalizeArray(subs?.counts);
                     const totals = {};
@@ -540,7 +462,7 @@
                     const data = labels.map(l => totals[l]);
 
                     // Destroy old chart when data disappears — prevents stale donuts.
-                    if (data.length === 0) { this.destroyChart('subsDonut'); this.cancelPending('subsDonut'); return; }
+                    if (data.length === 0) { this.destroyChart('subsDonut'); return; }
 
                     const bgColors = labels.map(s => s === 'active' ? this.colors.green : s === 'trialing' ? this.colors.blue : this.colors.neutral);
 
@@ -551,28 +473,26 @@
                             datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }],
                         },
                         options: {
-                            responsive: false,
-                            maintainAspectRatio: false,
+                            responsive: true,
+                            maintainAspectRatio: true,
                             cutout: '65%',
                             plugins: {
-                                legend: { position: 'bottom', labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 } },
+                                legend: { position: 'bottom', labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, boxWidth: 10, boxHeight: 10 } },
                                 tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + this.toNumber(ctx.raw).toLocaleString() } },
                             },
                         },
-                    }), 180, 180); // FIX #2: this container is a fixed 180x180 square — was previously
-                                   // falling back to the generic 600x260 default, squishing the donut
-                                   // into the thin sliver seen in the screenshot.
+                    }));
                 },
 
                 initCertificationsDonut(certs) {
                     const canvas = this.$refs.certificationsDonut;
-                    if (!canvas) { this.destroyChart('certDonut'); this.cancelPending('certDonut'); return; }
+                    if (!canvas) { this.destroyChart('certDonut'); return; }
 
                     const labels = ['pending', 'approved', 'rejected'];
                     const data = labels.map(s => this.toNumber(certs?.[s]));
 
                     // Destroy old chart when data disappears.
-                    if (data.every(v => v === 0)) { this.destroyChart('certDonut'); this.cancelPending('certDonut'); return; }
+                    if (data.every(v => v === 0)) { this.destroyChart('certDonut'); return; }
 
                     const bgColors = [this.colors.amber, this.colors.green, this.colors.red];
 
@@ -583,27 +503,27 @@
                             datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }],
                         },
                         options: {
-                            responsive: false,
-                            maintainAspectRatio: false,
+                            responsive: true,
+                            maintainAspectRatio: true,
                             cutout: '65%',
                             plugins: {
-                                legend: { position: 'bottom', labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 } },
+                                legend: { position: 'bottom', labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, boxWidth: 10, boxHeight: 10 } },
                                 tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + this.toNumber(ctx.raw).toLocaleString() } },
                             },
                         },
-                    }), 180, 180); // FIX #2: same 180x180 fixed container as the subscriptions donut.
+                    }));
                 },
 
                 initSponsoredChart(events) {
                     const canvas = this.$refs.sponsoredChart;
-                    if (!canvas) { this.destroyChart('sponsored'); this.cancelPending('sponsored'); return; }
+                    if (!canvas) { this.destroyChart('sponsored'); return; }
 
-                    if (!events.length) { this.destroyChart('sponsored'); this.cancelPending('sponsored'); return; }
+                    if (!events.length) { this.destroyChart('sponsored'); return; }
 
                     const tiers = [...new Set(events.map(e => e?.tier_name).filter(Boolean))];
                     const eventTypes = [...new Set(events.map(e => e?.event_type).filter(Boolean))];
 
-                    if (!tiers.length || !eventTypes.length) { this.destroyChart('sponsored'); this.cancelPending('sponsored'); return; }
+                    if (!tiers.length || !eventTypes.length) { this.destroyChart('sponsored'); return; }
 
                     const colorPalette = [this.colors.green, this.colors.blue, this.colors.amber, this.colors.red];
 
@@ -627,7 +547,7 @@
                                 legend: {
                                     display: eventTypes.length > 1,
                                     position: 'bottom',
-                                    labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 },
+                                    labels: { color: this.colors.text, font: { size: 11 }, padding: 12, usePointStyle: true, boxWidth: 10, boxHeight: 10 },
                                 },
                             },
                             scales: {
@@ -636,16 +556,11 @@
                                 y: { ...this.defaultOptions().scales.y, stacked: true },
                             },
                         },
-                    }), 800, 200); // FIX #2: this container's CSS height is fixed at 200px, not the
-                                   // generic 260px default — mismatched height was scaling/positioning
-                                   // the bars outside the visible plot area, which is why the screenshot
-                                   // shows gridlines/legend but no bars despite real data (233, 235, 1...).
+                    }));
                 },
 
                 destroyAllCharts() {
                     Object.keys(this.instances).forEach(k => this.destroyChart(k));
-                    Object.keys(this.pending).forEach(k => this.cancelPending(k));
-                    if (this.resizeObserver) { this.resizeObserver.disconnect(); this.resizeObserver = null; }
                 },
 
                 // Alpine calls this when the component is torn down (wire:navigate away).

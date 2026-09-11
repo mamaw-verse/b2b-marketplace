@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Livewire\CompanyHub\ShopProfileForm;
+use App\Models\Category;
+use App\Models\Media;
 use App\Models\Shop;
+use App\Models\ShopCertificate;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Livewire\Livewire;
@@ -65,7 +68,7 @@ test('the form hydrates the previously hidden onboarding fields', function () {
         'capabilities' => ['packaging', 'exporting'],
     ]);
 
-    $category = App\Models\Category::factory()->create();
+    $category = Category::factory()->create();
     $this->shop->categories()->sync([$category->id]);
 
     Livewire::actingAs($this->seller)
@@ -79,7 +82,7 @@ test('the form hydrates the previously hidden onboarding fields', function () {
 });
 
 test('saving persists value chain, capabilities, and categories', function () {
-    $category = App\Models\Category::factory()->create();
+    $category = Category::factory()->create();
 
     Livewire::actingAs($this->seller)
         ->test(ShopProfileForm::class)
@@ -106,12 +109,12 @@ test('the read-only verified details show legal identifiers and certificates', f
         'tax_identification_number' => '123-456-789-000',
     ]);
 
-    $media = App\Models\Media::factory()->create([
+    $media = Media::factory()->create([
         'original_filename' => 'halal-cert.pdf',
         'uploaded_by_id' => $this->seller->id,
     ]);
 
-    App\Models\ShopCertificate::create([
+    ShopCertificate::create([
         'shop_id' => $this->shop->id,
         'certification_body' => 'IDCP',
         'registration_number' => 'REG-001',
@@ -127,7 +130,9 @@ test('the read-only verified details show legal identifiers and certificates', f
         ->assertSee('SEC-2024-00001')
         ->assertSee('123-456-789-000')
         ->assertSee(__('Verified Compliance Details'))
-        ->assertSee('REG-001');
+        // Certificate row shows status badge and view-file button; registration_number is not displayed.
+        ->assertSee('Active')
+        ->assertSee('View file');
 });
 
 test('invalid enum values for the new fields are rejected', function () {

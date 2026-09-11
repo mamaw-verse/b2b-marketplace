@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\CompanyHub\Hub\Dashboard;
+use App\Livewire\Portal\Dashboard;
 use App\Models\Shop;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
@@ -14,13 +14,13 @@ beforeEach(function () {
     $this->seller->assignRole('seller');
 });
 
-test('the seller dashboard shows a View My Shop link for an active shop', function () {
+test('the seller dashboard shows a View Business link for an active shop', function () {
     $shop = Shop::factory()->create(['user_id' => $this->seller->id, 'status' => 'active']);
 
     Livewire::actingAs($this->seller)
         ->test(Dashboard::class)
         ->assertOk()
-        ->assertSee('View My Shop')
+        ->assertSee('View Business')
         ->assertSee(route('storefront.company', $shop), false);
 });
 

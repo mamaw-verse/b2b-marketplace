@@ -39,17 +39,17 @@ final class CertificateExpiryNotification extends Notification implements Should
         $registrationNumber = $this->certificate->registration_number;
 
         if ($this->daysUntilExpiry <= 0) {
-            $subject = "Certificate {$registrationNumber} has expired";
-            $line = "The halal certificate ({$registrationNumber}) for **{$shopName}** has expired.";
+            $subject = __('Certificate :registrationNumber has expired', ['registrationNumber' => $registrationNumber]);
+            $line = __('The halal certificate (:registrationNumber) for **:shopName** has expired.', ['registrationNumber' => $registrationNumber, 'shopName' => $shopName]);
         } else {
-            $subject = "Certificate {$registrationNumber} expires in {$this->daysUntilExpiry} days";
-            $line = "The halal certificate ({$registrationNumber}) for **{$shopName}** will expire in {$this->daysUntilExpiry} days.";
+            $subject = __('Certificate :registrationNumber expires in :days days', ['registrationNumber' => $registrationNumber, 'days' => $this->daysUntilExpiry]);
+            $line = __('The halal certificate (:registrationNumber) for **:shopName** will expire in :days days.', ['registrationNumber' => $registrationNumber, 'shopName' => $shopName, 'days' => $this->daysUntilExpiry]);
         }
 
         return (new MailMessage)
             ->subject($subject)
             ->line($line)
-            ->line('Please renew your certificate to maintain your shop listing.');
+            ->line(__('Please renew your certificate to maintain your shop listing.'));
     }
 
     /**

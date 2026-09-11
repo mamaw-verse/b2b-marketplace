@@ -1,14 +1,14 @@
 <x-mail::message>
-# Sourcing Request Received
+# {{ __('Sourcing Request Received') }}
 
-Dear **{{ $sourcingRequest->name }}**,
+{{ __('Dear **:name**,', ['name' => $sourcingRequest->name]) }}
 
-We have received your product sourcing request for **{{ $sourcingRequest->product_name }}**.
+{{ __('We have received your product sourcing request for **:productName**.', ['productName' => $sourcingRequest->product_name]) }}
 
-Our sourcing team will review your requirements and contact you at **{{ $sourcingRequest->email }}** with suitable options based on your specifications.
+{{ __('Our sourcing team will review your requirements and contact you at **:email** with suitable options based on your specifications.', ['email' => $sourcingRequest->email]) }}
 
-If you have any additional details to share, feel free to reply to this email.
+{{ __('If you have any additional details to share, feel free to reply to this email.') }}
 
-Thanks,<br>
+{{ __('Thanks,') }}<br>
 {{ config('app.name') }}
 </x-mail::message>

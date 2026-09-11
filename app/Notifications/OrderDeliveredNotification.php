@@ -28,10 +28,10 @@ final class OrderDeliveredNotification extends Notification implements ShouldQue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Order Has Been Delivered')
-            ->line('Your order #'.$this->order->id.' has been delivered.')
-            ->line('Please confirm receipt within 7 days.')
-            ->action('Confirm Receipt', url('/account/orders/'.$this->order->id));
+            ->subject(__('Your Order Has Been Delivered'))
+            ->line(__('Your order #:orderId has been delivered.', ['orderId' => $this->order->id]))
+            ->line(__('Please confirm receipt within 7 days.'))
+            ->action(__('Confirm Receipt'), url('/account/orders/'.$this->order->id));
     }
 
     public function toArray(object $notifiable): array

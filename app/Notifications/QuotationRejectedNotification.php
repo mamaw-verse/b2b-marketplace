@@ -28,11 +28,11 @@ final class QuotationRejectedNotification extends Notification implements Should
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Quotation Rejected')
-            ->line('The buyer has rejected your quotation.')
-            ->line('RFQ: '.$this->quotation->rfq->title)
-            ->action('View Details', url('/hub/rfqs/'.$this->quotation->rfqRecipient->id))
-            ->line('You can submit a revised quotation with different terms.');
+            ->subject(__('Quotation Rejected'))
+            ->line(__('The buyer has rejected your quotation.'))
+            ->line(__('RFQ: :title', ['title' => $this->quotation->rfq->title]))
+            ->action(__('View Details'), url('/hub/rfqs/'.$this->quotation->rfqRecipient->id))
+            ->line(__('You can submit a revised quotation with different terms.'));
     }
 
     public function toArray(object $notifiable): array

@@ -28,11 +28,11 @@ final class QuotationWithdrawnNotification extends Notification implements Shoul
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Quotation Withdrawn')
-            ->line('A seller has withdrawn their quotation.')
-            ->line('RFQ: '.$this->quotation->rfq->title)
-            ->action('View RFQ', url('/account/rfqs/'.$this->quotation->rfq_id))
-            ->line('The seller may submit a revised quotation.');
+            ->subject(__('Quotation Withdrawn'))
+            ->line(__('A seller has withdrawn their quotation.'))
+            ->line(__('RFQ: :title', ['title' => $this->quotation->rfq->title]))
+            ->action(__('View RFQ'), url('/account/rfqs/'.$this->quotation->rfq_id))
+            ->line(__('The seller may submit a revised quotation.'));
     }
 
     public function toArray(object $notifiable): array

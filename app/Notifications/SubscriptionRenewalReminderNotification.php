@@ -34,10 +34,10 @@ final class SubscriptionRenewalReminderNotification extends Notification impleme
         $shopName = $this->subscription->shop->storefront_name;
 
         return (new MailMessage)
-            ->subject("{$shopName} subscription renewal reminder")
-            ->line("Your subscription for {$shopName} is approaching renewal.")
-            ->line("Renewal is due in {$this->daysUntilRenewal} day(s).")
-            ->action('Review Subscription', route('hub.subscription'));
+            ->subject(__(':shopName subscription renewal reminder', ['shopName' => $shopName]))
+            ->line(__('Your subscription for :shopName is approaching renewal.', ['shopName' => $shopName]))
+            ->line(__('Renewal is due in :days day(s).', ['days' => $this->daysUntilRenewal]))
+            ->action(__('Review Subscription'), route('hub.subscription'));
     }
 
     /**

@@ -5,8 +5,10 @@ declare(strict_types=1);
 use App\Livewire\CompanyHub\ProductList;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\Subscription;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -59,6 +61,9 @@ test('toggleStatus archives a published product', function () {
 });
 
 test('toggleStatus publishes an archived product', function () {
+    // A trialing subscription is required for the publish policy to allow publishing.
+    Subscription::factory()->trialing()->create(['shop_id' => $this->shop->id]);
+
     $product = Product::factory()->archived()->create(['shop_id' => $this->shop->id]);
 
     Livewire::actingAs($this->seller)
@@ -102,7 +107,7 @@ test('seller cannot toggle status of a product belonging to another shop', funct
 
     // Status must not change — ownership check prevents it
     expect($product->fresh()->status)->toBe('published');
-})->throws(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+})->throws(ModelNotFoundException::class);
 
 test('status filter shows only published products', function () {
     $published = Product::factory()->published()->create(['shop_id' => $this->shop->id]);

@@ -28,10 +28,10 @@ final class DisputeResolvedNotification extends Notification implements ShouldQu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Dispute Resolved - Order #'.$this->dispute->order_id)
-            ->line('The dispute has been resolved: '.$this->dispute->resolution_type)
-            ->action('View Details', $this->urlForRecipient($notifiable))
-            ->line('Thank you for your patience.');
+            ->subject(__('Dispute Resolved - Order #:orderId', ['orderId' => $this->dispute->order_id]))
+            ->line(__('The dispute has been resolved: :resolutionType', ['resolutionType' => $this->dispute->resolution_type]))
+            ->action(__('View Details'), $this->urlForRecipient($notifiable))
+            ->line(__('Thank you for your patience.'));
     }
 
     /** @return array<string, mixed> */

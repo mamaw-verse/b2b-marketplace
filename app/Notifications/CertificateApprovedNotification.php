@@ -30,10 +30,10 @@ final class CertificateApprovedNotification extends Notification implements Shou
         $shopName = $this->certificate->shop?->storefront_name ?? 'your shop';
 
         return (new MailMessage)
-            ->subject('Your Halal Certificate Has Been Approved')
-            ->line("Your halal certificate for **{$shopName}** has been reviewed and approved.")
-            ->line('Your certificate is now active on the marketplace.')
-            ->action('View Certificates', route('hub.certifications.index'));
+            ->subject(__('Your Halal Certificate Has Been Approved'))
+            ->line(__('Your halal certificate for **:shopName** has been reviewed and approved.', ['shopName' => $shopName]))
+            ->line(__('Your certificate is now active on the marketplace.'))
+            ->action(__('View Certificates'), route('hub.certifications.index'));
     }
 
     /** @return array<string, mixed> */

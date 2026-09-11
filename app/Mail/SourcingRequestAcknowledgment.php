@@ -24,7 +24,7 @@ final class SourcingRequestAcknowledgment extends Mailable implements ShouldQueu
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'We received your product sourcing request',
+            subject: __('We received your product sourcing request'),
         );
     }
 

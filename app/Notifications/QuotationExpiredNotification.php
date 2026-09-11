@@ -28,11 +28,11 @@ final class QuotationExpiredNotification extends Notification implements ShouldQ
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Quotation Expired')
-            ->line('A quotation has expired without a response.')
-            ->line('RFQ: '.$this->quotation->rfq->title)
-            ->line('Total: '.$this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2))
-            ->action('View RFQ', url('/account/rfqs/'.$this->quotation->rfq_id));
+            ->subject(__('Quotation Expired'))
+            ->line(__('A quotation has expired without a response.'))
+            ->line(__('RFQ: :title', ['title' => $this->quotation->rfq->title]))
+            ->line(__('Total: :total', ['total' => $this->quotation->currency.' '.number_format((float) $this->quotation->total_amount, 2)]))
+            ->action(__('View RFQ'), url('/account/rfqs/'.$this->quotation->rfq_id));
     }
 
     public function toBroadcast(object $notifiable): BroadcastMessage

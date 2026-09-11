@@ -40,7 +40,7 @@ test('the verification mail footer links to storefront routes and drops the abou
         ->and($rendered)->toContain('href="'.route('storefront.products').'"')
         ->and($rendered)->toContain('>Products</a>')
         ->and($rendered)->toContain('href="'.route('storefront.companies').'"')
-        ->and($rendered)->toContain('>Verified Companies</a>')
+        ->and($rendered)->toContain('>Verified Businesses</a>')
         ->and($rendered)->not->toContain('1halalstore.com')
         ->and($rendered)->not->toContain('>About</a>');
 });

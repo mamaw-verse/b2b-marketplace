@@ -22,7 +22,7 @@ final class VerifyEmailNotification extends VerifyEmail
         $firstName = is_string($firstName) && mb_trim($firstName) !== '' ? mb_trim($firstName) : null;
 
         return (new MailMessage)
-            ->subject('Verify your email address — '.config('app.name'))
+            ->subject(__('Verify your email address — :appName', ['appName' => config('app.name')]))
             ->view('emails.verify-email', [
                 'url' => $verificationUrl,
                 'firstName' => $firstName,

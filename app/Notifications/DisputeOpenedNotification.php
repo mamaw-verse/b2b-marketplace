@@ -28,11 +28,11 @@ final class DisputeOpenedNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Dispute Opened on Order #'.$this->dispute->order_id)
-            ->line('A buyer has opened a '.$this->dispute->type.' dispute.')
-            ->line('Reason: '.str($this->dispute->reason)->limit(100))
-            ->action('View Dispute', url('/hub/orders/'.$this->dispute->order_id))
-            ->line('Please review and respond to this dispute.');
+            ->subject(__('Dispute Opened on Order #:orderId', ['orderId' => $this->dispute->order_id]))
+            ->line(__('A buyer has opened a :type dispute.', ['type' => $this->dispute->type]))
+            ->line(__('Reason: :reason', ['reason' => str($this->dispute->reason)->limit(100)]))
+            ->action(__('View Dispute'), url('/hub/orders/'.$this->dispute->order_id))
+            ->line(__('Please review and respond to this dispute.'));
     }
 
     /** @return array<string, mixed> */

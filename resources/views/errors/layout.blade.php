@@ -98,7 +98,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
                 <div class="flex items-center gap-3">
-                    <img src="/images/brand-logo.png" alt="1Halal Store" class="h-7 w-auto opacity-80">
+                    <img src="/images/brand-logo.png" alt="{{ __('1Halal Store') }}" class="h-7 w-auto opacity-80">
                     <img src="/images/halal-stamp.png" alt="{{ __('Halal Certified') }}" class="h-7 w-auto opacity-80">
                 </div>
                 <span class="text-[0.75rem] text-white/40">

@@ -46,6 +46,7 @@ test('hero section renders Halal Business Guru floating card', function () {
 
     $response->assertSee('Ismail Abaya, PhD');
     $response->assertSee('Halal Business Guru');
+    $response->assertSee('farm-level custody');
 });
 
 test('homepage sections have smooth-scroll anchor IDs', function () {
@@ -69,7 +70,7 @@ test('navigation header contains anchor links for homepage sections', function (
 test('homepage renders custom sourcing section', function () {
     $response = $this->get(route('home'));
 
-    $response->assertSee('Can’t Find What You’re Looking For?');
+    $response->assertSee("Can't Find What You're Looking For?");
     $response->assertSee('We can source it for you.');
     $response->assertSee('Request a Product');
     $response->assertSee(route('sourcing-request.create'));

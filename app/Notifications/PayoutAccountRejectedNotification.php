@@ -28,9 +28,9 @@ final class PayoutAccountRejectedNotification extends Notification implements Sh
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Payout Account Verification Failed')
-            ->line("Your bank account could not be verified. Reason: {$this->account->rejection_reason}. Please update your details and resubmit.")
-            ->action('Update Payout Account', url('/hub/payout-account'));
+            ->subject(__('Payout Account Verification Failed'))
+            ->line(__('Your bank account could not be verified. Reason: :reason. Please update your details and resubmit.', ['reason' => $this->account->rejection_reason]))
+            ->action(__('Update Payout Account'), url('/hub/payout-account'));
     }
 
     /** @return array<string, mixed> */

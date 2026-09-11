@@ -30,10 +30,10 @@ final class OnboardingSubmittedNotification extends Notification implements Shou
         $businessName = $this->onboarding->registered_business_name ?? 'Unknown';
 
         return (new MailMessage)
-            ->subject('New Onboarding Application Submitted')
-            ->line("A new onboarding application has been submitted by **{$businessName}**.")
-            ->line('Please review the application and approve or reject it.')
-            ->action('Review Application', url('/admin/onboardings/'.$this->onboarding->id));
+            ->subject(__('New Onboarding Application Submitted'))
+            ->line(__('A new onboarding application has been submitted by **:businessName**.', ['businessName' => $businessName]))
+            ->line(__('Please review the application and approve or reject it.'))
+            ->action(__('Review Application'), url('/admin/onboardings/'.$this->onboarding->id));
     }
 
     /** @return array<string, mixed> */

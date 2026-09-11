@@ -10,7 +10,7 @@ beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
 });
 
-test('account routes render the buyer portal nav even for shop owners', function () {
+test('account routes render the portal nav even for shop owners', function () {
     // A user who owns an active shop but is visiting an /account/* page.
     $user = User::factory()->create(['email_verified_at' => now()]);
     $user->assignRole('seller');
@@ -23,11 +23,11 @@ test('account routes render the buyer portal nav even for shop owners', function
     $response = $this->actingAs($user)->get(route('account.profile'));
 
     $response->assertOk()
-        // Buyer context header appears in the account portal's mobile drawer.
-        ->assertSee('Buyer Hub');
+        // Unified portal entry appears in the auth dropdown.
+        ->assertSee('My Portal');
 });
 
-test('hub routes render the company hub portal nav', function () {
+test('hub.hub-dashboard redirects to the unified portal dashboard', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
     $user->assignRole('seller');
     Shop::factory()->create([
@@ -38,6 +38,6 @@ test('hub routes render the company hub portal nav', function () {
 
     $response = $this->actingAs($user)->get(route('hub.hub-dashboard'));
 
-    $response->assertOk()
-        ->assertSee('Acme Halal Storefront');
+    // Phase 6: old hub-dashboard route now redirects to the unified portal dashboard.
+    $response->assertRedirect(route('portal.dashboard'));
 });

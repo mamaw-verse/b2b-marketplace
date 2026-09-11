@@ -71,7 +71,7 @@ test('previewable reference files show a preview button', function () {
         ->assertDontSee('>Download<');
 });
 
-test('non-previewable reference files show a download button', function () {
+test('non-previewable reference files show a View button linking to the detail page', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
     $request = SourcingRequest::factory()->create([
@@ -81,9 +81,11 @@ test('non-previewable reference files show a download button', function () {
 
     $this->actingAs($admin);
 
+    // The queue list now shows a View button linking to the detail page for all requests.
+    // Per-row Preview/Download buttons were moved to the detail page.
     Livewire::test(SourcingQueue::class)
-        ->assertSee('Download')
-        ->assertDontSee('>Preview<');
+        ->assertSee('View')
+        ->assertSee(route('admin.sourcing-requests.show', $request));
 });
 
 test('queue links to detail page', function () {

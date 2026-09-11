@@ -29,9 +29,9 @@ final class PayoutAccountPendingNotification extends Notification implements Sho
         $storefrontName = $this->account->shop->storefront_name;
 
         return (new MailMessage)
-            ->subject('New Payout Account Pending Verification')
-            ->line("Seller '{$storefrontName}' has submitted a payout account for verification.")
-            ->action('Review Payout Accounts', url('/admin/payout-accounts'));
+            ->subject(__('New Payout Account Pending Verification'))
+            ->line(__("Seller ':storefront' has submitted a payout account for verification.", ['storefront' => $storefrontName]))
+            ->action(__('Review Payout Accounts'), url('/admin/payout-accounts'));
     }
 
     /** @return array<string, mixed> */

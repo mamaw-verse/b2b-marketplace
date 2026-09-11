@@ -27,9 +27,9 @@ final class ProductFlaggedNotification extends Notification implements ShouldQue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your Product Has Been Flagged')
-            ->line("Your product \"{$this->product->name}\" has been flagged by a moderator for review.")
-            ->line('It remains visible on the marketplace while under review. If you believe this is an error, please contact support.');
+            ->subject(__('Your Product Has Been Flagged'))
+            ->line(__('Your product ":productName" has been flagged by a moderator for review.', ['productName' => $this->product->name]))
+            ->line(__('It remains visible on the marketplace while under review. If you believe this is an error, please contact support.'));
     }
 
     /** @return array<string, mixed> */

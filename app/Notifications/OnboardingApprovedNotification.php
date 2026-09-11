@@ -30,10 +30,10 @@ final class OnboardingApprovedNotification extends Notification implements Shoul
         $storefrontName = $this->onboarding->storefront_name ?? 'your business';
 
         return (new MailMessage)
-            ->subject('Your Onboarding Application Has Been Approved!')
-            ->line("Congratulations! Your onboarding application for **{$storefrontName}** has been approved.")
-            ->line('Your shop is now active on the marketplace.')
-            ->action('Go to Your Dashboard', route('hub.hub-dashboard'));
+            ->subject(__('Your Onboarding Application Has Been Approved!'))
+            ->line(__('Congratulations! Your onboarding application for **:storefrontName** has been approved.', ['storefrontName' => $storefrontName]))
+            ->line(__('Your shop is now active on the marketplace.'))
+            ->action(__('Go to Your Dashboard'), route('hub.hub-dashboard'));
     }
 
     /** @return array<string, mixed> */
