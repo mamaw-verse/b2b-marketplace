@@ -1,5 +1,10 @@
 <div
-    x-data="dashboardCharts()"
+    x-data="dashboardCharts({{ Js::from([
+        'label_gmv'             => __('GMV (PHP)'),
+        'label_orders'          => __('Orders'),
+        'tooltip_gmv_prefix'    => __('PHP '),
+        'tooltip_orders_prefix' => __('Orders: '),
+    ]) }})"
     x-init="$nextTick(() => updateCharts($wire.metrics)); $watch('$wire.metrics', val => updateCharts(val))"
     class="space-y-6"
 >
@@ -270,8 +275,9 @@
 
     {{-- Chart.js + Alpine dashboard component --}}
     <script>
-        window.dashboardCharts = function () {
+        window.dashboardCharts = function (t) {
             return {
+                t,
                 instances: {},
 
                 colors: {
@@ -389,7 +395,7 @@
                         data: {
                             labels: data.map(d => d.date),
                             datasets: [{
-                                label: 'GMV (PHP)',
+                                label: this.t.label_gmv,
                                 data: data.map(d => d.gmv),
                                 borderColor: this.colors.green,
                                 backgroundColor: this.colors.greenLight + '80',
@@ -406,7 +412,7 @@
                                 legend: { display: false },
                                 tooltip: {
                                     callbacks: {
-                                        label: (ctx) => 'PHP ' + this.toNumber(ctx.parsed.y).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                                        label: (ctx) => this.t.tooltip_gmv_prefix + this.toNumber(ctx.parsed.y).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                                     },
                                 },
                             },
@@ -426,7 +432,7 @@
                         data: {
                             labels: data.map(d => d.date),
                             datasets: [{
-                                label: 'Orders',
+                                label: this.t.label_orders,
                                 data: data.map(d => d.orders),
                                 backgroundColor: this.colors.blue,
                                 borderRadius: 4,
@@ -439,7 +445,7 @@
                                 legend: { display: false },
                                 tooltip: {
                                     callbacks: {
-                                        label: (ctx) => 'Orders: ' + this.toNumber(ctx.parsed.y).toLocaleString(),
+                                        label: (ctx) => this.t.tooltip_orders_prefix + this.toNumber(ctx.parsed.y).toLocaleString(),
                                     },
                                 },
                             },

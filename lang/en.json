@@ -1633,6 +1633,7 @@
   "The title below is prefilled from this product.": "The title below is prefilled from this product.",
   "These details were verified during onboarding and are read-only. Contact support if any need to change.": "These details were verified during onboarding and are read-only. Contact support if any need to change.",
   "These quotations have been awarded by the buyer. Create an order to proceed.": "These quotations have been awarded by the buyer. Create an order to proceed.",
+  "These subscriptions are stuck in a pending payment state. Use the actions below to manually resolve them after verifying the payment status.": "These subscriptions are stuck in a pending payment state. Use the actions below to manually resolve them after verifying the payment status.",
   "This Month": "This Month",
   "This action cannot be undone. This will permanently delete the team \":name\".": "This action cannot be undone. This will permanently delete the team \":name\".",
   "This action is unauthorized.": "This action is unauthorized.",
@@ -2074,5 +2075,8 @@
   "Your Halal Certificate Has Been Rejected": "Your Halal Certificate Has Been Rejected",
   "Your payment is still being processed. We'll update your subscription once it's confirmed.": "Your payment is still being processed. We'll update your subscription once it's confirmed.",
   "Your payment was declined. Please try a different payment method.": "Your payment was declined. Please try a different payment method.",
-  "Your previous payment attempt is still being verified by the payment gateway. We couldn't confirm whether it was completed or\nnot.": "Your previous payment attempt is still being verified by the payment gateway. We couldn't confirm whether it was completed or\nnot."
+  "Your previous payment attempt is still being verified by the payment gateway. We couldn't confirm whether it was completed or\nnot.": "Your previous payment attempt is still being verified by the payment gateway. We couldn't confirm whether it was completed or\nnot.",
+  "GMV (PHP)": "GMV (PHP)",
+  "Orders: ": "Orders: ",
+  "PHP ": "PHP "
 }

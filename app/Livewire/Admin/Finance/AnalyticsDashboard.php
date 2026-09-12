@@ -69,7 +69,7 @@ final class AnalyticsDashboard extends Component
 
     public function render()
     {
-        return view('livewire.admin.finance.analytics-dashboard');
+        return view('livewire.admin.analytics-dashboard');
     }
 
     private function applyPeriod(): void
