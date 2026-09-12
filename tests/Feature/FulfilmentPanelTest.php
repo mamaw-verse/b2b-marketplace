@@ -14,11 +14,12 @@ use App\Models\OrderItem;
 use App\Models\Shop;
 use App\Models\User;
 use App\Notifications\OrderReturnedNotification;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
-uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 function paidOrderWithItems(int $itemCount = 2): array
 {

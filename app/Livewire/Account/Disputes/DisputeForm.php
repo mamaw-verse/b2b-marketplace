@@ -8,12 +8,14 @@ use App\Events\DisputeOpened;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Services\MediaUploadService;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 final class DisputeForm extends Component
@@ -36,7 +38,7 @@ final class DisputeForm extends Component
      */
     public array $selectedItems = [];
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    /** @var array<int, TemporaryUploadedFile> */
     public array $disputePhotos = [];
 
     public function mount(Order $order): void
@@ -116,7 +118,7 @@ final class DisputeForm extends Component
 
         $this->show = false;
 
-        \Flux\Flux::toast('Dispute opened.', variant: 'success');
+        Flux::toast('Dispute opened.', variant: 'success');
 
         // Tell the parent order-detail component to refresh so the new dispute shows.
         $this->dispatch('dispute-opened');

@@ -7,6 +7,7 @@ namespace App\Livewire\Admin\Payouts;
 use App\Actions\ReleasePayoutAction;
 use App\Models\Payout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -34,7 +35,7 @@ final class PayoutDetail extends Component
             }
 
             $this->payout = $this->payout->fresh()->load(['shop', 'releasedBy', 'items.order', 'disbursements']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             session()->flash('error', collect($e->errors())->flatten()->first());
         }
     }

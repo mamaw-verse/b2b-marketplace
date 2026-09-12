@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Models\Category;
+use Flux\Flux;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -62,7 +63,7 @@ final class CategoryEdit extends Component
             'variant_attributes_schema' => $this->variantAttributesSchema,
         ]);
 
-        \Flux\Flux::toast('Category updated.', variant: 'success');
+        Flux::toast('Category updated.', variant: 'success');
 
         $this->redirect(route('admin.categories.index'), navigate: true);
     }

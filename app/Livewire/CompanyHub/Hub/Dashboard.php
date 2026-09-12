@@ -7,6 +7,7 @@ namespace App\Livewire\CompanyHub\Hub;
 use App\Models\CertificationApplication;
 use App\Models\Order;
 use App\Models\Shop;
+use App\Services\ShopAnalyticsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -35,7 +36,7 @@ final class Dashboard extends Component
             ->first();
     }
 
-    public function mount(\App\Services\ShopAnalyticsService $analyticsService): void
+    public function mount(ShopAnalyticsService $analyticsService): void
     {
         $shop = Auth::user()->shop;
         if (! $shop) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,7 +22,7 @@ final class ReviewResource extends JsonResource
                 'id' => $this->reviewer_user_id,
                 'name' => $this->reviewer?->first_name.' '.$this->reviewer?->last_name,
             ],
-            'reviewable_type' => $this->reviewable_type === \App\Models\Product::class ? 'product' : 'shop',
+            'reviewable_type' => $this->reviewable_type === Product::class ? 'product' : 'shop',
             'reviewable_id' => $this->reviewable_id,
             'rating' => $this->rating,
             'title' => $this->title,

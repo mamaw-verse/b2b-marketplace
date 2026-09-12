@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub\Reviews;
 
+use App\Models\Product;
 use App\Models\Review;
+use App\Models\Shop;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -23,7 +26,7 @@ final class ReviewList extends Component
         $this->resetPage();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $user = auth()->user();
         $shop = $user->shop;
@@ -32,12 +35,12 @@ final class ReviewList extends Component
             ->where(function ($q) use ($shop) {
                 // Reviews for the shop itself
                 $q->where(function ($sub) use ($shop) {
-                    $sub->where('reviewable_type', \App\Models\Shop::class)
+                    $sub->where('reviewable_type', Shop::class)
                         ->where('reviewable_id', $shop->id);
                 })
                 // Reviews for the shop's products
                     ->orWhere(function ($sub) use ($shop) {
-                        $sub->where('reviewable_type', \App\Models\Product::class)
+                        $sub->where('reviewable_type', Product::class)
                             ->whereIn('reviewable_id', $shop->products()->pluck('id'));
                     });
             })

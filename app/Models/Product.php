@@ -6,13 +6,16 @@ namespace App\Models;
 
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Scout\Searchable;
 
 /**
@@ -148,7 +151,7 @@ final class Product extends Model
     /**
      * Reviews for this product.
      */
-    public function reviews(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
     }
@@ -171,16 +174,16 @@ final class Product extends Model
     /**
      * Get the full S3 URL for the featured image.
      */
-    protected function featuredImageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function featuredImageUrl(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::get(function () {
+        return Attribute::get(function () {
             if (! $this->featured_image_path) {
                 return null;
             }
 
             return str_starts_with($this->featured_image_path, 'http')
                 ? $this->featured_image_path
-                : \Illuminate\Support\Facades\Storage::disk('s3')->url($this->featured_image_path);
+                : Storage::disk('s3')->url($this->featured_image_path);
         });
     }
 }

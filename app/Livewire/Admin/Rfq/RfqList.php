@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Rfq;
 
 use App\Models\RfqRecipient;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -44,8 +45,8 @@ final class RfqList extends Component
     public function tabCounts(): array
     {
         $counts = RfqRecipient::query()
-            ->selectRaw('admin_status, count(*) as aggregate')
-            ->groupBy('admin_status')
+            ->selectRaw("COALESCE(admin_status, 'pending') as admin_status, count(*) as aggregate")
+            ->groupBy(DB::raw("COALESCE(admin_status, 'pending')"))
             ->pluck('aggregate', 'admin_status');
 
         $pending = (int) $counts->get('pending', 0);
@@ -77,10 +78,20 @@ final class RfqList extends Component
         }
 
         if ($this->statusFilter !== 'all') {
-            $query->where('admin_status', $this->statusFilter);
+            if ($this->statusFilter === 'pending') {
+                $query->where(function ($q) {
+                    $q->where('admin_status', 'pending')
+                        ->orWhereNull('admin_status');
+                });
+            } else {
+                $query->where('admin_status', $this->statusFilter);
+            }
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(15);
+        return $query
+            ->orderByRaw("CASE COALESCE(admin_status, 'pending') WHEN 'pending' THEN 1 WHEN 'in_progress' THEN 2 WHEN 'resolved' THEN 3 WHEN 'closed' THEN 4 ELSE 5 END")
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
     }
 
     public function render()

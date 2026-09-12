@@ -51,13 +51,24 @@ test('changing period updates from and to dates', function () {
         ->set('period', '7d')
         ->assertSet('from', now()->subDays(7)->format('Y-m-d'))
         ->assertSet('to', now()->format('Y-m-d'))
-        ->assertSet('period', '7d');
+        ->set('period', 'today')
+        ->assertSet('from', now()->startOfDay()->format('Y-m-d'))
+        ->assertSet('to', now()->endOfDay()->format('Y-m-d'))
+        ->set('period', 'this_month')
+        ->assertSet('from', now()->startOfMonth()->format('Y-m-d'))
+        ->assertSet('to', now()->format('Y-m-d'))
+        ->set('period', 'last_month')
+        ->assertSet('from', now()->subMonth()->startOfMonth()->format('Y-m-d'))
+        ->assertSet('to', now()->subMonth()->endOfMonth()->format('Y-m-d'));
 });
 
-test('custom period shows custom date inputs', function () {
+test('custom period updates metrics when custom dates are set', function () {
     Livewire::test(AnalyticsDashboard::class)
         ->set('period', 'custom')
-        ->assertSet('period', 'custom');
+        ->set('customFrom', '2026-01-01')
+        ->set('customTo', '2026-01-31')
+        ->assertSet('from', '2026-01-01')
+        ->assertSet('to', '2026-01-31');
 });
 
 test('metrics include trend data arrays', function () {

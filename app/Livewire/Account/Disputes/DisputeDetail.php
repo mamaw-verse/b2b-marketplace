@@ -8,6 +8,7 @@ use App\Events\DisputeEscalated;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Services\MediaUploadService;
+use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -73,7 +74,7 @@ final class DisputeDetail extends Component
         DisputeEscalated::dispatch($this->dispute->fresh());
         $this->dispute->refresh();
 
-        \Flux\Flux::toast('Dispute escalated to admin.', variant: 'success');
+        Flux::toast('Dispute escalated to admin.', variant: 'success');
         $this->dispatch('dispute-updated');
     }
 
@@ -87,7 +88,7 @@ final class DisputeDetail extends Component
         $this->dispute->refresh();
         $this->show = false;
 
-        \Flux\Flux::toast('Dispute withdrawn.', variant: 'success');
+        Flux::toast('Dispute withdrawn.', variant: 'success');
         $this->dispatch('dispute-updated');
     }
 

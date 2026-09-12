@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\PayoutSetting;
 use App\Models\SellerPayoutAccount;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -93,7 +94,7 @@ final class EligiblePayouts extends Component
             $payout = (new CreatePayoutBatchAction)->execute($shopId);
             session()->flash('success', "Payout batch #{$payout->id} created successfully.");
             $this->redirectRoute('admin.payouts.show', $payout);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             session()->flash('error', collect($e->errors())->flatten()->first());
         }
     }

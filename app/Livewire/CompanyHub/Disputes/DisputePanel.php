@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub\Disputes;
 
 use App\Actions\ResolveDisputeAction;
+use App\Events\DisputeEscalated;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Services\MediaUploadService;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -90,7 +92,7 @@ final class DisputePanel extends Component
 
         $this->dispute->update(['status' => 'return_received']);
 
-        \Flux\Flux::toast('Return confirmed as received.', variant: 'success');
+        Flux::toast('Return confirmed as received.', variant: 'success');
 
         // Reload so the panel re-renders with refund options unlocked.
         $this->redirectRoute('hub.orders.show', ['order' => $this->order->id], navigate: true);
@@ -124,7 +126,7 @@ final class DisputePanel extends Component
         ]);
 
         if ($result['success']) {
-            \Flux\Flux::toast('Dispute resolved.', variant: 'success');
+            Flux::toast('Dispute resolved.', variant: 'success');
 
             // Full page reload so the order status, fulfilment section, and this
             // panel all reflect the resolved state.
@@ -133,7 +135,7 @@ final class DisputePanel extends Component
             return;
         }
 
-        \Flux\Flux::toast($result['error'], variant: 'danger');
+        Flux::toast($result['error'], variant: 'danger');
     }
 
     public function escalate(): void
@@ -145,9 +147,9 @@ final class DisputePanel extends Component
         }
 
         $this->dispute->update(['status' => 'escalated', 'escalated_at' => now()]);
-        \App\Events\DisputeEscalated::dispatch($this->dispute->fresh());
+        DisputeEscalated::dispatch($this->dispute->fresh());
 
-        \Flux\Flux::toast('Dispute escalated to admin.', variant: 'success');
+        Flux::toast('Dispute escalated to admin.', variant: 'success');
 
         // Reload so the escalated state is reflected across the page.
         $this->redirectRoute('hub.orders.show', ['order' => $this->order->id], navigate: true);

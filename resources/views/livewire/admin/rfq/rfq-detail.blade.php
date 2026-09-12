@@ -29,27 +29,27 @@
                         }
                         $galleryImages = $galleryImages->values();
                     @endphp
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="flex items-center gap-4">
                         {{-- Image --}}
-                        <div class="rounded-lg overflow-hidden border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
+                        <div class="shrink-0 size-16 rounded-lg overflow-hidden border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
                             @if($galleryImages->isNotEmpty())
                                 <img
                                     src="{{ $galleryImages->first() }}"
                                     alt="{{ $rfq->product->name }}"
-                                    class="w-full aspect-square object-cover"
+                                    class="w-full h-full object-cover"
                                     loading="lazy"
                                 />
                             @else
-                                <div class="flex aspect-square items-center justify-center">
-                                    <flux:icon name="photo" class="size-16 text-[var(--hs-neutral-300)]" />
+                                <div class="flex w-full h-full items-center justify-center">
+                                    <flux:icon name="photo" class="size-8 text-[var(--hs-neutral-300)]" />
                                 </div>
                             @endif
                         </div>
 
                         {{-- Details --}}
-                        <div class="space-y-3">
+                        <div class="min-w-0 space-y-1.5">
                             <a href="{{ route('storefront.product', $rfq->product) }}" target="_blank"
-                               class="block text-lg font-bold text-[var(--hs-neutral-900)] hover:text-[var(--hs-green-700)] transition leading-snug">
+                               class="block font-bold text-[var(--hs-neutral-900)] hover:text-[var(--hs-green-700)] transition leading-snug">
                                 {{ $rfq->product->name }}
                             </a>
 
@@ -65,50 +65,25 @@
 
                             @php $cheapestVariant = $rfq->product->variants->sortBy('price')->first(); @endphp
                             @if($cheapestVariant)
-                                <div class="pt-2 border-t border-[var(--hs-neutral-100)]">
-                                    <p class="text-[0.65rem] font-semibold uppercase tracking-widest text-[var(--hs-neutral-500)]">{{ __('Starting from') }}</p>
-                                    <p class="mt-0.5 text-xl font-bold text-[var(--hs-neutral-900)] tabular-nums">
-                                        {{ $cheapestVariant->currency ?? 'PHP' }} {{ number_format((float)$cheapestVariant->price, 2) }}
-                                        @if($cheapestVariant->unit)
-                                            <span class="text-sm font-medium text-[var(--hs-neutral-500)]">/ {{ $cheapestVariant->unit }}</span>
-                                        @endif
-                                    </p>
-                                    @if($cheapestVariant->minimum_order_quantity)
-                                        <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">
-                                            {{ __('MOQ: :quantity :unit', ['quantity' => $cheapestVariant->minimum_order_quantity, 'unit' => $cheapestVariant->unit ?? 'pcs']) }}
-                                        </p>
+                                <p class="text-sm font-semibold text-[var(--hs-neutral-900)] tabular-nums">
+                                    {{ $cheapestVariant->currency ?? 'PHP' }} {{ number_format((float)$cheapestVariant->price, 2) }}
+                                    @if($cheapestVariant->unit)
+                                        <span class="text-sm font-medium text-[var(--hs-neutral-500)]">/ {{ $cheapestVariant->unit }}</span>
                                     @endif
-                                </div>
-                            @endif
-
-                            @if($rfq->product->description)
-                                <div class="pt-2 border-t border-[var(--hs-neutral-100)]">
-                                    <p class="text-sm text-[var(--hs-neutral-500)] leading-relaxed line-clamp-4">
-                                        {{ $rfq->product->description }}
-                                    </p>
-                                </div>
+                                </p>
                             @endif
                         </div>
                     </div>
                 </flux:card>
             @endif
 
-            {{-- RFQ Content --}}
+            {{-- RFQ Details --}}
             <flux:card>
                 <flux:heading size="lg" class="mb-4">{{ __('RFQ Details') }}</flux:heading>
                 <div class="space-y-4">
                     <div>
-                        <div class="text-sm font-medium text-zinc-500">{{ __('Target Shop') }}</div>
-                        <div class="mt-1 text-sm text-zinc-900 dark:text-white">
-                            <a href="{{ route('admin.merchants.show', $recipient->shop_id) }}" class="text-[var(--hs-green-700)] hover:underline" wire:navigate>
-                                {{ $recipient->shop->registered_business_name }}
-                            </a>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="text-sm font-medium text-zinc-500">{{ __('Description') }}</div>
-                        <div class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">{{ $rfq->description ?: __('No description provided.') }}</div>
+                        <div class="text-sm font-medium text-zinc-500">{{ __('Requirements') }}</div>
+                        <div class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">{{ $rfq->description ?: __('No requirements provided.') }}</div>
                     </div>
                 </div>
 
@@ -122,54 +97,6 @@
                                     <span class="text-sm font-medium text-[var(--hs-neutral-700)]">{{ $attachment->original_filename }}</span>
                                 </a>
                             @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                @if($rfq->product?->shop)
-                    @php $sellerShop = $rfq->product->shop; @endphp
-                    <div class="mt-6 pt-6 border-t border-[var(--hs-neutral-100)]">
-                        <div class="text-sm font-medium text-zinc-500 mb-3">{{ __('Business Information') }}</div>
-                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                            @if($sellerShop->email)
-                                <div>
-                                    <dt class="font-medium text-zinc-500">{{ __('Email') }}</dt>
-                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->email }}</dd>
-                                </div>
-                            @endif
-                            @if($sellerShop->phone)
-                                <div>
-                                    <dt class="font-medium text-zinc-500">{{ __('Phone') }}</dt>
-                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->phone }}</dd>
-                                </div>
-                            @endif
-                            <div class="sm:col-span-2">
-                                <dt class="font-medium text-zinc-500">{{ __('Address') }}</dt>
-                                <dd class="mt-0.5 text-zinc-900 dark:text-white">
-                                    @if($sellerShop->address_1)
-                                        {{ $sellerShop->address_1 }}<br />
-                                    @endif
-                                    @if($sellerShop->address_2)
-                                        {{ $sellerShop->address_2 }}<br />
-                                    @endif
-                                    {{ collect([$sellerShop->city, $sellerShop->province, $sellerShop->zip_code])->filter()->implode(', ') }}
-                                    {{ $sellerShop->country_code }}
-                                    @if(!$sellerShop->address_1 && !$sellerShop->city && !$sellerShop->country_code)
-                                        —
-                                    @endif
-                                </dd>
-                            </div>
-                        </dl>
-                        <div class="mt-4">
-                            <flux:button
-                                href="{{ route('admin.merchants.show', $sellerShop) }}"
-                                variant="ghost"
-                                size="sm"
-                                icon="arrow-top-right-on-square"
-                                wire:navigate
-                            >
-                                {{ __('View Shop') }}
-                            </flux:button>
                         </div>
                     </div>
                 @endif
@@ -249,6 +176,69 @@
                         >
                             {{ __('View more info') }}
                         </flux:button>
+                    </div>
+                @endif
+            </flux:card>
+
+            {{-- Supplier Information --}}
+            <flux:card>
+                <flux:heading size="lg" class="mb-4">{{ __('Supplier Information') }}</flux:heading>
+                <div class="space-y-4">
+                    <div>
+                        <div class="text-sm font-medium text-zinc-500">{{ __('Target Shop') }}</div>
+                        <div class="mt-1 text-sm text-zinc-900 dark:text-white">
+                            <a href="{{ route('admin.merchants.show', $recipient->shop_id) }}" class="text-[var(--hs-green-700)] hover:underline" wire:navigate>
+                                {{ $recipient->shop->registered_business_name }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                @if($rfq->product?->shop)
+                    @php $sellerShop = $rfq->product->shop; @endphp
+                    <div class="mt-6 pt-6 border-t border-[var(--hs-neutral-100)]">
+                        <div class="text-sm font-medium text-zinc-500 mb-3">{{ __('Business Information') }}</div>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                            @if($sellerShop->email)
+                                <div>
+                                    <dt class="font-medium text-zinc-500">{{ __('Email') }}</dt>
+                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->email }}</dd>
+                                </div>
+                            @endif
+                            @if($sellerShop->phone)
+                                <div>
+                                    <dt class="font-medium text-zinc-500">{{ __('Phone') }}</dt>
+                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->phone }}</dd>
+                                </div>
+                            @endif
+                            <div class="sm:col-span-2">
+                                <dt class="font-medium text-zinc-500">{{ __('Address') }}</dt>
+                                <dd class="mt-0.5 text-zinc-900 dark:text-white">
+                                    @if($sellerShop->address_1)
+                                        {{ $sellerShop->address_1 }}<br />
+                                    @endif
+                                    @if($sellerShop->address_2)
+                                        {{ $sellerShop->address_2 }}<br />
+                                    @endif
+                                    {{ collect([$sellerShop->city, $sellerShop->province, $sellerShop->zip_code])->filter()->implode(', ') }}
+                                    {{ $sellerShop->country_code }}
+                                    @if(!$sellerShop->address_1 && !$sellerShop->city && !$sellerShop->country_code)
+                                        —
+                                    @endif
+                                </dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4">
+                            <flux:button
+                                href="{{ route('admin.merchants.show', $sellerShop) }}"
+                                variant="ghost"
+                                size="sm"
+                                icon="arrow-top-right-on-square"
+                                wire:navigate
+                            >
+                                {{ __('View Shop') }}
+                            </flux:button>
+                        </div>
                     </div>
                 @endif
             </flux:card>

@@ -7,6 +7,8 @@ namespace App\Services;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
@@ -97,19 +99,36 @@ final class DltPaymentService
     {
         $token = $this->getBearerToken();
 
+        $endpoint = $this->baseUrl().'/api/v1/collection/apn/brands';
+        $params = [
+            'merchant_account_id' => config('services.dlt.merchant_account_id'),
+            'service_code' => config('services.dlt.service_code'),
+        ];
+
+        Log::info('DLT: Get brands — request', [
+            'curl' => sprintf(
+                "curl -s -X GET '%s?%s' \\\n  -H 'Authorization: Bearer %s' \\\n  -H 'Accept: application/json'",
+                $endpoint,
+                http_build_query($params),
+                mb_substr($token, 0, 20).'...',
+            ),
+            'params' => $params,
+        ]);
+
         try {
-            $response = $this->authorized($token)
-                ->get($this->baseUrl().'/api/v1/collection/apn/brands', [
-                    'merchant_account_id' => config('services.dlt.merchant_account_id'),
-                    'service_code' => config('services.dlt.service_code'),
-                ]);
+            $response = $this->authorized($token)->get($endpoint, $params);
         } catch (ConnectionException $e) {
             Log::error('DLT: Get brands — connection failed', [
-                'endpoint' => $this->baseUrl().'/api/v1/collection/apn/brands',
+                'endpoint' => $endpoint,
                 'error' => $e->getMessage(),
             ]);
             throw $this->unreachable($e);
         }
+
+        Log::info('DLT: Get brands — response', [
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
 
         $this->throwIfFailed($response);
 
@@ -181,6 +200,25 @@ final class DltPaymentService
             'body' => $response->body(),
         ]);
 
+        // If the cached token was stale (e.g. poisoned by a test run or expired early),
+        // flush the cache and retry once with a fresh token before giving up.
+        if ($response->status() === 401) {
+            Log::warning('DLT: Submit payment — 401 Unauthenticated, flushing token and retrying once');
+            $this->cache->forget(self::TOKEN_CACHE_KEY);
+            $token = $this->getBearerToken();
+
+            try {
+                $response = $this->authorized($token)->post($endpoint, $payload);
+            } catch (ConnectionException $e) {
+                throw $this->unreachable($e);
+            }
+
+            Log::info('DLT: Submit payment — retry response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        }
+
         $this->throwIfFailed($response);
 
         return $response->json();
@@ -214,6 +252,22 @@ final class DltPaymentService
                 'error' => $e->getMessage(),
             ]);
             throw $this->unreachable($e);
+        }
+
+        // Retry once on 401 with a fresh token.
+        if ($response->status() === 401) {
+            Log::warning('DLT: Sync payment status — 401 Unauthenticated, flushing token and retrying once');
+            $this->cache->forget(self::TOKEN_CACHE_KEY);
+            $token = $this->getBearerToken();
+
+            try {
+                $response = $this->authorized($token)
+                    ->post($this->baseUrl().'/api/v1/collection/apn/sync', [
+                        'merchant_transaction_id' => $merchantTransactionId,
+                    ]);
+            } catch (ConnectionException $e) {
+                throw $this->unreachable($e);
+            }
         }
 
         $this->throwIfFailed($response);
@@ -317,7 +371,7 @@ final class DltPaymentService
         return $response->json('data', []);
     }
 
-    private function authorized(string $token): \Illuminate\Http\Client\PendingRequest
+    private function authorized(string $token): PendingRequest
     {
         return $this->http->withToken($token)->asJson()->acceptJson();
     }
@@ -342,7 +396,7 @@ final class DltPaymentService
      *
      * Branches: validation errors (errors array present) vs. general errors.
      */
-    private function throwIfFailed(\Illuminate\Http\Client\Response $response): void
+    private function throwIfFailed(Response $response): void
     {
         if ($response->successful() && $response->json('success') === true) {
             return;

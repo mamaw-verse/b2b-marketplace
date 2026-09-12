@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TransactionResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 final class TransactionController extends Controller
@@ -80,7 +81,7 @@ final class TransactionController extends Controller
 
         // Map raw objects into resources
         $results->through(function ($item) {
-            $item->date = $item->date ? \Illuminate\Support\Carbon::parse($item->date) : null;
+            $item->date = $item->date ? Carbon::parse($item->date) : null;
 
             return $item;
         });

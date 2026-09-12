@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Events;
 
 use App\Models\Order;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -20,7 +21,7 @@ final class OrderReturned implements ShouldBroadcast
     ) {}
 
     /**
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {

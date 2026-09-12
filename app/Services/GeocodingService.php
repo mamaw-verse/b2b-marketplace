@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Jobs\RetryGeocodeJob;
 use App\Models\ShopOnboarding;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -70,7 +71,7 @@ final class GeocodingService
      */
     public function updateGeoLocation(ShopOnboarding $onboarding, float $lat, float $lng): void
     {
-        \Illuminate\Support\Facades\DB::statement(
+        DB::statement(
             'UPDATE shop_onboardings SET geo_location = ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography WHERE id = ?',
             [$lng, $lat, $onboarding->id],
         );

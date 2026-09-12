@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -17,11 +18,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $carrier
  * @property string|null $tracking_code
  * @property string|null $tracking_url
- * @property \Illuminate\Support\Carbon|null $shipped_at
- * @property \Illuminate\Support\Carbon|null $delivered_at
- * @property \Illuminate\Support\Carbon|null $returned_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $shipped_at
+ * @property Carbon|null $delivered_at
+ * @property Carbon|null $returned_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Fulfilment extends Model
 {

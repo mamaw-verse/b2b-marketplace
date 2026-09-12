@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -56,16 +58,16 @@ final class ProductGallery extends Model
     /**
      * Get the full S3 URL for the gallery image.
      */
-    protected function imageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function imageUrl(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::get(function () {
+        return Attribute::get(function () {
             if (! $this->media?->storage_path) {
                 return null;
             }
 
             return str_starts_with($this->media->storage_path, 'http')
                 ? $this->media->storage_path
-                : \Illuminate\Support\Facades\Storage::disk('s3')->url($this->media->storage_path);
+                : Storage::disk('s3')->url($this->media->storage_path);
         });
     }
 }

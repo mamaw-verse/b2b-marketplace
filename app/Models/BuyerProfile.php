@@ -8,6 +8,7 @@ use Database\Factories\BuyerProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -27,8 +28,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $shipping_country_code
  * @property string|null $contact_phone
  * @property string|null $contact_email
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class BuyerProfile extends Model
 {

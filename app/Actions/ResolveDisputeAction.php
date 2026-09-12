@@ -8,6 +8,7 @@ use App\Events\DisputeResolved;
 use App\Models\Dispute;
 use App\Models\LedgerEntry;
 use App\Models\Order;
+use App\Models\PayoutSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -115,7 +116,7 @@ final class ResolveDisputeAction
                 // commission source as escrow/payout and the quotation/order payout
                 // estimates (PayoutSetting) so the basis is consistent app-wide.
                 if ($resolutionType === 'partial_refund') {
-                    $commissionRate = \App\Models\PayoutSetting::getCommissionFeeRate();
+                    $commissionRate = PayoutSetting::getCommissionFeeRate();
                     $remainder = (float) $lockedOrder->order_total - $actualAmount;
                     $payout = round($remainder * (1 - $commissionRate), 2);
 

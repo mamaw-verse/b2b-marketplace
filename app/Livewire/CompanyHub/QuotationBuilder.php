@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Quotation;
 use App\Models\RfqRecipient;
+use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\MessageBag;
@@ -133,7 +134,7 @@ final class QuotationBuilder extends Component
     public function confirmRemoveItem(int $index): void
     {
         $this->confirmingRemoveItemIndex = $index;
-        \Flux\Flux::modal('confirm-remove-quotation-item')->show();
+        Flux::modal('confirm-remove-quotation-item')->show();
     }
 
     /**
@@ -249,13 +250,13 @@ final class QuotationBuilder extends Component
             $quotation->update(['total_amount' => $totalAmount]);
         });
 
-        \Flux\Flux::toast('Draft saved.', variant: 'success');
+        Flux::toast('Draft saved.', variant: 'success');
     }
 
     public function confirmSubmit(): void
     {
         $this->validateItems();
-        \Flux\Flux::modal('submit-quotation-confirm')->show();
+        Flux::modal('submit-quotation-confirm')->show();
     }
 
     public function submitQuotation(): void
@@ -291,16 +292,16 @@ final class QuotationBuilder extends Component
 
         QuotationSubmitted::dispatch($quotation->fresh());
 
-        \Flux\Flux::modal('submit-quotation-confirm')->close();
+        Flux::modal('submit-quotation-confirm')->close();
 
-        \Flux\Flux::toast('Quotation submitted successfully.', variant: 'success');
+        Flux::toast('Quotation submitted successfully.', variant: 'success');
 
         $this->redirect(route('hub.rfqs.show', $this->rfqRecipient()), navigate: true);
     }
 
     public function confirmWithdraw(): void
     {
-        \Flux\Flux::modal('withdraw-quotation-confirm')->show();
+        Flux::modal('withdraw-quotation-confirm')->show();
     }
 
     public function withdrawQuotation(): void
@@ -316,7 +317,7 @@ final class QuotationBuilder extends Component
         $quotation->update(['status' => 'withdrawn']);
         $quotation->rfq->touchActivity();
 
-        \Flux\Flux::toast('Quotation withdrawn.', variant: 'warning');
+        Flux::toast('Quotation withdrawn.', variant: 'warning');
 
         $this->redirect(route('hub.rfqs.show', $this->rfqRecipient()), navigate: true);
     }

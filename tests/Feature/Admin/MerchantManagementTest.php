@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Jobs\IndexShopJob;
 use App\Livewire\Admin\Merchants\MerchantList;
 use App\Livewire\Admin\Merchants\MerchantShow;
+use App\Livewire\CompanyHub\OnboardingWizard;
 use App\Models\Shop;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
@@ -49,4 +50,14 @@ it('can suspend and reactivate a merchant', function () {
         ->assertDispatched('toast');
 
     expect($shop->fresh()->status)->toBe('active');
+});
+
+it('suspended seller cannot access the onboarding wizard', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+    Shop::factory()->create(['user_id' => $seller->id, 'status' => 'suspended']);
+
+    Livewire::actingAs($seller)
+        ->test(OnboardingWizard::class)
+        ->assertRedirect(route('portal.dashboard'));
 });

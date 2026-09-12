@@ -7,6 +7,7 @@ namespace App\Livewire\CompanyHub;
 use App\Livewire\Forms\VariantForm;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -98,7 +99,7 @@ final class VariantManager extends Component
 
         $this->showVariantModal = false;
         $this->loadVariants();
-        \Flux\Flux::toast($message, variant: 'success');
+        Flux::toast($message, variant: 'success');
     }
 
     public function toggleStatus(int $variantId): void
@@ -148,7 +149,7 @@ final class VariantManager extends Component
     public function confirmRemoveQuantityBreak(int $index): void
     {
         $this->confirmingBreakIndex = $index;
-        \Flux\Flux::modal('confirm-remove-quantity-break')->show();
+        Flux::modal('confirm-remove-quantity-break')->show();
     }
 
     public function saveQuantityBreaks(): void
@@ -171,7 +172,7 @@ final class VariantManager extends Component
         $this->editingBreaksVariantId = null;
         $this->quantityBreaks = [];
 
-        \Flux\Flux::toast('Quantity breaks saved.', variant: 'success');
+        Flux::toast('Quantity breaks saved.', variant: 'success');
     }
 
     // ── Computed ──────────────────────────────────────────────────────────────

@@ -6,8 +6,10 @@ namespace App\Livewire\CompanyHub\Orders;
 
 use App\Actions\CreateOrderAction;
 use App\Actions\SubmitOrderAction;
+use App\Events\OrderSubmittedForPayment;
 use App\Models\Order;
 use App\Models\ProductVariant;
+use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -272,7 +274,7 @@ final class OrderBuilder extends Component
             return;
         }
 
-        \Flux\Flux::modal('submit-order-confirm')->show();
+        Flux::modal('submit-order-confirm')->show();
     }
 
     public function submit(): void
@@ -295,7 +297,7 @@ final class OrderBuilder extends Component
             return;
         }
 
-        \App\Events\OrderSubmittedForPayment::dispatch($result['order']);
+        OrderSubmittedForPayment::dispatch($result['order']);
 
         session()->flash('success', 'Order submitted for payment.');
         $this->redirectRoute('hub.orders.show', ['order' => $order->id]);

@@ -78,6 +78,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Subscription Payment Method
+    |--------------------------------------------------------------------------
+    |
+    | Controls which payment flow is used for subscription payments.
+    |
+    | 'dlt'    — Redirect to DLT-hosted checkout (Philippines default).
+    | 'manual' — Merchant submits a bank reference number and receipt image;
+    |            an admin verifies and manually activates the subscription.
+    |
+    | Set via MARKETPLACE_PAYMENT_METHOD in .env.
+    |
+    */
+    'payment_method' => mb_strtolower((string) env('MARKETPLACE_PAYMENT_METHOD', 'dlt')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Feature Flags
     |--------------------------------------------------------------------------
     |

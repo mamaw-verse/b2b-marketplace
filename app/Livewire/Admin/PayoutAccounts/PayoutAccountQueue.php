@@ -7,6 +7,7 @@ namespace App\Livewire\Admin\PayoutAccounts;
 use App\Actions\RejectPayoutAccountAction;
 use App\Actions\VerifyPayoutAccountAction;
 use App\Models\SellerPayoutAccount;
+use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -57,7 +58,7 @@ final class PayoutAccountQueue extends Component
         $this->rejectingAccountId = $accountId;
         $this->rejectionReason = '';
 
-        \Flux\Flux::modal('reject-payout-account')->show();
+        Flux::modal('reject-payout-account')->show();
     }
 
     public function rejectAccount(): void
@@ -73,7 +74,7 @@ final class PayoutAccountQueue extends Component
         $this->rejectingAccountId = null;
         $this->rejectionReason = '';
 
-        \Flux\Flux::modal('reject-payout-account')->close();
+        Flux::modal('reject-payout-account')->close();
     }
 
     /**

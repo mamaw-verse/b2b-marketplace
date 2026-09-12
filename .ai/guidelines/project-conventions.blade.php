@@ -53,3 +53,12 @@
 - One company per user account (`shops.user_id UNIQUE`).
 - No RFQ, chat, quoting, orders, or payments — Phase 1 is discovery only.
 - Certificate renewal workflow is deferred; only expiry tracking/alerting is in scope.
+
+## Subscription Payment Methods
+
+The app supports two mutually exclusive subscription payment flows, controlled by `MARKETPLACE_PAYMENT_METHOD` in `.env` (config key: `marketplace.payment_method`):
+
+- **`dlt`** (default) — Redirects to DLT-hosted checkout. Used by the Philippine instance. Requires DLT credentials. Handled by `SubscriptionPaymentPage` + `SubscriptionPaymentCallbackController` + `SyncPendingPaymentJob`.
+- **`manual`** — Merchant submits a bank reference number and uploads a receipt. Admin verifies and manually activates via the admin Subscriptions panel. Handled by `ManualSubscriptionPaymentPage`. No DLT credentials required.
+
+Each payment page 403s if the configured method doesn't match. `SubscriptionPage::subscribe()` and `resumePayment()` branch on this flag to redirect to the correct page. `PaymentAttempt.payment_method` (`'dlt'` | `'manual'`) discriminates the attempt type. Never add a third payment method without updating `config/marketplace.php`, both payment page components, `SubscriptionPage`, the admin `SubscriptionQueue`, and the `payment_attempts` migration.

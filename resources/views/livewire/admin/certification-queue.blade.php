@@ -31,6 +31,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Business Name') }}</flux:table.column>
+                    <flux:table.column>{{ __('Date Submitted') }}</flux:table.column>
                     <flux:table.column>{{ __('Expiry of Certificate') }}</flux:table.column>
                     <flux:table.column>{{ __('Status') }}</flux:table.column>
                     <flux:table.column>{{ __('Actions') }}</flux:table.column>
@@ -39,6 +40,7 @@
                     @forelse ($this->certificates as $certificate)
                         <flux:table.row wire:key="certificate-{{ $certificate->id }}">
                             <flux:table.cell variant="strong">{{ $certificate->shop?->registered_business_name ?? '—' }}</flux:table.cell>
+                            <flux:table.cell>{{ $certificate->created_at?->format('M d, Y') }}</flux:table.cell>
                             <flux:table.cell>{{ $certificate->expiry_date?->format('M d, Y') }}</flux:table.cell>
                             <flux:table.cell>
                                 <flux:badge :color="match ($certificate->status) {
@@ -58,7 +60,7 @@
                             </flux:table.cell>
                         </flux:table.row>
                     @empty
-                        <flux:table.row><flux:table.cell colspan="4" class="text-center">{{ __('No halal certifications found.') }}</flux:table.cell></flux:table.row>
+                        <flux:table.row><flux:table.cell colspan="5" class="text-center">{{ __('No halal certifications found.') }}</flux:table.cell></flux:table.row>
                     @endforelse
                 </flux:table.rows>
             </flux:table>

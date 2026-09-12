@@ -164,6 +164,7 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     Route::middleware('feature:subscriptions_enabled')->group(function () {
         Route::livewire('subscription', 'company-hub.subscription-page')->name('subscription');
         Route::livewire('subscription/{subscription}/pay', 'company-hub.subscription-payment-page')->name('subscription.pay');
+        Route::livewire('subscription/{subscription}/pay/manual', 'company-hub.manual-subscription-payment-page')->name('subscription.pay.manual');
     });
 
     // Product management

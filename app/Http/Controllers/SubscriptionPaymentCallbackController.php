@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Events\SubscriptionStatusChanged;
+use App\Jobs\SyncPendingPaymentJob;
 use App\Models\PaymentAttempt;
 use App\Models\Subscription;
 use App\Services\DltPaymentService;
@@ -18,38 +19,29 @@ final class SubscriptionPaymentCallbackController extends Controller
 {
     /**
      * DLT redirects here after the payor completes payment on the hosted checkout.
-     * Both success_url and failure_url land here — we call /sync for the
-     * authoritative status rather than trusting which URL was hit.
+     *
+     * success_url — DLT signals the payment went through; call /sync to confirm.
+     * failure_url — DLT signals a definitive failure; reject immediately without /sync.
      */
     public function success(Request $request, Subscription $subscription): RedirectResponse
     {
-        return $this->handleCallback($request, $subscription);
-    }
-
-    public function failure(Request $request, Subscription $subscription): RedirectResponse
-    {
-        return $this->handleCallback($request, $subscription);
-    }
-
-    private function handleCallback(Request $request, Subscription $subscription): RedirectResponse
-    {
         $this->authorizeOwner($request, $subscription);
 
-        $attempt = PaymentAttempt::findOrFail($request->query('attempt'));
+        $attempt = $this->resolveAttempt($request, $subscription);
 
-        if ($attempt->subscription_id !== $subscription->id) {
-            abort(403);
+        // Already settled — idempotent return.
+        if ($attempt->status === 'succeeded') {
+            return redirect()->route('hub.subscription')
+                ->with('message', __('Your subscription is now active.'));
         }
 
-        // Already settled — idempotent return
-        if (in_array($attempt->status, ['succeeded', 'failed'], true)) {
-            return $attempt->status === 'succeeded'
-                ? redirect()->route('hub.subscription')->with('message', __('Your subscription is now active.'))
-                : redirect()->route('hub.subscription')->with('message', __('The subscription payment was not completed.'));
+        if ($attempt->status === 'failed') {
+            return redirect()->route('hub.subscription')
+                ->with('message', __('The subscription payment was not completed.'));
         }
 
-        // Call /sync to get the authoritative payment status from DLT
-        $paymentStatus = $this->syncPaymentStatus($attempt->dlt_merchant_transaction_id);
+        // Call /sync to get the authoritative status.
+        $paymentStatus = $this->syncPaymentStatus($attempt);
 
         if ($paymentStatus === 'PAID') {
             return $this->activateSubscription($attempt, $subscription);
@@ -59,32 +51,74 @@ final class SubscriptionPaymentCallbackController extends Controller
             return $this->rejectSubscription($attempt, $subscription);
         }
 
-        // PENDING — payment not yet settled, send back to the payment page to wait
-        Log::info('DLT: Subscription payment still PENDING after sync', [
+        // PENDING — dispatch background job to poll with exponential backoff.
+        // The user is redirected to the payment page which shows a 'confirming' step
+        // (the Livewire component sets this when it sees confirmingAttemptId is set
+        // via the session flash below).
+        Log::info('DLT: Subscription payment PENDING after success_url /sync — dispatching SyncPendingPaymentJob', [
             'subscription_id' => $subscription->id,
             'attempt_id' => $attempt->id,
             'merchant_transaction_id' => $attempt->dlt_merchant_transaction_id,
         ]);
 
+        SyncPendingPaymentJob::dispatch($attempt->id)->delay(now()->addMinute());
+
+        // Store the next_sync_at for the first retry.
+        $attempt->update(['next_sync_at' => now()->addMinute()]);
+
         return redirect()
             ->route('hub.subscription.pay', ['subscription' => $subscription->id])
-            ->with('message', __('Your payment is still being processed. Please wait and check back shortly.'));
+            ->with('confirming_attempt_id', $attempt->id);
     }
 
-    private function syncPaymentStatus(string $merchantTransactionId): string
+    /**
+     * failure_url — DLT has already determined the payment failed.
+     * Skip /sync entirely; reject immediately.
+     */
+    public function failure(Request $request, Subscription $subscription): RedirectResponse
+    {
+        $this->authorizeOwner($request, $subscription);
+
+        $attempt = $this->resolveAttempt($request, $subscription);
+
+        // Already settled — idempotent return.
+        if (in_array($attempt->status, ['succeeded', 'failed'], true)) {
+            return redirect()->route('hub.subscription')
+                ->with('message', __('The subscription payment was not completed.'));
+        }
+
+        return $this->rejectSubscription($attempt, $subscription);
+    }
+
+    private function resolveAttempt(Request $request, Subscription $subscription): PaymentAttempt
+    {
+        $attempt = PaymentAttempt::findOrFail($request->query('attempt'));
+
+        if ($attempt->subscription_id !== $subscription->id) {
+            abort(403);
+        }
+
+        return $attempt;
+    }
+
+    private function syncPaymentStatus(PaymentAttempt $attempt): string
     {
         try {
             $dlt = app(DltPaymentService::class);
-            $result = $dlt->syncPaymentStatus($merchantTransactionId);
+            $result = $dlt->syncPaymentStatus($attempt->dlt_merchant_transaction_id);
+            $status = $result['payment_status'] ?? 'PENDING';
 
-            return $result['payment_status'] ?? 'PENDING';
+            $attempt->update(['dlt_payment_status' => $status]);
+
+            return $status;
         } catch (RuntimeException $e) {
-            Log::error('DLT: /sync call failed on subscription callback', [
-                'merchant_transaction_id' => $merchantTransactionId,
+            Log::error('DLT: /sync call failed on subscription success_url callback', [
+                'attempt_id' => $attempt->id,
+                'merchant_transaction_id' => $attempt->dlt_merchant_transaction_id,
                 'error' => $e->getMessage(),
             ]);
 
-            // Cannot determine status — treat as pending rather than falsely activating
+            // Cannot determine status — treat as PENDING; background job will retry.
             return 'PENDING';
         }
     }
@@ -100,7 +134,6 @@ final class SubscriptionPaymentCallbackController extends Controller
                 ->where('id', '<>', $subscription->id)
                 ->get();
 
-            // If there's a future trial end, start the paid period from there
             $periodStart = now();
             $previousEnd = $previousSubscriptions->max('current_period_end');
             if ($previousEnd && $previousEnd->isFuture()) {
@@ -130,7 +163,8 @@ final class SubscriptionPaymentCallbackController extends Controller
         }
         event(new SubscriptionStatusChanged($subscription->fresh()));
 
-        return redirect()->route('hub.subscription')->with('message', __('Your subscription is now active.'));
+        return redirect()->route('hub.subscription')
+            ->with('message', __('Your subscription is now active.'));
     }
 
     private function rejectSubscription(PaymentAttempt $attempt, Subscription $subscription): RedirectResponse
@@ -147,7 +181,8 @@ final class SubscriptionPaymentCallbackController extends Controller
 
         event(new SubscriptionStatusChanged($subscription->fresh()));
 
-        return redirect()->route('hub.subscription')->with('message', __('The subscription payment was not completed.'));
+        return redirect()->route('hub.subscription')
+            ->with('message', __('The subscription payment was not completed.'));
     }
 
     private function authorizeOwner(Request $request, Subscription $subscription): void

@@ -133,6 +133,14 @@ final class OnboardingWizard extends Component
 
     public function mount(): void
     {
+        // Suspended accounts may not access the onboarding wizard.
+        $shop = Auth::user()?->shop;
+        if ($shop?->status === 'suspended') {
+            $this->redirect(route('portal.dashboard'), navigate: true);
+
+            return;
+        }
+
         // Clamp any URL-injected step to a valid range (e.g. stale bookmark).
         $this->currentStep = max(1, min($this->currentStep, self::TOTAL_STEPS));
 

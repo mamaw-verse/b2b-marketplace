@@ -99,6 +99,10 @@ final class AnalyticsDashboard extends Component
                 $this->from = now()->subMonth()->startOfMonth()->format('Y-m-d'),
                 $this->to = now()->subMonth()->endOfMonth()->format('Y-m-d'),
             ],
+            'custom' => [
+                $this->from = $this->customFrom ?: ($this->from ?: now()->subDays(30)->format('Y-m-d')),
+                $this->to = $this->customTo ?: ($this->to ?: now()->format('Y-m-d')),
+            ],
             default => [
                 $this->from = now()->subDays(30)->format('Y-m-d'),
                 $this->to = now()->format('Y-m-d'),
@@ -143,7 +147,9 @@ final class AnalyticsDashboard extends Component
         $platformAverageRating = (float) Shop::where('total_reviews', '>', 0)
             ->avg('average_rating');
 
-        $totalActiveSellers = Shop::where('status', 'active')->count();
+        $totalActiveSellers = Shop::where('status', 'active')
+            ->whereBetween('created_at', [$from, $to])
+            ->count();
 
         $gaOverview = app(GoogleAnalyticsService::class)->getOverview(
             $from->format('Y-m-d'),
@@ -153,14 +159,20 @@ final class AnalyticsDashboard extends Component
         $analyticsService = app(ShopAnalyticsService::class);
 
         $openRfqCount = RfqRecipient::query()
-            ->whereIn('admin_status', ['pending', 'in_progress'])
+            ->whereBetween('created_at', [$from, $to])
+            ->where(function ($query) {
+                $query->whereIn('admin_status', ['pending', 'in_progress'])
+                    ->orWhereNull('admin_status');
+            })
             ->count();
 
         $openSourcingCount = SourcingRequest::query()
+            ->whereBetween('created_at', [$from, $to])
             ->whereIn('status', ['pending', 'in_progress'])
             ->count();
 
         $expiringCertCount = ShopCertificate::query()
+            ->whereBetween('created_at', [$from, $to])
             ->whereIn('status', ['expiring_soon', 'expired'])
             ->count();
 
@@ -176,13 +188,13 @@ final class AnalyticsDashboard extends Component
             'open_sourcing_count' => $openSourcingCount,
             'expiring_cert_count' => $expiringCertCount,
             'ga' => $gaOverview,
-            'subscriptions' => $analyticsService->platformSubscriptions(),
-            'certifications' => $analyticsService->platformCertifications(),
+            'subscriptions' => $analyticsService->platformSubscriptions($from, $to),
+            'certifications' => $analyticsService->platformCertifications($from, $to),
             'rfqs' => $analyticsService->platformRfqs($from, $to),
-            'sponsored_content' => $analyticsService->platformSponsoredContent(),
+            'sponsored_content' => $analyticsService->platformSponsoredContent($from, $to),
             'revenue_trend' => $analyticsService->platformRevenueTrend($from, $to),
-            'subscription_trend' => $analyticsService->platformSubscriptionTrend(),
-            'certification_trend' => $analyticsService->platformCertificationTrend(),
+            'subscription_trend' => $analyticsService->platformSubscriptionTrend($from, $to),
+            'certification_trend' => $analyticsService->platformCertificationTrend($from, $to),
         ]);
     }
 

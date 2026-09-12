@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Account;
 
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -97,7 +98,7 @@ final class BuyerProfileForm extends Component
             $data,
         );
 
-        \Flux\Flux::toast('Buyer profile saved.', variant: 'success');
+        Flux::toast('Buyer profile saved.', variant: 'success');
     }
 
     public function render()

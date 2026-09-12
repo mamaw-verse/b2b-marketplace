@@ -83,7 +83,11 @@ final class SubscriptionPage extends Component
             ]);
         });
 
-        $this->redirect(route('hub.subscription.pay', ['subscription' => $subscription->id]), navigate: true);
+        $paymentRoute = config('marketplace.payment_method') === 'manual'
+            ? route('hub.subscription.pay.manual', ['subscription' => $subscription->id])
+            : route('hub.subscription.pay', ['subscription' => $subscription->id]);
+
+        $this->redirect($paymentRoute, navigate: true);
     }
 
     public function dismissPendingPayment(): void
@@ -114,7 +118,11 @@ final class SubscriptionPage extends Component
             return;
         }
 
-        $this->redirect(route('hub.subscription.pay', ['subscription' => $pendingSubscription->id]), navigate: true);
+        $paymentRoute = config('marketplace.payment_method') === 'manual'
+            ? route('hub.subscription.pay.manual', ['subscription' => $pendingSubscription->id])
+            : route('hub.subscription.pay', ['subscription' => $pendingSubscription->id]);
+
+        $this->redirect($paymentRoute, navigate: true);
     }
 
     #[Computed]

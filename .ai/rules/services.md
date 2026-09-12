@@ -22,3 +22,9 @@ DLT's /api/v1/quick-link/session endpoint returns a 500 "Undefined array key pro
 
 ## DLT Quick Link: data.website is the merchant site, not the checkout URL
 data.website in the Quick Link session response is the merchant's own website URL (e.g. 1halastore.com), NOT the DLT-hosted checkout page. The actual payor checkout URL is always: https://checkout-ql.dltc.com.ph/?merchant={merchant_account_id}&transaction_id={merchant_transaction_id}&amount={amount}&quantity=1. Never use data.website as the redirect target.
+
+## DLT v4 Hosted Checkout: no is_card_payment, /sync is recovery-only, failure_url = immediate reject
+This project uses DLT Hosted Checkout v4. Do NOT send is_card_payment, card fields, or 3DS device.* in the /submit payload — DLT rejects them. All payment types go to payment_url unconditionally. failure_url = always REJECTED, skip /sync. success_url = call /sync for authoritative status; on PENDING dispatch SyncPendingPaymentJob (exponential backoff: 1/5/15/30/60 min, 5 retries max, then email admin via PaymentStuckAdminNotification). DltPaymentService is final — use Http::fake() in tests, not Mockery.
+
+## Manual payment method bypasses DltPaymentService entirely
+When `config('marketplace.payment_method') === 'manual'`, the subscription payment flow does NOT use DltPaymentService at all. The merchant submits a reference number + receipt upload via ManualSubscriptionPaymentPage; the admin activates or cancels via SubscriptionQueue. DLT credentials are not required for manual instances. Never call DltPaymentService from ManualSubscriptionPaymentPage.

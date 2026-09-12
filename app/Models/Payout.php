@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -21,12 +22,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $net_amount
  * @property int $orders_count
  * @property int|null $released_by_id
- * @property \Illuminate\Support\Carbon|null $released_at
- * @property \Illuminate\Support\Carbon|null $completed_at
- * @property \Illuminate\Support\Carbon|null $failed_at
+ * @property Carbon|null $released_at
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $failed_at
  * @property string|null $failure_reason
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Payout extends Model
 {

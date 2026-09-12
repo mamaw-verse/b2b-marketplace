@@ -8,6 +8,7 @@ use App\Models\Quotation;
 use App\Models\RfqRecipient;
 use App\Notifications\QuotationWithdrawnNotification;
 use App\Notifications\RfqNoBidNotification;
+use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -66,7 +67,7 @@ final class RfqDetail extends Component
         $this->rfqRecipient->rfq->touchActivity();
         $this->rfqRecipient->refresh();
 
-        \Flux\Flux::toast('RFQ marked as in progress.', variant: 'success');
+        Flux::toast('RFQ marked as in progress.', variant: 'success');
     }
 
     /**
@@ -114,7 +115,7 @@ final class RfqDetail extends Component
             new RfqNoBidNotification($this->rfqRecipient, reason: 'seller_closed')
         );
 
-        \Flux\Flux::toast('RFQ closed.', variant: 'warning');
+        Flux::toast('RFQ closed.', variant: 'warning');
     }
 
     public function openCloseModal(): void
@@ -136,7 +137,7 @@ final class RfqDetail extends Component
     public function confirmWithdrawQuotation(int $quotationId): void
     {
         $this->confirmingWithdrawQuotationId = $quotationId;
-        \Flux\Flux::modal('confirm-withdraw-quotation')->show();
+        Flux::modal('confirm-withdraw-quotation')->show();
     }
 
     /**
@@ -162,7 +163,7 @@ final class RfqDetail extends Component
         $this->confirmingWithdrawQuotationId = null;
         $this->rfqRecipient->refresh();
 
-        \Flux\Flux::toast('Quotation withdrawn.', variant: 'warning');
+        Flux::toast('Quotation withdrawn.', variant: 'warning');
     }
 
     public function render()

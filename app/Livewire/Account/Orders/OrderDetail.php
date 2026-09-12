@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Account\Orders;
 
+use App\Actions\ConfirmReceiptAction;
+use App\Events\OrderCancelled;
 use App\Models\Order;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -39,14 +41,14 @@ final class OrderDetail extends Component
         $this->order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
         $this->order->refresh();
 
-        \App\Events\OrderCancelled::dispatch($this->order);
+        OrderCancelled::dispatch($this->order);
 
         session()->flash('success', 'Order cancelled.');
     }
 
     public function confirmReceipt(): void
     {
-        $action = app(\App\Actions\ConfirmReceiptAction::class);
+        $action = app(ConfirmReceiptAction::class);
         $result = $action->execute($this->order);
 
         if ($result['success']) {

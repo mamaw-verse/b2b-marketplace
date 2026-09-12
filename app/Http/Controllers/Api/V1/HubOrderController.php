@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\CreateOrderAction;
 use App\Actions\SubmitOrderAction;
+use App\Events\OrderCancelled;
+use App\Events\OrderSubmittedForPayment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
@@ -211,7 +213,7 @@ final class HubOrderController extends Controller
             ], 422);
         }
 
-        \App\Events\OrderSubmittedForPayment::dispatch($result['order']);
+        OrderSubmittedForPayment::dispatch($result['order']);
 
         return response()->json([
             'data' => new OrderResource($result['order']),
@@ -260,7 +262,7 @@ final class HubOrderController extends Controller
             }
         });
 
-        \App\Events\OrderCancelled::dispatch($order->fresh());
+        OrderCancelled::dispatch($order->fresh());
 
         return response()->json([
             'data' => new OrderResource($order->fresh()),

@@ -51,7 +51,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('RFQ / Buyer') }}</flux:table.column>
-                    <flux:table.column>{{ __('Target Business') }}</flux:table.column>
+                    <flux:table.column class="w-48">{{ __('Target Business') }}</flux:table.column>
                     <flux:table.column>{{ __('Admin Status') }}</flux:table.column>
                     <flux:table.column>{{ __('Date') }}</flux:table.column>
                     <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
@@ -64,8 +64,8 @@
                                 <div class="font-medium text-zinc-900 dark:text-white line-clamp-1" title="{{ $recipient->rfq->title }}">{{ $recipient->rfq->title }}</div>
                                 <div class="text-xs text-zinc-500">{{ $recipient->rfq->buyer->email ?? 'Unknown Buyer' }}</div>
                             </flux:table.cell>
-                            <flux:table.cell>
-                                <div class="font-medium text-zinc-900 dark:text-white">{{ $recipient->shop->registered_business_name }}</div>
+                            <flux:table.cell class="w-48 max-w-[12rem]">
+                                <div class="font-medium text-zinc-900 dark:text-white truncate" title="{{ $recipient->shop->registered_business_name }}">{{ $recipient->shop->registered_business_name }}</div>
                             </flux:table.cell>
                             <flux:table.cell>
                                 @php

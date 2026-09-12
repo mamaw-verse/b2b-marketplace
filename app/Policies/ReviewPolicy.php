@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Review;
+use App\Models\Shop;
 use App\Models\User;
 
 final class ReviewPolicy
@@ -58,11 +60,11 @@ final class ReviewPolicy
 
         $reviewable = $review->reviewable;
 
-        if ($reviewable instanceof \App\Models\Shop) {
+        if ($reviewable instanceof Shop) {
             return $user->id === $reviewable->user_id;
         }
 
-        if ($reviewable instanceof \App\Models\Product) {
+        if ($reviewable instanceof Product) {
             return $user->id === $reviewable->shop->user_id;
         }
 

@@ -6,6 +6,7 @@ namespace App\Livewire\CompanyHub\Reviews;
 
 use App\Models\Review;
 use App\Models\ReviewResponse;
+use Illuminate\View\View;
 use Livewire\Component;
 
 final class ReviewResponseForm extends Component
@@ -47,7 +48,7 @@ final class ReviewResponseForm extends Component
         $this->review->refresh();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.company-hub.reviews.review-response-form');
     }

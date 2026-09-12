@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Storefront\CompanyDirectory;
+use App\Models\Shop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -45,10 +47,10 @@ it('falls back to instance country default locale when no session locale is set'
 it('scopes company directory to instance country', function () {
     config(['marketplace.instance_country' => 'MY']);
 
-    App\Models\Shop::factory()->create(['status' => 'active', 'country_code' => 'MY']);
-    App\Models\Shop::factory()->create(['status' => 'active', 'country_code' => 'PH']);
+    Shop::factory()->create(['status' => 'active', 'country_code' => 'MY']);
+    Shop::factory()->create(['status' => 'active', 'country_code' => 'PH']);
 
-    $component = Livewire\Livewire::test(App\Livewire\Storefront\CompanyDirectory::class);
+    $component = Livewire\Livewire::test(CompanyDirectory::class);
 
     expect($component->instance()->shops()->total())->toBe(1);
 });

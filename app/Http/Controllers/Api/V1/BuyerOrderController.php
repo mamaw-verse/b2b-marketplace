@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\ConfirmReceiptAction;
+use App\Events\OrderCancelled;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderListResource;
 use App\Http\Resources\OrderResource;
@@ -81,7 +83,7 @@ final class BuyerOrderController extends Controller
             'cancelled_at' => now(),
         ]);
 
-        \App\Events\OrderCancelled::dispatch($order->fresh());
+        OrderCancelled::dispatch($order->fresh());
 
         return response()->json([
             'data' => new OrderResource($order->fresh()),
@@ -95,7 +97,7 @@ final class BuyerOrderController extends Controller
     {
         Gate::authorize('confirmReceipt', $order);
 
-        $action = app(\App\Actions\ConfirmReceiptAction::class);
+        $action = app(ConfirmReceiptAction::class);
         $result = $action->execute($order);
 
         if (! $result['success']) {

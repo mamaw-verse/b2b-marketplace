@@ -9,15 +9,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $order_id
  * @property string $type
  * @property string $amount
- * @property \Illuminate\Support\Carbon|null $due_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $due_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class OrderPaymentTerm extends Model
 {

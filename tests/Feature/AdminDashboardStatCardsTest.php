@@ -25,14 +25,15 @@ beforeEach(function () {
 // AnalyticsDashboard: open counts in metrics
 // ---------------------------------------------------------------------------
 
-test('dashboard metrics include open_rfq_count for pending and in_progress recipients', function () {
+test('dashboard metrics include open_rfq_count for pending, in_progress, and null admin_status recipients', function () {
     RfqRecipient::factory()->create(['admin_status' => 'pending']);
     RfqRecipient::factory()->create(['admin_status' => 'in_progress']);
+    RfqRecipient::factory()->create(['admin_status' => null]);
     RfqRecipient::factory()->create(['admin_status' => 'resolved']);
 
     Livewire::actingAs($this->admin)
         ->test(AnalyticsDashboard::class)
-        ->assertSet('metrics.open_rfq_count', 2);
+        ->assertSet('metrics.open_rfq_count', 3);
 });
 
 test('dashboard metrics include open_sourcing_count for pending and in_progress sourcing requests', function () {

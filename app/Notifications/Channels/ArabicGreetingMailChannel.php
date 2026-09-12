@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Channels;
 
 use Illuminate\Contracts\Mail\Mailable;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -27,7 +28,7 @@ final class ArabicGreetingMailChannel extends MailChannel
      * message before dispatch, so toMail() is only invoked once.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Mail\SentMessage|null
+     * @return SentMessage|null
      */
     public function send($notifiable, Notification $notification)
     {

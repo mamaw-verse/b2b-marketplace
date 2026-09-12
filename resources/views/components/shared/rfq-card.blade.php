@@ -16,5 +16,5 @@
     @if ($rfq->description)
         <p class="mt-1 text-[11px] text-[var(--hs-neutral-600)] line-clamp-2">{{ $rfq->description }}</p>
     @endif
-    <p class="mt-2 text-[9px] text-[var(--hs-neutral-400)]">{{ $rfq->created_at->format('M d, Y · H:i') }}</p>
+    <p class="mt-2 text-[9px] text-[var(--hs-neutral-400)]">{{ $rfq->created_at->format('M d, Y · g:i A') }}</p>
 </div>

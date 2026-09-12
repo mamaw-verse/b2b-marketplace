@@ -22,5 +22,5 @@
             <span class="text-xs font-semibold text-[var(--hs-neutral-900)]">{{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</span>
         </div>
     </div>
-    <p class="mt-2 text-[9px] text-[var(--hs-neutral-400)]">{{ $order->created_at->format('M d, Y \u00b7 H:i') }}</p>
+    <p class="mt-2 text-[9px] text-[var(--hs-neutral-400)]">{{ $order->created_at->format('M d, Y · g:i A') }}</p>
 </div>

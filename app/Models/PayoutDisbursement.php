@@ -8,6 +8,7 @@ use Database\Factories\PayoutDisbursementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -17,11 +18,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $dlt_transaction_id
  * @property string $amount
  * @property array|null $gateway_response
- * @property \Illuminate\Support\Carbon|null $attempted_at
- * @property \Illuminate\Support\Carbon|null $succeeded_at
- * @property \Illuminate\Support\Carbon|null $failed_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $attempted_at
+ * @property Carbon|null $succeeded_at
+ * @property Carbon|null $failed_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class PayoutDisbursement extends Model
 {

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -37,10 +38,10 @@ final class ProductDirectory extends Component
     /**
      * Categories with product counts for the tab bar.
      *
-     * @return \Illuminate\Support\Collection<int, Category>
+     * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): \Illuminate\Support\Collection
+    public function categories(): Collection
     {
         return Category::withCount([
             'products as published_products_count' => fn ($q) => $q->marketplaceVisible(),

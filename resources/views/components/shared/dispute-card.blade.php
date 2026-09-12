@@ -26,5 +26,5 @@
             </p>
         </div>
     @endif
-    <p class="mt-2 text-[9px] text-[var(--hs-neutral-400)]">{{ $dispute->created_at->format('M d, Y \u00b7 H:i') }}</p>
+    <p class="mt-2 text-[9px] text-[var(--hs-neutral-400)]">{{ $dispute->created_at->format('M d, Y · g:i A') }}</p>
 </div>

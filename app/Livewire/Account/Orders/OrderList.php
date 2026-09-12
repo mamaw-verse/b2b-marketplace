@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Account\Orders;
 
+use App\Actions\ConfirmReceiptAction;
 use App\Models\Order;
+use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -32,13 +34,13 @@ final class OrderList extends Component
     {
         $order = Order::where('buyer_user_id', Auth::id())->findOrFail($orderId);
 
-        $action = app(\App\Actions\ConfirmReceiptAction::class);
+        $action = app(ConfirmReceiptAction::class);
         $result = $action->execute($order);
 
         if ($result['success']) {
-            \Flux\Flux::toast('Order confirmed as received.', variant: 'success');
+            Flux::toast('Order confirmed as received.', variant: 'success');
         } else {
-            \Flux\Flux::toast($result['error'], variant: 'danger');
+            Flux::toast($result['error'], variant: 'danger');
         }
     }
 

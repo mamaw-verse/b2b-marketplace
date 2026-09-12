@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -22,12 +23,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $resolution_amount
  * @property string|null $resolution_notes
  * @property int|null $resolved_by_user_id
- * @property \Illuminate\Support\Carbon|null $resolved_at
- * @property \Illuminate\Support\Carbon|null $escalated_at
+ * @property Carbon|null $resolved_at
+ * @property Carbon|null $escalated_at
  * @property string|null $return_carrier
  * @property string|null $return_tracking_code
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Dispute extends Model
 {

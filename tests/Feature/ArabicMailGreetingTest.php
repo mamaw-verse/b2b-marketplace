@@ -5,9 +5,12 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Notifications\Channels\ArabicGreetingMailChannel;
 use App\Notifications\VerifyEmailNotification;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Event;
 
 test('the notification mail channel is overridden with the Arabic greeting channel', function () {
     $channel = app(ChannelManager::class)->driver('mail');
@@ -34,8 +37,8 @@ test('markdown notifications are addressed with an Arabic salutation and the fir
     };
 
     $captured = null;
-    Illuminate\Support\Facades\Event::listen(
-        Illuminate\Mail\Events\MessageSending::class,
+    Event::listen(
+        MessageSending::class,
         function ($event) use (&$captured) {
             $captured = $event->message->getHtmlBody();
 
@@ -52,7 +55,7 @@ test('markdown notifications are addressed with an Arabic salutation and the fir
 test('the salutation omits the name gracefully when the notifiable has none', function () {
     $notifiable = new class
     {
-        use Illuminate\Notifications\Notifiable;
+        use Notifiable;
 
         public function routeNotificationForMail(): string
         {
@@ -74,8 +77,8 @@ test('the salutation omits the name gracefully when the notifiable has none', fu
     };
 
     $captured = null;
-    Illuminate\Support\Facades\Event::listen(
-        Illuminate\Mail\Events\MessageSending::class,
+    Event::listen(
+        MessageSending::class,
         function ($event) use (&$captured) {
             $captured = $event->message->getHtmlBody();
 

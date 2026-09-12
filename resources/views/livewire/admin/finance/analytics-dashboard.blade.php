@@ -1,6 +1,6 @@
 <div
     x-data="dashboardCharts()"
-    x-effect="$wire.metrics && $nextTick(() => updateCharts($wire.metrics))"
+    x-init="$nextTick(() => updateCharts($wire.metrics)); $watch('$wire.metrics', val => updateCharts(val))"
     class="space-y-6"
 >
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -79,7 +79,7 @@
 
         {{-- Open RFQs (pending + in_progress) --}}
         @if(config('marketplace.features.admin_rfq_management_enabled'))
-            <a href="{{ route('admin.rfqs.index', ['status' => 'pending']) }}" wire:navigate class="block group">
+            <a href="{{ route('admin.rfqs.index', ['status' => 'all']) }}" wire:navigate class="block group">
                 <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
                     <div class="flex flex-col">
                         <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Open RFQs') }}</span>
@@ -234,9 +234,9 @@
                         <canvas x-ref="certificationsDonut"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
-                        @foreach(['pending', 'approved', 'rejected'] as $status)
+                        @foreach(['under_review', 'active', 'expiring_soon', 'expired', 'rejected'] as $status)
                             <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ __(':status Applications', ['status' => $status]) }}</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ __(str_replace('_', ' ', $status)) }}</span>
                                 <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $metrics['certifications'][$status] ?? 0 }}</span>
                             </div>
                         @endforeach
@@ -488,18 +488,18 @@
                     const canvas = this.$refs.certificationsDonut;
                     if (!canvas) { this.destroyChart('certDonut'); return; }
 
-                    const labels = ['pending', 'approved', 'rejected'];
+                    const labels = ['under_review', 'active', 'expiring_soon', 'expired', 'rejected'];
                     const data = labels.map(s => this.toNumber(certs?.[s]));
 
                     // Destroy old chart when data disappears.
                     if (data.every(v => v === 0)) { this.destroyChart('certDonut'); return; }
 
-                    const bgColors = [this.colors.amber, this.colors.green, this.colors.red];
+                    const bgColors = [this.colors.amber, this.colors.green, this.colors.amber, this.colors.red, this.colors.red];
 
                     this.safeInit('certDonut', canvas, (c) => new Chart(c, {
                         type: 'doughnut',
                         data: {
-                            labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                            labels: labels.map(l => l.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')),
                             datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }],
                         },
                         options: {

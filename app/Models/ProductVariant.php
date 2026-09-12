@@ -8,6 +8,7 @@ use Database\Factories\ProductVariantFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -60,7 +61,7 @@ final class ProductVariant extends Model
     /**
      * Quotation items that reference this variant (soft link — may be null on the item).
      */
-    public function quotationItems(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function quotationItems(): HasMany
     {
         return $this->hasMany(QuotationItem::class, 'variant_id');
     }

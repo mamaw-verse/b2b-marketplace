@@ -8,9 +8,10 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Actions/{CreatePayoutBatchAction,ConfirmReceiptAction,ResolveDisputeAction}.php | .ai/rules/actions.md |
 | app/**/*.php | .ai/rules/app.md |
 | app/Livewire/CompanyHub/Orders/OrderBuilder.php | .ai/rules/company-hub-orders.md |
-| app/Livewire/CompanyHub/**, app/Livewire/CompanyHub/OnboardingWizard.php | .ai/rules/company-hub.md |
+| app/Livewire/CompanyHub/**, app/Livewire/CompanyHub/OnboardingWizard.php, app/Livewire/CompanyHub/SubscriptionPaymentPage.php | .ai/rules/company-hub.md |
 | resources/views/components/**, resources/views/components/hs-confirm.blade.php, resources/views/components/hs-alert.blade.php, resources/views/components/hs-modal.blade.php, resources/views/components/hs-confirm*, resources/views/components/hs-alert*, resources/views/components/hs-unit-select.blade.php | .ai/rules/components.md |
 | resources/css/app.css | .ai/rules/css.md |
+| tests/Feature/Subscription* | .ai/rules/feature.md |
 | app/Livewire/CompanyHub/Fulfilment/** | .ai/rules/fulfilment.md |
 | resources/js/** | .ai/rules/js.md |
 | resources/views/livewire/company-hub/rfq-detail.blade.php, resources/views/livewire/company-hub/quotation-builder.blade.php, resources/views/livewire/company-hub/** | .ai/rules/livewire-company-hub.md |

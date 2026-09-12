@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\Admin\AnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\LedgerController;
 use App\Http\Controllers\Api\V1\Admin\PayoutAccountController;
 use App\Http\Controllers\Api\V1\Admin\PayoutController as AdminPayoutController;
+use App\Http\Controllers\Api\V1\Admin\PayoutSettingsController;
+use App\Http\Controllers\Api\V1\Admin\ReviewReportController;
 use App\Http\Controllers\Api\V1\AdminCategoryController;
 use App\Http\Controllers\Api\V1\AdminDisputeController;
 use App\Http\Controllers\Api\V1\AdminOnboardingController;
@@ -26,6 +28,8 @@ use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\OrderPaymentController;
 use App\Http\Controllers\Api\V1\QuotationActionController;
+use App\Http\Controllers\Api\V1\ReviewController;
+use App\Http\Controllers\Api\V1\ReviewResponseController;
 use App\Http\Controllers\Api\V1\RfqController;
 use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\SellerHubController;
@@ -212,15 +216,15 @@ Route::prefix('v1')->group(function () {
 
         // Payout Settings
         Route::middleware('feature:payouts_enabled')->group(function () {
-            Route::get('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'index']);
-            Route::put('/payout-settings', [App\Http\Controllers\Api\V1\Admin\PayoutSettingsController::class, 'update']);
+            Route::get('/payout-settings', [PayoutSettingsController::class, 'index']);
+            Route::put('/payout-settings', [PayoutSettingsController::class, 'update']);
         });
 
         // Review Reports
         Route::middleware('feature:reviews_enabled')->group(function () {
-            Route::get('/review-reports', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'index']);
-            Route::post('/review-reports/{reviewReport}/dismiss', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'dismiss']);
-            Route::post('/review-reports/{reviewReport}/action', [App\Http\Controllers\Api\V1\Admin\ReviewReportController::class, 'action']);
+            Route::get('/review-reports', [ReviewReportController::class, 'index']);
+            Route::post('/review-reports/{reviewReport}/dismiss', [ReviewReportController::class, 'dismiss']);
+            Route::post('/review-reports/{reviewReport}/action', [ReviewReportController::class, 'action']);
         });
 
         // Payout Accounts & Payouts
@@ -242,12 +246,12 @@ Route::prefix('v1')->group(function () {
 
     // Reviews (requires auth + verified)
     Route::middleware(['auth:sanctum', 'verified', 'feature:reviews_enabled'])->group(function () {
-        Route::post('/orders/{order}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'store'])
+        Route::post('/orders/{order}/reviews', [ReviewController::class, 'store'])
             ->middleware('throttle:review-creation');
-        Route::put('/reviews/{review}', [App\Http\Controllers\Api\V1\ReviewController::class, 'update']);
-        Route::post('/reviews/{review}/respond', [App\Http\Controllers\Api\V1\ReviewResponseController::class, 'store']);
-        Route::put('/review-responses/{reviewResponse}', [App\Http\Controllers\Api\V1\ReviewResponseController::class, 'update']);
-        Route::post('/reviews/{review}/report', [App\Http\Controllers\Api\V1\ReviewController::class, 'report']);
+        Route::put('/reviews/{review}', [ReviewController::class, 'update']);
+        Route::post('/reviews/{review}/respond', [ReviewResponseController::class, 'store']);
+        Route::put('/review-responses/{reviewResponse}', [ReviewResponseController::class, 'update']);
+        Route::post('/reviews/{review}/report', [ReviewController::class, 'report']);
     });
 
     // Public Search & Discovery (no auth required)
@@ -259,8 +263,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/categories', [SearchController::class, 'categories']);
 
         // Public review listings
-        Route::get('/products/{product}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'productReviews']);
-        Route::get('/companies/{shop}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'shopReviews']);
+        Route::get('/products/{product}/reviews', [ReviewController::class, 'productReviews']);
+        Route::get('/companies/{shop}/reviews', [ReviewController::class, 'shopReviews']);
     });
 
 });

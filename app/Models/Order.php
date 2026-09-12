@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -38,12 +40,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $fees_total
  * @property string|null $order_total
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $submitted_at
- * @property \Illuminate\Support\Carbon|null $paid_at
- * @property \Illuminate\Support\Carbon|null $completed_at
- * @property \Illuminate\Support\Carbon|null $cancelled_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $submitted_at
+ * @property Carbon|null $paid_at
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $cancelled_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Order extends Model
 {
@@ -152,7 +154,7 @@ final class Order extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function payoutItem(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function payoutItem(): HasOne
     {
         return $this->hasOne(PayoutItem::class);
     }

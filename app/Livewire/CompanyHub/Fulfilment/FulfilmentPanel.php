@@ -12,6 +12,7 @@ use App\Models\FulfilmentItem;
 use App\Models\LedgerEntry;
 use App\Models\Order;
 use App\Models\PayoutSetting;
+use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -225,8 +226,8 @@ final class FulfilmentPanel extends Component
 
         OrderReturned::dispatch($this->order->fresh());
 
-        \Flux\Flux::modal('confirm-mark-returned')->close();
-        \Flux\Flux::toast('Marked as returned to seller.', variant: 'success');
+        Flux::modal('confirm-mark-returned')->close();
+        Flux::toast('Marked as returned to seller.', variant: 'success');
     }
 
     public function render()

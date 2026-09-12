@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Models\Category;
+use Flux\Flux;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -17,7 +19,7 @@ final class CategoryManager extends Component
     public ?int $deletingCategoryId = null;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Category>
+     * @return Collection<int, Category>
      */
     #[Computed]
     public function categories()
@@ -28,7 +30,7 @@ final class CategoryManager extends Component
     public function confirmDelete(int $categoryId): void
     {
         $this->deletingCategoryId = $categoryId;
-        \Flux\Flux::modal('confirm-delete-category')->show();
+        Flux::modal('confirm-delete-category')->show();
     }
 
     public function delete(): void

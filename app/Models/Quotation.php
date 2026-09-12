@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -20,11 +21,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $notes
  * @property string $currency
  * @property string|null $total_amount
- * @property \Illuminate\Support\Carbon|null $valid_until
- * @property \Illuminate\Support\Carbon|null $submitted_at
+ * @property Carbon|null $valid_until
+ * @property Carbon|null $submitted_at
  * @property array|null $buyer_snapshot
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Quotation extends Model
 {

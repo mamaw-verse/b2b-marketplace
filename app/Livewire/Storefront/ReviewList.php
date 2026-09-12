@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Review;
 use App\Models\ReviewReport;
 use App\Models\Shop;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -86,7 +87,7 @@ final class ReviewList extends Component
         session()->flash('review-reported', 'Report submitted. Our team will review it shortly.');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $modelClass = match ($this->reviewableType) {
             'product' => Product::class,

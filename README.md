@@ -129,6 +129,35 @@ Then:
 6. Attach documents
 7. Publish the product
 
+### Test Flow 4b: Subscription Payment (DLT — default PH flow)
+
+After a shop is approved, the seller must subscribe to go live:
+
+1. Login as the approved seller
+2. Navigate to http://localhost/hub/subscription
+3. Choose a plan and click Subscribe
+4. Select a payment brand (card or e-wallet)
+5. Fill in billing details and click **Continue to Payment**
+6. You'll be redirected to the DLT-hosted checkout page
+7. Complete payment — you'll be returned to the app and the subscription activated
+
+> Requires `MARKETPLACE_PAYMENT_METHOD=dlt` (default) and valid DLT credentials in `.env`.
+
+### Test Flow 4c: Subscription Payment (Manual — non-DLT instances)
+
+For country instances that don't use DLT (e.g. `MARKETPLACE_PAYMENT_METHOD=manual`):
+
+1. Login as the approved seller
+2. Navigate to http://localhost/hub/subscription
+3. Choose a plan and click Subscribe
+4. Enter the **bank/transaction reference number** from your bank transfer
+5. Upload your **payment receipt** (JPEG, PNG, or PDF, max 5 MB)
+6. Click **Submit Payment** — the admin is notified by email
+7. Admin logs in → http://localhost/admin/subscriptions → **Pending Payments** tab
+8. Admin verifies the payment in the bank portal, then clicks **Activate** (or **Cancel**)
+
+> Set `MARKETPLACE_PAYMENT_METHOD=manual` in `.env` to use this flow. DLT credentials are not required.
+
 ### Test Flow 5: Categories (Admin)
 
 1. Login as admin

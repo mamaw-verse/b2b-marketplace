@@ -17,10 +17,13 @@
             </div>
         </div>
 
-        {{-- Inline error (non-failed steps) --}}
-        @if ($errorMessage && $step === 'payment_form')
+        {{-- Inline error --}}
+        @if ($errorMessage && in_array($step, ['payment_form', 'brands']))
             <div class="p-4 bg-[var(--hs-danger-50)] border border-[var(--hs-danger-200)] rounded-lg text-sm text-[var(--hs-danger-700)]">
                 {{ $errorMessage }}
+                @if ($step === 'brands')
+                    <button wire:click="loadBrands" class="ml-2 underline font-medium">{{ __('Try again') }}</button>
+                @endif
             </div>
         @endif
 
@@ -91,11 +94,7 @@
                 </div>
 
                 <p class="mb-5 text-sm text-[var(--hs-neutral-600)]">
-                    @if ($selectedBrand['is_card'] ?? false)
-                        {{ __("Enter your billing details. You'll enter your card number on the secure payment page.") }}
-                    @else
-                        {{ __("Enter your billing details. You'll be redirected to :brand to complete payment.", ['brand' => $selectedBrand['value'] ?? __('the payment provider')]) }}
-                    @endif
+                    {{ __("Enter your billing details. You'll be redirected to the secure DLT-hosted checkout page to complete your payment.") }}
                 </p>
 
                 <div class="space-y-4">
@@ -141,6 +140,61 @@
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--hs-green-700)] mx-auto"></div>
                 <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Preparing Payment') }}</h2>
                 <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Redirecting you to the secure checkout page...') }}</p>
+            </div>
+
+        {{-- Step: Confirming — payor returned from DLT; background job is polling /sync --}}
+        @elseif ($step === 'confirming')
+            <div wire:poll.5s="checkConfirmingStatus" class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-8 text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--hs-green-700)] mx-auto"></div>
+                <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Confirming Your Payment') }}</h2>
+                <p class="text-sm text-[var(--hs-neutral-600)] mt-2">
+                    {{ __("We're waiting for confirmation from the payment gateway. This page will update automatically — please don't close this tab.") }}
+                </p>
+                <p class="mt-4 text-xs text-[var(--hs-neutral-400)]">{{ __('This may take a few minutes.') }}</p>
+            </div>
+
+        {{-- Step: Sync Pending — unresolvable PENDING attempt detected (Gap 2 / job give-up) --}}
+        @elseif ($step === 'sync_pending')
+            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-yellow-200 shadow-[var(--hs-shadow-sm)] p-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center">
+                        <flux:icon name="exclamation-triangle" class="size-6 text-yellow-600" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Payment Verification In Progress') }}</h2>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">
+                            {{ __("Your previous payment attempt is still being verified by the payment gateway. We couldn't confirm whether it was completed or not.") }}
+                        </p>
+                        <p class="mt-3 text-sm text-[var(--hs-neutral-600)]">
+                            {{ __('Our team has been notified and will resolve this manually. Please wait for an email update, or contact support if this takes longer than expected.') }}
+                        </p>
+
+                        {{-- Technical details for transparency --}}
+                        <div class="mt-5 p-4 bg-[var(--hs-neutral-50)] rounded-lg border border-[var(--hs-neutral-200)] text-xs font-mono space-y-1 text-[var(--hs-neutral-600)]">
+                            <p class="font-semibold text-[var(--hs-neutral-700)] mb-2 font-sans text-xs uppercase tracking-wider">{{ __('Reference Details') }}</p>
+                            @php
+                                $stuckAttempt = \App\Models\PaymentAttempt::where('subscription_id', $subscriptionId)
+                                    ->where('status', 'pending')
+                                    ->latest()
+                                    ->first();
+                            @endphp
+                            @if ($stuckAttempt)
+                                <p>{{ __('Subscription ID:') }} <span class="text-[var(--hs-neutral-900)]">{{ $subscriptionId }}</span></p>
+                                <p>{{ __('Payment Attempt ID:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->id }}</span></p>
+                                <p>{{ __('Transaction Reference:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->dlt_merchant_transaction_id }}</span></p>
+                                <p>{{ __('Status:') }} <span class="text-yellow-700">{{ $stuckAttempt->dlt_payment_status ?? 'PENDING' }}</span></p>
+                                <p>{{ __('Initiated:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->created_at?->format('Y-m-d H:i:s T') }}</span></p>
+                                <p>{{ __('Sync Attempts:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->sync_attempts }}</span></p>
+                            @endif
+                        </div>
+
+                        <div class="mt-5 flex gap-3">
+                            <flux:button variant="ghost" size="sm" href="{{ route('hub.subscription') }}" wire:navigate>
+                                {{ __('Back to Subscription') }}
+                            </flux:button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         {{-- Step: Success --}}

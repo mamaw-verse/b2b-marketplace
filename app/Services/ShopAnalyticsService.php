@@ -244,9 +244,19 @@ final class ShopAnalyticsService
      *
      * @return array<int, array{month: string, active: int, trial: int, cancelled: int}>
      */
-    public function platformSubscriptionTrend(): array
+    /**
+     * Monthly subscription growth trend.
+     *
+     * @return array<int, array{month: string, active: int, trial: int, cancelled: int}>
+     */
+    public function platformSubscriptionTrend(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
-        $rows = DB::table('subscriptions')
+        $query = DB::table('subscriptions');
+        if ($from !== null && $to !== null) {
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        $rows = $query
             ->select(
                 DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
                 DB::raw("SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active"),
@@ -266,17 +276,24 @@ final class ShopAnalyticsService
     }
 
     /**
-     * Monthly certification application trend.
+     * Monthly shop certificate submission trend.
      *
-     * @return array<int, array{month: string, pending: int, approved: int, rejected: int}>
+     * @return array<int, array{month: string, under_review: int, active: int, expiring_soon: int, expired: int, rejected: int}>
      */
-    public function platformCertificationTrend(): array
+    public function platformCertificationTrend(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
-        $rows = DB::table('certification_applications')
+        $query = DB::table('shop_certificates');
+        if ($from !== null && $to !== null) {
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        $rows = $query
             ->select(
                 DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
-                DB::raw("SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending"),
-                DB::raw("SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved"),
+                DB::raw("SUM(CASE WHEN status = 'under_review' THEN 1 ELSE 0 END) as under_review"),
+                DB::raw("SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active"),
+                DB::raw("SUM(CASE WHEN status = 'expiring_soon' THEN 1 ELSE 0 END) as expiring_soon"),
+                DB::raw("SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) as expired"),
                 DB::raw("SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected"),
             )
             ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM')"))
@@ -285,25 +302,32 @@ final class ShopAnalyticsService
 
         return $rows->map(fn ($row) => [
             'month' => $row->month,
-            'pending' => (int) $row->pending,
-            'approved' => (int) $row->approved,
+            'under_review' => (int) $row->under_review,
+            'active' => (int) $row->active,
+            'expiring_soon' => (int) $row->expiring_soon,
+            'expired' => (int) $row->expired,
             'rejected' => (int) $row->rejected,
         ])->toArray();
     }
 
-    public function platformSubscriptions(): array
+    public function platformSubscriptions(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
-        $counts = DB::table('subscriptions')
+        $query = DB::table('subscriptions');
+        if ($from !== null && $to !== null) {
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        $counts = (clone $query)
             ->select('subscriptions.status', DB::raw('COUNT(*) as count'))
             ->groupBy('subscriptions.status')
             ->get();
 
-        $trialToPaid = DB::table('subscriptions')
+        $trialToPaid = (clone $query)
             ->whereNotNull('trial_ends_at')
             ->where('status', 'active')
             ->count();
 
-        $totalTrials = DB::table('subscriptions')
+        $totalTrials = (clone $query)
             ->whereNotNull('trial_ends_at')
             ->count();
 
@@ -315,9 +339,14 @@ final class ShopAnalyticsService
         ];
     }
 
-    public function platformCertifications(): array
+    public function platformCertifications(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
-        return DB::table('certification_applications')
+        $query = DB::table('shop_certificates');
+        if ($from !== null && $to !== null) {
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        return $query
             ->select('status', DB::raw('COUNT(*) as count'))
             ->groupBy('status')
             ->get()
@@ -344,11 +373,17 @@ final class ShopAnalyticsService
         ];
     }
 
-    public function platformSponsoredContent(): array
+    public function platformSponsoredContent(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
-        return DB::table('sponsored_content_events')
+        $query = DB::table('sponsored_content_events')
             ->join('sponsored_content', 'sponsored_content.id', '=', 'sponsored_content_events.sponsored_content_id')
-            ->join('sponsored_content_tiers', 'sponsored_content_tiers.id', '=', 'sponsored_content.sponsored_content_tier_id')
+            ->join('sponsored_content_tiers', 'sponsored_content_tiers.id', '=', 'sponsored_content.sponsored_content_tier_id');
+
+        if ($from !== null && $to !== null) {
+            $query->whereBetween('sponsored_content_events.occurred_at', [$from, $to]);
+        }
+
+        return $query
             ->select('sponsored_content_tiers.name as tier_name', 'sponsored_content_events.event_type', DB::raw('COUNT(*) as count'))
             ->groupBy('sponsored_content_tiers.name', 'sponsored_content_events.event_type')
             ->get()

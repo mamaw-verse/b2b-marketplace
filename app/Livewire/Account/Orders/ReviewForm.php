@@ -8,8 +8,10 @@ use App\Actions\CreateReviewAction;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
+use App\Models\Shop;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 use Livewire\Component;
 
 final class ReviewForm extends Component
@@ -91,7 +93,7 @@ final class ReviewForm extends Component
         // Submit shop review if rating provided
         if ($this->shopRating > 0) {
             $existing = $this->existingReviews
-                ->where('reviewable_type', \App\Models\Shop::class)
+                ->where('reviewable_type', Shop::class)
                 ->where('reviewable_id', $this->order->shop_id)
                 ->first();
 
@@ -180,7 +182,7 @@ final class ReviewForm extends Component
         session()->flash('review-success', 'Your review has been updated.');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.account.orders.review-form');
     }

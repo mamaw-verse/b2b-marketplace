@@ -14,10 +14,12 @@ use App\Http\Requests\UpdateProductVariantRequest;
 use App\Jobs\IndexProductJob;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Shop;
 use App\Services\MediaUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 final class HubProductController extends Controller
 {
@@ -99,7 +101,7 @@ final class HubProductController extends Controller
             ->count();
 
         if ($publishedVariantCount === 0) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'variants' => ['Product must have at least one published variant before publishing.'],
             ]);
         }
@@ -187,7 +189,7 @@ final class HubProductController extends Controller
     /**
      * Get the authenticated user's active shop or abort with 403.
      */
-    private function getActiveShopOrFail(Request $request): \App\Models\Shop
+    private function getActiveShopOrFail(Request $request): Shop
     {
         $shop = $request->user()->shop;
 

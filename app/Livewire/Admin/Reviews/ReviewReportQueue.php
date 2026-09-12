@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Reviews;
 
 use App\Jobs\RecalculateRatingsJob;
 use App\Models\ReviewReport;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -44,7 +45,7 @@ final class ReviewReportQueue extends Component
         RecalculateRatingsJob::dispatch($review->reviewable_type, $review->reviewable_id);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $reports = ReviewReport::where('status', 'pending')
             ->with(['review.reviewer', 'reporter'])
