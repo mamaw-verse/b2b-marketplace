@@ -53,6 +53,11 @@ return [
 
         'ses' => [
             'transport' => 'ses',
+            'options' => array_filter([
+                // Optional SES configuration set for open/click tracking
+                // and dedicated IP pool wiring. Leave empty when unset.
+                'ConfigurationSetName' => env('SES_CONFIGURATION_SET'),
+            ]),
         ],
 
         'postmark' => [

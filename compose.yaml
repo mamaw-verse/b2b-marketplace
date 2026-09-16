@@ -24,10 +24,8 @@ services:
         depends_on:
             - pgsql
             - redis
-            - typesense
             - mailpit
             - minio
-            - clamav
             - reverb
     worker:
         build:
@@ -47,9 +45,7 @@ services:
         depends_on:
             - pgsql
             - redis
-            - typesense
             - minio
-            - clamav
     reverb:
         build:
             context: './vendor/laravel/sail/runtimes/8.5'
@@ -72,6 +68,8 @@ services:
             - redis
     clamav:
         image: mkodockx/docker-clamav:alpine
+        profiles:
+            - scanning
         networks:
             - sail
     pgsql:
@@ -116,6 +114,8 @@ services:
             timeout: 5s
     typesense:
         image: 'typesense/typesense:27.1'
+        profiles:
+            - search
         ports:
             - '${FORWARD_TYPESENSE_PORT:-8108}:8108'
         environment:

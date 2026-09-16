@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 final class SearchController extends Controller
 {
     /**
-     * GET /api/v1/search/companies — Search shops via Typesense/Scout.
+     * GET /api/v1/search/companies — Search shops via Scout (pgsql FTS by default, Typesense when enabled).
      */
     public function companies(Request $request): JsonResponse
     {
@@ -50,7 +50,7 @@ final class SearchController extends Controller
     }
 
     /**
-     * GET /api/v1/search/products — Search products via Typesense/Scout.
+     * GET /api/v1/search/products — Search products via Scout (pgsql FTS by default, Typesense when enabled).
      */
     public function products(Request $request): JsonResponse
     {

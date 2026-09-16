@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Scout\Builder as ScoutBuilder;
 use Laravel\Scout\Searchable;
 
 /**
@@ -84,6 +85,51 @@ final class Product extends Model
         }
 
         return (bool) $visible;
+    }
+
+    /**
+     * Real-column text fields ranked by the `pgsql` Scout engine.
+     * (Typesense keeps using `toSearchableArray()` — untouched.)
+     *
+     * @return list<string>
+     */
+    public function searchTextColumns(): array
+    {
+        return ['name', 'description'];
+    }
+
+    /**
+     * Columns covered by the pg_trgm similarity fallback.
+     *
+     * @return list<string>
+     */
+    public function searchTrigramColumns(): array
+    {
+        return ['name'];
+    }
+
+    /**
+     * Shop-name matching for the `pgsql` engine (Typesense indexes
+     * `shop_name` directly — this is the relational equivalent).
+     */
+    public function applyScoutRelationSearch(Builder $query, string $term): void
+    {
+        $likeTerm = '%'.addcslashes($term, '%_\\').'%';
+
+        $query->orWhereHas('shop', fn (Builder $shopQuery) => $shopQuery
+            ->where('storefront_name', 'ilike', $likeTerm)
+            ->orWhere('registered_business_name', 'ilike', $likeTerm));
+    }
+
+    /**
+     * Base query for the `pgsql` Scout engine — only visible products.
+     * The Typesense driver never calls this.
+     *
+     * @return Builder<Product>
+     */
+    public function newScoutQuery(ScoutBuilder $builder): Builder
+    {
+        return self::marketplaceVisible();
     }
 
     /**

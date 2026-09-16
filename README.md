@@ -6,7 +6,7 @@ A B2B Halal Marketplace application built with Laravel.
 - Laravel 11 / PHP 8.3
 - Frontend: Livewire, Alpine.js, TailwindCSS
 - Dockerized environment via Laravel Sail
-- Services: PostgreSQL, Redis, Typesense (Search), Minio (S3-compatible Object Storage), ClamAV (Antivirus), Mailpit
+- Services: PostgreSQL (+PostGIS, pg_trgm for native search), Redis, Minio (S3-compatible Object Storage), Mailpit — plus optional Typesense (Search, dormant: `sail up --profile search`) and ClamAV (Antivirus, dormant: `sail up --profile scanning`)
 
 ## Prerequisites
 - Docker Desktop, OrbStack, or Podman

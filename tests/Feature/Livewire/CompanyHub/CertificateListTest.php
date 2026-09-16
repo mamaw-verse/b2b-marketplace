@@ -9,6 +9,7 @@ use App\Models\ShopCertificate;
 use App\Models\User;
 use App\Notifications\CertificateSubmittedNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -83,6 +84,7 @@ it('opens the add certificate modal and resets the form fields', function () {
 });
 
 it('uploads the certificate file on selection', function () {
+    Config::set('services.clamav.enabled', true);
     Storage::fake('s3');
     Queue::fake();
 

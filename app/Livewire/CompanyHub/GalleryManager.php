@@ -111,6 +111,10 @@ final class GalleryManager extends Component
     #[Computed]
     public function hasPendingPhotos(): bool
     {
+        if (! (bool) config('services.clamav.enabled', false)) {
+            return false;
+        }
+
         return $this->galleryItems->contains(
             fn (ProductGallery $item): bool => $item->media?->scan_status === 'pending'
         );

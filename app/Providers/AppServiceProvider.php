@@ -13,6 +13,7 @@ use App\Listeners\PostOrderStatusMessage;
 use App\Listeners\ReindexProductsForSubscriptionChange;
 use App\Models\User;
 use App\Notifications\Channels\ArabicGreetingMailChannel;
+use App\Search\PostgresSearchEngine;
 use App\Services\DltDisbursementService;
 use App\Services\DltPaymentService;
 use App\Services\MockDltDisbursementService;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Scout\EngineManager;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -77,6 +79,19 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->configureDefaults();
         $this->configureRateLimiting();
+        $this->registerSearchEngines();
+    }
+
+    /**
+     * Register the native Postgres Scout engine.
+     *
+     * `SCOUT_DRIVER=pgsql` serves search from Postgres (tsvector + pg_trgm).
+     * Flipping back to Typesense later is config-only
+     * (`SCOUT_DRIVER=typesense` + `sail up --profile search` + `scout:import`).
+     */
+    protected function registerSearchEngines(): void
+    {
+        app(EngineManager::class)->extend('pgsql', fn () => new PostgresSearchEngine);
     }
 
     /**

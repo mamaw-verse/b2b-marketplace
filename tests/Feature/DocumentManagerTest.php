@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -40,6 +41,7 @@ function attachDocument(Product $product, string $scanStatus): Media
 }
 
 test('hasPendingDocuments reflects whether any attached document is still scanning', function () {
+    Config::set('services.clamav.enabled', true);
     $product = sellerProduct();
 
     $component = Livewire::test(DocumentManager::class, ['product' => $product]);
@@ -61,6 +63,7 @@ test('hasPendingDocuments reflects whether any attached document is still scanni
 });
 
 test('the document table polls while a scan is pending and stops once it settles', function () {
+    Config::set('services.clamav.enabled', true);
     $product = sellerProduct();
     $media = attachDocument($product, 'pending');
 

@@ -93,6 +93,10 @@ final class DocumentManager extends Component
     #[Computed]
     public function hasPendingDocuments(): bool
     {
+        if (! (bool) config('services.clamav.enabled', false)) {
+            return false;
+        }
+
         return $this->documents->contains(
             fn (Media $document): bool => $document->scan_status === 'pending'
         );

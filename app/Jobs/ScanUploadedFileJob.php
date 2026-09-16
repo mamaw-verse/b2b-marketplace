@@ -32,11 +32,26 @@ final class ScanUploadedFileJob implements ShouldQueue
     /**
      * Execute the job — scan the file for malware using ClamAV.
      *
-     * If ClamAV is unavailable and the config allows, the file is marked
-     * as 'clean' (for development environments without ClamAV installed).
+     * When scanning is disabled (CLAMAV_ENABLED=false) any pending record
+     * is marked clean immediately — this settles rows dispatched before
+     * the flag was turned off. If ClamAV is enabled but unavailable and
+     * the config allows, the file is marked as 'clean' (for development
+     * environments without ClamAV installed).
      */
     public function handle(): void
     {
+        if (! (bool) config('services.clamav.enabled', false)) {
+            if ($this->media->scan_status !== 'clean') {
+                $this->markStatus('clean');
+            }
+
+            Log::info('ScanUploadedFileJob: Scanning disabled, marked clean.', [
+                'media_id' => $this->media->id,
+            ]);
+
+            return;
+        }
+
         $fileContent = Storage::disk('s3')->get($this->media->storage_path);
 
         if ($fileContent === null) {

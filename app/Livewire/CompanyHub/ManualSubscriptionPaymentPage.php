@@ -111,7 +111,8 @@ final class ManualSubscriptionPaymentPage extends Component
 
         $this->receiptMediaId = $media->id;
         $this->receipt = null;
-        $this->step = 'scanning';
+        // When scanning is disabled the media is already clean — stay on the form.
+        $this->step = $media->scan_status === 'clean' ? 'form' : 'scanning';
         unset($this->receiptMedia);
     }
 
@@ -123,6 +124,12 @@ final class ManualSubscriptionPaymentPage extends Component
         unset($this->receiptMedia);
 
         $media = $this->receiptMedia;
+
+        if (! (bool) config('services.clamav.enabled', false)) {
+            $this->step = 'form';
+
+            return;
+        }
 
         if ($media && $media->scan_status === 'clean') {
             $this->step = 'form';
@@ -163,8 +170,14 @@ final class ManualSubscriptionPaymentPage extends Component
 
         $media = $this->receiptMedia;
 
-        if (! $media || $media->scan_status !== 'clean') {
+        if ((bool) config('services.clamav.enabled', false) && (! $media || $media->scan_status !== 'clean')) {
             $this->errorMessage = 'Your receipt is still being scanned. Please wait a moment and try again.';
+
+            return;
+        }
+
+        if (! $media) {
+            $this->errorMessage = 'Please upload your payment receipt before submitting.';
 
             return;
         }

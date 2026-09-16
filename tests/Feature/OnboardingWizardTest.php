@@ -9,6 +9,7 @@ use App\Models\ShopOnboarding;
 use App\Models\User;
 use App\Services\MediaUploadService;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -420,6 +421,7 @@ test('stepForErrorKey maps field keys and prefixes to the correct step', functio
 });
 
 test('hasPendingDocuments reflects whether any uploaded document is still scanning', function () {
+    Config::set('services.clamav.enabled', true);
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 

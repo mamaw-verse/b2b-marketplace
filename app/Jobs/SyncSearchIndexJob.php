@@ -17,11 +17,15 @@ final class SyncSearchIndexJob implements ShouldQueue
     /**
      * Reconcile stale search index entries.
      *
-     * Re-indexes shops and products updated within the last 5 minutes
-     * as a safety-net to catch any missed index writes.
+     * Only runs for the external Typesense driver. Under `pgsql` the
+     * generated `search_vector` columns are always fresh — nothing to do.
      */
     public function handle(): void
     {
+        if (config('scout.driver') !== 'typesense') {
+            return;
+        }
+
         $since = Carbon::now()->subMinutes(5);
 
         Shop::withoutGlobalScopes()

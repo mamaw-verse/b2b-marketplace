@@ -263,6 +263,10 @@ final class OnboardingWizard extends Component
             $type = $doc->description;
             $label = self::REQUIRED_DOCUMENTS[$type] ?? $type;
 
+            if (! (bool) config('services.clamav.enabled', false)) {
+                continue;
+            }
+
             if ($doc->scan_status === 'pending') {
                 $this->addError("documentUploads.{$type}", "{$label}: Security scan in progress — please wait and try again.");
                 $hasErrors = true;
@@ -274,6 +278,9 @@ final class OnboardingWizard extends Component
 
         // Supporting documents are optional but must not have pending/infected scans.
         foreach ($this->supportingDocuments as $index => $doc) {
+            if (! (bool) config('services.clamav.enabled', false)) {
+                break;
+            }
             if (($doc['scan_status'] ?? null) === 'pending') {
                 $this->addError('supportingDocuments', 'A supporting document scan is still in progress — please wait and try again.');
                 $hasErrors = true;
@@ -692,6 +699,10 @@ final class OnboardingWizard extends Component
     #[Computed]
     public function hasPendingDocuments(): bool
     {
+        if (! (bool) config('services.clamav.enabled', false)) {
+            return false;
+        }
+
         foreach ($this->uploadedDocuments as $document) {
             if (($document['scan_status'] ?? null) === 'pending') {
                 return true;
@@ -714,6 +725,10 @@ final class OnboardingWizard extends Component
     #[Computed]
     public function hasPendingCertificates(): bool
     {
+        if (! (bool) config('services.clamav.enabled', false)) {
+            return false;
+        }
+
         foreach ($this->certificates as $certificate) {
             if (($certificate['scan_status'] ?? null) === 'pending') {
                 return true;

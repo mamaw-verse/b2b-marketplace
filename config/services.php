@@ -27,6 +27,7 @@ return [
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        'token' => env('AWS_SESSION_TOKEN'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
@@ -38,6 +39,7 @@ return [
     ],
 
     'clamav' => [
+        'enabled' => (bool) env('CLAMAV_ENABLED', false),
         'host' => env('CLAMAV_HOST', 'localhost'),
         'port' => (int) env('CLAMAV_PORT', 3310),
         'timeout' => (int) env('CLAMAV_TIMEOUT', 30),

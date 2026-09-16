@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Jobs\IndexShopJob;
 use Database\Factories\ShopFactory;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Laravel\Scout\Builder as ScoutBuilder;
 use Laravel\Scout\Searchable;
 
 /**
@@ -109,6 +111,38 @@ final class Shop extends Model
     public function shouldBeSearchable(): bool
     {
         return $this->status === 'active' && $this->deleted_at === null;
+    }
+
+    /**
+     * Real-column text fields ranked by the `pgsql` Scout engine.
+     * (Typesense keeps using `toSearchableArray()` — untouched.)
+     *
+     * @return list<string>
+     */
+    public function searchTextColumns(): array
+    {
+        return ['storefront_name', 'registered_business_name', 'city', 'province'];
+    }
+
+    /**
+     * Columns covered by the pg_trgm similarity fallback.
+     *
+     * @return list<string>
+     */
+    public function searchTrigramColumns(): array
+    {
+        return ['storefront_name', 'registered_business_name'];
+    }
+
+    /**
+     * Base query for the `pgsql` Scout engine — only searchable shops.
+     * The Typesense driver never calls this.
+     *
+     * @return EloquentBuilder<Shop>
+     */
+    public function newScoutQuery(ScoutBuilder $builder): EloquentBuilder
+    {
+        return $this->newQuery()->where('status', 'active');
     }
 
     /**

@@ -235,16 +235,19 @@ final class OnboardingController extends Controller
             $errors['step_5'] = ['Required documents must be uploaded.'];
         }
 
-        // Check if any documents are still pending scan
-        $pendingDocs = $onboarding->documents()->where('scan_status', 'pending')->count();
-        if ($pendingDocs > 0) {
-            $errors['step_5'] = array_merge($errors['step_5'] ?? [], ['Some documents are still being scanned.']);
-        }
+        // Scan gates only apply when antivirus scanning is enabled.
+        if ((bool) config('services.clamav.enabled', false)) {
+            // Check if any documents are still pending scan
+            $pendingDocs = $onboarding->documents()->where('scan_status', 'pending')->count();
+            if ($pendingDocs > 0) {
+                $errors['step_5'] = array_merge($errors['step_5'] ?? [], ['Some documents are still being scanned.']);
+            }
 
-        // Check for infected documents
-        $infectedDocs = $onboarding->documents()->where('scan_status', 'infected')->count();
-        if ($infectedDocs > 0) {
-            $errors['step_5'] = array_merge($errors['step_5'] ?? [], ['Some documents failed the security scan.']);
+            // Check for infected documents
+            $infectedDocs = $onboarding->documents()->where('scan_status', 'infected')->count();
+            if ($infectedDocs > 0) {
+                $errors['step_5'] = array_merge($errors['step_5'] ?? [], ['Some documents failed the security scan.']);
+            }
         }
 
         return $errors;

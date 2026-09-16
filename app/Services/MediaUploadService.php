@@ -63,7 +63,21 @@ final class MediaUploadService
     }
 
     /**
+     * Whether antivirus scanning is enabled.
+     *
+     * Disabled by default (CLAMAV_ENABLED=false) — uploads are marked
+     * clean immediately and no scan job is dispatched. Enable in
+     * production where the clamav service is running.
+     */
+    public static function scanningEnabled(): bool
+    {
+        return (bool) config('services.clamav.enabled', false);
+    }
+
+    /**
      * Store an uploaded file to S3, create a media record, and dispatch the antivirus scan job.
+     *
+     * When scanning is disabled the record is marked clean immediately.
      *
      * @throws ValidationException If the file fails MIME/extension/size validation.
      */
@@ -81,17 +95,21 @@ final class MediaUploadService
             basename($storagePath),
         );
 
+        $scanningEnabled = self::scanningEnabled();
+
         $media = Media::create([
             'original_filename' => $originalFilename,
             'extension' => $extension,
             'storage_path' => $storagePath,
             'mime_type' => $file->getMimeType(),
             'description' => $description ?: null,
-            'scan_status' => 'pending',
+            'scan_status' => $scanningEnabled ? 'pending' : 'clean',
             'uploaded_by_id' => $uploaderId,
         ]);
 
-        ScanUploadedFileJob::dispatch($media);
+        if ($scanningEnabled) {
+            ScanUploadedFileJob::dispatch($media);
+        }
 
         return $media;
     }

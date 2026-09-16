@@ -34,9 +34,10 @@
 
 ## Search & Indexing
 
-- Only `active` shops and `published` products appear in the Typesense search index.
-- Index writes are event-driven (queued jobs: `IndexShopJob`, `IndexProductJob`) — never synchronous with the HTTP request.
-- A scheduled safety-net job (`SyncSearchIndexJob`) reconciles stale entries every 5 minutes.
+- Default driver is native Postgres FTS (`SCOUT_DRIVER=pgsql` → `App\Search\PostgresSearchEngine`: generated `search_vector` + GIN, pg_trgm prefix/typo fallback). Typesense is dormant (`SCOUT_DRIVER=typesense` + `sail up --profile search` + `scout:import` to flip back).
+- Only `active` shops and `published` products are searchable (enforced in SQL via `newScoutQuery()`, not the external index).
+- Index writes stay event-driven (queued jobs: `IndexShopJob`, `IndexProductJob`) — no-ops under `pgsql`, functional under `typesense`; never synchronous with the HTTP request.
+- `SyncSearchIndexJob` (every 5 minutes) only runs under `typesense`; it early-returns under `pgsql` where generated columns are always fresh.
 
 ## API Conventions
 
