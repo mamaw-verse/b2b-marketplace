@@ -70,9 +70,13 @@
 
         {{-- Drawer footer — user info + sign out --}}
         <div class="flex items-center gap-3 border-t border-[var(--hs-neutral-200)] px-5 py-4">
-            <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-xs font-bold text-white">
-                {{ strtoupper(mb_substr($user->first_name, 0, 1) . mb_substr($user->last_name, 0, 1)) }}
-            </span>
+            @if ($user->photo_url)
+                <img src="{{ $user->photo_url }}" alt="{{ __('Profile photo') }}" class="size-9 shrink-0 rounded-full object-cover" />
+            @else
+                <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-xs font-bold text-white">
+                    {{ strtoupper(mb_substr($user->first_name, 0, 1) . mb_substr($user->last_name, 0, 1)) }}
+                </span>
+            @endif
             <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-semibold text-[var(--hs-neutral-900)]">{{ $user->first_name }} {{ $user->last_name }}</p>
                 <p class="truncate text-xs text-[var(--hs-neutral-500)]">{{ $user->email }}</p>

@@ -9,12 +9,14 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
@@ -37,6 +39,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string|null $photo_url
  */
 #[Fillable(['first_name', 'last_name', 'email', 'password', 'phone', 'photo_path'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -51,6 +54,22 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailNotification);
+    }
+
+    /**
+     * Get the full S3 URL for the profile photo.
+     */
+    protected function photoUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            if (! $this->photo_path) {
+                return null;
+            }
+
+            return str_starts_with($this->photo_path, 'http')
+                ? $this->photo_path
+                : Storage::disk('s3')->url($this->photo_path);
+        });
     }
 
     /**

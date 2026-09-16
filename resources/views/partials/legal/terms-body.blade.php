@@ -169,10 +169,10 @@
         <div class="mt-3 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
             <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">1HALALSTORE.COM</p>
             <ul class="mt-2 space-y-1 text-sm text-[var(--hs-neutral-600)]">
-                <li>{{ __('Operator: To be confirmed') }}</li>
-                <li>{{ __('Address: To be confirmed') }}</li>
-                <li>{{ __('Support email: To be confirmed') }}</li>
-                <li>{{ __('Customer support: To be confirmed') }}</li>
+                <li>{{ __('Operator: Ismail Abaya') }}</li>
+                <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
+                <li>{{ __('Support email: admin@gmail.com') }}</li>
+                <li>{{ __('Customer support: admin@gmail.com') }}</li>
             </ul>
         </div>
         <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('By clicking “I Agree,” registering an account, placing an order, listing products or otherwise using the Platform, you acknowledge that you have read and agreed to these Terms of Service.') }}</p>

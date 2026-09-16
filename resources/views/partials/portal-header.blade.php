@@ -187,9 +187,13 @@
                             @click="open = !open"
                             class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-100)] transition"
                         >
-                            <span class="inline-flex size-7 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-xs font-bold text-white shrink-0">
-                                {{ strtoupper(mb_substr($user->first_name, 0, 1) . mb_substr($user->last_name, 0, 1)) }}
-                            </span>
+                            @if ($user->photo_url)
+                                <img src="{{ $user->photo_url }}" alt="{{ __('Profile photo') }}" class="size-7 shrink-0 rounded-full object-cover" />
+                            @else
+                                <span class="inline-flex size-7 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-xs font-bold text-white shrink-0">
+                                    {{ strtoupper(mb_substr($user->first_name, 0, 1) . mb_substr($user->last_name, 0, 1)) }}
+                                </span>
+                            @endif
                             <span class="hidden sm:block max-w-[120px] truncate">{{ $user->first_name }}</span>
                             <svg class="size-4 text-[var(--hs-neutral-400)] transition-transform" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
                         </button>

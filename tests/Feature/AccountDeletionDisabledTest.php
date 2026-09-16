@@ -12,7 +12,9 @@ beforeEach(function () {
 test('the profile settings page no longer renders the delete account form', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
 
-    $response = $this->actingAs($user)->get(route('profile.edit'));
+    $response = $this->actingAs($user)
+        ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+        ->get(route('profile.edit'));
 
     $response->assertOk()
         ->assertDontSee('Delete account')

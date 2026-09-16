@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Database\Seeders\RolePermissionSeeder;
 
 test('terms page loads successfully', function () {
     $response = $this->get(route('legal.terms'));
@@ -88,4 +89,29 @@ test('registration succeeds when terms are accepted', function () {
     ])->assertSessionHasNoErrors();
 
     expect(User::where('email', 'termsbuyer@example.com')->exists())->toBeTrue();
+});
+
+test('privacy page shows controller details and hides phone when unset', function () {
+    $response = $this->get(route('legal.privacy'));
+
+    $response->assertOk();
+    $response->assertSee('Controller: Ismail Abaya');
+    $response->assertSee('BO. Taytay, El Salvador City, Misamis Oriental 9017');
+    $response->assertSee('admin@gmail.com');
+    $response->assertSee('Data Protection Officer: Ismail Abaya');
+    $response->assertSee('Effective Date: September 16, 2026');
+    $response->assertDontSee('To be confirmed');
+    $response->assertDontSee('Telephone:');
+});
+
+test('privacy page shows admin phone when set on admin profile', function () {
+    $this->seed(RolePermissionSeeder::class);
+
+    $admin = User::factory()->create(['phone' => '+639171234567']);
+    $admin->assignRole('admin');
+
+    $response = $this->get(route('legal.privacy'));
+
+    $response->assertOk();
+    $response->assertSee('Phone: +639171234567');
 });

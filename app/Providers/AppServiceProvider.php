@@ -26,9 +26,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Scout\EngineManager;
+use Spatie\Permission\Models\Role;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -80,6 +82,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureRateLimiting();
         $this->registerSearchEngines();
+        $this->shareLegalContactDetails();
     }
 
     /**
@@ -114,6 +117,24 @@ final class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Share the admin profile phone with the privacy policy partial.
+     *
+     * The number is maintained on the admin user profile; the line stays
+     * hidden until a phone is set, and nothing breaks when roles are
+     * not seeded (e.g. fresh test databases).
+     */
+    protected function shareLegalContactDetails(): void
+    {
+        View::composer('partials.legal.privacy-body', function (\Illuminate\View\View $view): void {
+            $adminPhone = Role::where('name', 'admin')->exists()
+                ? User::role('admin')->whereNotNull('phone')->value('phone')
+                : null;
+
+            $view->with('adminPhone', $adminPhone);
+        });
     }
 
     /**

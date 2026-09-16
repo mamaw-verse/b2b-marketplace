@@ -15,7 +15,7 @@
             <p class="mt-2 max-w-2xl text-sm sm:text-base text-white/70 leading-relaxed">
                 {{ __('How 1HALALSTORE.COM collects, uses, stores, discloses and protects personal information — aligned with the Philippine Data Privacy Act of 2012.') }}
             </p>
-            <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: To be confirmed') }} &middot; {{ __('Last Updated: To be confirmed') }}</p>
+            <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: September 16, 2026') }} &middot; {{ __('Last Updated: September 16, 2026') }}</p>
         </div>
     </div>
 

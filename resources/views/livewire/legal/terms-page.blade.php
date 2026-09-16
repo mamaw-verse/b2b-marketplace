@@ -15,7 +15,7 @@
             <p class="mt-2 max-w-2xl text-sm sm:text-base text-white/70 leading-relaxed">
                 {{ __('Halal Supply-Chain Marketplace — the rules for using 1HALALSTORE.COM as a buyer, merchant, or supply-chain partner.') }}
             </p>
-            <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: To be confirmed') }} &middot; {{ __('Last Updated: To be confirmed') }}</p>
+            <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: September 16, 2026') }} &middot; {{ __('Last Updated: September 16, 2026') }}</p>
         </div>
     </div>
 

@@ -1,4 +1,5 @@
 {{-- Shared Privacy Policy body. Rendered on /privacy and inside the registration consent modal. --}}
+{{-- $adminPhone is shared via view composer; the line below stays hidden until a phone is set. --}}
 <p class="text-sm leading-relaxed text-[var(--hs-neutral-700)]">
     {{ __('1HALALSTORE.COM (“1HALALSTORE,” “we,” “our,” or “us”) respects your privacy. This Privacy Policy explains how we collect, use, store, disclose and protect personal information when you use our website, marketplace, applications, merchant portal, customer-support channels and related services.') }}
 </p>
@@ -11,11 +12,13 @@
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('1. Who Controls Your Personal Information?') }}</h2>
         <div class="mt-3 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
             <ul class="space-y-1 text-sm text-[var(--hs-neutral-600)]">
-                <li>{{ __('Controller: To be confirmed (legal entity name)') }}</li>
-                <li>{{ __('Address: To be confirmed') }}</li>
-                <li>{{ __('Privacy email: To be confirmed') }}</li>
-                <li>{{ __('Telephone: To be confirmed') }}</li>
-                <li>{{ __('Data Protection Officer: To be confirmed') }}</li>
+                <li>{{ __('Controller: Ismail Abaya') }}</li>
+                <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
+                <li>{{ __('Privacy email: admin@gmail.com') }}</li>
+                @if ($adminPhone)
+                    <li>{{ __('Phone: :phone', ['phone' => $adminPhone]) }}</li>
+                @endif
+                <li>{{ __('Data Protection Officer: Ismail Abaya') }}</li>
             </ul>
         </div>
         <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Where another organization independently determines how it processes your information, that organization may be a separate Personal Information Controller.') }}</p>
@@ -102,7 +105,7 @@
 
     <section id="section-13" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('13. How to Exercise Your Rights') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Send a request to the Data Protection Officer at the privacy email (to be confirmed) with sufficient information to verify your identity and understand your request. We may need to retain certain information where required by law or necessary to establish, exercise or defend legal claims.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Send a request to the Data Protection Officer at admin@gmail.com with sufficient information to verify your identity and understand your request. We may need to retain certain information where required by law or necessary to establish, exercise or defend legal claims.') }}</p>
     </section>
 
     <section id="section-14" class="py-6 scroll-mt-24">
@@ -135,10 +138,10 @@
         <div class="mt-3 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
             <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">1HALALSTORE.COM</p>
             <ul class="mt-2 space-y-1 text-sm text-[var(--hs-neutral-600)]">
-                <li>{{ __('Operator: To be confirmed') }}</li>
-                <li>{{ __('Address: To be confirmed') }}</li>
-                <li>{{ __('Privacy email: To be confirmed') }}</li>
-                <li>{{ __('DPO: To be confirmed') }}</li>
+                <li>{{ __('Operator: Ismail Abaya') }}</li>
+                <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
+                <li>{{ __('Privacy email: admin@gmail.com') }}</li>
+                <li>{{ __('DPO: Ismail Abaya') }}</li>
             </ul>
         </div>
         <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('For privacy concerns, please use the subject “1HALALSTORE.COM – Privacy Request”.') }}</p>

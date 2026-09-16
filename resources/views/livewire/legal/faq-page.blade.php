@@ -60,7 +60,7 @@
                     ['id' => 'faq-14', 'q' => __('Merchant vs. franchise partner?'), 'a' => __('A merchant lists and sells products. A franchise or country partner may hold broader territorial rights and operational responsibilities under a separate Franchise Partnership Agreement.')],
                     ['id' => 'faq-31', 'q' => __('Can government and industry groups participate?'), 'a' => __('Yes — government agencies, chambers, industry and Halal associations, farmer and MSME groups, logistics and export organizations, tourism bodies and trade partners, subject to agreements and law.')],
                     ['id' => 'faq-32', 'q' => __('Does the Platform support MSMEs?'), 'a' => __('Yes — a major objective is giving MSMEs and Halal micro-entrepreneurs digital market access and supply-chain connections, locally and internationally.')],
-                    ['id' => 'faq-35', 'q' => __('How can I become a partner?'), 'a' => __('Contact the partnerships team via the support email (to be confirmed). Opportunities include merchant, logistics, supply-chain, country operator, franchise, technology and strategic partnerships.')],
+                    ['id' => 'faq-35', 'q' => __('How can I become a partner?'), 'a' => __('Contact the partnerships team via the support email admin@gmail.com. Opportunities include merchant, logistics, supply-chain, country operator, franchise, technology and strategic partnerships.')],
                 ]],
                 ['id' => 'orders', 'icon' => 'shopping-bag', 'title' => __('Orders, Payments & Trust'), 'items' => [
                     ['id' => 'faq-18', 'q' => __('How are payments made?'), 'a' => __('Through approved payment providers; methods vary by country and transaction type. Additional processing, currency or transaction charges may apply.')],
@@ -72,13 +72,13 @@
                     ['id' => 'faq-26', 'q' => __('Can I cancel an order?'), 'a' => __('Depends on order status, merchant policy, product type and consumer law. Some products have special cancellation restrictions.')],
                     ['id' => 'faq-27', 'q' => __('Is my personal information protected?'), 'a' => __('Yes — the Platform implements appropriate privacy and security measures. Processing follows the Privacy Policy and applicable law.')],
                     ['id' => 'faq-28', 'q' => __('Will my information be shared with merchants?'), 'a' => __('Where necessary to complete a transaction (e.g. delivery details with merchant, logistics and payment providers). Only reasonably necessary information is shared.')],
-                    ['id' => 'faq-29', 'q' => __('Can I request deletion or correction?'), 'a' => __('Subject to law, you may request access, correction, deletion, blocking or objection. Contact the Data Protection Officer (email to be confirmed).')],
+                    ['id' => 'faq-29', 'q' => __('Can I request deletion or correction?'), 'a' => __('Subject to law, you may request access, correction, deletion, blocking or objection. Contact the Data Protection Officer at admin@gmail.com.')],
                 ]],
                 ['id' => 'ecosystem', 'icon' => 'globe-alt', 'title' => __('Ecosystem & Contact'), 'items' => [
                     ['id' => 'faq-33', 'q' => __('What does “Farm to Plate” mean?'), 'a' => __('Connecting the entire Halal value chain — from agricultural production and ingredients through processing, manufacturing, logistics, distribution, retail and final consumption.')],
                     ['id' => 'faq-34', 'q' => __('What countries can participate?'), 'a' => __('The Platform may expand internationally. Availability depends on operational capability, regulations, partners, payments, logistics and Halal requirements.')],
                     ['id' => 'faq-36', 'q' => __('Where can I read the legal policies?'), 'a' => __('The latest Terms of Service, Privacy Policy, Merchant Terms, Refund and Cancellation Policy, Shipping and Delivery Policy, Prohibited Products Policy, Halal Integrity Policy and Franchise/Partner Agreements will be available on the Platform.')],
-                    ['id' => 'faq-37', 'q' => __('How can I contact 1HALALSTORE.COM?'), 'a' => __('Customer, merchant, partnership and privacy/DPO support emails plus telephone and office address — to be confirmed. Contact us first so concerns can be investigated promptly.')],
+                    ['id' => 'faq-37', 'q' => __('How can I contact 1HALALSTORE.COM?'), 'a' => __('Customer, merchant, partnership and privacy/DPO support email: admin@gmail.com. Contact us first so concerns can be investigated promptly.')],
                 ]],
             ];
         @endphp
