@@ -6,6 +6,7 @@ use App\Livewire\Admin\SubscriptionQueue;
 use App\Livewire\CompanyHub\ManualSubscriptionPaymentPage;
 use App\Livewire\CompanyHub\SubscriptionPage;
 use App\Livewire\CompanyHub\SubscriptionPaymentPage;
+use App\Models\Media;
 use App\Models\PaymentAttempt;
 use App\Models\Shop;
 use App\Models\Subscription;
@@ -107,11 +108,14 @@ test('submit requires receipt upload', function () {
 
     [$user, $subscription] = makeManualSetup();
 
-    Livewire::actingAs($user)
+    // Call submit() with no receiptMediaId set — component returns errorMessage, not a validation error.
+    $component = Livewire::actingAs($user)
         ->test(ManualSubscriptionPaymentPage::class, ['subscription' => $subscription])
         ->set('referenceNumber', 'REF-12345')
-        ->call('submit')
-        ->assertHasErrors(['receipt']);
+        ->call('submit');
+
+    expect($component->get('errorMessage'))->not->toBeNull();
+    expect($component->get('step'))->toBe('form');
 });
 
 test('submit rejects invalid receipt mime type', function () {
@@ -120,11 +124,11 @@ test('submit rejects invalid receipt mime type', function () {
 
     [$user, $subscription] = makeManualSetup();
 
+    // uploadReceipt() validates the mime type — invalid file should produce a validation error.
     Livewire::actingAs($user)
         ->test(ManualSubscriptionPaymentPage::class, ['subscription' => $subscription])
-        ->set('referenceNumber', 'REF-12345')
         ->set('receipt', UploadedFile::fake()->create('malware.exe', 100, 'application/octet-stream'))
-        ->call('submit')
+        ->call('uploadReceipt')
         ->assertHasErrors(['receipt']);
 });
 
@@ -136,13 +140,22 @@ test('submit creates a manual payment attempt and moves to submitted step', func
     Config::set('marketplace.payment_method', 'manual');
     Storage::fake('s3');
     Notification::fake();
+    $this->seed(RolePermissionSeeder::class);
 
     [$user, $subscription] = makeManualSetup();
+
+    // Pre-create a clean Media record — simulates a completed uploadReceipt() + scan pass.
+    $media = Media::factory()->create([
+        'uploaded_by_id' => $user->id,
+        'scan_status' => 'clean',
+        'extension' => 'jpg',
+        'mime_type' => 'image/jpeg',
+    ]);
 
     Livewire::actingAs($user)
         ->test(ManualSubscriptionPaymentPage::class, ['subscription' => $subscription])
         ->set('referenceNumber', 'REF-99887766')
-        ->set('receipt', UploadedFile::fake()->image('receipt.jpg'))
+        ->set('receiptMediaId', $media->id)
         ->call('submit')
         ->assertSet('step', 'submitted')
         ->assertHasNoErrors();
@@ -152,40 +165,57 @@ test('submit creates a manual payment attempt and moves to submitted step', func
         ->and($attempt->payment_method)->toBe('manual')
         ->and($attempt->status)->toBe('pending')
         ->and($attempt->manual_reference_number)->toBe('REF-99887766')
-        ->and($attempt->manual_receipt_path)->not->toBeNull();
+        ->and($attempt->receipt_media_id)->toBe($media->id)
+        ->and($attempt->manual_receipt_path)->toBe($media->storage_path);
 });
 
-test('submit notifies admin after successful manual payment submission', function () {
+test('submit notifies admin users after successful manual payment submission', function () {
     Config::set('marketplace.payment_method', 'manual');
     Storage::fake('s3');
     Notification::fake();
+    $this->seed(RolePermissionSeeder::class);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
 
     [$user, $subscription] = makeManualSetup();
+
+    $media = Media::factory()->create([
+        'uploaded_by_id' => $user->id,
+        'scan_status' => 'clean',
+    ]);
 
     Livewire::actingAs($user)
         ->test(ManualSubscriptionPaymentPage::class, ['subscription' => $subscription])
         ->set('referenceNumber', 'REF-11223344')
-        ->set('receipt', UploadedFile::fake()->image('receipt.png'))
+        ->set('receiptMediaId', $media->id)
         ->call('submit');
 
-    Notification::assertSentOnDemand(ManualPaymentSubmittedAdminNotification::class);
+    Notification::assertSentTo($admin, ManualPaymentSubmittedAdminNotification::class);
 });
 
-test('submit stores receipt on s3 disk', function () {
+test('submit stores receipt path from media record on the attempt', function () {
     Config::set('marketplace.payment_method', 'manual');
     Storage::fake('s3');
     Notification::fake();
+    $this->seed(RolePermissionSeeder::class);
 
     [$user, $subscription] = makeManualSetup();
+
+    $media = Media::factory()->create([
+        'uploaded_by_id' => $user->id,
+        'scan_status' => 'clean',
+        'storage_path' => 'media/2026/09/16/test-receipt.jpg',
+    ]);
 
     Livewire::actingAs($user)
         ->test(ManualSubscriptionPaymentPage::class, ['subscription' => $subscription])
         ->set('referenceNumber', 'REF-55443322')
-        ->set('receipt', UploadedFile::fake()->image('receipt.jpg'))
+        ->set('receiptMediaId', $media->id)
         ->call('submit');
 
     $attempt = PaymentAttempt::where('subscription_id', $subscription->id)->first();
-    Storage::disk('s3')->assertExists($attempt->manual_receipt_path);
+    expect($attempt->manual_receipt_path)->toBe('media/2026/09/16/test-receipt.jpg');
 });
 
 // ──────────────────────────────────────────────────────────────
@@ -274,6 +304,7 @@ test('admin pending payments tab shows manual payment subscriptions', function (
 test('forceActivate on manual attempt does not set dlt_payment_status', function () {
     $this->seed(RolePermissionSeeder::class);
     Event::fake();
+    Notification::fake();
 
     $admin = User::factory()->create();
     $admin->assignRole('admin');

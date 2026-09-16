@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\CompanyHub;
 
+use App\Models\Media;
 use App\Models\PaymentAttempt;
 use App\Models\Subscription;
+use App\Models\User;
 use App\Notifications\ManualPaymentSubmittedAdminNotification;
+use App\Services\MediaUploadService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -30,17 +31,21 @@ final class ManualSubscriptionPaymentPage extends Component
     public int $subscriptionId;
 
     /**
-     * @var string form|submitted
+     * @var string form|scanning|submitted
      *
-     * - form       : reference number input + receipt upload (initial state)
-     * - submitted  : confirmation screen while admin reviews
+     * - form      : reference number input + receipt upload (initial state)
+     * - scanning  : receipt uploaded, waiting for antivirus scan to pass
+     * - submitted : admin has been notified, awaiting verification
      */
     public string $step = 'form';
 
     public string $referenceNumber = '';
 
-    /** @var TemporaryUploadedFile|null */
+    /** @var TemporaryUploadedFile|null Livewire temp file before MediaUploadService stores it */
     public $receipt = null;
+
+    /** @var int|null Media ID once the file has been stored and scan dispatched */
+    public ?int $receiptMediaId = null;
 
     public ?string $errorMessage = null;
 
@@ -50,9 +55,17 @@ final class ManualSubscriptionPaymentPage extends Component
         return Subscription::with('plan')->findOrFail($this->subscriptionId);
     }
 
+    /**
+     * The Media record for the uploaded receipt (set after upload, cleared on submit).
+     */
+    #[Computed]
+    public function receiptMedia(): ?Media
+    {
+        return $this->receiptMediaId ? Media::find($this->receiptMediaId) : null;
+    }
+
     public function mount(Subscription $subscription): void
     {
-        // Only available when the instance is configured for manual payments.
         abort_unless(config('marketplace.payment_method') === 'manual', 403);
 
         $shop = Auth::user()?->shop;
@@ -61,8 +74,7 @@ final class ManualSubscriptionPaymentPage extends Component
 
         $this->subscriptionId = $subscription->id;
 
-        // If there is already a pending manual attempt, jump straight to the
-        // submitted screen — the merchant already submitted; prevent double-submit.
+        // If there is already a pending manual attempt, jump to the submitted screen.
         $existingAttempt = PaymentAttempt::query()
             ->where('subscription_id', $subscription->id)
             ->where('status', 'pending')
@@ -75,16 +87,87 @@ final class ManualSubscriptionPaymentPage extends Component
         }
     }
 
-    public function submit(): void
+    /**
+     * Called when Livewire finishes uploading the temporary file.
+     * Immediately stores it via MediaUploadService (dispatches scan job) so
+     * we have a Media record and can show the scan status badge.
+     */
+    public function uploadReceipt(MediaUploadService $uploader): void
     {
         $this->validate([
-            'referenceNumber' => 'required|string|min:3|max:100',
             'receipt' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120',
         ], [
             'receipt.required' => 'Please upload your payment receipt.',
             'receipt.mimes' => 'Receipt must be a JPEG, PNG, or PDF file.',
             'receipt.max' => 'Receipt file must be under 5 MB.',
         ]);
+
+        // Delete any previously uploaded receipt for this session.
+        if ($this->receiptMediaId) {
+            Media::find($this->receiptMediaId)?->delete();
+        }
+
+        $media = $uploader->store($this->receipt, Auth::id(), 'Subscription payment receipt');
+
+        $this->receiptMediaId = $media->id;
+        $this->receipt = null;
+        $this->step = 'scanning';
+        unset($this->receiptMedia);
+    }
+
+    /**
+     * Polled every 3s while on the scanning step to refresh scan status.
+     */
+    public function checkScanStatus(): void
+    {
+        unset($this->receiptMedia);
+
+        $media = $this->receiptMedia;
+
+        if ($media && $media->scan_status === 'clean') {
+            $this->step = 'form';
+        } elseif ($media && $media->scan_status === 'infected') {
+            // Infected — delete the media and reset so they can re-upload.
+            $media->delete();
+            $this->receiptMediaId = null;
+            $this->step = 'form';
+            $this->errorMessage = 'Your receipt file failed the security scan. Please upload a different file.';
+        }
+    }
+
+    /**
+     * Remove the uploaded receipt and go back to the form step.
+     */
+    public function removeReceipt(): void
+    {
+        if ($this->receiptMediaId) {
+            Media::find($this->receiptMediaId)?->delete();
+            $this->receiptMediaId = null;
+        }
+
+        $this->step = 'form';
+        unset($this->receiptMedia);
+    }
+
+    public function submit(): void
+    {
+        $this->validate([
+            'referenceNumber' => 'required|string|min:3|max:100',
+        ]);
+
+        if (! $this->receiptMediaId) {
+            $this->errorMessage = 'Please upload your payment receipt before submitting.';
+
+            return;
+        }
+
+        $media = $this->receiptMedia;
+
+        if (! $media || $media->scan_status !== 'clean') {
+            $this->errorMessage = 'Your receipt is still being scanned. Please wait a moment and try again.';
+
+            return;
+        }
 
         $subscription = $this->subscription;
 
@@ -105,27 +188,24 @@ final class ManualSubscriptionPaymentPage extends Component
             return;
         }
 
-        $receiptPath = $this->receipt->storePubliclyAs(
-            path: 'subscription-receipts/'.$subscription->id,
-            name: Str::ulid().'.'.$this->receipt->getClientOriginalExtension(),
-            options: 's3',
-        );
-
-        $attempt = DB::transaction(function () use ($subscription, $receiptPath): PaymentAttempt {
+        $attempt = DB::transaction(function () use ($subscription, $media): PaymentAttempt {
             return PaymentAttempt::create([
                 'subscription_id' => $subscription->id,
                 'payment_method' => 'manual',
                 'status' => 'pending',
                 'manual_reference_number' => $this->referenceNumber,
-                'manual_receipt_path' => $receiptPath,
+                'manual_receipt_path' => $media->storage_path,
+                'receipt_media_id' => $media->id,
             ]);
         });
 
-        Notification::route('mail', config('mail.admin_address', config('mail.from.address')))
-            ->notify(new ManualPaymentSubmittedAdminNotification(
+        // Notify all admin users — triggers mail + database (in-app) + broadcast channels.
+        User::role('admin')->get()->each(
+            fn (User $admin) => $admin->notify(new ManualPaymentSubmittedAdminNotification(
                 attempt: $attempt,
                 subscription: $subscription,
-            ));
+            ))
+        );
 
         $this->step = 'submitted';
     }

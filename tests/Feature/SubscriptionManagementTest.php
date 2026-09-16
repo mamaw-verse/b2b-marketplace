@@ -11,10 +11,14 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
+    // This file tests DLT-flow subscription behaviour (trials, pending_payment).
+    // Guard against .env having MARKETPLACE_PAYMENT_METHOD=manual.
+    Config::set('marketplace.payment_method', 'dlt');
 });
 
 test('ph merchants receive a free trial when subscribing', function () {

@@ -133,7 +133,6 @@
                     <flux:table.column>{{ __('Business') }}</flux:table.column>
                     <flux:table.column>{{ __('Plan') }}</flux:table.column>
                     <flux:table.column>{{ __('Payment') }}</flux:table.column>
-                    <flux:table.column>{{ __('Sync Attempts') }}</flux:table.column>
                     <flux:table.column>{{ __('Initiated') }}</flux:table.column>
                     <flux:table.column>{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
@@ -155,78 +154,82 @@
                             <flux:table.cell>
                                 @if ($attempt)
                                     @if ($attempt->isManual())
-                                        {{-- Manual payment: show reference number + receipt link --}}
-                                        <flux:badge size="sm" color="blue" class="mb-1">{{ __('Manual') }}</flux:badge>
-                                        @if ($attempt->manual_reference_number)
-                                            <div>
-                                                <code class="text-xs bg-[var(--hs-neutral-100)] px-1.5 py-0.5 rounded text-[var(--hs-neutral-700)]">
-                                                    {{ $attempt->manual_reference_number }}
-                                                </code>
-                                            </div>
-                                        @endif
-                                        @if ($attempt->manual_receipt_path)
-                                            <a
-                                                href="{{ \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($attempt->manual_receipt_path, now()->addMinutes(30)) }}"
-                                                target="_blank"
-                                                class="mt-1 inline-flex items-center gap-1 text-xs text-[var(--hs-info-700)] hover:underline"
-                                            >
-                                                <flux:icon name="document-arrow-down" class="size-3" />
-                                                {{ __('View Receipt') }}
-                                            </a>
-                                        @endif
+                                        {{-- Manual payment --}}
+                                        <div class="flex flex-col gap-1.5">
+                                            <flux:badge size="sm" color="blue" icon="banknotes">{{ __('Manual Transfer') }}</flux:badge>
+                                            @if ($attempt->manual_reference_number)
+                                                <div class="flex items-center gap-1.5">
+                                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Ref:') }}</span>
+                                                    <code class="text-xs font-mono bg-[var(--hs-neutral-100)] px-2 py-0.5 rounded-md text-[var(--hs-neutral-800)] tracking-wide">
+                                                        {{ $attempt->manual_reference_number }}
+                                                    </code>
+                                                </div>
+                                            @endif
+                                        </div>
                                     @else
-                                        {{-- DLT payment: show transaction reference + status --}}
-                                        <code class="text-xs bg-[var(--hs-neutral-100)] px-1.5 py-0.5 rounded text-[var(--hs-neutral-700)]">
-                                            {{ $attempt->dlt_merchant_transaction_id }}
-                                        </code>
-                                        @if ($attempt->dlt_payment_status)
-                                            <flux:badge size="sm" color="{{ $attempt->dlt_payment_status === 'PENDING' ? 'yellow' : 'zinc' }}" class="ml-1">
-                                                {{ $attempt->dlt_payment_status }}
-                                            </flux:badge>
-                                        @endif
+                                        {{-- DLT payment --}}
+                                        <div class="flex flex-col gap-1.5">
+                                            <flux:badge size="sm" color="zinc" icon="credit-card">{{ __('DLT') }}</flux:badge>
+                                            @if ($attempt->dlt_merchant_transaction_id)
+                                                <code class="text-xs font-mono bg-[var(--hs-neutral-100)] px-2 py-0.5 rounded-md text-[var(--hs-neutral-800)] max-w-[160px] truncate block">
+                                                    {{ $attempt->dlt_merchant_transaction_id }}
+                                                </code>
+                                            @endif
+                                            @if ($attempt->dlt_payment_status)
+                                                <flux:badge size="sm" color="{{ $attempt->dlt_payment_status === 'PENDING' ? 'yellow' : 'zinc' }}">
+                                                    {{ $attempt->dlt_payment_status }}
+                                                </flux:badge>
+                                            @endif
+                                        </div>
                                     @endif
                                 @else
                                     <span class="text-[var(--hs-neutral-400)] text-sm">{{ __('No attempt yet') }}</span>
                                 @endif
                             </flux:table.cell>
-                            <flux:table.cell class="text-[var(--hs-neutral-600)]">
-                                {{ $attempt?->sync_attempts ?? 0 }}
-                            </flux:table.cell>
                             <flux:table.cell class="text-[var(--hs-neutral-600)] text-sm">
                                 {{ $attempt?->created_at?->format('M d, Y H:i') ?? $subscription->created_at->format('M d, Y H:i') }}
                             </flux:table.cell>
                             <flux:table.cell>
-                                <div class="flex items-center gap-2">
-                                    <flux:modal.trigger name="confirm-activate">
-                                        <flux:button
-                                            size="sm"
-                                            variant="primary"
-                                            wire:click="confirmActivate({{ $subscription->id }})"
-                                            wire:loading.attr="disabled"
-                                            wire:target="confirmActivate({{ $subscription->id }})"
-                                        >
-                                            <span wire:loading.remove wire:target="confirmActivate({{ $subscription->id }})">{{ __('Activate') }}</span>
-                                            <span wire:loading wire:target="confirmActivate({{ $subscription->id }})">
-                                                <svg class="animate-spin size-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                                            </span>
-                                        </flux:button>
-                                    </flux:modal.trigger>
+                                <flux:dropdown position="bottom" align="end">
+                                    <flux:button size="sm" variant="ghost" icon="ellipsis-vertical" />
 
-                                    <flux:modal.trigger name="confirm-cancel">
-                                        <flux:button
-                                            size="sm"
+                                    <flux:menu>
+                                        @if ($attempt && $attempt->isManual())
+                                            <flux:menu.item
+                                                icon="eye"
+                                                wire:click="confirmActivate({{ $subscription->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="confirmActivate({{ $subscription->id }})"
+                                            >
+                                                {{ __('Review & Activate') }}
+                                            </flux:menu.item>
+                                        @else
+                                            <flux:menu.item
+                                                icon="check-circle"
+                                                wire:click="confirmActivate({{ $subscription->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="confirmActivate({{ $subscription->id }})"
+                                            >
+                                                {{ __('Activate') }}
+                                            </flux:menu.item>
+                                        @endif
+
+                                        <flux:menu.separator />
+
+                                        <flux:menu.item
+                                            icon="x-circle"
                                             variant="danger"
                                             wire:click="confirmCancel({{ $subscription->id }})"
                                         >
                                             {{ __('Cancel') }}
-                                        </flux:button>
-                                    </flux:modal.trigger>
-                                </div>
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
                             </flux:table.cell>
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="6" class="text-center py-10">
+                            <flux:table.cell colspan="5" class="text-center py-10">
                                 <div class="flex flex-col items-center gap-2">
                                     <flux:icon name="check-circle" class="size-8 text-[var(--hs-success-700)]" />
                                     <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No pending payment subscriptions. All clear!') }}</p>
@@ -246,11 +249,11 @@
     @endif
 </div>
 
-{{-- Force Activate confirmation --}}
+{{-- Force Activate confirmation (DLT path — /sync returned inconclusive or no attempt) --}}
 <x-hs-confirm
     name="confirm-activate"
     title="{{ __('Force Activate Subscription') }}"
-    message="{{ __('This will manually mark the subscription as active and the payment attempt as succeeded. Only do this after confirming payment was received in the DLT merchant portal.') }}"
+    message="{{ __('This will manually mark the subscription as active and the payment attempt as succeeded. Only do this after confirming payment was received.') }}"
     variant="primary"
 >
     <x-slot name="action">
@@ -259,6 +262,91 @@
         </flux:button>
     </x-slot>
 </x-hs-confirm>
+
+{{-- Manual payment: Review receipt + Activate modal --}}
+<flux:modal name="confirm-activate-manual" class="md:w-[56rem] lg:w-[68rem] max-w-[calc(100vw-2rem)]">
+    <div class="space-y-4">
+        <div class="flex items-start justify-between gap-4 pe-10">
+            <div>
+                <flux:heading size="lg">{{ __('Review Payment & Activate') }}</flux:heading>
+                <flux:text class="mt-1">{{ __('Verify the bank transfer below, then activate or cancel.') }}</flux:text>
+            </div>
+            @if ($confirmingActivateId)
+                @php $reviewAttemptForHeader = $this->pendingPaymentSubscriptions->firstWhere('id', $confirmingActivateId)?->paymentAttempts->first(); @endphp
+                @if ($reviewAttemptForHeader?->receiptMedia || $reviewAttemptForHeader?->manual_receipt_path)
+                    @php
+                        $headerReceiptUrl = $reviewAttemptForHeader->receiptMedia
+                            ? app(\App\Services\MediaUploadService::class)->signedUrl($reviewAttemptForHeader->receiptMedia)
+                            : \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($reviewAttemptForHeader->manual_receipt_path, now()->addMinutes(30));
+                    @endphp
+                    <flux:button variant="ghost" size="sm" icon="arrow-top-right-on-square" href="{{ $headerReceiptUrl }}" target="_blank" rel="noopener noreferrer">
+                        {{ __('Open in new tab') }}
+                    </flux:button>
+                @endif
+            @endif
+        </div>
+
+        @if ($confirmingActivateId)
+            @php
+                $reviewSub = $this->pendingPaymentSubscriptions->firstWhere('id', $confirmingActivateId);
+                $reviewAttempt = $reviewSub?->paymentAttempts->first();
+            @endphp
+
+            @if ($reviewAttempt)
+                {{-- Payment summary --}}
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2.5 bg-[var(--hs-neutral-50)] rounded-lg border border-[var(--hs-neutral-200)] text-sm">
+                    <span class="font-medium text-[var(--hs-neutral-900)]">{{ $reviewSub->shop->registered_business_name }}</span>
+                    <span class="text-[var(--hs-neutral-300)]">·</span>
+                    <span class="text-[var(--hs-neutral-700)]">{{ $reviewSub->plan->currency }} {{ number_format((float) $reviewSub->plan->price, 2) }}</span>
+                    <span class="text-[var(--hs-neutral-300)]">·</span>
+                    <span class="text-[var(--hs-neutral-500)] text-xs">{{ __('Ref:') }}</span>
+                    <code class="font-mono text-[var(--hs-neutral-800)] bg-[var(--hs-neutral-100)] px-2 py-0.5 rounded-md text-xs">{{ $reviewAttempt->manual_reference_number ?? '—' }}</code>
+                    <span class="text-[var(--hs-neutral-300)]">·</span>
+                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ $reviewAttempt->created_at?->format('M d, Y H:i') }}</span>
+                </div>
+
+                {{-- Receipt preview --}}
+                @if ($reviewAttempt->receiptMedia)
+                    @php
+                        $receiptUrl = app(\App\Services\MediaUploadService::class)->signedUrl($reviewAttempt->receiptMedia);
+                        $isImage = in_array($reviewAttempt->receiptMedia->extension, ['jpg', 'jpeg', 'png']);
+                    @endphp
+                    <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden" style="height: 420px;">
+                        @if ($isImage)
+                            <div class="flex items-center justify-center h-full bg-[var(--hs-neutral-50)] p-4">
+                                <img src="{{ $receiptUrl }}" alt="{{ __('Payment receipt') }}" class="max-h-full max-w-full rounded object-contain">
+                            </div>
+                        @else
+                            <iframe src="{{ $receiptUrl }}" class="w-full h-full" title="{{ __('Payment receipt') }}"></iframe>
+                        @endif
+                    </div>
+                @elseif ($reviewAttempt->manual_receipt_path)
+                    {{-- Legacy: no Media record, show direct link --}}
+                    <div class="p-4 bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-200)] rounded-lg text-sm text-[var(--hs-neutral-600)]">
+                        <flux:button variant="ghost" size="sm" icon="document-arrow-down" href="{{ \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($reviewAttempt->manual_receipt_path, now()->addMinutes(30)) }}" target="_blank">
+                            {{ __('Download Receipt') }}
+                        </flux:button>
+                    </div>
+                @else
+                    <div class="p-4 bg-[var(--hs-warning-50)] border border-[var(--hs-warning-200)] rounded-lg text-sm text-[var(--hs-warning-700)]">
+                        {{ __('No receipt file attached to this payment attempt.') }}
+                    </div>
+                @endif
+            @endif
+        @endif
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-[var(--hs-neutral-100)]">
+            <flux:modal.close>
+                <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+            </flux:modal.close>
+            <flux:modal.close>
+                <flux:button variant="primary" wire:click="forceActivate" wire:loading.attr="disabled">
+                    {{ __('Activate Subscription') }}
+                </flux:button>
+            </flux:modal.close>
+        </div>
+    </div>
+</flux:modal>
 
 {{-- Activate confirmation when DLT /sync still returns PENDING --}}
 <x-hs-confirm
@@ -363,4 +451,8 @@
         </div>
     </div>
 </flux:modal>
+
+{{-- Receipt Preview Modal (reuses the shared document-viewer partial) --}}
+@include('livewire.admin.document-viewer')
+
 </div>

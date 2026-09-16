@@ -1,4 +1,4 @@
-<div>
+<div @if ($step === 'scanning') wire:poll.3s="checkScanStatus" @endif>
     <div class="space-y-4">
 
         {{-- Header --}}
@@ -23,8 +23,8 @@
             </div>
         @endif
 
-        {{-- Step: Form --}}
-        @if ($step === 'form')
+        {{-- Step: Form (+ scan complete) --}}
+        @if (in_array($step, ['form', 'scanning']))
             <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-6">
 
                 {{-- Instructions --}}
@@ -50,9 +50,6 @@
                             placeholder="{{ __('e.g. 1234567890') }}"
                             required
                         />
-                        @error('referenceNumber')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     {{-- Receipt upload --}}
@@ -61,25 +58,55 @@
                             {{ __('Payment Receipt') }}
                             <span class="text-[var(--hs-danger-700)]">*</span>
                         </p>
-                        <x-hs-dropzone
-                            input-id="receipt-upload"
-                            wire-model="receipt"
-                            accept="image/jpeg,image/png,application/pdf"
-                            :multiple="false"
-                            hint="{{ __('JPEG, PNG, or PDF — max 5 MB') }}"
-                            loading-target="receipt"
-                        >
-                            @error('receipt')
-                                <p class="mt-2 text-xs text-red-500">{{ $message }}</p>
-                            @enderror
 
-                            @if ($receipt)
-                                <div class="mt-3 flex items-center gap-2 text-sm text-[var(--hs-neutral-700)]">
-                                    <flux:icon name="document-check" class="size-4 text-[var(--hs-success-700)]" />
-                                    <span>{{ $receipt->getClientOriginalName() }}</span>
+                        @if ($receiptMediaId && $this->receiptMedia)
+                            {{-- Uploaded receipt — show scan status badge --}}
+                            @php $media = $this->receiptMedia; @endphp
+                            <div class="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)]">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    @if ($media->scan_status === 'clean')
+                                        <flux:icon name="document-check" class="size-5 text-[var(--hs-success-700)] shrink-0" />
+                                    @elseif ($media->scan_status === 'pending')
+                                        <flux:icon name="arrow-path" class="size-5 text-[var(--hs-warning-600)] shrink-0 animate-spin" />
+                                    @else
+                                        <flux:icon name="document" class="size-5 text-[var(--hs-neutral-400)] shrink-0" />
+                                    @endif
+                                    <span class="text-sm text-[var(--hs-neutral-700)] truncate">{{ $media->original_filename }}</span>
+                                    @if ($media->scan_status === 'clean')
+                                        <flux:badge color="green" size="sm">{{ __('Verified') }}</flux:badge>
+                                    @elseif ($media->scan_status === 'pending')
+                                        <flux:badge color="yellow" size="sm">{{ __('Scanning…') }}</flux:badge>
+                                    @endif
                                 </div>
+                                <flux:button
+                                    variant="ghost"
+                                    size="sm"
+                                    icon="x-mark"
+                                    wire:click="removeReceipt"
+                                    wire:loading.attr="disabled"
+                                />
+                            </div>
+
+                            @if ($step === 'scanning')
+                                <p class="mt-2 text-xs text-[var(--hs-neutral-500)]">
+                                    {{ __('Running a security scan on your file. This usually takes a few seconds…') }}
+                                </p>
                             @endif
-                        </x-hs-dropzone>
+                        @else
+                            {{-- Dropzone for initial upload --}}
+                            <x-hs-dropzone
+                                input-id="receipt-upload"
+                                wire-model="receipt"
+                                accept="image/jpeg,image/png,application/pdf"
+                                :multiple="false"
+                                hint="{{ __('JPEG, PNG, or PDF — max 5 MB') }}"
+                                on-finish="$wire.uploadReceipt()"
+                                loading-target="receipt,uploadReceipt"
+                            />
+                            @error('receipt')
+                                <p class="mt-1 text-xs text-[var(--hs-danger-700)]">{{ $message }}</p>
+                            @enderror
+                        @endif
                     </div>
 
                     <flux:button
@@ -87,12 +114,17 @@
                         class="w-full"
                         wire:click="submit"
                         wire:loading.attr="disabled"
-                        wire:target="submit,receipt"
+                        wire:target="submit"
+                        :disabled="$step === 'scanning' || ! $receiptMediaId"
                     >
                         <span wire:loading.remove wire:target="submit">
-                            {{ __('Submit Payment') }}
+                            @if ($step === 'scanning')
+                                {{ __('Scanning receipt…') }}
+                            @else
+                                {{ __('Submit Payment') }}
+                            @endif
                         </span>
-                        <span wire:loading wire:target="submit">{{ __('Submitting...') }}</span>
+                        <span wire:loading wire:target="submit">{{ __('Submitting…') }}</span>
                     </flux:button>
                 </div>
             </div>

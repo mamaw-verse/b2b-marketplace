@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Events\SubscriptionStatusChanged;
+use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\PaymentAttempt;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
+use App\Notifications\SubscriptionActivatedNotification;
 use App\Services\DltPaymentService;
 use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -26,6 +28,7 @@ use RuntimeException;
 #[Title('Subscriptions')]
 final class SubscriptionQueue extends Component
 {
+    use HasDocumentViewer;
     use WithPagination;
 
     /**
@@ -133,10 +136,10 @@ final class SubscriptionQueue extends Component
             ->latest()
             ->first();
 
-        // Manual payment — skip /sync, show standard confirmation modal.
+        // Manual payment — skip /sync, show receipt review modal.
         if ($attempt === null || $attempt->isManual()) {
             $this->syncChecking = false;
-            Flux::modal('confirm-activate')->show();
+            Flux::modal('confirm-activate-manual')->show();
 
             return;
         }
@@ -288,10 +291,8 @@ final class SubscriptionQueue extends Component
             ->with([
                 'shop.user',
                 'plan',
-                'paymentAttempts' => fn ($q) => $q->latest()->limit(1),
+                'paymentAttempts' => fn ($q) => $q->with('receiptMedia')->latest()->limit(1),
             ])
-            ->whereHas('shop', fn ($q) => $q->where('country_code', config('marketplace.instance_country')))
-            ->where('status', 'pending_payment')
             ->whereHas('paymentAttempts', fn ($q) => $q
                 ->where('status', 'pending')
                 ->where(fn ($inner) => $inner
@@ -395,6 +396,10 @@ final class SubscriptionQueue extends Component
         });
 
         event(new SubscriptionStatusChanged($subscription->fresh()));
+
+        // Notify the seller that their subscription is now active.
+        $fresh = $subscription->fresh()->load('plan', 'shop.user');
+        $fresh->shop->user?->notify(new SubscriptionActivatedNotification($fresh));
     }
 
     /**

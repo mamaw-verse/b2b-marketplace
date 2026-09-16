@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property array|null $gateway_response
  * @property string|null $manual_reference_number
  * @property string|null $manual_receipt_path
+ * @property int|null $receipt_media_id
  * @property int $sync_attempts
  * @property Carbon|null $next_sync_at
  * @property Carbon|null $succeeded_at
@@ -49,6 +50,7 @@ final class PaymentAttempt extends Model
         'gateway_response',
         'manual_reference_number',
         'manual_receipt_path',
+        'receipt_media_id',
         'succeeded_at',
         'failed_at',
         'sync_attempts',
@@ -63,6 +65,11 @@ final class PaymentAttempt extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    public function receiptMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'receipt_media_id');
     }
 
     public function isManual(): bool

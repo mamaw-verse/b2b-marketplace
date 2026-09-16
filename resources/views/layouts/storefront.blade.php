@@ -186,6 +186,7 @@
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('About Us') }}</a></li>
                             <li><a href="{{ route('apply.certificate') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Events & Training') }}</a></li>
+                            <li><a href="{{ route('help.faq') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('FAQs') }}</a></li>
                         </ul>
                     </div>
 
@@ -224,9 +225,19 @@
                     @endforeach
                 </div>
 
-                <span class="text-[0.72rem] sm:text-[0.78rem] text-white/40 text-center sm:text-right">
-                    &copy; {{ date('Y') }} 1HalalStore.com — {{ __('All rights reserved.') }}
-                </span>
+                {{-- Legal + copyright --}}
+                <div class="flex flex-col items-center gap-3 sm:items-end">
+                    <nav class="flex items-center gap-1 text-[0.78rem] font-medium" aria-label="Legal">
+                        <a href="{{ route('legal.terms') }}" wire:navigate class="px-2 py-1 text-white/60 hover:text-[var(--hs-gold-300)] transition">{{ __('Terms') }}</a>
+                        <span class="text-white/25" aria-hidden="true">&middot;</span>
+                        <a href="{{ route('legal.privacy') }}" wire:navigate class="px-2 py-1 text-white/60 hover:text-[var(--hs-gold-300)] transition">{{ __('Privacy') }}</a>
+                        <span class="text-white/25" aria-hidden="true">&middot;</span>
+                        <a href="{{ route('help.faq') }}" wire:navigate class="px-2 py-1 text-white/60 hover:text-[var(--hs-gold-300)] transition">{{ __('FAQs') }}</a>
+                    </nav>
+                    <span class="text-[0.72rem] sm:text-[0.78rem] text-white/40 text-center sm:text-right">
+                        &copy; {{ date('Y') }} 1HalalStore.com — {{ __('All rights reserved.') }}
+                    </span>
+                </div>
             </div>
         </div>
     </footer>

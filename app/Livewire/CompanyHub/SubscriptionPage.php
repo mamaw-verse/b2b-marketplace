@@ -198,6 +198,12 @@ final class SubscriptionPage extends Component
 
     private function shouldStartTrial(Shop $shop, SubscriptionPlan $plan): bool
     {
+        // Trials only apply to the DLT payment flow. Manual-payment instances
+        // always go through the bank-transfer + admin-verification path.
+        if (config('marketplace.payment_method') !== 'dlt') {
+            return false;
+        }
+
         return $shop->country_code === config('marketplace.trial_eligible_country')
             && $plan->trial_days !== null
             && ! $shop->subscriptions()->exists();

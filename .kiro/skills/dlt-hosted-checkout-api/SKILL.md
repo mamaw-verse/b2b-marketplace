@@ -4,65 +4,252 @@ description: Integrate with the DLT Payment Collection API v4.0 — a Philippine
 ---
 
 # DLT Payment Collection API — Hosted Checkout (v4.0)
+## Project implementation guide — what actually works in this codebase
 
-Integration skill for DLT's Collection API v4.0, where **DLT hosts the checkout page for every payment type** — card and e-wallet alike. The merchant never collects card numbers, CVVs, or 3DS device fingerprints; it only creates a transaction and redirects the payor to a DLT-hosted URL.
+This skill documents what has been **verified to work** in this Laravel app. All patterns below are drawn from `app/Services/DltPaymentService.php` and the subscription payment flow. Check `references/api-reference.md` for the full field tables; check here first for project-specific behaviour and gotchas.
 
-Read `references/api-reference.md` for full endpoint specs, field tables, and sample payloads before writing integration code — it is the authoritative source for request/response schemas, which fields are mandatory, the status lifecycle, webhook signature verification, and the version history vs. earlier (non-hosted-checkout) releases.
+---
 
-**If the user's request or existing code has card fields, `is_card_payment: true` branches, or 3DS `device.*` fields in a Submit Payment payload, that's a v3.0-era (client-hosted card form) pattern — flag it and offer to migrate it to this Hosted Checkout model rather than silently keeping it.**
+## Orientation
 
-## Quick orientation
+| Item | Value |
+|---|---|
+| Base URL | `https://checkout.dxp.dtic.com.ph` (config `services.dlt.base_url`) |
+| Auth | OAuth 2.0 client credentials → `POST /oauth/token` → `Bearer` on every call |
+| Endpoints used | `/oauth/token`, `/api/v1/collection/apn/brands`, `/api/v1/collection/apn/submit`, `/api/v1/collection/apn/sync`, `/api/v1/quick-link/session` (both POST and GET) |
+| Service class | `App\Services\DltPaymentService` (injected via constructor; `final` — cannot be Mockery-mocked in tests, use `Http::fake()` instead) |
+| Config keys | `services.dlt.client_id`, `services.dlt.client_secret`, `services.dlt.merchant_account_id`, `services.dlt.service_code` |
 
-**Base URL:** `https://checkout.dxp.dtic.com.ph/`
-**Auth:** OAuth 2.0 Client Credentials Grant → `POST /oauth/token` → `Authorization: Bearer <access_token>` on every subsequent call. Cache and refresh proactively; never fetch a new token per request.
-**Trust model:** DLT maps each machine client to exactly one merchant account. `merchant_account_id` in a request body is only a **compatibility assertion** — DLT authorizes based on the OAuth token, not the ID you send. Don't design your code as if `merchant_account_id` is the security boundary.
-**Content type:** All requests/responses are `application/json`.
-**No card data ever leaves the merchant's own systems.** Card entry happens on DLT's hosted page. Submitting PAN/CVV/expiry/device fingerprints to `/submit` gets rejected by DLT — don't build a form for them.
+The merchant **never handles card numbers, CVVs, or 3DS device fields** — DLT's hosted page does. Every payment type (card and e-wallet) follows the same code path: submit → get `payment_url` → redirect payor there.
 
-## The one integration path (all payment types)
+---
 
-There is no "pick a mode" branching by card vs. e-wallet in this version — every payment follows the same shape:
+## Authentication
 
-1. `GET /api/v1/collection/apn/brands` → show available payment brands (Visa, GCash, etc.) so the payor can pick one.
-2. `POST /api/v1/collection/apn/submit` with `payment_brand` + `payment_brand_code` (copied verbatim from step 1) and the rest of the transaction/payor/billing fields — **no card fields, no device/3DS fields.**
-3. Response includes `data.payment_url` — **redirect the payor there unconditionally.** DLT's hosted page handles card entry, OTP/3DS, or wallet QR/redirect internally.
-4. Payor completes payment on DLT's page → DLT resolves the browser return via `callback_url` → merchant's default return URL → DLT's own fallback page (in that priority order).
-5. The merchant's source of truth is the **signed webhook** (or an authenticated `/sync` call for recovery) — **never the payor's browser return**, and never a generic "poll by transaction ID" endpoint (there isn't one in this version).
+### Token request
 
-**Quick Link** is a separate, optional shortcut for when you want a shareable hosted-checkout link without building the Submit Payment call yourself: `POST /api/v1/quick-link/session` → opaque token (30 min expiry) → send the payor to the DLT-hosted URL built from that token. It's still Hosted Checkout under the hood — same no-card-data rule applies, and OAuth credentials must never be placed in the payor's browser.
+```
+POST /oauth/token
+Content-Type: application/json
 
-## Before writing code
+{
+    "grant_type": "client_credentials",
+    "client_id": "<client_id>",
+    "client_secret": "<client_secret>"
+}
+```
 
-1. Confirm which language/framework/HTTP client the user wants — this skill is language-agnostic.
-2. Check whether the user already has `client_id`, `client_secret`, `merchant_account_id`, and `service_code` (currently `APNCOLLECTION`) — these are DLT-issued and not guessable. Use obvious placeholders like `YOUR_CLIENT_ID`; never invent real-looking values.
-3. Ask (or infer from context) whether they need: (a) direct Submit Payment integration, (b) Quick Link, or (c) both — plus whether they need the webhook receiver built too, since that's a separate piece of server code from the checkout-initiation flow.
-4. Look up exact field names/types/required-ness in `references/api-reference.md` rather than relying on memory, especially around required billing-address fields and the `amount` upper bound (500,000.00).
+Response: `{ "token_type": "Bearer", "expires_in": 31536000, "access_token": "..." }`
 
-## Implementation guidance
+### Token caching
 
-- **Token caching:** store `access_token` + a computed expiry from `expires_in`; refresh before it lapses (e.g. at <60s remaining) rather than reacting to 401s.
-- **`payment_brand_code` is opaque and time-sensitive** — fetch brands fresh per checkout session rather than caching codes long-term; copy the value unchanged into the submit request, never decode or persist it separately.
-- **`callback_url` vs. the webhook notification URL — these are two different things, don't conflate them:**
-  - `callback_url` (request field on Submit Payment) — where the payor's *browser* is redirected after completing payment on DLT's hosted page.
-  - The merchant payment-notification URL (configured separately in Web Integration, test and live) — where DLT POSTs the *signed server-to-server webhook*.
-  Only the webhook is authoritative for updating order state; `callback_url`/`success_url`/`failure_url` are UX-only.
-- **Idempotency:** `merchant_transaction_id` is the merchant-side unique reference — generate one per payment attempt. Reusing it with an identical request replays the prior result; reusing it with different content returns HTTP 409 `TRANSACTION_REFERENCE_CONFLICT`. If DLT returns HTTP 503 `SUBMISSION_UNKNOWN`, **do not auto-resubmit** — call `/sync` or contact DLT support instead.
-- **`/sync` is for recovery, not routine polling:** use it when a transaction is stuck `PENDING` or the browser return was inconclusive. It never downgrades a terminal (`PAID`/`REJECTED`) status. Pass `merchant_transaction_id`, not `data.transaction_id`.
-- **Webhook signature verification is mandatory** before trusting any webhook payload:
-  1. `HMAC-SHA256(secret, "<X-DLT-Timestamp>.<raw body>")`, formatted as `sha256=<hex>`.
-  2. Compare to `X-DLT-Signature` in **constant time**.
-  3. Reject stale timestamps (define a max age).
-  4. Dedupe by `X-DLT-Event-Id` (or payload `event_id`).
-  5. Only then update the order and return HTTP 2xx. Non-2xx/network errors get retried by DLT — a failed delivery does not roll back the payment, so don't assume "no webhook yet" means "not paid," reconcile with `/sync` if it's been a while.
-- **Channel field:** Submit Payment requires integer `channel` — 1=API, 2=Quick Link, 3=WooCommerce, 4=Custom. **This project uses `channel: 4` (Custom).** Quick Link sets its own channel internally when it calls Submit Payment on your behalf, so Create/Get Quick Link Session don't take this field.
-- **Amount bounds:** greater than 0, max 500,000.00, 0–2 decimal places, sent as a decimal (see reference doc for exact type per endpoint — Submit Payment vs. Quick Link session creation may differ in how strict the JSON type needs to be; check the reference before assuming).
-- **Currency is optional** on Submit Payment and falls back merchant currency → DLT default `PHP` — don't hardcode `PHP` if the user's merchant account uses something else; just omit the field and let DLT resolve it, or pass it explicitly if the user wants to be unambiguous.
-- **Billing address fields are mostly required** in v4.0 (`address_line_one`, `city_municipality`, `state_province_region`, `country_code`, `postal_code` — only `address_line_two` is optional). Don't treat this as a thin/optional block.
-- **Error handling:** all endpoints return `{success, message, data}` on success, `{success: false, message, data: null}` for general errors, or `{success: false, message, errors: [...]}` for validation errors. Branch on `success` first, then on presence of `errors`.
-- **Never log or hardcode `client_secret` or the webhook signing secret** in generated code — pull from env vars/secrets manager, and flag it to the user if they paste real credentials into the conversation.
+Cache the token under key `'dlt:bearer_token'` with TTL = `expires_in - 60` seconds (minimum 60s). **Do not fetch a new token per request.**
 
-## When generating code
+**401 retry pattern:** if any endpoint returns HTTP 401, flush the cache (`Cache::forget('dlt:bearer_token')`), fetch a fresh token, and retry **once**. This handles token expiry between requests without error propagation. Implemented on both `/submit` and `/sync`.
 
-Produce a small, focused client covering: token fetch+cache, get brands, submit payment (redirect-based), `/sync`, and — if the user needs it — a separate webhook receiver with signature verification. Add typed request/response shapes where the target language supports them (TS interfaces, Python dataclasses/TypedDicts, etc.). Pull exact field lists from `references/api-reference.md` rather than guessing at undocumented fields.
+### Tests
 
-If the user's prompt or pasted code mixes in v3.0 patterns (card fields, `is_card_payment: true` branches, 3DS `device.*`), call that out explicitly and offer the Hosted Checkout equivalent instead of quietly merging both approaches.
+Because the token is cached in Laravel's cache store, `Http::fake()` for `/oauth/token` **will not fire** if a previous test already populated the cache. Always call `Cache::forget('dlt:bearer_token')` in `beforeEach` for any test file that uses `Http::fake` with DLT endpoints. See `.ai/rules/feature.md` for the full test isolation rule.
+
+---
+
+## Get Payment Brands
+
+```
+GET /api/v1/collection/apn/brands?merchant_account_id=<id>&service_code=<code>
+Authorization: Bearer <token>
+```
+
+Returns an array of brand objects. Each has:
+
+| Field | Type | Notes |
+|---|---|---|
+| value | String | Human-readable name, e.g. `Visa`, `GCash`. Sent as `payment_brand` on Submit. |
+| code | String | **Opaque, signed, time-sensitive.** Sent as `payment_brand_code` on Submit — copy verbatim, never decode or persist. |
+| image | String\|null | Logo URL |
+| is_card | Boolean | `true` for card brands, `false` for e-wallets. Used to split the brand picker UI. |
+
+**`code` is time-sensitive** — fetch brands fresh per checkout session, never long-cache the codes.
+
+---
+
+## Submit Payment
+
+```
+POST /api/v1/collection/apn/submit
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Required fields (as used in this project)
+
+| Field | Type | Notes |
+|---|---|---|
+| `merchant_account_id` | String | Auto-injected from config |
+| `service_code` | String | Auto-injected from config |
+| `merchant_transaction_id` | String, max 45 | ASCII alphanumeric, dash, underscore only. Generated per attempt. |
+| `time_offset` | String | `+08:00` for PH |
+| `channel` | Integer | **Must be `4` (Custom)** in this project — not `1` |
+| `amount` | String | Decimal string, e.g. `"1200.00"`. **> 0, ≤ 500,000.00** |
+| `currency` | String | `"PHP"` |
+| `payment_brand` | String | `value` from Get Brands |
+| `payment_brand_code` | String | `code` from Get Brands — copy verbatim |
+| `product_name` | String, max 80 | |
+| `product_description` | String, max 120 | **Required in practice** — DLT server crashes (500) if omitted, even though the docs say optional |
+| `first_name`, `last_name` | String | |
+| `email` | String | |
+| `phone` | String\|null | |
+| `address_line_one` | String, max 80 | |
+| `address_line_two` | String\|null | |
+| `city_municipality` | String, max 60 | |
+| `state_province_region` | String, max 40 | |
+| `country_code` | String | 2-letter ISO, e.g. `"PH"` |
+| `postal_code` | String, max 10 | |
+| `success_url` | URL | Payor browser return on completion |
+| `failure_url` | URL | Payor browser return on failure |
+
+**Do NOT send:** `is_card_payment`, card fields (`card_number`, `ccv`, etc.), or `device.*` 3DS fields — DLT rejects them in v4.0.
+
+### Response
+
+```json
+{
+    "success": true,
+    "message": "Transaction ready for payment",
+    "data": {
+        "payment_url": "https://checkout.dxp.dtic.com.ph/...",
+        "payment_status": "PENDING",
+        "amount": "1200.00",
+        "merchant_transaction_id": "sub00043...",
+        "transaction_id": "...",
+        "is_card_payment": false,
+        "success_url": "...",
+        "failure_url": "..."
+    }
+}
+```
+
+### Redirecting the payor
+
+**Never use Livewire's `$this->redirect()` for `payment_url`** — it breaks in Firefox ("'open' called on an object that does not implement interface Window"). Always dispatch a browser event and handle with Alpine:
+
+```php
+// In Livewire component:
+$this->dispatch('redirect-to-payment', url: $paymentUrl);
+```
+
+```html
+<!-- In Blade template root element: -->
+<div x-data x-on:redirect-to-payment.window="window.location.href = $event.detail.url">
+```
+
+### Database column for payment URL
+
+Store `payment_url` in a `TEXT` column (not `VARCHAR(255)`) — e-wallet redirect URLs (GCash etc.) routinely exceed 500 characters.
+
+---
+
+## Synchronize Payment Status (`/sync`)
+
+```
+POST /api/v1/collection/apn/sync
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "merchant_transaction_id": "<your_txn_id>" }
+```
+
+**Use `merchant_transaction_id`, not `data.transaction_id`.** Pass the string generated by the merchant, not DLT's internal ID.
+
+Response: `{ "success": true, "data": { "payment_status": "PAID|PENDING|REJECTED", ... } }`
+
+- **`PAID` and `REJECTED` are terminal** — `/sync` never downgrades them.
+- Use for recovery only, not routine polling.
+- Implements 401-retry-once (same as submit).
+
+### How `/sync` fits into the subscription flow
+
+| Trigger | Action |
+|---|---|
+| `success_url` callback from DLT | Call `/sync` immediately; on PAID → activate; on REJECTED → cancel; on PENDING → dispatch `SyncPendingPaymentJob` |
+| `failure_url` callback from DLT | Always REJECTED — skip `/sync`, cancel immediately |
+| Admin "Activate" button (pending DLT attempt) | Call `/sync` first; on PAID → activate immediately; on PENDING → show warning modal; on REJECTED/ERROR → cancel |
+| `SyncPendingPaymentJob` (background, exponential backoff) | Polls with backoff: 1/5/15/30/60 min, max 5 attempts; on give-up → email admin via `PaymentStuckAdminNotification` |
+| Seller returns to payment page (stale pending attempt on mount) | Call `/sync`; on PAID → activate; on REJECTED → allow fresh start; on PENDING → show `sync_pending` step |
+
+---
+
+## Error handling
+
+All endpoints return `{ success, message, data }` on success and `{ success: false, message }` or `{ success: false, errors: [...] }` on failure. Branch on `success` first:
+
+```php
+private function throwIfFailed(Response $response): void
+{
+    if ($response->successful() && $response->json('success') === true) {
+        return;
+    }
+    if ($errors = $response->json('errors')) {
+        throw new RuntimeException('DLT validation error: ' . json_encode($errors));
+    }
+    throw new RuntimeException('DLT request failed: ' . ($response->json('message') ?? $response->body()));
+}
+```
+
+**Never auto-resubmit on HTTP 503 `SUBMISSION_UNKNOWN` or HTTP 409 `TRANSACTION_REFERENCE_CONFLICT`** — use `/sync` to check the actual status instead.
+
+---
+
+## Quick Link (implemented but not used for subscriptions)
+
+```
+POST /api/v1/quick-link/session   → create a hosted-checkout link session
+GET  /api/v1/quick-link/session?token=<token>  → read back
+```
+
+Session token expires in **30 minutes**. The actual checkout URL is **not** `data.website` (that's the merchant's own site). Build it as:
+
+```
+https://checkout-ql.dltc.com.ph/?merchant=<merchant_account_id>&transaction_id=<merchant_transaction_id>&amount=<amount>&quantity=1
+```
+
+`product_description` is required even though the docs say optional — same issue as Submit Payment.
+
+---
+
+## Webhook (not implemented in this project)
+
+Configured separately in DLT Web Integration (test and live URLs). Not used — this project relies on `success_url`/`failure_url` callbacks + `/sync` for status reconciliation. If you add webhooks, signature verification is mandatory:
+
+1. `HMAC-SHA256("<X-DLT-Timestamp>.<raw body>", signingSecret)` → `sha256=<hex>`
+2. Compare to `X-DLT-Signature` in constant time
+3. Reject stale timestamps (e.g. > 5 min)
+4. Deduplicate by `X-DLT-Event-Id`
+
+---
+
+## Config reference
+
+```php
+// config/services.php
+'dlt' => [
+    'base_url'           => env('DLT_BASE_URL', 'https://checkout.dxp.dtic.com.ph'),
+    'client_id'          => env('DLT_CLIENT_ID'),
+    'client_secret'      => env('DLT_CLIENT_SECRET'),
+    'merchant_account_id'=> env('DLT_MERCHANT_ACCOUNT_ID'),
+    'service_code'       => env('DLT_SERVICE_CODE', 'APN-COLLECTION'),
+],
+```
+
+## Testing
+
+`DltPaymentService` is `final` — **Mockery cannot mock it**. Use `Http::fake()` instead.
+
+```php
+Http::fake([
+    '*/oauth/token' => Http::response(['access_token' => 'fake-token', 'expires_in' => 3600]),
+    '*/api/v1/collection/apn/sync' => Http::response(['success' => true, 'data' => ['payment_status' => 'PAID']]),
+]);
+```
+
+**Never set `Http::fake` in `beforeEach` AND also in individual test functions for the same URL pattern** — the stacking behaviour is unreliable; prefer per-test-only fakes. Always call `Cache::forget('dlt:bearer_token')` in `beforeEach`.

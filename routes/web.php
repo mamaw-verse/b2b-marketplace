@@ -33,6 +33,9 @@ Route::livewire('/products', 'storefront.product-directory')->name('storefront.p
 Route::livewire('/products/{product}', 'storefront.product-detail')->name('storefront.product');
 Route::livewire('/certification/apply', 'storefront.apply-for-certificate')->name('apply.certificate');
 Route::livewire('/request-a-product', 'storefront.product-sourcing-form')->name('sourcing-request.create');
+Route::livewire('/terms', 'legal.terms-page')->name('legal.terms');
+Route::livewire('/privacy', 'legal.privacy-page')->name('legal.privacy');
+Route::livewire('/faq', 'legal.faq-page')->name('help.faq');
 
 /*
 | Media viewer.

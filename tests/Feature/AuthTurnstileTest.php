@@ -71,6 +71,7 @@ test('registration requires a turnstile token', function () {
         'email' => 'newbuyer@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'terms' => '1',
         'cf-turnstile-response' => '',
     ])->assertSessionHasErrors([
         'cf-turnstile-response' => 'Please complete the security check.',
@@ -86,6 +87,7 @@ test('registration rejects an invalid turnstile token without creating a user', 
         'email' => 'newbuyer@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'terms' => '1',
         'cf-turnstile-response' => 'invalid-token',
     ])->assertSessionHasErrors('cf-turnstile-response');
 
@@ -100,6 +102,7 @@ test('registration succeeds when the turnstile token is valid', function () {
         'email' => 'newbuyer@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'terms' => '1',
         'cf-turnstile-response' => 'valid-token',
     ])->assertSessionHasNoErrors();
 
