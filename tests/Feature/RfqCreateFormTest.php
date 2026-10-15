@@ -80,6 +80,8 @@ test('saveProfile creates the buyer profile and advances to step 2', function ()
         ->assertSet('step', 1)
         ->set('business_name', 'Acme Supplies')
         ->set('billing_city', 'Manila')
+        ->set('contact_phone', '+63 917 123 4567')
+        ->set('contact_email', 'acme@example.ph')
         ->call('saveProfile')
         ->assertHasNoErrors()
         ->assertSet('step', 2)
@@ -109,6 +111,8 @@ test('saveProfile shipping same as billing copies billing fields', function () {
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
         ->set('business_name', 'Acme Supplies')
         ->set('billing_city', 'Cebu')
+        ->set('contact_phone', '+63 917 123 4567')
+        ->set('contact_email', 'acme@example.ph')
         ->set('useShippingSameAsBilling', true)
         ->call('saveProfile')
         ->assertHasNoErrors();
@@ -391,4 +395,31 @@ test('submitting the RFQ on step 2 redirects back to step 1 when profile is miss
         ->set('step', 2) // force step 2 without having a profile
         ->call('submit')
         ->assertSet('step', 1); // falls back to step 1
+});
+
+test('a seller cannot submit an RFQ to their own shop', function () {
+    $seller = User::factory()->create(['email_verified_at' => now()]);
+    $seller->assignRole('seller');
+    $ownShop = Shop::factory()->create(['status' => 'active', 'user_id' => $seller->id]);
+    BuyerProfile::factory()->create(['user_id' => $seller->id]);
+
+    Livewire::actingAs($seller)
+        ->test(RfqCreateForm::class, ['shop_id' => $ownShop->id, 'title' => 'Self RFQ'])
+        ->set('description', 'Trying to quote my own product')
+        ->call('submit')
+        ->assertHasErrors(['shop_id']);
+
+    expect(Rfq::where('title', 'Self RFQ')->exists())->toBeFalse();
+});
+
+test('a seller viewing their own shop sees the self-RFQ blocked state', function () {
+    $seller = User::factory()->create(['email_verified_at' => now()]);
+    $seller->assignRole('seller');
+    $ownShop = Shop::factory()->create(['status' => 'active', 'user_id' => $seller->id]);
+    BuyerProfile::factory()->create(['user_id' => $seller->id]);
+
+    Livewire::actingAs($seller)
+        ->test(RfqCreateForm::class, ['shop_id' => $ownShop->id])
+        ->assertSee('You cannot request a quote from your own business')
+        ->assertDontSee('Send RFQ');
 });

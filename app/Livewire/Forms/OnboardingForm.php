@@ -50,14 +50,6 @@ final class OnboardingForm extends Form
 
     public string $export_readiness_status = '';
 
-    // ── Step 4: Value Chain & Capabilities ────────────────────────────────────
-
-    /** @var array<int, string> */
-    public array $value_chain_positions = [];
-
-    /** @var array<int, string> */
-    public array $capabilities = [];
-
     /**
      * Human-readable attribute names used in validation error messages.
      * Prevents Laravel from generating messages like "The form.registered business name field is required."
@@ -84,8 +76,6 @@ final class OnboardingForm extends Form
             'fda_lto_number' => 'FDA LTO Number',
             'average_production_lead_time' => 'Average Production Lead Time',
             'export_readiness_status' => 'Export Readiness',
-            'value_chain_positions' => 'Value Chain Positions',
-            'capabilities' => 'Capabilities',
         ];
     }
 
@@ -117,10 +107,6 @@ final class OnboardingForm extends Form
                 'fda_lto_number' => ['nullable', 'string', 'max:100'],
                 'average_production_lead_time' => ['nullable', 'integer'],
                 'export_readiness_status' => ['required', 'string'],
-            ],
-            3 => [
-                'value_chain_positions' => ['array'],
-                'capabilities' => ['array'],
             ],
             default => [],
         };
@@ -158,10 +144,6 @@ final class OnboardingForm extends Form
                 'average_production_lead_time' => $this->average_production_lead_time ?: null,
                 'export_readiness_status' => $this->export_readiness_status ?: null,
             ],
-            3 => [
-                'value_chain_positions' => $this->value_chain_positions,
-                'capabilities' => $this->capabilities,
-            ],
             default => [],
         };
     }
@@ -189,8 +171,6 @@ final class OnboardingForm extends Form
         $this->fda_lto_number = $onboarding->fda_lto_number ?? '';
         $this->average_production_lead_time = (string) ($onboarding->average_production_lead_time ?? '');
         $this->export_readiness_status = $onboarding->export_readiness_status ?? '';
-        $this->value_chain_positions = $onboarding->value_chain_positions ?? [];
-        $this->capabilities = $onboarding->capabilities ?? [];
     }
 
     /**

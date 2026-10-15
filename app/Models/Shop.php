@@ -99,7 +99,13 @@ final class Shop extends Model
             'country_code' => $this->country_code,
             'value_chain_positions' => $this->value_chain_positions ?? [],
             'capabilities' => $this->capabilities ?? [],
-            'categories' => $this->categories->pluck('name')->toArray(),
+            'categories' => $this->categories
+                ->loadMissing('parent')
+                ->flatMap(fn (Category $category) => [$category->name, $category->parent?->name])
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray(),
             'certification_bodies' => $this->certificates->pluck('certification_body')->unique()->values()->toArray(),
             'export_readiness_status' => $this->export_readiness_status,
             'average_rating' => (float) ($this->average_rating ?? 0),

@@ -50,8 +50,6 @@ final class ApproveOnboardingAction
                 'fda_lto_number' => $onboarding->fda_lto_number,
                 'average_production_lead_time' => $onboarding->average_production_lead_time,
                 'export_readiness_status' => $onboarding->export_readiness_status,
-                'value_chain_positions' => $onboarding->value_chain_positions,
-                'capabilities' => $onboarding->capabilities,
                 'user_id' => $onboarding->user_id,
                 'status' => 'active',
             ]);

@@ -16,7 +16,7 @@
         <meta name="auth-user-id" content="{{ $user->id }}">
     @endauth
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 items-center justify-between">
+        <div class="relative flex h-16 items-center justify-between">
 
             {{-- Left: Hamburger (portal mobile only) + Logo --}}
             @php
@@ -82,18 +82,7 @@
             <div class="flex items-center gap-1">
 
                 @unless ($isPortal)
-                    <nav class="hidden sm:flex items-center mr-4">
-                        <a
-                            href="{{ route('storefront.companies') }}"
-                            wire:navigate
-                            @class([
-                                'relative px-3 py-2 text-sm font-medium transition pb-[calc(0.5rem+2px)]',
-                                'text-[var(--hs-neutral-900)] font-semibold after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-[var(--hs-gold-500)] after:rounded-full' => request()->routeIs('storefront.companies') || request()->routeIs('storefront.company'),
-                                'text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]' => ! (request()->routeIs('storefront.companies') || request()->routeIs('storefront.company')),
-                            ])
-                        >
-                            {{ __('Businesses') }}
-                        </a>
+                    <nav class="hidden sm:flex items-center absolute left-1/2 -translate-x-1/2">
                         <a
                             href="{{ route('storefront.products') }}"
                             wire:navigate
@@ -116,30 +105,28 @@
                         >
                             {{ __('Certification') }}
                         </a>
-
-                        {{-- Homepage anchor links — scroll in-page or navigate to home with hash --}}
-                        @foreach ([
-                            'who-we-serve'  => __('Who We Serve'),
-                            'what-we-offer' => __('What We Offer'),
-                            'supply-chain'  => __('Supply Chain'),
-                            'join'          => __('Join Us'),
-                        ] as $anchor => $label)
-                            <a
-                                href="{{ route('home') }}#{{ $anchor }}"
-                                x-data
-                                @click.prevent="
-                                    const target = document.getElementById('{{ $anchor }}');
-                                    if (target) {
-                                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                    } else {
-                                        window.location.href = '{{ route('home') }}#{{ $anchor }}';
-                                    }
-                                "
-                                class="relative px-3 py-2 text-sm font-medium transition pb-[calc(0.5rem+2px)] text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]"
-                            >
-                                {{ $label }}
-                            </a>
-                        @endforeach
+                        <a
+                            href="{{ route('sourcing-request.create') }}"
+                            wire:navigate
+                            @class([
+                                'relative px-3 py-2 text-sm font-medium transition pb-[calc(0.5rem+2px)]',
+                                'text-[var(--hs-neutral-900)] font-semibold after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-[var(--hs-gold-500)] after:rounded-full' => request()->routeIs('sourcing-request.create'),
+                                'text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]' => ! request()->routeIs('sourcing-request.create'),
+                            ])
+                        >
+                            {{ __('Sourcing') }}
+                        </a>
+                        <a
+                            href="{{ route('about') }}"
+                            wire:navigate
+                            @class([
+                                'relative px-3 py-2 text-sm font-medium transition pb-[calc(0.5rem+2px)]',
+                                'text-[var(--hs-neutral-900)] font-semibold after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-[var(--hs-gold-500)] after:rounded-full' => request()->routeIs('about'),
+                                'text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)]' => ! request()->routeIs('about'),
+                            ])
+                        >
+                            {{ __('About') }}
+                        </a>
                     </nav>
                 @endunless
 

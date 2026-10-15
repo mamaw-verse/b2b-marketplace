@@ -112,7 +112,7 @@ final class DemoUsersSeeder extends Seeder
 
     private function attachShopCategories(Shop $shop): void
     {
-        foreach (['meat-poultry', 'processed-foods', 'spices-seasonings'] as $slug) {
+        foreach (['meat-poultry', 'frozen-ready-to-eat', 'spices-seasonings'] as $slug) {
             $categoryId = Category::where('slug', $slug)->value('id');
 
             if ($categoryId && ! $shop->categories()->where('category_id', $categoryId)->exists()) {
@@ -368,8 +368,8 @@ final class DemoUsersSeeder extends Seeder
 
             // ----------------------------------------------------------------
             // 3 — Chicken Longganisa (Halal, Sweet-Type)
-            //     Categories: processed-foods, meat-poultry
-            //     Merged schema: attr_weight, attr_packaging, attr_shelf_life (processed-foods)
+            //     Categories: frozen-ready-to-eat, meat-poultry
+            //     Merged schema: attr_weight, attr_packaging, attr_shelf_life (frozen-ready-to-eat)
             //                  + attr_cut (meat-poultry, deduped attr_weight/packaging)
             // ----------------------------------------------------------------
             [
@@ -379,7 +379,7 @@ final class DemoUsersSeeder extends Seeder
                     'featured_image_path' => 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80',
                     'status' => 'published',
                 ],
-                'categories' => ['processed-foods', 'meat-poultry'],
+                'categories' => ['frozen-ready-to-eat', 'meat-poultry'],
                 'variants' => [
                     [
                         'sku' => 'MHF-LONGGA-400G',
@@ -467,7 +467,7 @@ final class DemoUsersSeeder extends Seeder
 
             // ----------------------------------------------------------------
             // 5 — Halal Beef Tapa (Ready-to-Cook)
-            //     Categories: processed-foods, meat-poultry
+            //     Categories: frozen-ready-to-eat, meat-poultry
             //     Merged schema: attr_weight, attr_packaging, attr_shelf_life,
             //                    attr_cut (from meat-poultry, deduped)
             // ----------------------------------------------------------------
@@ -478,7 +478,7 @@ final class DemoUsersSeeder extends Seeder
                     'featured_image_path' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80',
                     'status' => 'published',
                 ],
-                'categories' => ['processed-foods', 'meat-poultry'],
+                'categories' => ['frozen-ready-to-eat', 'meat-poultry'],
                 'variants' => [
                     [
                         'sku' => 'MHF-TAPA-500G',

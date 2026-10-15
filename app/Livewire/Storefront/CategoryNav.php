@@ -15,12 +15,18 @@ final class CategoryNav extends Component
     public ?int $selectedId = null;
 
     /**
+     * Top-level groups with their subcategories.
+     *
      * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): Collection
+    public function categoryGroups(): Collection
     {
-        return Category::orderBy('name')->get();
+        return Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     public function selectCategory(?int $id): void

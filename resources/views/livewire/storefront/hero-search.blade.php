@@ -30,7 +30,7 @@
                     </h1>
 
                     <p class="mt-4 lg:mt-5 mx-auto lg:mx-0 max-w-lg text-base sm:text-lg text-white/70 leading-relaxed">
-                        {{ __('1HalalStore.com is a B2B & B2C marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.') }}
+                        {{ __('1HalalStore.com is a B2B marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.') }}
                     </p>
 
                     <div class="mt-7 lg:mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
@@ -317,7 +317,7 @@
                     {{ __('All Businesses') }}
                 </a>
                 @foreach ($this->categories as $category)
-                    <a href="{{ route('storefront.products') }}" wire:navigate
+                    <a href="{{ route('storefront.products', ['category' => $category->id]) }}" wire:navigate
                        class="shrink-0 px-3 py-1.5 rounded-lg bg-[var(--hs-neutral-100)] hover:bg-[var(--hs-neutral-200)] text-[var(--hs-neutral-700)] text-xs font-medium whitespace-nowrap transition">
                         {{ $category->name }}
                     </a>
@@ -511,7 +511,7 @@
                                 ['icon' => 'truck',               'label' => 'Logistics & Cold Chain Providers'],
                                 ['icon' => 'rectangle-stack',     'label' => 'Distributors & Wholesalers'],
                                 ['icon' => 'building-storefront', 'label' => 'Retailers & Halal Businesses'],
-                                ['icon' => 'user-group',          'label' => 'Consumers (B2C)'],
+                                ['icon' => 'user-group',          'label' => 'Consumers'],
                             ] as $item)
                                 <li class="flex items-center gap-2.5 sm:gap-3 py-2 sm:py-2.5">
                                     <div class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-[var(--hs-gold-300)]">
@@ -534,7 +534,7 @@
                         <ul class="divide-y divide-[var(--hs-neutral-100)]">
                             @foreach ([
                                 ['icon' => 'clipboard-document-list', 'label' => 'Halal-verified suppliers directory'],
-                                ['icon' => 'shopping-bag',            'label' => 'Products & services sourcing (B2B & B2C)'],
+                                ['icon' => 'shopping-bag',            'label' => 'Products & services sourcing (B2B)'],
                                 ['icon' => 'shield-check',            'label' => 'Halal certification awareness & support'],
                                 ['icon' => 'map',                     'label' => 'Supply chain visibility & traceability'],
                                 ['icon' => 'paper-airplane',          'label' => 'Logistics & export assistance'],
@@ -614,12 +614,12 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 sm:gap-5 sm:grid-cols-3 lg:grid-cols-6">
+                <div class="grid grid-cols-2 gap-4 sm:gap-5 sm:grid-cols-4 lg:grid-cols-7">
 
                     {{-- Current instance — "You are here" --}}
                     @php $p = $this->instancePortal; @endphp
                     <div class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_6px_32px_rgba(0,0,0,0.22)]"
-                         style="min-height: 280px;">
+                         style="min-height: 220px;">
                         {{-- Full-bleed landmark photo --}}
                         @if (!empty($p['landmark_image']))
                             <img src="{{ $p['landmark_image'] }}"
@@ -658,7 +658,7 @@
 
                         <{{ $tag }} {{ $attrs }}
                             class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
-                            style="min-height: 280px;"
+                            style="min-height: 220px;"
                         >
                             {{-- Full-bleed landmark photo --}}
                             @if (!empty($portal['landmark_image']))
@@ -692,6 +692,104 @@
                             </div>
                         </{{ $tag }}>
                     @endforeach
+
+                </div>
+            </div>
+        </section>
+
+        {{-- ── Seller Commission & Escrow ──────────────────────── --}}
+        <section id="for-sellers" class="bg-[var(--hs-neutral-0)] border-t border-[var(--hs-neutral-200)]">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+
+                <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 items-center">
+
+                    {{-- Left: Copy --}}
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-gold-200)] bg-[var(--hs-gold-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-gold-700)]">
+                            <flux:icon.building-storefront class="size-3.5" />
+                            {{ __('For Sellers') }}
+                        </span>
+
+                        <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight">
+                            {{ __('Grow Your Halal Business with') }}
+                            <span class="text-[var(--hs-green-600)]">{{ __('1HalalStore.com') }}</span>
+                        </h2>
+
+                        <p class="mt-3 text-base text-[var(--hs-neutral-500)] leading-relaxed max-w-lg">
+                            {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
+                        </p>
+
+                        <ul class="mt-6 space-y-3">
+                            @foreach ([
+                                __('Free store registration — no upfront fees'),
+                                __('Only 10% commission when you make a sale'),
+                                __('MHCB-verified badge builds buyer trust'),
+                                __('Built-in product & order management'),
+                                __('Integrated payout support (GCash & bank)'),
+                                __('Dedicated seller dashboard & analytics'),
+                            ] as $point)
+                                <li class="flex items-start gap-2.5">
+                                    <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-100)] text-[var(--hs-green-700)]">
+                                        <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-[0.9rem] text-[var(--hs-neutral-700)]">{{ $point }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <div class="mt-8">
+                            <a href="{{ route('register') }}" wire:navigate
+                               class="inline-flex items-center gap-2 rounded-full bg-[var(--hs-green-600)] px-6 py-3 text-sm font-semibold text-white hover:bg-[var(--hs-green-700)] transition shadow-[var(--hs-shadow-sm)]">
+                                {{ __('Register as Seller') }}
+                                <flux:icon.arrow-right class="size-4" />
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Right: Commission card --}}
+                    <div class="flex justify-center lg:justify-end">
+                        <div class="w-full max-w-sm rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-7 sm:p-8 shadow-[var(--hs-shadow-md)]">
+
+                            {{-- Big 10% --}}
+                            <div class="text-center border-b border-[var(--hs-neutral-200)] pb-6 mb-6">
+                                <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
+                                <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
+                                <p class="mt-1 text-xs text-[var(--hs-neutral-400)]">{{ __('No hidden fees. No monthly charges.') }}</p>
+                            </div>
+
+                            {{-- Feature list --}}
+                            <ul class="space-y-3.5">
+                                @foreach ([
+                                    __('Free store setup & MHCB verification'),
+                                    __('Built-in product & order management'),
+                                    __('Integrated GCash & bank payouts'),
+                                    __('Ad campaigns to reach more buyers'),
+                                    __('Real-time analytics dashboard'),
+                                ] as $feature)
+                                    <li class="flex items-center gap-3">
+                                        <span class="size-2 shrink-0 rounded-full bg-[var(--hs-green-500)]"></span>
+                                        <span class="text-[0.88rem] text-[var(--hs-neutral-700)]">{{ $feature }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+
+                            {{-- Escrow note --}}
+                            <div class="mt-6 rounded-xl border border-[var(--hs-info-200)] bg-[var(--hs-info-50)] px-4 py-3">
+                                <div class="flex items-start gap-2.5">
+                                    <flux:icon.lock-closed class="size-4 shrink-0 mt-0.5 text-[var(--hs-info-500)]" />
+                                    <div>
+                                        <p class="text-[0.78rem] font-bold text-[var(--hs-info-700)]">{{ __('Escrow Payment Protection') }}</p>
+                                        <p class="mt-0.5 text-[0.75rem] text-[var(--hs-info-500)] leading-snug">
+                                            {{ __('Buyer funds are held in escrow and released to you only after delivery is confirmed — protecting both parties on every transaction.') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
 
                 </div>
             </div>

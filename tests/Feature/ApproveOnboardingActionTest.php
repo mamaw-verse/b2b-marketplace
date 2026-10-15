@@ -11,6 +11,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Config;
 
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
@@ -122,6 +123,9 @@ test('approval succeeds and creates an active shop when certificates are complet
     $admin->assignRole('admin');
     $seller = User::factory()->create();
     $seller->assignRole('seller');
+
+    // Pin the trial length so the assertion doesn't depend on the local .env.
+    Config::set('marketplace.initial_subscription_trial_days', 180);
 
     $onboarding = makeOnboardingFor($seller);
 

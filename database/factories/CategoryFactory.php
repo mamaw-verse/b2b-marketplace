@@ -23,9 +23,18 @@ final class CategoryFactory extends Factory
         $name = fake()->unique()->words(rand(1, 3), true);
 
         return [
+            'parent_id' => null,
             'name' => ucfirst($name),
             'description' => fake()->optional()->sentence(),
             'slug' => Str::slug($name),
         ];
+    }
+
+    /**
+     * Nest this category under a parent group.
+     */
+    public function childOf(Category $parent): static
+    {
+        return $this->state(fn () => ['parent_id' => $parent->id]);
     }
 }

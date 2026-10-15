@@ -124,11 +124,15 @@ final class SearchController extends Controller
     }
 
     /**
-     * GET /api/v1/categories — Public category list.
+     * GET /api/v1/categories — Public category tree (groups with subcategories).
      */
     public function categories(): JsonResponse
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
 
         return response()->json(['data' => $categories]);
     }

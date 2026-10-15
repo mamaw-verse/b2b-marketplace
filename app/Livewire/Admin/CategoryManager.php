@@ -19,16 +19,34 @@ final class CategoryManager extends Component
     public ?int $deletingCategoryId = null;
 
     /**
+     * Top-level groups with their subcategories, in display order.
+     *
      * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories()
+    public function categoryGroups()
     {
-        return Category::orderBy('name')->get();
+        return Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     public function confirmDelete(int $categoryId): void
     {
+        $category = Category::find($categoryId);
+
+        if (! $category) {
+            return;
+        }
+
+        if ($category->isGroup()) {
+            Flux::toast(__('Delete its subcategories first.'), variant: 'warning');
+
+            return;
+        }
+
         $this->deletingCategoryId = $categoryId;
         Flux::modal('confirm-delete-category')->show();
     }
@@ -40,7 +58,7 @@ final class CategoryManager extends Component
         }
 
         $this->deletingCategoryId = null;
-        unset($this->categories);
+        unset($this->categoryGroups);
     }
 
     public function render()

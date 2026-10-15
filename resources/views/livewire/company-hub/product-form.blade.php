@@ -33,18 +33,26 @@
                 {{-- ── Categories (toggle pills via Livewire action) ─────────── --}}
                 <div>
                     <label class="block text-sm font-semibold text-[var(--hs-neutral-700)] mb-1.5">{{ __('Categories') }}</label>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($this->categories as $id => $name)
-                            <button
-                                type="button"
-                                wire:click="toggleCategory({{ $id }})"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--hs-radius-pill)] text-sm font-medium border cursor-pointer transition {{ in_array($id, $category_ids, false) ? 'bg-[var(--hs-green-600)] border-[var(--hs-green-600)] text-white' : 'bg-[var(--hs-neutral-0)] border-[var(--hs-neutral-200)] text-[var(--hs-neutral-600)] hover:border-[var(--hs-green-300)]' }}"
-                            >
-                                @if (in_array($id, $category_ids, false))
-                                    <flux:icon name="check" variant="micro" class="size-3.5" />
-                                @endif
-                                {{ $name }}
-                            </button>
+                    <div class="space-y-3">
+                        @foreach ($this->categoryGroups as $group)
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)] mb-1.5">{{ $group->name }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($group->children->isNotEmpty() ? $group->children : collect([$group]) as $category)
+                                        <button
+                                            type="button"
+                                            wire:key="category-{{ $category->id }}"
+                                            wire:click="toggleCategory({{ $category->id }})"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--hs-radius-pill)] text-sm font-medium border cursor-pointer transition {{ in_array($category->id, $category_ids, false) ? 'bg-[var(--hs-green-600)] border-[var(--hs-green-600)] text-white' : 'bg-[var(--hs-neutral-0)] border-[var(--hs-neutral-200)] text-[var(--hs-neutral-600)] hover:border-[var(--hs-green-300)]' }}"
+                                        >
+                                            @if (in_array($category->id, $category_ids, false))
+                                                <flux:icon name="check" variant="micro" class="size-3.5" />
+                                            @endif
+                                            {{ $category->name }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 </div>

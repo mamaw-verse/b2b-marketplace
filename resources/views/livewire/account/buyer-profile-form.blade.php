@@ -6,7 +6,7 @@
                 {{ __('Buyer Profile') }}
             </h1>
             <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">
-                {{ __('Your business details used for RFQs and quotations. This information is shared with sellers when you send a request for quotation.') }}
+                {{ __('Your business details used for requests for quotation and quotations. This information is shared with sellers when you send a request for quotation.') }}
             </p>
         </div>
 
@@ -14,13 +14,11 @@
             <form wire:submit="save" class="space-y-8">
                 {{-- Business Name --}}
                 <div>
-                    <flux:input
-                        wire:model="business_name"
-                        label="{{ __('Business Name') }}"
-                        placeholder="{{ __('Enter your business name') }}"
-                        required
-                    />
-                    @error('business_name') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
+                    <flux:field>
+                        <flux:label>{{ __('Business Name') }}<span class="text-red-500 ms-0.5" aria-hidden="true">*</span></flux:label>
+                        <flux:input wire:model="business_name" placeholder="{{ __('Enter your business name') }}" required />
+                        <flux:error name="business_name" />
+                    </flux:field>
                 </div>
 
                 {{-- Billing Address Section --}}
@@ -152,29 +150,25 @@
                     @endunless
                 </div>
 
-                {{-- Contact Override Section --}}
+                {{-- Contact Information Section --}}
                 <div class="space-y-4">
                     <h2 class="text-base font-semibold text-[var(--hs-neutral-800)]">{{ __('Contact Information') }}</h2>
-                    <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('Optional — override your account phone/email for business inquiries.') }}</p>
+                    <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('Business contact details shared with suppliers when you send a request for quotation.') }}</p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <flux:input
-                                wire:model="contact_phone"
-                                label="{{ __('Phone') }}"
-                                placeholder="+63 917 123 4567"
-                                type="tel"
-                            />
-                            @error('contact_phone') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
+                            <flux:field>
+                                <flux:label>{{ __('Phone') }}<span class="text-red-500 ms-0.5" aria-hidden="true">*</span></flux:label>
+                                <flux:input wire:model="contact_phone" placeholder="+63 917 123 4567" type="tel" required />
+                                <flux:error name="contact_phone" />
+                            </flux:field>
                         </div>
                         <div>
-                            <flux:input
-                                wire:model="contact_email"
-                                label="{{ __('Email') }}"
-                                placeholder="purchasing@yourbusiness.ph"
-                                type="email"
-                            />
-                            @error('contact_email') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
+                            <flux:field>
+                                <flux:label>{{ __('Email') }}<span class="text-red-500 ms-0.5" aria-hidden="true">*</span></flux:label>
+                                <flux:input wire:model="contact_email" placeholder="purchasing@yourbusiness.ph" type="email" required />
+                                <flux:error name="contact_email" />
+                            </flux:field>
                         </div>
                     </div>
                 </div>

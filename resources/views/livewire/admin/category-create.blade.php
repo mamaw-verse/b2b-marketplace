@@ -33,6 +33,33 @@
                 @error('description') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
             </div>
 
+            <div>
+                <flux:select wire:model.live="parent_id" label="{{ __('Parent Group') }}">
+                    <flux:select.option value="">{{ __('None — this is a top-level group') }}</flux:select.option>
+                    @foreach ($this->parents as $parent)
+                        <flux:select.option value="{{ $parent->id }}">{{ $parent->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                @error('parent_id') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
+                <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
+                    {{ __('Leave empty to create a top-level group, or pick a group to create a subcategory sellers can select.') }}
+                </p>
+            </div>
+
+            <div class="max-w-40">
+                <flux:input
+                    wire:model="sort_order"
+                    type="number"
+                    min="0"
+                    label="{{ __('Sort Order') }}"
+                    placeholder="0"
+                />
+                @error('sort_order') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
+                <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
+                    {{ __('Lower numbers appear first among siblings.') }}
+                </p>
+            </div>
+
             {{-- Product Options (Variant Attribute Schema) --}}
             <div class="border-t border-[var(--hs-neutral-100)] pt-6">
                 <div class="flex items-center justify-between mb-4">
@@ -42,12 +69,19 @@
                             {{ __('Define what makes each variant unique (e.g. Cut, Weight, Packaging).') }}
                         </p>
                     </div>
-                    <flux:button type="button" variant="outline" size="sm" icon="plus" wire:click="addAttribute">
-                        {{ __('Add Option') }}
-                    </flux:button>
+                    @if ($parent_id)
+                        <flux:button type="button" variant="outline" size="sm" icon="plus" wire:click="addAttribute">
+                            {{ __('Add Option') }}
+                        </flux:button>
+                    @endif
                 </div>
 
-                @if (! empty($variantAttributesSchema))
+                @if (! $parent_id)
+                    <div class="flex items-center gap-2.5 px-4 py-4 rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-200)] text-sm text-[var(--hs-neutral-400)]">
+                        <flux:icon name="information-circle" variant="mini" class="shrink-0 text-[var(--hs-neutral-300)]" />
+                        {{ __('Product options only apply to subcategories. Select a parent group above to define them.') }}
+                    </div>
+                @elseif (! empty($variantAttributesSchema))
                     <div class="space-y-2">
                         @foreach ($variantAttributesSchema as $key => $attr)
                             <div

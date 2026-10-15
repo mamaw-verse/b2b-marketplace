@@ -20,33 +20,25 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
-            DemoDataSeeder::class,
-            DemoUsersSeeder::class,
+            CategorySeeder::class,
+            // DemoDataSeeder::class,
+            // DemoUsersSeeder::class,
             SubscriptionPlanSeeder::class,
-            DemoSubscriptionSeeder::class,   // Phase 6 — give seeded shops a free trial
+            // DemoSubscriptionSeeder::class,   // Phase 6 — give seeded shops a free trial
             SponsoredContentTierSeeder::class,
-            SponsoredContentSeeder::class,
+            // SponsoredContentSeeder::class,
             // Phase3Seeder and PayoutSettingsSeeder are preserved in the codebase
             // but excluded from the default seed — orders/payouts are disabled in
             // Phase 6. Re-add them manually when testing transactional features.
         ]);
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'first_name' => 'Test',
-                'last_name' => 'User',
-                'password' => bcrypt('password'),
-            ]
-        );
-
         $admin = User::firstOrCreate(
-            ['email' => 'admin@gmail.com'],
+            ['email' => 'admin@1halalstore.com'],
             [
                 'first_name' => 'Admin',
                 'last_name' => 'User',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password'),
+                'password' => Hash::make('j0xzB2T7MdI2'),
             ]
         );
         $admin->assignRole('admin');

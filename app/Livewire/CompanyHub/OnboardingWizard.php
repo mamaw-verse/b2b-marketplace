@@ -32,7 +32,7 @@ final class OnboardingWizard extends Component
 {
     use WithFileUploads;
 
-    public const int TOTAL_STEPS = 5;
+    public const int TOTAL_STEPS = 4;
 
     public const array REQUIRED_DOCUMENTS = [
         'business_permit' => 'Business Permit',
@@ -62,8 +62,6 @@ final class OnboardingWizard extends Component
         'form.fda_lto_number' => 'FDA LTO Number',
         'form.average_production_lead_time' => 'Average Production Lead Time',
         'form.export_readiness_status' => 'Export Readiness',
-        'form.value_chain_positions' => 'Value Chain Positions',
-        'form.capabilities' => 'Capabilities',
         'documentUploads.business_permit' => 'Business Permit',
     ];
 
@@ -91,10 +89,8 @@ final class OnboardingWizard extends Component
         'form.fda_lto_number' => 2,
         'form.average_production_lead_time' => 2,
         'form.export_readiness_status' => 2,
-        'form.value_chain_positions' => 3,
-        'form.capabilities' => 3,
-        'certificates' => 4,
-        'documentUploads' => 5,
+        'certificates' => 3,
+        'documentUploads' => 4,
     ];
 
     #[Url]
@@ -212,11 +208,11 @@ final class OnboardingWizard extends Component
             $this->getStepData(),
         );
 
-        if ($this->currentStep === 4) {
+        if ($this->currentStep === 3) {
             $this->saveCertificates($onboarding);
         }
 
-        if ($this->currentStep === 5) {
+        if ($this->currentStep === 4) {
             $this->processDocumentUploads($onboarding);
         }
     }
@@ -642,8 +638,6 @@ final class OnboardingWizard extends Component
             'fda_lto_number' => null,
             'average_production_lead_time' => null,
             'export_readiness_status' => 'never_exported',
-            'value_chain_positions' => [],
-            'capabilities' => [],
         ]);
 
         // Reset all local component state.
@@ -660,14 +654,20 @@ final class OnboardingWizard extends Component
     }
 
     /**
-     * Categories available for the step 2 product-category checkbox group.
+     * Selectable categories grouped under their top-level parent groups,
+     * for the step 2 product-category checkbox group.
+     * A group with no children is itself selectable and is listed alone.
      *
      * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): Collection
+    public function categoryGroups(): Collection
     {
-        return Category::orderBy('name')->get();
+        return Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     /**

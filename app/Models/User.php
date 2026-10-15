@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
@@ -57,7 +56,10 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
-     * Get the full S3 URL for the profile photo.
+     * Get the proxied URL for the profile photo.
+     *
+     * Streams through the app via `users.photo` (not a direct S3 URL) so a
+     * private bucket keeps working.
      */
     protected function photoUrl(): Attribute
     {
@@ -68,7 +70,7 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
             return str_starts_with($this->photo_path, 'http')
                 ? $this->photo_path
-                : Storage::disk('s3')->url($this->photo_path);
+                : route('users.photo', $this);
         });
     }
 

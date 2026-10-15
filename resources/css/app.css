@@ -14,8 +14,13 @@
    These markdown files contain literal placeholder classes such as
    `bg-[var(--hs-*)]` that generate invalid CSS (Unexpected token '*'). */
 @source not '../../.ai';
+@source not '../../.agents';
 @source not '../../.claude';
 @source not '../../.kiro';
+@source not '../../.kilo';
+@source not '../../specs';
+@source not '../../mockup';
+@source not '../../tmp';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

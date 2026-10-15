@@ -47,9 +47,10 @@ final class OnboardingReview extends Component
             return [];
         }
 
-        return Category::whereIn('id', $ids)
-            ->get(['id', 'name'])
-            ->pluck('name')
+        return Category::with('parent:id,name')
+            ->whereIn('id', $ids)
+            ->get(['id', 'name', 'parent_id'])
+            ->map(fn (Category $category) => $category->display_name)
             ->toArray();
     }
 

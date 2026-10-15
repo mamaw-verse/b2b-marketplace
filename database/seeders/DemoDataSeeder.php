@@ -17,7 +17,8 @@ final class DemoDataSeeder extends Seeder
     /**
      * Seed the database with realistic Philippine halal food marketplace data.
      *
-     * 5 companies · 10 products · 8 categories — all with real Unsplash image URLs.
+     * 5 companies · 10 products — all with real Unsplash image URLs.
+     * Categories come from the canonical tree in CategorySeeder.
      * Each category carries a variant_attributes_schema; products inherit it and
      * variant attributes are keyed to match the schema (attr_<slug> format).
      */
@@ -29,256 +30,23 @@ final class DemoDataSeeder extends Seeder
     }
 
     // -------------------------------------------------------------------------
-    // Category schema definitions
-    // -------------------------------------------------------------------------
-
-    /**
-     * Canonical variant attribute schemas, keyed by category slug.
-     * Key format: attr_<slug> — stable, reproducible, matches admin editor convention.
-     * "options" is always a comma-separated string (not an array).
-     *
-     * @return array<string, array<string, array{label: string, type: string, options: string, required: bool}>>
-     */
-    private function categorySchemas(): array
-    {
-        return [
-            'meat-poultry' => [
-                'attr_cut' => [
-                    'label' => 'Cut',
-                    'type' => 'select',
-                    'options' => 'Whole,Breast,Thigh,Drumstick,Wing,Bone-in,Boneless',
-                    'required' => true,
-                ],
-                'attr_weight' => [
-                    'label' => 'Weight',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-            ],
-            'processed-foods' => [
-                'attr_weight' => [
-                    'label' => 'Weight / Volume',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-                'attr_shelf_life' => [
-                    'label' => 'Shelf Life',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-            ],
-            'spices-seasonings' => [
-                'attr_weight' => [
-                    'label' => 'Weight',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_grade' => [
-                    'label' => 'Grade',
-                    'type' => 'select',
-                    'options' => 'Food Grade,Premium,Organic,Export Grade',
-                    'required' => false,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-            ],
-            'dairy-alternatives' => [
-                'attr_volume' => [
-                    'label' => 'Volume',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_fat_content' => [
-                    'label' => 'Fat Content',
-                    'type' => 'select',
-                    'options' => 'Full Fat,Reduced Fat,Low Fat,Skimmed',
-                    'required' => false,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-            ],
-            'grains-legumes' => [
-                'attr_weight' => [
-                    'label' => 'Weight',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_grade' => [
-                    'label' => 'Grade',
-                    'type' => 'select',
-                    'options' => 'Premium,Food Grade,Organic,Export Grade',
-                    'required' => false,
-                ],
-                'attr_milling' => [
-                    'label' => 'Milling',
-                    'type' => 'select',
-                    'options' => 'Whole Grain,Light Bran,Fully Milled,Stone Ground',
-                    'required' => false,
-                ],
-            ],
-            'beverages' => [
-                'attr_volume' => [
-                    'label' => 'Volume',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'select',
-                    'options' => 'PET Bottle,Glass Bottle,Tetra Pak,Carton,Can,Pouch',
-                    'required' => false,
-                ],
-                'attr_concentration' => [
-                    'label' => 'Concentration',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-            ],
-            'condiments-sauces' => [
-                'attr_weight' => [
-                    'label' => 'Weight / Volume',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-                'attr_heat_level' => [
-                    'label' => 'Heat Level',
-                    'type' => 'select',
-                    'options' => 'Mild,Medium,Medium-hot,Hot,Extra Hot',
-                    'required' => false,
-                ],
-            ],
-            'snacks-confectionery' => [
-                'attr_weight' => [
-                    'label' => 'Weight',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => true,
-                ],
-                'attr_count' => [
-                    'label' => 'Count / Pieces',
-                    'type' => 'text',
-                    'options' => '',
-                    'required' => false,
-                ],
-                'attr_packaging' => [
-                    'label' => 'Packaging',
-                    'type' => 'select',
-                    'options' => 'Retail Box,Pouch,Tin Can,Gift Box,Bulk Bag,Wrapper',
-                    'required' => false,
-                ],
-            ],
-        ];
-    }
-
-    // -------------------------------------------------------------------------
     // Seeders
     // -------------------------------------------------------------------------
 
     /**
+     * Seed the canonical category tree (delegates to CategorySeeder) and
+     * return the selectable categories keyed by slug.
+     *
      * @return array<string, Category>
      */
     private function seedCategories(): array
     {
-        $definitions = [
-            [
-                'name' => 'Meat & Poultry',
-                'slug' => 'meat-poultry',
-                'description' => 'Halal-certified beef, chicken, goat, and other meats for food service and retail.',
-            ],
-            [
-                'name' => 'Processed Foods',
-                'slug' => 'processed-foods',
-                'description' => 'Ready-to-eat and ready-to-cook halal processed food products.',
-            ],
-            [
-                'name' => 'Spices & Seasonings',
-                'slug' => 'spices-seasonings',
-                'description' => 'Halal spice blends, marinades, and seasonings for food manufacturing.',
-            ],
-            [
-                'name' => 'Dairy & Alternatives',
-                'slug' => 'dairy-alternatives',
-                'description' => 'Halal dairy products and plant-based alternatives.',
-            ],
-            [
-                'name' => 'Grains & Legumes',
-                'slug' => 'grains-legumes',
-                'description' => 'Rice, wheat, dried beans, lentils, and other commodity grains.',
-            ],
-            [
-                'name' => 'Beverages',
-                'slug' => 'beverages',
-                'description' => 'Halal-certified juices, teas, energy drinks, and bottled water.',
-            ],
-            [
-                'name' => 'Condiments & Sauces',
-                'slug' => 'condiments-sauces',
-                'description' => 'Halal soy sauce, vinegar, chili sauces, and cooking pastes.',
-            ],
-            [
-                'name' => 'Snacks & Confectionery',
-                'slug' => 'snacks-confectionery',
-                'description' => 'Halal chips, nuts, biscuits, candies, and chocolate products.',
-            ],
-        ];
+        $this->call(CategorySeeder::class);
 
-        $schemas = $this->categorySchemas();
-        $map = [];
-
-        foreach ($definitions as $def) {
-            $category = Category::firstOrCreate(
-                ['slug' => $def['slug']],
-                [
-                    'name' => $def['name'],
-                    'description' => $def['description'],
-                    'variant_attributes_schema' => $schemas[$def['slug']] ?? [],
-                ]
-            );
-
-            // Update schema on existing rows (safe on re-seed).
-            if (empty($category->variant_attributes_schema)) {
-                $category->update(['variant_attributes_schema' => $schemas[$def['slug']] ?? []]);
-            }
-
-            $map[$def['slug']] = $category;
-        }
-
-        return $map;
+        return Category::whereNotNull('parent_id')
+            ->get()
+            ->keyBy('slug')
+            ->all();
     }
 
     /**
@@ -314,7 +82,7 @@ final class DemoDataSeeder extends Seeder
                     'capabilities' => ['processing', 'contract_manufacturing', 'private_label', 'exporting'],
                     'status' => 'active',
                 ],
-                'categories' => ['meat-poultry', 'processed-foods'],
+                'categories' => ['meat-poultry', 'frozen-ready-to-eat'],
             ],
             [
                 'user' => [
@@ -343,7 +111,7 @@ final class DemoDataSeeder extends Seeder
                     'capabilities' => ['processing', 'packaging', 'contract_processing', 'oem_odm', 'private_label', 'exporting'],
                     'status' => 'active',
                 ],
-                'categories' => ['spices-seasonings', 'condiments-sauces', 'processed-foods'],
+                'categories' => ['spices-seasonings', 'condiments-sauces', 'frozen-ready-to-eat'],
             ],
             [
                 'user' => [
@@ -371,7 +139,7 @@ final class DemoDataSeeder extends Seeder
                     'capabilities' => ['processing', 'packaging', 'wholesale', 'exporting'],
                     'status' => 'active',
                 ],
-                'categories' => ['grains-legumes', 'spices-seasonings'],
+                'categories' => ['grains-rice-legumes', 'spices-seasonings'],
             ],
             [
                 'user' => [
@@ -428,7 +196,7 @@ final class DemoDataSeeder extends Seeder
                     'capabilities' => ['processing', 'contract_processing', 'packaging', 'cold_storage', 'warehousing', 'exporting'],
                     'status' => 'active',
                 ],
-                'categories' => ['dairy-alternatives', 'beverages', 'grains-legumes'],
+                'categories' => ['dairy-eggs-alternatives', 'beverages', 'grains-rice-legumes'],
             ],
         ];
 
@@ -476,11 +244,14 @@ final class DemoDataSeeder extends Seeder
      */
     private function mergedSchema(array $categorySlugs, array $categoryMap): array
     {
-        $schemas = $this->categorySchemas();
         $merged = [];
 
         foreach ($categorySlugs as $slug) {
-            foreach ($schemas[$slug] ?? [] as $key => $def) {
+            $schema = $categoryMap[$slug]?->variant_attributes_schema
+                ?? Category::where('slug', $slug)->value('variant_attributes_schema')
+                ?? [];
+
+            foreach ($schema as $key => $def) {
                 $merged[$key] ??= $def;
             }
         }
@@ -563,7 +334,7 @@ final class DemoDataSeeder extends Seeder
                     'featured_image_path' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80',
                     'status' => 'published',
                 ],
-                'categories' => ['meat-poultry', 'processed-foods'],
+                'categories' => ['meat-poultry', 'frozen-ready-to-eat'],
                 'variants' => [
                     [
                         'sku' => 'ALA-TAPA-500G',
@@ -692,7 +463,7 @@ final class DemoDataSeeder extends Seeder
                     'featured_image_path' => 'https://images.unsplash.com/photo-1505253304499-671c55fb57fe?w=800&q=80',
                     'status' => 'published',
                 ],
-                'categories' => ['grains-legumes'],
+                'categories' => ['grains-rice-legumes'],
                 'variants' => [
                     [
                         'sku' => 'MOG-BRICE-5KG',
@@ -852,7 +623,7 @@ final class DemoDataSeeder extends Seeder
                     'featured_image_path' => 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&q=80',
                     'status' => 'published',
                 ],
-                'categories' => ['processed-foods'],
+                'categories' => ['frozen-ready-to-eat'],
                 'variants' => [
                     [
                         'sku' => 'ZHA-SARD-155G',

@@ -7,7 +7,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -56,7 +55,10 @@ final class ProductGallery extends Model
     }
 
     /**
-     * Get the full S3 URL for the gallery image.
+     * Get the proxied URL for the gallery image.
+     *
+     * Streams through the app via `media.view` (not a direct S3 URL) so a
+     * private bucket keeps working.
      */
     protected function imageUrl(): Attribute
     {
@@ -65,9 +67,11 @@ final class ProductGallery extends Model
                 return null;
             }
 
-            return str_starts_with($this->media->storage_path, 'http')
-                ? $this->media->storage_path
-                : Storage::disk('s3')->url($this->media->storage_path);
+            if (str_starts_with($this->media->storage_path, 'http')) {
+                return $this->media->storage_path;
+            }
+
+            return route('media.view', $this->media);
         });
     }
 }

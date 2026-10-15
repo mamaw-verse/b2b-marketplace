@@ -128,8 +128,13 @@ final class PostgresSearchEngine extends DatabaseEngine
                     }
 
                     if ($where['field'] === 'categories') {
+                        // Match the category name itself or its parent group's
+                        // name, so filtering by a top-level group catches all
+                        // products/shops tagged with its subcategories.
                         $query->whereHas('categories', fn (EloquentBuilder $categoryQuery) => $categoryQuery
-                            ->where('name', $where['operator'] ?? '=', $where['value']));
+                            ->where('name', $where['operator'] ?? '=', $where['value'])
+                            ->orWhereHas('parent', fn (EloquentBuilder $parentQuery) => $parentQuery
+                                ->where('name', $where['operator'] ?? '=', $where['value'])));
 
                         continue;
                     }

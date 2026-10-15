@@ -102,7 +102,7 @@ test('profile photo upload stores the file and clear plus save removes it', func
     Storage::disk('s3')->assertMissing($path);
 });
 
-test('the user photo url accessor resolves to the s3 url', function () {
+test('the user photo url accessor resolves to the proxied photo route', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
 
     expect($user->photo_url)->toBeNull();
@@ -110,7 +110,7 @@ test('the user photo url accessor resolves to the s3 url', function () {
     Storage::disk('s3')->put('profile-photos/avatar.jpg', 'fake-image-bytes');
     $user->update(['photo_path' => 'profile-photos/avatar.jpg']);
 
-    expect($user->fresh()->photo_url)->toBe(Storage::disk('s3')->url('profile-photos/avatar.jpg'));
+    expect($user->fresh()->photo_url)->toBe(route('users.photo', $user));
 });
 
 test('password can be updated from the single settings page', function () {

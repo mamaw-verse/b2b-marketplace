@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -23,6 +24,11 @@ final class ProductDirectory extends Component
 
     public string $query = '';
 
+    /**
+     * Selected category id — may be a top-level group (matches products in
+     * any of its subcategories) or a subcategory (exact match).
+     */
+    #[Url(as: 'category')]
     public ?int $categoryId = null;
 
     public function updatedQuery(): void
@@ -36,20 +42,39 @@ final class ProductDirectory extends Component
     }
 
     /**
-     * Categories with product counts for the tab bar.
+     * Top-level groups whose subcategories (or themselves) have published
+     * products, for the sidebar tree. Each group carries its children's
+     * published_products_count and an aggregate count.
      *
      * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): Collection
+    public function categoryGroups(): Collection
     {
-        return Category::withCount([
-            'products as published_products_count' => fn ($q) => $q->marketplaceVisible(),
+        return Category::with(['children' => fn ($q) => $q
+            ->withCount(['products as published_products_count' => fn ($p) => $p->marketplaceVisible()]),
         ])
+            ->withCount(['products as own_published_products_count' => fn ($q) => $q->marketplaceVisible()])
+            ->roots()
+            ->orderBy('sort_order')
             ->orderBy('name')
             ->get()
-            ->filter(fn ($c) => $c->published_products_count > 0)
+            ->each(function (Category $group): void {
+                $group->published_products_count = $group->children->isNotEmpty()
+                    ? $group->children->sum('published_products_count')
+                    : $group->own_published_products_count;
+            })
             ->values();
+    }
+
+    /**
+     * The currently selected category (group or subcategory), for the
+     * results header.
+     */
+    #[Computed]
+    public function selectedCategory(): ?Category
+    {
+        return $this->categoryId ? Category::find($this->categoryId) : null;
     }
 
     /**
@@ -73,6 +98,18 @@ final class ProductDirectory extends Component
     }
 
     /**
+     * Selectable (leaf) categories that have published products — used for
+     * the "N categories" hero stat.
+     */
+    #[Computed]
+    public function totalCategoryCount(): int
+    {
+        return Category::leaves()
+            ->whereHas('products', fn ($q) => $q->marketplaceVisible())
+            ->count();
+    }
+
+    /**
      * @return LengthAwarePaginator<Product>
      */
     #[Computed]
@@ -84,6 +121,8 @@ final class ProductDirectory extends Component
             if ($this->categoryId) {
                 $category = Category::find($this->categoryId);
                 if ($category) {
+                    // Filtering by group name also matches subcategory-tagged
+                    // products (the index carries parent names too).
                     $search->where('categories', $category->name);
                 }
             }
@@ -95,7 +134,9 @@ final class ProductDirectory extends Component
             ->with(['shop', 'variants', 'categories']);
 
         if ($this->categoryId) {
-            $query->whereHas('categories', fn ($q) => $q->where('categories.id', $this->categoryId));
+            $query->whereHas('categories', fn ($q) => $q
+                ->where('categories.id', $this->categoryId)
+                ->orWhere('categories.parent_id', $this->categoryId));
         }
 
         return $query->latest()->paginate(12);

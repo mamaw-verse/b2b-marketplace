@@ -63,7 +63,7 @@ final class ProductModerationList extends Component
             return null;
         }
 
-        return Product::with(['shop', 'variants', 'gallery', 'categories'])
+        return Product::with(['shop', 'variants', 'gallery', 'categories.parent'])
             ->find($this->previewProductId);
     }
 

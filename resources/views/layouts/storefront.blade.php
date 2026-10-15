@@ -64,16 +64,6 @@
         {{-- Nav links --}}
         <nav class="p-3 space-y-0.5">
 
-            <a href="{{ route('storefront.companies') }}" wire:navigate @click="sfNav = false"
-               @class([
-                   'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
-                   'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('storefront.companies', 'storefront.company'),
-                   'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('storefront.companies', 'storefront.company'),
-               ])>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2H3a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V9l-9-7z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 9v11h18V9"/></svg>
-                {{ __('Businesses') }}
-            </a>
-
             <a href="{{ route('storefront.products') }}" wire:navigate @click="sfNav = false"
                @class([
                    'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
@@ -84,28 +74,6 @@
                 {{ __('Products') }}
             </a>
 
-            <div class="px-3 pt-4 pb-1.5 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[var(--hs-neutral-400)]">
-                {{ __('Discover') }}
-            </div>
-
-            @foreach ([
-                ['anchor' => 'who-we-serve',  'label' => __('Who We Serve')],
-                ['anchor' => 'what-we-offer', 'label' => __('What We Offer')],
-                ['anchor' => 'supply-chain',  'label' => __('Supply Chain')],
-                ['anchor' => 'join',          'label' => __('Join Us')],
-            ] as $item)
-                <a href="{{ route('home') }}#{{ $item['anchor'] }}"
-                   @click.prevent="sfNav = false; setTimeout(() => {
-                       const t = document.getElementById('{{ $item['anchor'] }}');
-                       if (t) t.scrollIntoView({ behavior:'smooth' });
-                       else window.location.href = '{{ route('home') }}#{{ $item['anchor'] }}';
-                   }, 200);"
-                   class="flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)] no-underline">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    {{ $item['label'] }}
-                </a>
-            @endforeach
-
             <a href="{{ route('apply.certificate') }}" wire:navigate @click="sfNav = false"
                @class([
                    'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
@@ -113,8 +81,29 @@
                    'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('apply.certificate'),
                ])>
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
-                {{ __('Halal Certification') }}
+                {{ __('Certification') }}
             </a>
+
+            <a href="{{ route('sourcing-request.create') }}" wire:navigate @click="sfNav = false"
+               @class([
+                   'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
+                   'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('sourcing-request.create'),
+                   'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('sourcing-request.create'),
+               ])>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0Z"/></svg>
+                {{ __('Sourcing') }}
+            </a>
+
+            <a href="{{ route('about') }}" wire:navigate @click="sfNav = false"
+               @class([
+                   'flex items-center gap-3 px-3 py-3 rounded-[10px] text-[0.9rem] font-semibold no-underline',
+                   'text-[var(--hs-green-700)] bg-[var(--hs-green-50)]' => request()->routeIs('about'),
+                   'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => ! request()->routeIs('about'),
+               ])>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="text-[var(--hs-neutral-400)] shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm0 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm0 5c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1v-4c0-.55.45-1 1-1Z"/></svg>
+                {{ __('About') }}
+            </a>
+
         </nav>
 
         {{-- Auth footer --}}
@@ -167,24 +156,23 @@
                         </p>
                     </div>
 
-                    {{-- Platform --}}
+                    {{-- Discover --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Platform') }}</h4>
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Discover') }}</h4>
                         <ul class="grid gap-2.5 sm:gap-[11px]">
-                            <li><a href="{{ route('home') }}#who-we-serve" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Who We Serve') }}</a></li>
-                            <li><a href="{{ route('home') }}#what-we-offer" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('What We Offer') }}</a></li>
-                            <li><a href="{{ route('home') }}#supply-chain" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Supply Chain') }}</a></li>
-                            <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Browse Businesses') }}</a></li>
                             <li><a href="{{ route('storefront.products') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Browse Products') }}</a></li>
+                            <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Browse Businesses') }}</a></li>
+                            <li><a href="{{ route('apply.certificate') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
+                            <li><a href="{{ route('sourcing-request.create') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Request Sourcing') }}</a></li>
                         </ul>
                     </div>
 
-                    {{-- Business --}}
+                    {{-- Company --}}
                     <div class="text-center sm:text-left">
-                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Business') }}</h4>
+                        <h4 class="text-[0.82rem] font-semibold text-white uppercase tracking-[0.03em] mb-3 sm:mb-4">{{ __('Company') }}</h4>
                         <ul class="grid gap-2.5 sm:gap-[11px]">
-                            <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('About Us') }}</a></li>
-                            <li><a href="{{ route('apply.certificate') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Halal Certification') }}</a></li>
+                            <li><a href="{{ route('about') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('About Us') }}</a></li>
+                            <li><a href="{{ route('about') }}#mission" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Our Mission') }}</a></li>
                             <li><a href="#" class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Events & Training') }}</a></li>
                             <li><a href="{{ route('help.faq') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('FAQs') }}</a></li>
                         </ul>
@@ -196,6 +184,7 @@
                         <ul class="grid gap-2.5 sm:gap-[11px]">
                             <li><a href="{{ route('register') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('List Your Business') }}</a></li>
                             <li><a href="{{ route('storefront.companies') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Find Suppliers') }}</a></li>
+                            <li><a href="{{ route('sourcing-request.create') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Source a Product') }}</a></li>
                             <li><a href="{{ route('login') }}" wire:navigate class="text-[0.88rem] text-white/62 hover:text-[var(--hs-gold-300)] transition">{{ __('Seller Login') }}</a></li>
                         </ul>
                     </div>
@@ -228,6 +217,8 @@
                 {{-- Legal + copyright --}}
                 <div class="flex flex-col items-center gap-3 sm:items-end">
                     <nav class="flex items-center gap-1 text-[0.78rem] font-medium" aria-label="Legal">
+                        <a href="{{ route('about') }}" wire:navigate class="px-2 py-1 text-white/60 hover:text-[var(--hs-gold-300)] transition">{{ __('About') }}</a>
+                        <span class="text-white/25" aria-hidden="true">&middot;</span>
                         <a href="{{ route('legal.terms') }}" wire:navigate class="px-2 py-1 text-white/60 hover:text-[var(--hs-gold-300)] transition">{{ __('Terms') }}</a>
                         <span class="text-white/25" aria-hidden="true">&middot;</span>
                         <a href="{{ route('legal.privacy') }}" wire:navigate class="px-2 py-1 text-white/60 hover:text-[var(--hs-gold-300)] transition">{{ __('Privacy') }}</a>

@@ -174,7 +174,7 @@
                 <div class="flex items-center gap-2 mb-3">
                     <x-hs-badge variant="halal" label="{{ __('Halal Certified') }}" />
                     @foreach ($product->categories->take(2) as $category)
-                        <x-hs-badge variant="tag" :label="$category->name" />
+                        <x-hs-badge variant="tag" :label="$category->display_name" />
                     @endforeach
                 </div>
 
@@ -325,6 +325,21 @@
 
             {{-- ============ REQUEST QUOTE CTA ============ --}}
             @if ($product->shop)
+                @if (auth()->check() && auth()->user()->shop?->id === $product->shop_id)
+                    <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 flex items-center justify-between gap-4 flex-wrap">
+                        <div>
+                            <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">{{ __('This is your product') }}</p>
+                            <p class="text-xs text-[var(--hs-neutral-500)] mt-0.5">{{ __('You cannot request a quote for your own products.') }}</p>
+                        </div>
+                        <a
+                            href="{{ route('hub.products.edit', $product) }}"
+                            wire:navigate
+                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--hs-radius-md)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] text-sm font-semibold text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-100)] transition whitespace-nowrap"
+                        >
+                            {{ __('Manage product') }}
+                        </a>
+                    </div>
+                @else
                 <div class="rounded-[var(--hs-radius-card)] bg-[var(--hs-green-900)] p-5 flex items-center justify-between gap-4 flex-wrap">
                     <div>
                         <p class="text-sm font-semibold text-white">{{ __('Interested in this product?') }}</p>
@@ -339,6 +354,7 @@
                         {{ $ctaLabel }}
                     </a>
                 </div>
+                @endif
             @endif
 
             {{-- ============ DOCUMENTS ============ --}}

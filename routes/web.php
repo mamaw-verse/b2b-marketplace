@@ -7,8 +7,11 @@ use App\Http\Controllers\SponsoredContentClickController;
 use App\Http\Controllers\SubscriptionPaymentCallbackController;
 use App\Models\CertificationApplication;
 use App\Models\Media;
+use App\Models\Product;
+use App\Models\ProductGallery;
 use App\Models\SourcingRequest;
 use App\Models\SponsoredContent;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -33,6 +36,7 @@ Route::livewire('/products', 'storefront.product-directory')->name('storefront.p
 Route::livewire('/products/{product}', 'storefront.product-detail')->name('storefront.product');
 Route::livewire('/certification/apply', 'storefront.apply-for-certificate')->name('apply.certificate');
 Route::livewire('/request-a-product', 'storefront.product-sourcing-form')->name('sourcing-request.create');
+Route::livewire('/about', 'storefront.about-page')->name('about');
 Route::livewire('/terms', 'legal.terms-page')->name('legal.terms');
 Route::livewire('/privacy', 'legal.privacy-page')->name('legal.privacy');
 Route::livewire('/faq', 'legal.faq-page')->name('help.faq');
@@ -40,16 +44,32 @@ Route::livewire('/faq', 'legal.faq-page')->name('help.faq');
 /*
 | Media viewer.
 | Documents attached to a marketplace-visible published product are public
-| (accessible to all, even unauthenticated users). Any other media requires an
-| authenticated admin, the original uploader, or the relevant buyer/seller.
+| (accessible to all, even unauthenticated users). Gallery images of
+| marketplace-visible published products are public too. Any other media
+| requires an authenticated admin, the original uploader, or the relevant
+| buyer/seller.
+|
+| All responses stream through the app (not direct S3 URLs) so a private
+| bucket keeps working — direct Storage::url() calls 403 on private objects.
 */
 Route::get('media/{media}/view', function (Media $media) {
+    $subscriptionsEnabled = (bool) config('marketplace.features.subscriptions_enabled', true);
+
     $isPublicProductDocument = $media->products()
         ->where('status', 'published')
         ->whereHas('shop', fn ($query) => $query
             ->where('status', 'active')
-            ->whereHas('subscriptions', fn ($subscriptionQuery) => $subscriptionQuery
-                ->whereIn('status', ['active', 'trialing'])))
+            ->when($subscriptionsEnabled, fn ($q) => $q->whereHas('subscriptions', fn ($subscriptionQuery) => $subscriptionQuery
+                ->whereIn('status', ['active', 'trialing']))))
+        ->exists();
+
+    $isPublicGalleryImage = ProductGallery::where('media_id', $media->id)
+        ->whereHas('product', fn ($query) => $query
+            ->where('status', 'published')
+            ->whereHas('shop', fn ($shopQuery) => $shopQuery
+                ->where('status', 'active')
+                ->when($subscriptionsEnabled, fn ($q) => $q->whereHas('subscriptions', fn ($subscriptionQuery) => $subscriptionQuery
+                    ->whereIn('status', ['active', 'trialing'])))))
         ->exists();
 
     // Sponsored content creatives are public — they appear on the storefront
@@ -59,7 +79,9 @@ Route::get('media/{media}/view', function (Media $media) {
         ->orWhere('media_id', $media->id)
         ->exists();
 
-    if (! $isPublicProductDocument && ! $isSponsoredContentCreative) {
+    $isPublic = $isPublicProductDocument || $isPublicGalleryImage || $isSponsoredContentCreative;
+
+    if (! $isPublic) {
         $user = auth()->user();
 
         if (! $user) {
@@ -67,6 +89,15 @@ Route::get('media/{media}/view', function (Media $media) {
         }
 
         $isAdminOrUploader = $user->hasRole('admin') || $media->uploaded_by_id === $user->id;
+
+        // Sellers must see their own draft/archived product images in the hub
+        // (gallery manager, product list) even before publishing.
+        $isProductOwner = $user->shop && (
+            $media->products()->where('shop_id', $user->shop->id)->exists()
+            || ProductGallery::where('media_id', $media->id)
+                ->whereHas('product', fn ($q) => $q->where('shop_id', $user->shop->id))
+                ->exists()
+        );
 
         // Dispute photos must be viewable by BOTH parties of the dispute, not just
         // the uploader: the buyer uploads them, but the seller needs to see them to
@@ -85,16 +116,93 @@ Route::get('media/{media}/view', function (Media $media) {
             ->whereHas('recipients', fn ($q) => $q->where('shop_id', $user->shop->id))
             ->exists();
 
-        if (! $isAdminOrUploader && ! $isDisputeParty && ! $isRfqRecipient) {
+        if (! $isAdminOrUploader && ! $isProductOwner && ! $isDisputeParty && ! $isRfqRecipient) {
             abort(403);
         }
     }
 
-    return Storage::disk('s3')->response(
+    $response = Storage::disk('s3')->response(
         $media->storage_path,
         $media->original_filename
     );
+
+    // Public storefront images get long browser caching; private files stay private.
+    $response->headers->set(
+        'Cache-Control',
+        $isPublic ? 'public, max-age=31536000, immutable' : 'private, max-age=3600'
+    );
+
+    return $response;
 })->name('media.view');
+
+/*
+| Product featured image.
+| featured_image_path is a raw S3 path (not a Media row), so it needs its own
+| proxy. Same visibility rule as gallery: public when the product is
+| marketplace-visible, otherwise owner/admin only.
+*/
+Route::get('products/{product}/featured-image', function (Product $product) {
+    if (! $product->featured_image_path || ! Storage::disk('s3')->exists($product->featured_image_path)) {
+        abort(404);
+    }
+
+    $subscriptionsEnabled = (bool) config('marketplace.features.subscriptions_enabled', true);
+
+    $isPublic = $product->status === 'published'
+        && $product->shop?->status === 'active'
+        && (! $subscriptionsEnabled || $product->shop->hasActiveOrTrialingSubscription());
+
+    if (! $isPublic) {
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        $isOwnerOrAdmin = $user->hasRole('admin')
+            || ($user->shop && (int) $user->shop->id === (int) $product->shop_id);
+
+        if (! $isOwnerOrAdmin) {
+            abort(403);
+        }
+    }
+
+    $response = Storage::disk('s3')->response(
+        $product->featured_image_path,
+        basename($product->featured_image_path)
+    );
+
+    $response->headers->set(
+        'Cache-Control',
+        $isPublic ? 'public, max-age=31536000, immutable' : 'private, max-age=3600'
+    );
+
+    return $response;
+})->name('products.featured-image');
+
+/*
+| User profile photo (private — owner or admin only).
+*/
+Route::get('users/{user}/photo', function (User $user) {
+    if (! $user->photo_path || ! Storage::disk('s3')->exists($user->photo_path)) {
+        abort(404);
+    }
+
+    $viewer = auth()->user();
+
+    if (! $viewer || (! $viewer->hasRole('admin') && (int) $viewer->id !== (int) $user->id)) {
+        abort(403);
+    }
+
+    $response = Storage::disk('s3')->response(
+        $user->photo_path,
+        basename($user->photo_path)
+    );
+
+    $response->headers->set('Cache-Control', 'private, max-age=3600');
+
+    return $response;
+})->name('users.photo')->middleware(['auth']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Phase 6: canonical unified dashboard for all non-admin users.

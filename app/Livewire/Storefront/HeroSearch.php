@@ -53,12 +53,14 @@ final class HeroSearch extends Component
     }
 
     /**
+     * Top-level category groups for the hero pills.
+     *
      * @return Collection<int, Category>
      */
     #[Computed]
     public function categories(): Collection
     {
-        return Category::orderBy('name')->get();
+        return Category::roots()->orderBy('sort_order')->orderBy('name')->get();
     }
 
     /**

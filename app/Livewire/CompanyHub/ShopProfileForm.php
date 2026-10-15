@@ -95,14 +95,19 @@ final class ShopProfileForm extends Component
     }
 
     /**
-     * Categories available for the product-category checkbox group.
+     * Selectable categories grouped under their top-level parent groups.
+     * A group with no children is itself selectable and is listed alone.
      *
      * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): Collection
+    public function categoryGroups(): Collection
     {
-        return Category::orderBy('name')->get();
+        return Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     /**

@@ -136,7 +136,7 @@
                             @else
                                 <div class="flex flex-wrap gap-1.5">
                                     @foreach ($shop->categories as $category)
-                                        <flux:badge color="zinc" size="sm">{{ $category->name }}</flux:badge>
+                                        <flux:badge color="zinc" size="sm">{{ $category->display_name }}</flux:badge>
                                     @endforeach
                                 </div>
                             @endif
@@ -485,7 +485,7 @@
                 <div class="mt-3 flex flex-wrap gap-1.5">
                     @foreach($preview->categories as $cat)
                         <span class="inline-flex items-center rounded-full bg-[var(--hs-neutral-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--hs-neutral-700)]">
-                            {{ $cat->name }}
+                            {{ $cat->display_name }}
                         </span>
                     @endforeach
                 </div>

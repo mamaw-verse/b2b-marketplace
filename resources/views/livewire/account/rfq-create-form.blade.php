@@ -28,9 +28,9 @@
             <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-[var(--hs-success-50)]">
                 <flux:icon name="check-circle" class="size-8 text-[var(--hs-success-700)]" />
             </div>
-            <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('RFQ submitted') }}</h2>
+            <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Request for Quotation submitted') }}</h2>
             <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[var(--hs-neutral-500)]">
-                {{ __('You can track the status of this request under My RFQs.') }}
+                {{ __('You can track the status of this request under My Requests for Quotation.') }}
             </p>
 
             @if ($submittedTitle !== '')
@@ -42,10 +42,10 @@
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <flux:button variant="primary" icon="inbox-stack" href="{{ route('account.rfqs.index') }}" wire:navigate>
-                    {{ __('Go to My RFQs') }}
+                    {{ __('Go to My Requests for Quotation') }}
                 </flux:button>
                 <flux:button variant="ghost" href="{{ route('account.rfqs.show', $submittedRfqId) }}" wire:navigate>
-                    {{ __('View this RFQ') }}
+                    {{ __('View this Request for Quotation') }}
                 </flux:button>
             </div>
         </div>
@@ -57,7 +57,7 @@
             </div>
             <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-800)]">{{ __('Choose a supplier first') }}</h2>
             <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[var(--hs-neutral-500)]">
-                {{ __('An RFQ is always addressed to one verified supplier. Open a business or product page and use the Request Quote button there.') }}
+                {{ __('A Request for Quotation is always addressed to one verified supplier. Open a business or product page and use the Request Quote button there.') }}
             </p>
             @error('shop_id')
                 <p class="mt-3 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>
@@ -68,6 +68,28 @@
                 </flux:button>
                 <flux:button variant="ghost" href="{{ route('storefront.products') }}" wire:navigate>
                     {{ __('Browse products') }}
+                </flux:button>
+            </div>
+        </div>
+    @elseif (($isOwnShop ?? false))
+        {{-- Own shop: sellers cannot send RFQs to themselves. --}}
+        <div class="mx-auto max-w-3xl rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-10 text-center shadow-[var(--hs-shadow-sm)]">
+            <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-[var(--hs-neutral-100)]">
+                <flux:icon name="building-storefront" class="size-7 text-[var(--hs-neutral-400)]" />
+            </div>
+            <h2 class="mt-4 text-lg font-semibold text-[var(--hs-neutral-800)]">{{ __('You cannot request a quote from your own business') }}</h2>
+            <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[var(--hs-neutral-500)]">
+                {{ __('This business belongs to your account. Switch to a different supplier to send a Request for Quotation.') }}
+            </p>
+            @error('shop_id')
+                <p class="mt-3 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>
+            @enderror
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <flux:button variant="primary" icon="magnifying-glass" href="{{ route('storefront.companies') }}" wire:navigate>
+                    {{ __('Browse businesses') }}
+                </flux:button>
+                <flux:button variant="ghost" href="{{ route('account.rfqs.index') }}" wire:navigate>
+                    {{ __('Go to My Requests for Quotation') }}
                 </flux:button>
             </div>
         </div>
@@ -100,7 +122,7 @@
                     <div>
                         <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Set up your buyer profile') }}</h2>
                         <p class="mt-0.5 text-sm text-[var(--hs-neutral-500)]">
-                            {{ __('Suppliers need your business details to send you an accurate quotation. This information is shared when you send an RFQ.') }}
+                            {{ __('Suppliers need your business details to send you an accurate quotation. This information is shared when you send a Request for Quotation.') }}
                         </p>
                     </div>
                 </div>
@@ -109,13 +131,11 @@
             <form wire:submit="saveProfile">
                 <div class="space-y-6 px-6 py-6">
                     {{-- Business Name --}}
-                    <flux:input
-                        wire:model="business_name"
-                        label="{{ __('Business Name') }}"
-                        placeholder="{{ __('Your business name') }}"
-                        badge="{{ __('Required') }}"
-                        required
-                    />
+                    <flux:field>
+                        <flux:label>{{ __('Business Name') }}<span class="text-red-500 ms-0.5" aria-hidden="true">*</span></flux:label>
+                        <flux:input wire:model="business_name" placeholder="{{ __('Your business name') }}" required />
+                        <flux:error name="business_name" />
+                    </flux:field>
 
                     {{-- Billing Address --}}
                     <div class="space-y-4">
@@ -168,12 +188,20 @@
                     <div class="space-y-4">
                         <div>
                             <h3 class="text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('Contact Information') }}</h3>
-                            <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Optional — override your account phone/email for business inquiries.') }}</p>
+                            <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Business contact details shared with the supplier on your RFQ.') }}</p>
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <flux:input wire:model="contact_phone" label="{{ __('Phone') }}" placeholder="+63 917 123 4567" type="tel" />
-                            <flux:input wire:model="contact_email" label="{{ __('Email') }}" placeholder="purchasing@yourbusiness.ph" type="email" />
+                            <flux:field>
+                                <flux:label>{{ __('Phone') }}<span class="text-red-500 ms-0.5" aria-hidden="true">*</span></flux:label>
+                                <flux:input wire:model="contact_phone" placeholder="+63 917 123 4567" type="tel" required />
+                                <flux:error name="contact_phone" />
+                            </flux:field>
+                            <flux:field>
+                                <flux:label>{{ __('Email') }}<span class="text-red-500 ms-0.5" aria-hidden="true">*</span></flux:label>
+                                <flux:input wire:model="contact_email" placeholder="purchasing@yourbusiness.ph" type="email" required />
+                                <flux:error name="contact_email" />
+                            </flux:field>
                         </div>
                     </div>
                 </div>
@@ -191,7 +219,7 @@
                         wire:loading.attr="disabled"
                         wire:target="saveProfile"
                     >
-                        {{ __('Continue to RFQ') }}
+                        {{ __('Continue to Request for Quotation') }}
                     </flux:button>
                 </div>
             </form>
@@ -420,7 +448,7 @@
                             <div class="flex items-start gap-2.5 rounded-[var(--hs-radius-md)] border border-[var(--hs-info-200)] bg-[var(--hs-info-50)] p-4">
                                 <flux:icon name="information-circle" variant="mini" class="mt-0.5 size-4 shrink-0 text-[var(--hs-info-700)]" />
                                 <p class="text-xs leading-relaxed text-[var(--hs-info-800)]">
-                                    {{ __('Once sent, this RFQ cannot be edited. Your business name and address are shared with the supplier as part of the inquiry.') }}
+                                    {{ __('Once sent, this Request for Quotation cannot be edited. Your business name and address are shared with the supplier as part of the inquiry.') }}
                                 </p>
                             </div>
                         </div>
@@ -438,7 +466,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="submit"
                             >
-                                {{ __('Send RFQ') }}
+                                {{ __('Send Request for Quotation') }}
                             </flux:button>
                         </div>
                     </form>

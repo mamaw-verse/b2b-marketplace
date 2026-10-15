@@ -125,8 +125,8 @@ final class BuyerProfileForm extends Component
             'shipping_province' => ['nullable', 'string', 'max:120'],
             'shipping_zip_code' => ['nullable', 'string', 'max:20'],
             'shipping_country_code' => ['nullable', 'string', 'size:2'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['required', 'string', 'max:30'],
+            'contact_email' => ['required', 'email', 'max:255'],
         ];
     }
 

@@ -5,12 +5,19 @@
     </div>
 
     <flux:checkbox.group wire:model="form.product_categories" :label="__('Product Categories')" :description="__('Select the product categories you sell or manufacture.')">
-        @if ($this->categories->isEmpty())
+        @if ($this->categoryGroups->isEmpty())
             <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No categories are available yet.') }}</p>
         @else
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @foreach ($this->categories as $category)
-                    <flux:checkbox wire:key="category-{{ $category->id }}" value="{{ $category->id }}" :label="$category->name" />
+            <div class="space-y-4">
+                @foreach ($this->categoryGroups as $group)
+                    <div wire:key="category-group-{{ $group->id }}">
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">{{ $group->name }}</p>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            @foreach ($group->children->isNotEmpty() ? $group->children : collect([$group]) as $category)
+                                <flux:checkbox wire:key="category-{{ $category->id }}" value="{{ $category->id }}" :label="$category->name" />
+                            @endforeach
+                        </div>
+                    </div>
                 @endforeach
             </div>
         @endif

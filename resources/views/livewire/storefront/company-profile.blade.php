@@ -117,16 +117,24 @@
 
                 {{-- Sidebar (1/3) --}}
                 <aside class="space-y-6">
-                    {{-- Categories --}}
+                    {{-- Categories (grouped by top-level category group) --}}
                     @php
                         $activeCategories = $shop->products->pluck('categories')->flatten()->unique('id');
+                        $groupedCategories = $activeCategories->groupBy(fn ($category) => $category->parent?->name ?? __('Other'));
                     @endphp
                     @if ($activeCategories->count() > 0)
                         <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
                             <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Categories') }}</h3>
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach ($activeCategories as $category)
-                                    <x-hs-badge variant="tag" :label="$category->name" />
+                            <div class="space-y-3">
+                                @foreach ($groupedCategories as $groupName => $categories)
+                                    <div>
+                                        <p class="text-xs font-semibold text-[var(--hs-neutral-500)] mb-1.5">{{ $groupName }}</p>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach ($categories as $category)
+                                                <x-hs-badge variant="tag" :label="$category->name" />
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
                         </section>

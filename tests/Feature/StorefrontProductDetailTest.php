@@ -103,3 +103,15 @@ test('product detail renders sourcing section at bottom', function () {
         ->assertSee('We can help.')
         ->assertSee('Custom Sourcing');
 });
+
+test('product owner does not see the request quote CTA for their own product', function () {
+    $owner = $this->shop->user;
+    $owner->email_verified_at ??= now();
+    $owner->save();
+
+    $this->actingAs($owner)
+        ->get(route('storefront.product', $this->product))
+        ->assertOk()
+        ->assertSee('This is your product')
+        ->assertSee('You cannot request a quote for your own products.');
+});

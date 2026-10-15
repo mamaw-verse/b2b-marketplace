@@ -37,20 +37,40 @@
                     {{ __('All Categories') }}
                 </button>
 
-                @foreach ($this->categories as $category)
-                    <button
-                        wire:click="$set('categoryId', {{ $category->id }})"
-                        @class([
-                            'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
-                            'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-inset ring-[var(--hs-green-200)]' => $categoryId === $category->id,
-                            'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => $categoryId !== $category->id,
-                        ])
-                    >
-                        @if ($categoryId === $category->id)
-                            <span class="mr-2 flex size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]" aria-hidden="true"></span>
+                @foreach ($this->categoryGroups as $group)
+                    <div wire:key="category-group-{{ $group->id }}" class="pt-2 first:pt-0">
+                        <button
+                            wire:click="$set('categoryId', {{ $group->id }})"
+                            @class([
+                                'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200',
+                                'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-inset ring-[var(--hs-green-200)]' => $categoryId === $group->id,
+                                'text-[var(--hs-neutral-800)] hover:bg-[var(--hs-neutral-100)]' => $categoryId !== $group->id,
+                            ])
+                        >
+                            @if ($categoryId === $group->id)
+                                <span class="mr-2 flex size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]" aria-hidden="true"></span>
+                            @endif
+                            {{ $group->name }}
+                        </button>
+
+                        @if ($group->children->isNotEmpty())
+                            <div class="mt-1 space-y-1">
+                                @foreach ($group->children as $category)
+                                    <button
+                                        wire:key="category-{{ $category->id }}"
+                                        wire:click="$set('categoryId', {{ $category->id }})"
+                                        @class([
+                                            'flex w-full items-center rounded-lg py-1.5 pl-8 pr-3 text-sm font-medium transition-all duration-200',
+                                            'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] shadow-sm ring-1 ring-inset ring-[var(--hs-green-200)]' => $categoryId === $category->id,
+                                            'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => $categoryId !== $category->id,
+                                        ])
+                                    >
+                                        {{ $category->name }}
+                                    </button>
+                                @endforeach
+                            </div>
                         @endif
-                        {{ $category->name }}
-                    </button>
+                    </div>
                 @endforeach
             </nav>
         </aside>

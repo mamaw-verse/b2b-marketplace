@@ -142,7 +142,7 @@ test('wizard has 4 total steps', function () {
 
     $component = Livewire::test(OnboardingWizard::class)->instance();
 
-    expect(OnboardingWizard::TOTAL_STEPS)->toBe(5);
+    expect(OnboardingWizard::TOTAL_STEPS)->toBe(4);
 });
 
 test('resetDocument detaches the media and clears the stuck document', function () {
@@ -368,7 +368,7 @@ test('submit is a no-op when the application is already submitted', function () 
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 5)
+        ->set('currentStep', 4)
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -414,9 +414,7 @@ test('stepForErrorKey maps field keys and prefixes to the correct step', functio
         ->and($component->stepForErrorKey('form.company_description'))->toBe(1)
         ->and($component->stepForErrorKey('form.products_description'))->toBe(1)
         ->and($component->stepForErrorKey('form.export_readiness_status'))->toBe(2)
-        ->and($component->stepForErrorKey('form.value_chain_positions'))->toBe(3)
-        ->and($component->stepForErrorKey('form.capabilities'))->toBe(3)
-        ->and($component->stepForErrorKey('documentUploads.business_permit'))->toBe(5)
+        ->and($component->stepForErrorKey('documentUploads.business_permit'))->toBe(4)
         ->and($component->stepForErrorKey('unknown.key'))->toBeNull();
 });
 
@@ -491,9 +489,9 @@ test('a verified document can be replaced when the application requires revision
 
     $this->actingAs($seller);
 
-    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 5);
+    $component = Livewire::test(OnboardingWizard::class)->set('currentStep', 4);
 
-    // The verified document loads and step 5 offers a way to replace it.
+    // The verified document loads and step 4 offers a way to replace it.
     expect($component->get('uploadedDocuments'))->toHaveKey('business_permit');
     $component->assertSee(__('Replace'));
 
@@ -525,7 +523,7 @@ test('setting documentUploads auto-triggers uploadDocument without manual button
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 5)
+        ->set('currentStep', 4)
         ->call('uploadDocument', 'business_permit', app(MediaUploadService::class))
         // No file set — uploadDocument returns early gracefully
         ->assertHasNoErrors();
@@ -542,7 +540,7 @@ test('step 4 document upload dropzone has no manual upload button', function () 
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 5)
+        ->set('currentStep', 4)
         ->assertDontSee('wire:click="uploadDocument')
         ->assertSee('Drag & drop, or click to browse');
 });
@@ -554,7 +552,7 @@ test('step 4 document dropzone wires a dropped file to the hidden input', functi
     $this->actingAs($seller);
 
     Livewire::test(OnboardingWizard::class)
-        ->set('currentStep', 5)
+        ->set('currentStep', 4)
         ->assertSee('dataTransfer?.files', escape: false)
         ->assertSee('dispatchEvent(new Event(\'change\', { bubbles: true }))', escape: false);
 });
@@ -605,7 +603,7 @@ test('a stale or out-of-range step in the URL is clamped to valid bounds', funct
 
     Livewire::withQueryParams(['currentStep' => 99])
         ->test(OnboardingWizard::class)
-        ->assertSet('currentStep', 5);
+        ->assertSet('currentStep', 4);
 
     Livewire::withQueryParams(['currentStep' => 0])
         ->test(OnboardingWizard::class)

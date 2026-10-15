@@ -184,6 +184,12 @@ final class RfqCreateForm extends Component
             return;
         }
 
+        if ((int) $shop->user_id === (int) $user->id) {
+            $this->addError('shop_id', 'You cannot send an RFQ to your own business.');
+
+            return;
+        }
+
         // Persist the product the RFQ is asking a quotation for, so it can be
         // shown on the buyer and admin RFQ detail pages. Only link products that
         // are published and actually belong to the targeted shop.
@@ -259,6 +265,8 @@ final class RfqCreateForm extends Component
             ? Shop::with('certificates')->where('status', 'active')->find($this->shop_id)
             : null;
 
+        $isOwnShop = $shop !== null && (int) $shop->user_id === (int) Auth::id();
+
         // Only surface the reference product when it is published and actually
         // belongs to the shop this RFQ is addressed to.
         $product = $shop && $this->product_id
@@ -271,6 +279,7 @@ final class RfqCreateForm extends Component
         return view('livewire.account.rfq-create-form', [
             'shop' => $shop,
             'product' => $product,
+            'isOwnShop' => $isOwnShop,
         ]);
     }
 
@@ -318,8 +327,8 @@ final class RfqCreateForm extends Component
             'shipping_province' => ['nullable', 'string', 'max:120'],
             'shipping_zip_code' => ['nullable', 'string', 'max:20'],
             'shipping_country_code' => ['nullable', 'string', 'size:2'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['required', 'string', 'max:30'],
+            'contact_email' => ['required', 'email', 'max:255'],
         ];
     }
 

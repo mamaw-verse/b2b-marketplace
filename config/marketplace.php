@@ -39,6 +39,7 @@ return [
         ['country_code' => 'BN', 'display_name' => 'Brunei',                'card_heading' => 'BRUNEI DARUSSALAM',       'flag' => '🇧🇳', 'locale' => 'ms', 'url' => env('PORTAL_BN_URL', null), 'landmark_image' => '/images/countries/bn.jpg'],
         ['country_code' => 'ID', 'display_name' => 'Indonesia',             'card_heading' => 'INDONESIA',               'flag' => '🇮🇩', 'locale' => 'id', 'url' => env('PORTAL_ID_URL', null), 'landmark_image' => '/images/countries/id.jpg'],
         ['country_code' => 'TR', 'display_name' => 'Turkey',                'card_heading' => 'TÜRKIYE',                 'flag' => '🇹🇷', 'locale' => 'tr', 'url' => env('PORTAL_TR_URL', null), 'landmark_image' => '/images/countries/tr.jpg'],
+        ['country_code' => 'KE', 'display_name' => 'Kenya',                 'card_heading' => 'KENYA',                   'flag' => '🇰🇪', 'locale' => 'en', 'url' => env('PORTAL_KE_URL', null), 'landmark_image' => '/images/countries/ke.jpg'],
     ],
 
     /*

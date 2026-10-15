@@ -198,6 +198,137 @@ curl http://localhost/api/v1/products/1 | jq
 
 ---
 
+## Production Deployment (1halalstore.com)
+
+Server: `54.169.199.14` (Ubuntu 24.04, Apache, PHP 8.4)
+SSH key: `1halal.pem` (keep in project root, never commit)
+
+All scripts are in `bin/`. Run them from the **project root**.
+
+### Prerequisites
+
+- DNS `A` records for `1halalstore.com` and `www.1halalstore.com` must point to `54.169.199.14` before running Certbot
+- `1halal.pem` must be in the project root with permissions `600`
+- `rsync` must be installed locally (`brew install rsync`)
+
+---
+
+### Step 1 — Provision the server (run once)
+
+```bash
+ssh -i 1halal.pem ubuntu@54.169.199.14 'bash -s' < bin/server-setup.sh
+```
+
+Installs and configures:
+- Apache 2 (with `mod_proxy`, `mod_rewrite`, `mod_ssl`, PHP-FPM)
+- PHP 8.4 + all required extensions (pgsql, redis, mbstring, xml, curl, zip, bcmath, gd, intl, opcache)
+- PostgreSQL 17 + PostGIS 3 + pg_trgm
+- Redis (bound to localhost)
+- Node.js 22 + Composer
+- Supervisor (2× queue workers, Reverb WebSocket server, scheduler loop)
+- Certbot (Let's Encrypt)
+
+At the end, Certbot will prompt you to issue the SSL cert. Ensure DNS is live before confirming.
+
+> **Note:** If Supervisor errors about missing log directory, run:
+> ```bash
+> ssh -i 1halal.pem ubuntu@54.169.199.14 '
+>   sudo mkdir -p /var/www/1halalstore/storage/logs
+>   sudo chown -R www-data:www-data /var/www/1halalstore/storage
+>   sudo chmod -R 775 /var/www/1halalstore/storage
+>   sudo supervisorctl reread && sudo supervisorctl update
+> '
+> ```
+
+---
+
+### Step 2 — Write the production `.env` (run once, or to update secrets)
+
+```bash
+bin/env.production.sh
+```
+
+Prompts you interactively for all credentials (DB, Redis, Reverb, Turnstile, DLT, mail, geocoding). The `.env` is written locally to `/tmp`, uploaded via a single SCP connection, then installed at `/var/www/1halalstore/.env`. Nothing is stored on your Mac permanently.
+
+Optionally creates the PostgreSQL database + enables PostGIS and pg_trgm extensions.
+
+Verify success:
+```bash
+ssh -i 1halal.pem ubuntu@54.169.199.14 'sudo cat /var/www/1halalstore/.env'
+```
+
+---
+
+### Step 3 — Deploy (run on every release)
+
+```bash
+bin/deploy.sh
+```
+
+Does the following in order:
+1. Builds frontend assets locally (`npm run build`)
+2. `rsync`s code to server (excludes `.env`, `vendor`, `node_modules`, `storage`, `*.pem`)
+3. Fixes file permissions (`www-data` ownership, `775` on storage)
+4. `composer install --no-dev --optimize-autoloader`
+5. `php artisan migrate --force`
+6. Warms caches: `config:cache`, `route:cache`, `view:cache`, `event:cache`, `icons:cache`
+7. Restarts Supervisor workers, PHP-FPM, and Apache
+
+---
+
+### SSL Certificate (Let's Encrypt)
+
+Certbot runs as part of `server-setup.sh`. To renew manually or re-issue:
+
+```bash
+ssh -i 1halal.pem ubuntu@54.169.199.14 '
+  sudo certbot --apache \
+    -d 1halalstore.com \
+    -d www.1halalstore.com \
+    --non-interactive \
+    --agree-tos \
+    --email ops@1halalstore.com \
+    --redirect
+  sudo systemctl enable certbot.timer
+  sudo systemctl start certbot.timer
+'
+```
+
+> DNS must point to the server IP before running Certbot. If behind Cloudflare, temporarily disable the proxy (grey cloud) during cert issuance.
+
+---
+
+### Adding SES (email) later
+
+Edit `.env` on the server:
+```bash
+ssh -i 1halal.pem ubuntu@54.169.199.14 'sudo nano /var/www/1halalstore/.env'
+```
+Uncomment and fill in the SES block, then restart:
+```bash
+ssh -i 1halal.pem ubuntu@54.169.199.14 'cd /var/www/1halalstore && sudo -u www-data php8.4 artisan config:cache'
+```
+
+### Adding S3 (file storage) later
+
+Same as above — uncomment the S3 block in `.env`, set `FILESYSTEM_DISK=s3`, then run `config:cache`.
+
+---
+
+### Production Troubleshooting
+
+| Issue | Fix |
+|---|---|
+| 502 Bad Gateway | `sudo systemctl status php8.4-fpm` — likely FPM is down |
+| WebSocket not connecting | `sudo supervisorctl status 1halalstore-reverb` |
+| Queue jobs not processing | `sudo supervisorctl status 1halalstore-worker_00` |
+| Scheduler not running | `sudo supervisorctl status 1halalstore-scheduler` |
+| View/config changes not reflecting | `ssh ... 'cd /var/www/1halalstore && sudo -u www-data php8.4 artisan config:cache && php8.4 artisan view:cache'` |
+| Check app logs | `ssh ... 'sudo tail -f /var/www/1halalstore/storage/logs/laravel.log'` |
+| Certbot DNS error (404 challenge) | Ensure DNS A record points to server IP, not Cloudflare proxy |
+
+---
+
 ## Troubleshooting
 
 | Issue | Fix |

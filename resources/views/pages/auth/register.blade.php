@@ -61,57 +61,153 @@
             placeholder="you@business.com"
         />
 
-        <!-- Password -->
-        <flux:field>
-            <flux:label>{{ __('Create password') }}</flux:label>
-            <div x-data="{ show: false }" class="relative">
-                <input
-                    name="password"
-                    :type="show ? 'text' : 'password'"
-                    required
-                    autocomplete="new-password"
-                    placeholder="{{ __('At least 8 characters') }}"
-                    passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                    class="w-full rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
-                />
-                <button
-                    type="button"
-                    @click="show = !show"
-                    :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
-                >
-                    <flux:icon.eye x-show="!show" class="size-5" />
-                    <flux:icon.eye-slash x-show="show" x-cloak class="size-5" />
-                </button>
-            </div>
-            <flux:error name="password" />
-        </flux:field>
+        <!-- Password + Strength Meter -->
+        <div x-data="{
+            password: '',
+            showPassword: false,
+            showConfirm: false,
 
-        <!-- Confirm Password -->
-        <flux:field>
-            <flux:label>{{ __('Confirm password') }}</flux:label>
-            <div x-data="{ show: false }" class="relative">
-                <input
-                    name="password_confirmation"
-                    :type="show ? 'text' : 'password'"
-                    required
-                    autocomplete="new-password"
-                    placeholder="{{ __('Confirm password') }}"
-                    passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                    class="w-full rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
-                />
-                <button
-                    type="button"
-                    @click="show = !show"
-                    :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
-                >
-                    <flux:icon.eye x-show="!show" class="size-5" />
-                    <flux:icon.eye-slash x-show="show" x-cloak class="size-5" />
-                </button>
-            </div>
-            <flux:error name="password_confirmation" />
-        </flux:field>
+            get hasMinLength()  { return this.password.length >= 12; },
+            get hasUppercase()  { return /[A-Z]/.test(this.password); },
+            get hasLowercase()  { return /[a-z]/.test(this.password); },
+            get hasNumber()     { return /[0-9]/.test(this.password); },
+            get hasSymbol()     { return /[^A-Za-z0-9]/.test(this.password); },
+
+            get metCount() {
+                return [this.hasMinLength, this.hasUppercase, this.hasLowercase, this.hasNumber, this.hasSymbol]
+                    .filter(Boolean).length;
+            },
+
+            /** 0 = empty, 1 = weak, 2 = fair, 3 = good, 4 = strong */
+            get strength() {
+                if (this.password.length === 0) return 0;
+                if (this.metCount <= 2) return 1;
+                if (this.metCount === 3) return 2;
+                if (this.metCount === 4) return 3;
+                return 4;
+            },
+
+            get strengthLabel() {
+                return ['', '{{ __('Weak') }}', '{{ __('Fair') }}', '{{ __('Good') }}', '{{ __('Strong') }}'][this.strength];
+            },
+
+            get strengthColor() {
+                return [
+                    '',
+                    'bg-[var(--hs-danger-500)]',
+                    'bg-[var(--hs-warning-500)]',
+                    'bg-[var(--hs-info-500)]',
+                    'bg-[var(--hs-success-500)]',
+                ][this.strength];
+            },
+
+            get strengthTextColor() {
+                return [
+                    '',
+                    'text-[var(--hs-danger-700)]',
+                    'text-[var(--hs-warning-700)]',
+                    'text-[var(--hs-info-700)]',
+                    'text-[var(--hs-success-700)]',
+                ][this.strength];
+            },
+        }">
+
+            {{-- Password input --}}
+            <flux:field>
+                <flux:label>{{ __('Create password') }}</flux:label>
+                <div class="relative">
+                    <input
+                        name="password"
+                        :type="showPassword ? 'text' : 'password'"
+                        x-model="password"
+                        required
+                        autocomplete="new-password"
+                        placeholder="{{ __('At least 12 characters') }}"
+                        passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                        class="w-full rounded-[var(--hs-radius-sm)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
+                        aria-describedby="password-strength-desc"
+                    />
+                    <button
+                        type="button"
+                        @click="showPassword = !showPassword"
+                        :aria-label="showPassword ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
+                    >
+                        <flux:icon.eye x-show="!showPassword" class="size-5" />
+                        <flux:icon.eye-slash x-show="showPassword" x-cloak class="size-5" />
+                    </button>
+                </div>
+
+                {{-- Strength meter bar (only shown once user starts typing) --}}
+                <div x-show="password.length > 0" x-cloak class="mt-2 space-y-1.5" id="password-strength-desc">
+                    {{-- Segmented bar --}}
+                    <div class="flex gap-1" role="meter" :aria-valuenow="strength" aria-valuemin="0" aria-valuemax="4" :aria-label="'{{ __('Password strength') }}: ' + strengthLabel">
+                        <template x-for="segment in 4" :key="segment">
+                            <div
+                                class="h-1.5 flex-1 rounded-full transition-colors duration-[var(--hs-duration-normal)]"
+                                :class="segment <= strength ? strengthColor : 'bg-[var(--hs-neutral-200)]'"
+                            ></div>
+                        </template>
+                    </div>
+                    {{-- Label --}}
+                    <p class="text-xs font-medium transition-colors duration-[var(--hs-duration-normal)]" :class="strengthTextColor" x-text="strengthLabel" aria-live="polite"></p>
+                </div>
+
+                {{-- Requirements checklist --}}
+                <ul x-show="password.length > 0" x-cloak class="mt-2 space-y-1" aria-label="{{ __('Password requirements') }}">
+                    <template x-for="[met, label] in [
+                        [hasMinLength, '{{ __('At least 12 characters') }}'],
+                        [hasUppercase, '{{ __('Uppercase letter (A–Z)') }}'],
+                        [hasLowercase, '{{ __('Lowercase letter (a–z)') }}'],
+                        [hasNumber,    '{{ __('Number (0–9)') }}'],
+                        [hasSymbol,    '{{ __('Symbol (!@#$ …)') }}'],
+                    ]" :key="label">
+                        <li class="flex items-center gap-1.5 text-xs transition-colors duration-[var(--hs-duration-fast)]"
+                            :class="met ? 'text-[var(--hs-success-700)]' : 'text-[var(--hs-neutral-500)]'"
+                            :aria-label="label + (met ? ' — met' : ' — not met')"
+                        >
+                            <svg x-show="met" class="size-3.5 shrink-0" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+                                <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.15"/>
+                                <path d="M5 8l2.5 2.5L11 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <svg x-show="!met" class="size-3.5 shrink-0 text-[var(--hs-neutral-300)]" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            <span x-text="label"></span>
+                        </li>
+                    </template>
+                </ul>
+
+                <flux:error name="password" />
+            </flux:field>
+
+            {{-- Confirm Password --}}
+            <flux:field class="mt-4">
+                <flux:label>{{ __('Confirm password') }}</flux:label>
+                <div class="relative">
+                    <input
+                        name="password_confirmation"
+                        :type="showConfirm ? 'text' : 'password'"
+                        required
+                        autocomplete="new-password"
+                        placeholder="{{ __('Confirm password') }}"
+                        passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                        class="w-full rounded-[var(--hs-radius-sm)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
+                    />
+                    <button
+                        type="button"
+                        @click="showConfirm = !showConfirm"
+                        :aria-label="showConfirm ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
+                    >
+                        <flux:icon.eye x-show="!showConfirm" class="size-5" />
+                        <flux:icon.eye-slash x-show="showConfirm" x-cloak class="size-5" />
+                    </button>
+                </div>
+                <flux:error name="password_confirmation" />
+            </flux:field>
+
+        </div>{{-- end password x-data --}}
 
         <!-- Turnstile -->
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

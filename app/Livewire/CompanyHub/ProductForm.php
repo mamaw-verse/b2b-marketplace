@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Flux\Flux;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -200,12 +201,19 @@ final class ProductForm extends Component
     }
 
     /**
-     * @return array<string, mixed>
+     * Selectable categories grouped under their top-level parent groups.
+     * A group with no children is itself selectable and is listed alone.
+     *
+     * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): array
+    public function categoryGroups()
     {
-        return Category::orderBy('name')->pluck('name', 'id')->all();
+        return Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     public function render()

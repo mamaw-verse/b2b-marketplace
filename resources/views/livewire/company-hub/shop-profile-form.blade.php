@@ -80,18 +80,25 @@
                     <flux:label>{{ __('Product Categories') }}</flux:label>
                     <flux:text class="mt-1 mb-3">{{ __('Select the product categories you sell or manufacture.') }}</flux:text>
 
-                    @if ($this->categories->isEmpty())
+                    @if ($this->categoryGroups->isEmpty())
                         <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No categories are available yet.') }}</p>
                     @else
-                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            @foreach ($this->categories as $category)
-                                <label
-                                    wire:key="category-{{ $category->id }}"
-                                    class="flex items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 text-sm text-[var(--hs-neutral-800)] cursor-pointer hover:border-[var(--hs-green-400)] transition"
-                                >
-                                    <flux:checkbox wire:model="product_categories" value="{{ $category->id }}" />
-                                    <span>{{ $category->name }}</span>
-                                </label>
+                        <div class="space-y-4">
+                            @foreach ($this->categoryGroups as $group)
+                                <div wire:key="category-group-{{ $group->id }}">
+                                    <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">{{ $group->name }}</p>
+                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                        @foreach ($group->children->isNotEmpty() ? $group->children : collect([$group]) as $category)
+                                            <label
+                                                wire:key="category-{{ $category->id }}"
+                                                class="flex items-center gap-2 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 text-sm text-[var(--hs-neutral-800)] cursor-pointer hover:border-[var(--hs-green-400)] transition"
+                                            >
+                                                <flux:checkbox wire:model="product_categories" value="{{ $category->id }}" />
+                                                <span>{{ $category->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
                     @endif

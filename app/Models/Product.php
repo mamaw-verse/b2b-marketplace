@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Laravel\Scout\Builder as ScoutBuilder;
 use Laravel\Scout\Searchable;
 
@@ -64,7 +63,13 @@ final class Product extends Model
             'description' => $this->description ?? '',
             'shop_name' => $this->shop->storefront_name ?? '',
             'shop_id' => (string) $this->shop_id,
-            'categories' => $this->categories->pluck('name')->toArray(),
+            'categories' => $this->categories
+                ->loadMissing('parent')
+                ->flatMap(fn (Category $category) => [$category->name, $category->parent?->name])
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray(),
             'price_from' => (float) $this->variants()->min('price'),
             'currency' => $this->variants()->value('currency') ?? 'PHP',
             'average_rating' => (float) ($this->average_rating ?? 0),
@@ -218,7 +223,10 @@ final class Product extends Model
     }
 
     /**
-     * Get the full S3 URL for the featured image.
+     * Get the proxied URL for the featured image.
+     *
+     * Streams through the app (not a direct S3 URL) so a private bucket
+     * keeps working — see the `products.featured-image` route.
      */
     protected function featuredImageUrl(): Attribute
     {
@@ -229,7 +237,7 @@ final class Product extends Model
 
             return str_starts_with($this->featured_image_path, 'http')
                 ? $this->featured_image_path
-                : Storage::disk('s3')->url($this->featured_image_path);
+                : route('products.featured-image', $this);
         });
     }
 }

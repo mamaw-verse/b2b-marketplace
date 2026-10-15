@@ -89,7 +89,7 @@
             </flux:toast.group>
         @endpersist
 
-        @fluxScripts
         @livewireScripts
+        @fluxScripts
     </body>
 </html>

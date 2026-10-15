@@ -62,7 +62,7 @@
         <flux:toast />
     </flux:toast.group>
 
-    @fluxScripts
     @livewireScripts
+    @fluxScripts
 </body>
 </html>

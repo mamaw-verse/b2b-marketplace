@@ -37,7 +37,7 @@ final class MerchantShow extends Component
             'certificationApplications',
             'latestSubscription',
             'certificates.media',
-            'categories',
+            'categories.parent',
             'documents',
         ]);
     }
@@ -62,7 +62,7 @@ final class MerchantShow extends Component
             return null;
         }
 
-        return Product::with(['shop', 'variants', 'gallery', 'categories'])
+        return Product::with(['shop', 'variants', 'gallery', 'categories.parent'])
             ->find($this->previewProductId);
     }
 

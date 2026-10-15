@@ -16,7 +16,7 @@ final class SubscriptionPlanSeeder extends Seeder
             [
                 'country_scope' => null,
                 'name' => 'Annual Membership Plan',
-                'price' => '0.00',
+                'price' => '600.00',
                 'currency' => 'PHP',
                 'billing_period' => 'yearly',
                 'trial_days' => config('marketplace.initial_subscription_trial_days', 180),

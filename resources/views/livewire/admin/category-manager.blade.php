@@ -9,8 +9,8 @@
         </div>
 
         {{-- Categories Table --}}
-        <div class="overflow-x-auto">
-            <flux:table>
+        <div>
+            <flux:table class="w-full">
                 <flux:table.columns>
                     <flux:table.column>{{ __('Name') }}</flux:table.column>
                     <flux:table.column>{{ __('Slug') }}</flux:table.column>
@@ -19,20 +19,49 @@
                 </flux:table.columns>
 
                 <flux:table.rows>
-                    @forelse ($this->categories as $category)
-                        <flux:table.row :key="$category->id" class="hover:bg-[var(--hs-neutral-50)] transition">
-                            <flux:table.cell variant="strong">{{ $category->name }}</flux:table.cell>
+                    @forelse ($this->categoryGroups as $group)
+                        {{-- Parent group row --}}
+                        <flux:table.row :key="'group-'.$group->id" class="bg-[var(--hs-neutral-50)]">
                             <flux:table.cell>
-                                <code class="rounded-[var(--hs-radius-tag)] bg-[var(--hs-neutral-100)] px-2 py-0.5 text-xs font-mono text-[var(--hs-neutral-700)]">{{ $category->slug }}</code>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-[var(--hs-neutral-900)]">{{ $group->name }}</span>
+                                    <span class="inline-flex items-center rounded-full bg-[var(--hs-neutral-100)] px-2 py-0.5 text-[0.65rem] font-medium text-[var(--hs-neutral-500)]">
+                                        {{ trans_choice(':count subcategory|:count subcategories', $group->children->count(), ['count' => $group->children->count()]) }}
+                                    </span>
+                                </div>
                             </flux:table.cell>
-                            <flux:table.cell class="text-[var(--hs-neutral-600)]">{{ Str::limit($category->description ?? '—', 60) }}</flux:table.cell>
+                            <flux:table.cell>
+                                <code class="rounded-[var(--hs-radius-tag)] bg-[var(--hs-neutral-100)] px-2 py-0.5 text-xs font-mono text-[var(--hs-neutral-700)]">{{ $group->slug }}</code>
+                            </flux:table.cell>
+                            <flux:table.cell class="w-full max-w-0 whitespace-normal break-words text-[var(--hs-neutral-600)]">{{ $group->description ?? '—' }}</flux:table.cell>
                             <flux:table.cell align="end">
                                 <div class="flex justify-end gap-1">
-                                    <flux:button variant="ghost" size="sm" icon="pencil" href="{{ route('admin.categories.edit', $category) }}" wire:navigate />
-                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmDelete({{ $category->id }})" />
+                                    <flux:button variant="ghost" size="sm" icon="pencil" href="{{ route('admin.categories.edit', $group) }}" wire:navigate />
+                                    @if ($group->children->isEmpty())
+                                        <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmDelete({{ $group->id }})" />
+                                    @endif
                                 </div>
                             </flux:table.cell>
                         </flux:table.row>
+
+                        {{-- Subcategory rows --}}
+                        @foreach ($group->children as $category)
+                            <flux:table.row :key="$category->id" class="hover:bg-[var(--hs-neutral-50)] transition">
+                                <flux:table.cell>
+                                    <span class="pl-6 text-[var(--hs-neutral-700)]">{{ $category->name }}</span>
+                                </flux:table.cell>
+                                <flux:table.cell>
+                                    <code class="rounded-[var(--hs-radius-tag)] bg-[var(--hs-neutral-100)] px-2 py-0.5 text-xs font-mono text-[var(--hs-neutral-700)]">{{ $category->slug }}</code>
+                                </flux:table.cell>
+                                <flux:table.cell class="w-full max-w-0 whitespace-normal break-words text-[var(--hs-neutral-600)]">{{ $category->description ?? '—' }}</flux:table.cell>
+                                <flux:table.cell align="end">
+                                    <div class="flex justify-end gap-1">
+                                        <flux:button variant="ghost" size="sm" icon="pencil" href="{{ route('admin.categories.edit', $category) }}" wire:navigate />
+                                        <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmDelete({{ $category->id }})" />
+                                    </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
                     @empty
                         <flux:table.row>
                             <flux:table.cell colspan="4" class="text-center">

@@ -43,12 +43,28 @@ final class CompanyDirectory extends Component
     }
 
     /**
+     * Top-level groups with their subcategories for the sidebar filter.
+     *
      * @return Collection<int, Category>
      */
     #[Computed]
-    public function categories(): Collection
+    public function categoryGroups(): Collection
     {
-        return Category::orderBy('name')->get();
+        return Category::with('children')
+            ->roots()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * The currently selected category (group or subcategory), for the
+     * sidebar active state.
+     */
+    #[Computed]
+    public function selectedCategory(): ?Category
+    {
+        return $this->categoryId ? Category::find($this->categoryId) : null;
     }
 
     /**
@@ -66,6 +82,8 @@ final class CompanyDirectory extends Component
             if ($this->categoryId) {
                 $category = Category::find($this->categoryId);
                 if ($category) {
+                    // Filtering by group name also matches shops tagged with
+                    // its subcategories (the index carries parent names too).
                     $search->where('categories', $category->name);
                 }
             }
@@ -77,7 +95,9 @@ final class CompanyDirectory extends Component
             ->where('country_code', $instanceCountry);
 
         if ($this->categoryId) {
-            $query->whereHas('categories', fn ($q) => $q->where('categories.id', $this->categoryId));
+            $query->whereHas('categories', fn ($q) => $q
+                ->where('categories.id', $this->categoryId)
+                ->orWhere('categories.parent_id', $this->categoryId));
         }
 
         $query = match ($this->sortBy) {

@@ -58,13 +58,13 @@ test('homepage sections have smooth-scroll anchor IDs', function () {
     $response->assertSee('id="join"', false);
 });
 
-test('navigation header contains anchor links for homepage sections', function () {
+test('navigation header contains primary storefront links', function () {
     $response = $this->get(route('home'));
 
-    $response->assertSee('Who We Serve');
-    $response->assertSee('What We Offer');
-    $response->assertSee('Supply Chain');
-    $response->assertSee('Join Us');
+    $response->assertSee('Products');
+    $response->assertSee('Certification');
+    $response->assertSee('Sourcing');
+    $response->assertSee('About');
 });
 
 test('homepage renders custom sourcing section', function () {

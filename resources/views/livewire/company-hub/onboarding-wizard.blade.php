@@ -11,17 +11,16 @@
             @if (!in_array($onboardingStatus, ['submitted', 'approved', 'rejected']))
             <nav aria-label="{{ __('Onboarding progress') }}" class="mb-4">
                 <ol class="flex items-center">
-                    @for ($step = 1; $step <= 5; $step++)
+                    @for ($step = 1; $step <= 4; $step++)
                         @php
                             $stepLabel = match ($step) {
                                 1 => __('Business'),
                                 2 => __('Operations'),
-                                3 => __('Value Chain'),
-                                4 => __('Certificates'),
-                                5 => __('Documents'),
+                                3 => __('Certificates'),
+                                4 => __('Documents'),
                             };
                         @endphp
-                        <li class="flex items-center {{ $step < 5 ? 'flex-1' : '' }}" @if ($step === $currentStep) aria-current="step" @endif>
+                        <li class="flex items-center {{ $step < 4 ? 'flex-1' : '' }}" @if ($step === $currentStep) aria-current="step" @endif>
                             {{-- Step circle --}}
                             <div class="flex flex-col items-center">
                                 <div @class([
@@ -45,7 +44,7 @@
                                 </span>
                             </div>
                             {{-- Connecting line --}}
-                            @if ($step < 5)
+                            @if ($step < 4)
                                 <div @class([
                                     'flex-1 h-0.5 mx-1 sm:mx-2',
                                     'bg-[var(--hs-green-600)]' => $step < $currentStep,
@@ -57,9 +56,9 @@
                 </ol>
                 {{-- Mobile-only caption, since labels hide below sm: --}}
                 <p class="mt-2 text-xs font-medium text-[var(--hs-green-700)] sm:hidden">
-                    {{ __('Step :current of 5 — :label', ['current' => $currentStep, 'label' => match ($currentStep) {
+                    {{ __('Step :current of 4 — :label', ['current' => $currentStep, 'label' => match ($currentStep) {
                         1 => __('Business'), 2 => __('Operations'),
-                        3 => __('Value Chain'), 4 => __('Certificates'), 5 => __('Documents'),
+                        3 => __('Certificates'), 4 => __('Documents'),
                     }]) }}
                 </p>
             </nav>
@@ -189,7 +188,7 @@
                 @endif
 
                 {{-- Step content --}}
-                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-6 [&_[data-flux-error]]:mt-1 [&_*:data-flux-label]:mb-1.5">
+                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-6 [&_[data-flux-error]]:mt-1 [&_[data-flux-label]]:mb-1.5">
                     @switch($currentStep)
                         @case(1)
                             @include('livewire.company-hub.steps.step-1-company-profile')
@@ -198,12 +197,9 @@
                             @include('livewire.company-hub.steps.step-2-operations')
                             @break
                         @case(3)
-                            @include('livewire.company-hub.steps.step-4-value-chain')
-                            @break
-                        @case(4)
                             @include('livewire.company-hub.steps.step-3-halal-certification')
                             @break
-                        @case(5)
+                        @case(4)
                             @include('livewire.company-hub.steps.step-5-documents')
                             @break
                     @endswitch
@@ -236,7 +232,7 @@
                     </div>
 
                     <div>
-                        @if ($currentStep < 5)
+                        @if ($currentStep < 4)
                             <flux:button
                                 wire:click="nextStep"
                                 wire:loading.attr="disabled"
