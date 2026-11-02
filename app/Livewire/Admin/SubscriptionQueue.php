@@ -279,8 +279,12 @@ final class SubscriptionQueue extends Component
      * Pending payment subscriptions with their latest payment attempt details.
      * Used in the reconciliation tab.
      *
-     * Includes both DLT-stuck attempts (have a dlt_merchant_transaction_id) and
-     * manual payment attempts awaiting admin verification.
+     * Includes all subscriptions stuck in the `pending_payment` status:
+     * - Subscriptions with no payment attempts yet (user abandoned before starting payment).
+     * - Manual payment attempts awaiting admin verification.
+     * - DLT payment attempts that are still pending (regardless of whether the
+     *   merchant transaction ID was assigned — covers users who closed the browser
+     *   before or after the DLT redirect).
      *
      * @return LengthAwarePaginator<Subscription>
      */
@@ -293,15 +297,19 @@ final class SubscriptionQueue extends Component
                 'plan',
                 'paymentAttempts' => fn ($q) => $q->with('receiptMedia')->latest()->limit(1),
             ])
-            ->whereHas('paymentAttempts', fn ($q) => $q
-                ->where('status', 'pending')
-                ->where(fn ($inner) => $inner
+            ->where('status', 'pending_payment')
+            ->where(fn ($q) => $q
+                // No attempt started yet — user abandoned before the payment page.
+                ->doesntHave('paymentAttempts')
+                // Manual payment pending admin verification.
+                ->orWhereHas('paymentAttempts', fn ($inner) => $inner
+                    ->where('status', 'pending')
                     ->where('payment_method', 'manual')
-                    ->orWhere(fn ($dlt) => $dlt
-                        ->where('payment_method', 'dlt')
-                        ->whereNotNull('dlt_merchant_transaction_id')
-                        ->where('dlt_merchant_transaction_id', '<>', '')
-                    )
+                )
+                // DLT attempt still unresolved (with or without a merchant transaction ID).
+                ->orWhereHas('paymentAttempts', fn ($inner) => $inner
+                    ->where('status', 'pending')
+                    ->where('payment_method', 'dlt')
                 )
             )
             ->latest('id')

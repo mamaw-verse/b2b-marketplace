@@ -58,6 +58,30 @@ sudo apt-get install -y -qq \
     php${PHP_VERSION}-opcache \
     php${PHP_VERSION}-pcov
 
+# PHP security hardening — "php2shell" disclosures (Oct 2026)
+# CVE-2026-115560 (unpatched): RCE via session upload progress. PHP's official
+# mitigation until the next bugfix release is session.upload_progress.enabled=0.
+# Laravel never uses this feature. fatal_error_backtraces=0 additionally blocks
+# the confirmed CVE-2026-109619 path on PHP 8.5 (no-op on <= 8.4).
+for SAPI in fpm cli; do
+    sudo tee "/etc/php/${PHP_VERSION}/${SAPI}/conf.d/99-hardening.ini" > /dev/null <<'HARDENING'
+[PHP]
+session.upload_progress.enabled = 0
+fatal_error_backtraces = 0
+HARDENING
+done
+
+# Upload limits — defaults (upload_max_filesize=2M, post_max_size=8M) reject
+# product/certificate images. App-level validation still caps featured images
+# at 5MB and Livewire temp uploads at 12MB; post_max_size must exceed
+# upload_max_filesize to leave room for the rest of the request body.
+sudo tee "/etc/php/${PHP_VERSION}/fpm/conf.d/99-uploads.ini" > /dev/null <<'UPLOADS'
+upload_max_filesize = 10M
+post_max_size = 12M
+UPLOADS
+
+sudo systemctl restart "php${PHP_VERSION}-fpm"
+
 echo "==> [4/10] Install PostgreSQL ${PG_VERSION} client (RDS — server runs on AWS)"
 # Only the client tools + libpq are needed; the actual PostgreSQL server
 # runs as a managed AWS RDS instance.

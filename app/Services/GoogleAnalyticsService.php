@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Exception;
-use Google\Analytics\Data\V1beta\AnalyticsDataClient;
+use Google\Analytics\Data\V1beta\Client\BetaAnalyticsDataClient;
 use Google\Analytics\Data\V1beta\DateRange;
 use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\RunReportRequest;
 
 final class GoogleAnalyticsService
 {
-    private ?AnalyticsDataClient $client;
+    private ?BetaAnalyticsDataClient $client;
 
     private ?string $propertyId;
 
-    public function __construct(?AnalyticsDataClient $client = null, ?string $propertyId = null)
+    public function __construct(?BetaAnalyticsDataClient $client = null, ?string $propertyId = null)
     {
         $this->propertyId = $propertyId ?? config('services.google_analytics.property_id');
         $credentials = config('services.google_analytics.credentials');
@@ -24,7 +24,7 @@ final class GoogleAnalyticsService
         if ($client !== null) {
             $this->client = $client;
         } elseif ($this->propertyId && $credentials && file_exists($credentials)) {
-            $this->client = AnalyticsDataClient::build([
+            $this->client = new BetaAnalyticsDataClient([
                 'credentials' => $credentials,
             ]);
         } else {
@@ -47,19 +47,19 @@ final class GoogleAnalyticsService
         }
 
         try {
-            $request = RunReportRequest::create()
-                ->setPropertyName("properties/{$this->propertyId}")
-                ->setDateRanges([
-                    DateRange::create()
-                        ->setStartDate($from)
-                        ->setEndDate($to),
-                ])
+            $dateRange = (new DateRange)
+                ->setStartDate($from)
+                ->setEndDate($to);
+
+            $request = (new RunReportRequest)
+                ->setProperty("properties/{$this->propertyId}")
+                ->setDateRanges([$dateRange])
                 ->setMetrics([
-                    Metric::create()->setName('activeUsers'),
-                    Metric::create()->setName('sessions'),
-                    Metric::create()->setName('screenPageViews'),
-                    Metric::create()->setName('bounceRate'),
-                    Metric::create()->setName('averageSessionDuration'),
+                    (new Metric)->setName('activeUsers'),
+                    (new Metric)->setName('sessions'),
+                    (new Metric)->setName('screenPageViews'),
+                    (new Metric)->setName('bounceRate'),
+                    (new Metric)->setName('averageSessionDuration'),
                 ]);
 
             $response = $this->client->runReport($request);

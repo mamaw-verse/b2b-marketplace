@@ -777,7 +777,6 @@
   "JPG, PNG or WebP · max 20 MB": "JPG, PNG أو WebP · بحد أقصى 20MB",
   "Join Us": "انضم إلينا",
   "Join business matching, events, training and consultancy": "شارك في مواءمة الأعمال والفعاليات والتدريب والاستشارات",
-  "Join the Movement": "انضم إلى الحركة",
   "Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.": "انضم إلى بائعي الحلال الموثّقين في جميع أنحاء الفلبين. ابدأ الإدراج مجانًا — ولا تدفع عمولة إلا عند إتمام البيع. لا رسوم شهرية ولا رسوم خفية.",
   "Joined": "تاريخ الانضمام",
   "Keep invitation": "الإبقاء على الدعوة",
@@ -1317,6 +1316,7 @@
   "Regenerate codes": "إعادة إنشاء الرموز",
   "Register": "تسجيل",
   "Register Business": "تسجيل النشاط التجاري",
+  "Register Now": "سجّل الآن",
   "Register Your Business": "سجّل نشاطك التجاري",
   "Register Your Company": "سجّل شركتك",
   "Register as Seller": "سجّل كبائع",
@@ -2510,5 +2510,8 @@
   "Product options only apply to subcategories. Select a parent group above to define them.": "تنطبق خيارات المنتج على التصنيفات الفرعية فقط. حدد مجموعة رئيسية أعلاه لتعريفها.",
   "This category has subcategories and cannot be nested under a group.": "يحتوي هذا التصنيف على تصنيفات فرعية ولا يمكن وضعه تحت مجموعة.",
   "Sort Order": "ترتيب الفرز",
-  "Lower numbers appear first among siblings.": "تظهر الأرقام الأصغر أولاً ضمن المستوى نفسه."
+  "Lower numbers appear first among siblings.": "تظهر الأرقام الأصغر أولاً ضمن المستوى نفسه.",
+  "Subscriptions are currently disabled": "الاشتراكات معطّلة حالياً",
+  "These settings are saved and will take effect once the development team enables subscriptions for this instance.": "تم حفظ هذه الإعدادات وستسري بمجرد أن يقوم فريق التطوير بتفعيل الاشتراكات لهذه النسخة.",
+  "The marketplace is currently free. Subscription plans are not required right now.": "السوق مجاني حالياً. لا تُشترط خطط الاشتراك في الوقت الراهن."
 }

@@ -1,3 +1,19 @@
+@push('meta')
+    <meta name="description" content="{{ __('Learn about :app — the trusted halal supply-chain marketplace connecting farmers, producers, certifiers, and retailers in one ecosystem.', ['app' => config('app.name')]) }}">
+
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="{{ url()->current() }}">
+    <meta property="og:title"       content="{{ __('About Us — :app', ['app' => config('app.name')]) }}">
+    <meta property="og:description" content="{{ __('Learn about :app — the trusted halal supply-chain marketplace connecting farmers, producers, certifiers, and retailers in one ecosystem.', ['app' => config('app.name')]) }}">
+    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
+    <meta property="og:site_name"   content="{{ config('app.name') }}">
+
+    <meta name="twitter:card"        content="summary">
+    <meta name="twitter:title"       content="{{ __('About Us — :app', ['app' => config('app.name')]) }}">
+    <meta name="twitter:description" content="{{ __('Learn about :app — the trusted halal supply-chain marketplace connecting farmers, producers, certifiers, and retailers in one ecosystem.', ['app' => config('app.name')]) }}">
+    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
+@endpush
+
 <style>
     html { scroll-behavior: smooth; }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

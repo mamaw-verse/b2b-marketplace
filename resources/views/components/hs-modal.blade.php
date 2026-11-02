@@ -22,12 +22,12 @@ $widthClass = $widths[$size] ?? $widths['md'];
     name="{{ $name }}"
     wire:model="{{ $model }}"
     :dismissible="$dismissible"
-    class="{{ $widthClass }} !p-0"
+    class="{{ $widthClass }} w-full sm:w-auto !p-0"
 >
-    <div class="flex flex-col max-h-[85vh]">
+    <div class="flex flex-col max-h-[90dvh] sm:max-h-[85vh]">
         {{-- Fixed header --}}
         @if ($title || $subtitle)
-            <div class="shrink-0 border-b border-[var(--hs-neutral-100)] px-6 py-4">
+            <div class="shrink-0 border-b border-[var(--hs-neutral-100)] px-4 sm:px-6 py-4">
                 @if ($title)
                     <flux:heading size="lg">{{ $title }}</flux:heading>
                 @endif
@@ -38,13 +38,13 @@ $widthClass = $widths[$size] ?? $widths['md'];
         @endif
 
         {{-- Scrollable body --}}
-        <div class="flex-1 overflow-y-auto px-6 py-5">
+        <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
             {{ $slot }}
         </div>
 
         {{-- Fixed footer --}}
         @if (isset($footer))
-            <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-6 py-4">
+            <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-4 sm:px-6 py-4">
                 {{ $footer }}
             </div>
         @endif

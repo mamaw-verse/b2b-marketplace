@@ -101,16 +101,8 @@
                                 </flux:field>
                             </div>
 
-                            <div class="mt-4" wire:ignore x-data="{
-                                init() {
-                                    window.onTurnstileCallback = (token) => {
-                                        $wire.set('turnstile_token', token);
-                                    }
-                                }
-                            }" @turnstile-reset.window="turnstile.reset()">
-                                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-                                <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}" data-callback="onTurnstileCallback"></div>
-                                <flux:error name="turnstile_token" />
+                            <div class="mt-4">
+                                <flux:error name="human_check" />
                             </div>
                         </div>
 
@@ -132,7 +124,7 @@
             {{-- ═══════════════════════════════════════════════════════
                  RIGHT: Important notes panel
             ═══════════════════════════════════════════════════════ --}}
-            <aside class="rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
+            <aside class="order-first lg:order-last rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
                 <h2 class="flex items-center gap-2 text-base font-semibold text-[var(--hs-neutral-900)]">
                     <flux:icon name="information-circle" class="size-5 text-[var(--hs-green-700)]" />
                     Important Notes

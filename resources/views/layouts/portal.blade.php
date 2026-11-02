@@ -62,6 +62,8 @@
         <flux:toast />
     </flux:toast.group>
 
+    <x-turnstile-gate />
+
     @livewireScripts
     @fluxScripts
 </body>

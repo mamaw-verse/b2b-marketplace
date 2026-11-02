@@ -777,7 +777,6 @@
   "JPG, PNG or WebP · max 20 MB": "JPG, PNG or WebP · max 20 MB",
   "Join Us": "Join Us",
   "Join business matching, events, training and consultancy": "Join business matching, events, training and consultancy",
-  "Join the Movement": "Join the Movement",
   "Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.": "Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.",
   "Joined": "Joined",
   "Keep invitation": "Keep invitation",
@@ -1317,6 +1316,7 @@
   "Regenerate codes": "Regenerate codes",
   "Register": "Register",
   "Register Business": "Register Business",
+  "Register Now": "Register Now",
   "Register Your Business": "Register Your Business",
   "Register Your Company": "Register Your Company",
   "Register as Seller": "Register as Seller",
@@ -2506,5 +2506,8 @@
   "Product options only apply to subcategories. Select a parent group above to define them.": "Product options only apply to subcategories. Select a parent group above to define them.",
   "This category has subcategories and cannot be nested under a group.": "This category has subcategories and cannot be nested under a group.",
   "Sort Order": "Sort Order",
-  "Lower numbers appear first among siblings.": "Lower numbers appear first among siblings."
+  "Lower numbers appear first among siblings.": "Lower numbers appear first among siblings.",
+  "Subscriptions are currently disabled": "Subscriptions are currently disabled",
+  "These settings are saved and will take effect once the development team enables subscriptions for this instance.": "These settings are saved and will take effect once the development team enables subscriptions for this instance.",
+  "The marketplace is currently free. Subscription plans are not required right now.": "The marketplace is currently free. Subscription plans are not required right now."
 }

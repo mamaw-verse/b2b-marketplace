@@ -145,6 +145,36 @@ test('wizard has 4 total steps', function () {
     expect(OnboardingWizard::TOTAL_STEPS)->toBe(4);
 });
 
+test('wizard renders accessible responsive category controls', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+    $group = Category::factory()->create(['name' => 'Foods']);
+    Category::factory()->count(13)->childOf($group)->create();
+
+    $this->actingAs($seller);
+
+    Livewire::test(OnboardingWizard::class)
+        ->set('currentStep', 2)
+        ->assertSeeHtml('data-onboarding-stepper')
+        ->assertSeeHtml('mt-[15px]')
+        ->assertSeeHtml('sm:mt-[19px]')
+        ->assertSeeHtml('data-product-categories')
+        ->assertSeeHtml('<fieldset')
+        ->assertSeeHtml('<legend')
+        ->assertSeeHtml('data-onboarding-category')
+        ->assertSeeHtml('type="checkbox"')
+        ->assertSeeHtml('wire:model="form.product_categories"')
+        ->assertSeeHtml('x-bind:aria-disabled')
+        ->assertSeeHtml('min-h-12')
+        ->assertSeeHtml('lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))]')
+        ->assertSeeHtml('has-[:checked]:border-[var(--hs-green-600)]')
+        ->assertSeeHtml('has-[:focus-visible]:outline-2')
+        ->assertSeeHtml('aria-live="polite"')
+        ->assertSeeHtml('sticky bottom-0')
+        ->assertSee('Search categories')
+        ->assertSee('Clear all');
+});
+
 test('resetDocument detaches the media and clears the stuck document', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');

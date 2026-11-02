@@ -17,12 +17,15 @@ export default defineConfig({
             fonts: [
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
+                    optimizedFallbacks: false,
                 }),
                 bunny('Sora', {
                     weights: [400, 500, 600, 700],
+                    optimizedFallbacks: false,
                 }),
                 bunny('Inter', {
                     weights: [400, 500, 600, 700],
+                    optimizedFallbacks: false,
                 }),
             ],
         }),

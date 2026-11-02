@@ -29,7 +29,7 @@ test('product list shows subscription banner when shop has no subscription', fun
         ->assertSee(__('Your business profile and products are not visible on the marketplace'));
 });
 
-test('product list hides subscription banner when shop is trialing', function () {
+test('product list shows subscription banner when shop is trialing', function () {
     $seller = User::factory()->create();
     $seller->assignRole('seller');
     $shop = Shop::factory()->create(['user_id' => $seller->id, 'status' => 'active']);
@@ -37,7 +37,7 @@ test('product list hides subscription banner when shop is trialing', function ()
 
     Livewire::actingAs($seller)
         ->test(ProductList::class)
-        ->assertDontSee(__('Your business profile and products are not visible on the marketplace'));
+        ->assertSee(__('Your business profile and products are not visible on the marketplace'));
 });
 
 test('product list hides subscription banner when shop has active subscription', function () {
@@ -73,12 +73,12 @@ test('company profile is accessible when shop has active subscription', function
         ->assertOk();
 });
 
-test('company profile is accessible when shop is trialing', function () {
+test('company profile returns 404 when shop is trialing', function () {
     $shop = Shop::factory()->create(['status' => 'active']);
     Subscription::factory()->trialing()->create(['shop_id' => $shop->id]);
 
     Livewire::test(CompanyProfile::class, ['shop' => $shop])
-        ->assertOk();
+        ->assertStatus(404);
 });
 
 test('company profile returns 404 for unsubscribed shop when viewed by public', function () {

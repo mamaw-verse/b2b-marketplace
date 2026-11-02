@@ -34,7 +34,33 @@
             @if ($this->transactions->isEmpty())
                 <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No transactions yet.') }}</p>
             @else
-                <div class="overflow-x-auto">
+                {{-- Mobile card list (hidden on sm+) --}}
+                <div class="sm:hidden space-y-3">
+                    @foreach ($this->transactions as $entry)
+                        <div class="rounded-lg border border-[var(--hs-neutral-200)] p-3.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs text-[var(--hs-neutral-400)]">{{ \Illuminate\Support\Carbon::parse($entry->created_at)->format('M d, Y') }}</span>
+                                <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums">₱{{ number_format((float) $entry->amount, 2) }}</span>
+                            </div>
+                            <div class="mt-1.5 flex items-center gap-2">
+                                @if ($entry->type === 'escrow_hold')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-info-50)] text-[var(--hs-info-700)]">{{ __('Escrow') }}</span>
+                                @elseif ($entry->type === 'payout')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-success-50)] text-[var(--hs-success-700)]">{{ __('Payout') }}</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]">{{ __('Refund') }}</span>
+                                @endif
+                                <span class="text-xs text-[var(--hs-neutral-500)]">#{{ $entry->order_id }}</span>
+                            </div>
+                            @if ($entry->note)
+                                <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">{{ $entry->note }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Desktop table (hidden on mobile) --}}
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-[var(--hs-neutral-100)]">

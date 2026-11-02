@@ -16,20 +16,23 @@ beforeEach(function () {
 test('login page renders the turnstile widget', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('cf-turnstile', false)
-        ->assertSee('challenges.cloudflare.com/turnstile/v0/api.js', false);
+        ->assertSee('data-turnstile', false)
+        ->assertSee('rel="preconnect" href="https://challenges.cloudflare.com"', false)
+        ->assertSee('turnstile/v0/api.js?render=explicit', false)
+        ->assertSee("appearance: 'interaction-only'", false)
+        ->assertDontSee('min-h-[65px]', false);
 });
 
 test('register page renders the turnstile widget', function () {
     $this->get(route('register'))
         ->assertOk()
-        ->assertSee('cf-turnstile', false);
+        ->assertSee('data-turnstile', false);
 });
 
 test('forgot password page renders the turnstile widget', function () {
     $this->get(route('password.request'))
         ->assertOk()
-        ->assertSee('cf-turnstile', false);
+        ->assertSee('data-turnstile', false);
 });
 
 test('login requires a turnstile token', function () {

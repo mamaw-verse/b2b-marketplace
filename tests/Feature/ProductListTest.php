@@ -61,8 +61,8 @@ test('toggleStatus archives a published product', function () {
 });
 
 test('toggleStatus publishes an archived product', function () {
-    // A trialing subscription is required for the publish policy to allow publishing.
-    Subscription::factory()->trialing()->create(['shop_id' => $this->shop->id]);
+    // An active subscription is required for the publish policy to allow publishing.
+    Subscription::factory()->active()->create(['shop_id' => $this->shop->id]);
 
     $product = Product::factory()->archived()->create(['shop_id' => $this->shop->id]);
 
@@ -130,3 +130,66 @@ test('status filter shows only archived products', function () {
         ->assertSee($archived->name)
         ->assertDontSee($published->name);
 });
+
+test('confirmDeleteProduct sets confirmingDeleteId', function () {
+    $product = Product::factory()->archived()->create(['shop_id' => $this->shop->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductList::class)
+        ->call('confirmDeleteProduct', $product->id)
+        ->assertSet('confirmingDeleteId', $product->id);
+});
+
+test('deleteProduct soft-deletes an archived product', function () {
+    $product = Product::factory()->archived()->create(['shop_id' => $this->shop->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductList::class)
+        ->call('confirmDeleteProduct', $product->id)
+        ->call('deleteProduct');
+
+    expect(Product::withTrashed()->find($product->id))->not->toBeNull()
+        ->and(Product::find($product->id))->toBeNull();
+});
+
+test('deleteProduct resets confirmingDeleteId after deletion', function () {
+    $product = Product::factory()->archived()->create(['shop_id' => $this->shop->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductList::class)
+        ->call('confirmDeleteProduct', $product->id)
+        ->call('deleteProduct')
+        ->assertSet('confirmingDeleteId', null);
+});
+
+test('deleteProduct does nothing when no product is being confirmed', function () {
+    $product = Product::factory()->archived()->create(['shop_id' => $this->shop->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductList::class)
+        ->call('deleteProduct');
+
+    expect(Product::find($product->id))->not->toBeNull();
+});
+
+test('deleteProduct cannot delete a published product', function () {
+    $product = Product::factory()->published()->create(['shop_id' => $this->shop->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductList::class)
+        ->call('confirmDeleteProduct', $product->id)
+        ->call('deleteProduct');
+
+    // Product must still exist — abort_unless(archived) prevents deletion
+    expect(Product::find($product->id))->not->toBeNull();
+});
+
+test('seller cannot delete a product belonging to another shop', function () {
+    $otherShop = Shop::factory()->create(['status' => 'active']);
+    $product = Product::factory()->archived()->create(['shop_id' => $otherShop->id]);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductList::class)
+        ->call('confirmDeleteProduct', $product->id)
+        ->call('deleteProduct');
+})->throws(ModelNotFoundException::class);

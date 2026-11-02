@@ -27,8 +27,75 @@
             </div>
         </div>
 
-        {{-- Table --}}
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse($this->products as $product)
+                @php
+                    $isLive = $product->status === 'published'
+                        && $product->moderation_status === 'active'
+                        && $product->shop->status === 'active';
+                @endphp
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <button
+                                wire:click="openPreview({{ $product->id }})"
+                                class="font-medium text-[var(--hs-neutral-900)] hover:text-[var(--hs-green-700)] text-left transition cursor-pointer"
+                            >{{ $product->name }}</button>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">
+                                <a href="{{ route('admin.merchants.show', $product->shop_id) }}" wire:navigate class="text-[var(--hs-green-700)] hover:underline">
+                                    {{ $product->shop->registered_business_name }}
+                                </a>
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <flux:badge color="{{ $product->status === 'published' ? 'green' : 'zinc' }}" size="sm">
+                                {{ ucfirst($product->status) }}
+                            </flux:badge>
+                            <flux:badge color="{{ $product->moderation_status === 'active' ? 'green' : ($product->moderation_status === 'flagged' ? 'yellow' : 'red') }}" size="sm">
+                                {{ str_replace('_', ' ', ucfirst($product->moderation_status)) }}
+                            </flux:badge>
+                        </div>
+                    </div>
+                    @if($product->shop->latestSubscription)
+                        <div class="mt-2 flex items-center gap-2">
+                            <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Subscription') }}</span>
+                            <flux:badge size="sm" color="{{ in_array($product->shop->latestSubscription->status, ['active', 'trialing']) ? 'green' : 'zinc' }}">
+                                {{ ucfirst(str_replace('_', ' ', $product->shop->latestSubscription->status)) }}
+                            </flux:badge>
+                        </div>
+                    @else
+                        <div class="mt-2 text-xs text-[var(--hs-neutral-500)]">{{ __('No subscription') }}</div>
+                    @endif
+                    @if($isLive)
+                        <div class="mt-2">
+                            <a href="{{ route('storefront.product', $product) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-medium text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)] transition">
+                                <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                                {{ __('View live') }}
+                            </a>
+                        </div>
+                    @endif
+                    <div class="mt-3">
+                        @if($product->moderation_status === 'flagged')
+                            <flux:button variant="primary" size="sm" x-on:click="$flux.modal('confirm-restore-{{ $product->id }}').show()">
+                                {{ __('Restore') }}
+                            </flux:button>
+                        @else
+                            <flux:button variant="ghost" size="sm" x-on:click="$flux.modal('confirm-flag-{{ $product->id }}').show()" class="text-[var(--hs-warning-700)] hover:bg-[var(--hs-warning-50)] hover:text-[var(--hs-warning-700)]">
+                                {{ __('Flag') }}
+                            </flux:button>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">
+                    {{ __('No products found matching your filters.') }}
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Product') }}</flux:table.column>
@@ -63,7 +130,7 @@
                                 </div>
                             </flux:table.cell>
                             <flux:table.cell>
-                                <a href="{{ route('admin.merchants.show', $product->shop_id) }}" class="text-blue-600 hover:underline">
+                                <a href="{{ route('admin.merchants.show', $product->shop_id) }}" wire:navigate class="text-[var(--hs-green-700)] hover:underline">
                                     {{ $product->shop->registered_business_name }}
                                 </a>
                                 @if($product->shop->latestSubscription)
@@ -93,7 +160,7 @@
                                         {{ __('Restore') }}
                                     </flux:button>
                                 @else
-                                    <flux:button variant="ghost" size="sm" x-on:click="$flux.modal('confirm-flag-{{ $product->id }}').show()" class="text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700">
+                                    <flux:button variant="ghost" size="sm" x-on:click="$flux.modal('confirm-flag-{{ $product->id }}').show()" class="text-[var(--hs-warning-700)] hover:bg-[var(--hs-warning-50)] hover:text-[var(--hs-warning-700)]">
                                         {{ __('Flag') }}
                                     </flux:button>
                                 @endif
@@ -101,20 +168,20 @@
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="5" class="text-center text-zinc-500 py-8">
+                            <flux:table.cell colspan="5" class="text-center text-[var(--hs-neutral-500)] py-8">
                                 {{ __('No products found matching your filters.') }}
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-
-            @if ($this->products->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
-                    {{ $this->products->links() }}
-                </div>
-            @endif
         </div>
+
+        @if ($this->products->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
+                {{ $this->products->links() }}
+            </div>
+        @endif
     </div>
 
     {{-- ── Confirm Modals ───────────────────────────────────────────── --}}
@@ -128,7 +195,7 @@
                 confirmText="{{ __('Flag') }}"
             >
                 <x-slot name="action">
-                    <flux:button variant="ghost" wire:click="flagProduct({{ $product->id }})" wire:loading.attr="disabled" class="text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700">{{ __('Flag') }}</flux:button>
+                    <flux:button variant="ghost" wire:click="flagProduct({{ $product->id }})" wire:loading.attr="disabled" class="text-[var(--hs-warning-700)] hover:bg-[var(--hs-warning-50)] hover:text-[var(--hs-warning-700)]">{{ __('Flag') }}</flux:button>
                 </x-slot>
             </x-hs-confirm>
         @endif

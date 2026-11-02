@@ -777,7 +777,6 @@
   "JPG, PNG or WebP · max 20 MB": "JPG, PNG veya WebP · maks. 20 MB",
   "Join Us": "Bize Katılın",
   "Join business matching, events, training and consultancy": "İş eşleştirme, etkinlikler, eğitim ve danışmanlığa katılın",
-  "Join the Movement": "Harekete Katılın",
   "Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.": "Filipinler'deki doğrulanmış helal satıcılara katılın. Ücretsiz listelemeye başlayın — yalnızca satış yaptığınızda komisyon ödersiniz. Aylık ücret yok, gizli ücret yok.",
   "Joined": "Katıldı",
   "Keep invitation": "Daveti koru",
@@ -1317,6 +1316,7 @@
   "Regenerate codes": "Regenerate codes",
   "Register": "Kayıt Ol",
   "Register Business": "İşletme Kaydı",
+  "Register Now": "Şimdi Kayıt Ol",
   "Register Your Business": "İşletmenizi Kaydedin",
   "Register Your Company": "Şirketinizi Kayıt Edin",
   "Register as Seller": "Satıcı Olarak Kaydol",
@@ -2510,5 +2510,8 @@
   "Product options only apply to subcategories. Select a parent group above to define them.": "Ürün seçenekleri yalnızca alt kategoriler için geçerlidir. Bunları tanımlamak için yukarıdan bir üst grup seçin.",
   "This category has subcategories and cannot be nested under a group.": "Bu kategorinin alt kategorileri var ve bir grubun altına yerleştirilemez.",
   "Sort Order": "Sıralama",
-  "Lower numbers appear first among siblings.": "Küçük numaralar aynı düzeyde önce görünür."
+  "Lower numbers appear first among siblings.": "Küçük numaralar aynı düzeyde önce görünür.",
+  "Subscriptions are currently disabled": "Abonelikler şu anda devre dışı",
+  "These settings are saved and will take effect once the development team enables subscriptions for this instance.": "Bu ayarlar kaydedildi ve geliştirme ekibi bu örnek için abonelikleri etkinleştirdiğinde geçerli olacak.",
+  "The marketplace is currently free. Subscription plans are not required right now.": "Pazar yeri şu an ücretsizdir. Abonelik planları şu için gerekli değildir."
 }

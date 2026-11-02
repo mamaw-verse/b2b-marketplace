@@ -31,7 +31,7 @@
                                         </span>
                                         <div class="flex items-center gap-0.5">
                                             @for($i = 1; $i <= 5; $i++)
-                                                <span class="text-xs {{ $report->review->rating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-300)]' }}">★</span>
+                                                <span class="text-xs {{ $report->review->rating >= $i ? 'text-[var(--hs-warning-500)]' : 'text-[var(--hs-neutral-300)]' }}">★</span>
                                             @endfor
                                         </div>
                                     </div>

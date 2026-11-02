@@ -18,7 +18,7 @@ final class CompanyProfile extends Component
     public function mount(Shop $shop): void
     {
         if (config('marketplace.features.subscriptions_enabled')) {
-            $visible = $shop->status === 'active' && $shop->hasActiveOrTrialingSubscription();
+            $visible = $shop->status === 'active' && $shop->hasActiveSubscription();
 
             if (! $visible) {
                 // Own shop: redirect to the subscription page with a helpful message.

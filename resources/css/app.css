@@ -145,7 +145,7 @@
 }
 
 [data-flux-field]:not(ui-radio, ui-checkbox) {
-    @apply grid gap-2;
+    @apply grid content-start gap-2;
 }
 
 [data-flux-label] {
@@ -246,4 +246,431 @@ select:focus[data-flux-control] {
 }
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
+}
+
+/* ============================================================
+   FLUX MODAL — Mobile Bottom-Sheet Override
+   On mobile (< 640px), modals become full-width bottom sheets:
+   - Anchored to bottom of viewport
+   - Full width (no max-width constraint)
+   - Top-only rounded corners (visible above the safe area)
+   - Slightly shorter than full height so the page peeks above
+   - Max height 90vh to prevent covering the status bar
+   This applies globally to every [data-flux-modal] dialog that
+   isn't a flyout (flyouts have their own positioning).
+   ============================================================ */
+@media (max-width: 639px) {
+    [data-flux-modal] > dialog[open]:not([data-flux-flyout]) {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: none;
+        width: 100%;
+        max-height: 90dvh;
+        margin: 0;
+        border-radius: var(--hs-radius-2xl) var(--hs-radius-2xl) 0 0;
+    }
+
+    /* Strengthen backdrop on mobile for better focus */
+    [data-flux-modal] > dialog[open]::backdrop {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ============================================================
+   HS WYSIWYG (Trix) — Complete custom stylesheet
+   Replaces trix/dist/trix.css entirely so we control all styles.
+   Trix renders icons as background-images (inline SVG data URIs).
+   ============================================================ */
+
+/* ── Reset Trix globals ─────────────────────────────────────── */
+trix-toolbar * {
+    box-sizing: border-box;
+}
+
+/* ── Toolbar layout ─────────────────────────────────────────── */
+trix-toolbar .trix-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 8px;
+    background-color: var(--hs-neutral-50);
+    border-bottom: 1px solid var(--hs-neutral-200);
+    border-radius: var(--hs-radius-sm) var(--hs-radius-sm) 0 0;
+}
+
+trix-toolbar .trix-button-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    margin: 0;
+    border: none;
+}
+
+trix-toolbar .trix-button-group-spacer {
+    flex-grow: 1;
+}
+
+@media (max-width: 640px) {
+    trix-toolbar .trix-button-group-spacer {
+        display: none;
+    }
+}
+
+/* ── Toolbar buttons ────────────────────────────────────────── */
+trix-toolbar .trix-button {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 30px;
+    height: 28px;
+    border-radius: var(--hs-radius-xs);
+    color: var(--hs-neutral-600);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 100ms, color 100ms;
+    background: transparent;
+}
+
+trix-toolbar .trix-button:hover {
+    background-color: var(--hs-neutral-200);
+    color: var(--hs-neutral-900);
+}
+
+trix-toolbar .trix-button.trix-active {
+    background-color: var(--hs-green-100);
+    color: var(--hs-green-700);
+}
+
+trix-toolbar .trix-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* ── Icon buttons ───────────────────────────────────────────── */
+trix-toolbar .trix-button--icon {
+    font-size: inherit;
+    text-indent: -9999px;
+    overflow: hidden;
+    width: 30px;
+    height: 28px;
+    position: relative;
+}
+
+trix-toolbar .trix-button--icon::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 4px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.65;
+    filter: var(--trix-icon-filter, none);
+}
+
+trix-toolbar .trix-button--icon:hover::before,
+trix-toolbar .trix-button--icon.trix-active::before {
+    opacity: 1;
+}
+
+trix-toolbar .trix-button--icon:disabled::before {
+    opacity: 0.2;
+}
+
+/* Icon background images — Trix uses inline SVG data URIs */
+trix-toolbar .trix-button--icon-bold::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M6.522%2019.242a.5.5%200%200%201-.5-.5V5.35a.5.5%200%200%201%20.5-.5h5.783c1.347%200%202.46.345%203.24.982.783.64%201.216%201.562%201.216%202.683%200%201.13-.587%202.129-1.476%202.71a.35.35%200%200%200%20.049.613c1.259.56%202.101%201.742%202.101%203.22%200%201.282-.483%202.334-1.363%203.063-.876.726-2.132%201.12-3.66%201.12h-5.89ZM9.27%207.347v3.362h1.97c.766%200%201.347-.17%201.733-.464.38-.291.587-.716.587-1.27%200-.53-.183-.928-.513-1.198-.334-.273-.838-.43-1.505-.43H9.27Zm0%205.606v3.791h2.389c.832%200%201.448-.177%201.853-.497.399-.315.614-.786.614-1.423%200-.62-.22-1.077-.63-1.385-.418-.313-1.053-.486-1.905-.486H9.27Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-italic::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M9%205h6.5v2h-2.23l-2.31%2010H13v2H6v-2h2.461l2.306-10H9V5Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-strike::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M6%2014.986c.088%202.647%202.246%204.258%205.635%204.258%203.496%200%205.713-1.728%205.713-4.463%200-.275-.02-.536-.062-.781h-3.461c.398.293.573.654.573%201.123%200%201.035-1.074%201.787-2.646%201.787-1.563%200-2.773-.762-2.91-1.924H6ZM6.432%2010h3.763c-.632-.314-.914-.715-.914-1.273%200-1.045.977-1.739%202.432-1.739%201.475%200%202.52.723%202.617%201.914h2.764c-.05-2.548-2.11-4.238-5.39-4.238-3.145%200-5.392%201.719-5.392%204.316%200%20.363.04.703.12%201.02ZM4%2011a1%201%200%201%200%200%202h15a1%201%200%201%200%200-2H4Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-link::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M18.948%205.258a4.337%204.337%200%200%200-6.108%200L11.217%206.87a.993.993%200%200%200%200%201.41c.392.39%201.027.39%201.418%200l1.623-1.613a2.323%202.323%200%200%201%203.271%200%202.29%202.29%200%200%201%200%203.251l-2.393%202.38a3.021%203.021%200%200%201-4.255%200l-.05-.049a1.007%201.007%200%200%200-1.418%200%20.993.993%200%200%200%200%201.41l.05.049a5.036%205.036%200%200%200%207.091%200l2.394-2.38a4.275%204.275%200%200%200%200-6.072Zm-13.683%2013.6a4.337%204.337%200%200%200%206.108%200l1.262-1.255a.993.993%200%200%200%200-1.41%201.007%201.007%200%200%200-1.418%200L9.954%2017.45a2.323%202.323%200%200%201-3.27%200%202.29%202.29%200%200%201%200-3.251l2.344-2.331a2.579%202.579%200%200%201%203.631%200c.392.39%201.027.39%201.419%200a.993.993%200%200%200%200-1.41%204.593%204.593%200%200%200-6.468%200l-2.345%202.33a4.275%204.275%200%200%200%200%206.072Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-heading-1::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M21.5%207.5v-3h-12v3H14v13h3v-13h4.5ZM9%2013.5h3.5v-3h-10v3H6v7h3v-7Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-quote::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M4.581%208.471c.44-.5%201.056-.834%201.758-.995C8.074%207.17%209.201%207.822%2010%208.752c1.354%201.578%201.33%203.555.394%205.277-.941%201.731-2.788%203.163-4.988%203.56a.622.622%200%200%201-.653-.317c-.113-.205-.121-.49.16-.764.294-.286.567-.566.791-.835.222-.266.413-.54.524-.815.113-.28.156-.597.026-.908-.128-.303-.39-.524-.72-.69a3.02%203.02%200%200%201-1.674-2.7c0-.905.283-1.59.72-2.088Zm9.419%200c.44-.5%201.055-.834%201.758-.995%201.734-.306%202.862.346%203.66%201.276%201.355%201.578%201.33%203.555.395%205.277-.941%201.731-2.789%203.163-4.988%203.56a.622.622%200%200%201-.653-.317c-.113-.205-.122-.49.16-.764.294-.286.567-.566.791-.835.222-.266.412-.54.523-.815.114-.28.157-.597.026-.908-.127-.303-.39-.524-.72-.69a3.02%203.02%200%200%201-1.672-2.701c0-.905.283-1.59.72-2.088Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-code::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M3.293%2011.293a1%201%200%200%200%200%201.414l4%204a1%201%200%201%200%201.414-1.414L5.414%2012l3.293-3.293a1%201%200%200%200-1.414-1.414l-4%204Zm13.414%205.414%204-4a1%201%200%200%200%200-1.414l-4-4a1%201%200%201%200-1.414%201.414L18.586%2012l-3.293%203.293a1%201%200%200%200%201.414%201.414Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-bullet-list::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M5%207.5a1.5%201.5%200%201%200%200-3%201.5%201.5%200%200%200%200%203ZM8%206a1%201%200%200%201%201-1h11a1%201%200%201%201%200%202H9a1%201%200%200%201-1-1Zm1%205a1%201%200%201%200%200%202h11a1%201%200%201%200%200-2H9Zm0%206a1%201%200%201%200%200%202h11a1%201%200%201%200%200-2H9Zm-2.5-5a1.5%201.5%200%201%201-3%200%201.5%201.5%200%200%201%203%200ZM5%2019.5a1.5%201.5%200%201%200%200-3%201.5%201.5%200%200%200%200%203Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-number-list::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M3%204h2v4H4V5H3V4Zm5%202a1%201%200%200%201%201-1h11a1%201%200%201%201%200%202H9a1%201%200%200%201-1-1Zm1%205a1%201%200%201%200%200%202h11a1%201%200%201%200%200-2H9Zm0%206a1%201%200%201%200%200%202h11a1%201%200%201%200%200-2H9Zm-3.5-7H6v1l-1.5%202H6v1H3v-1l1.667-2H3v-1h2.5ZM3%2017v-1h3v4H3v-1h2v-.5H4v-1h1V17H3Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-decrease-nesting-level::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M5%206a1%201%200%200%201%201-1h12a1%201%200%201%201%200%202H6a1%201%200%200%201-1-1Zm4%205a1%201%200%201%200%200%202h9a1%201%200%201%200%200-2H9Zm-3%206a1%201%200%201%200%200%202h12a1%201%200%201%200%200-2H6Zm-3.707-5.707a1%201%200%200%200%200%201.414l2%202a1%201%200%201%200%201.414-1.414L4.414%2012l1.293-1.293a1%201%200%200%200-1.414-1.414l-2%202Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-increase-nesting-level::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M5%206a1%201%200%200%201%201-1h12a1%201%200%201%201%200%202H6a1%201%200%200%201-1-1Zm4%205a1%201%200%201%200%200%202h9a1%201%200%201%200%200-2H9Zm-3%206a1%201%200%201%200%200%202h12a1%201%200%201%200%200-2H6Zm-2.293-2.293%202-2a1%201%200%200%200%200-1.414l-2-2a1%201%200%201%200-1.414%201.414L3.586%2012l-1.293%201.293a1%201%200%201%200%201.414%201.414Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-undo::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M3%2014a1%201%200%200%200%201%201h6a1%201%200%201%200%200-2H6.257c2.247-2.764%205.151-3.668%207.579-3.264%202.589.432%204.739%202.356%205.174%205.405a1%201%200%200%200%201.98-.283c-.564-3.95-3.415-6.526-6.825-7.095C11.084%207.25%207.63%208.377%205%2011.39V8a1%201%200%200%200-2%200v6Zm2-1Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-redo::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M21%2014a1%201%200%200%201-1%201h-6a1%201%200%201%201%200-2h3.743c-2.247-2.764-5.151-3.668-7.579-3.264-2.589.432-4.739%202.356-5.174%205.405a1%201%200%200%201-1.98-.283c.564-3.95%203.415-6.526%206.826-7.095%203.08-.513%206.534.614%209.164%203.626V8a1%201%200%201%201%202%200v6Zm-2-1Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+}
+trix-toolbar .trix-button--icon-attach::before {
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M10.5%2018V7.5c0-2.25%203-2.25%203%200V18c0%204.125-6%204.125-6%200V7.5c0-6.375%209-6.375%209%200V18%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-miterlimit%3D%2210%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+}
+
+/* ── Hide file attachment button (not used) ─────────────────── */
+trix-toolbar .trix-button-group--file-tools {
+    display: none !important;
+}
+
+/* ── Link dialog ────────────────────────────────────────────── */
+trix-toolbar .trix-dialogs {
+    position: relative;
+}
+
+trix-toolbar .trix-dialog {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    font-size: 0.8125rem;
+    padding: 10px 12px;
+    background: var(--hs-neutral-0);
+    border: 1px solid var(--hs-neutral-200);
+    border-radius: var(--hs-radius-sm);
+    box-shadow: var(--hs-shadow-md);
+}
+
+trix-toolbar .trix-dialog--link {
+    max-width: 480px;
+}
+
+trix-toolbar .trix-dialog__link-fields {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+trix-toolbar .trix-input--dialog {
+    flex: 1;
+    font-size: inherit;
+    padding: 6px 10px;
+    border: 1px solid var(--hs-neutral-200);
+    border-radius: var(--hs-radius-xs);
+    background: var(--hs-neutral-0);
+    color: var(--hs-neutral-900);
+    outline: none;
+}
+
+trix-toolbar .trix-input--dialog:focus {
+    border-color: var(--hs-green-600);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--hs-green-600) 20%, transparent);
+}
+
+trix-toolbar .trix-button--dialog {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    border-radius: var(--hs-radius-xs);
+    font-size: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--hs-green-600);
+    color: white;
+    transition: background-color 100ms;
+}
+
+trix-toolbar .trix-button--dialog:hover {
+    background: var(--hs-green-700);
+}
+
+trix-toolbar .trix-button--dialog + .trix-button--dialog {
+    background: transparent;
+    color: var(--hs-neutral-600);
+    border: 1px solid var(--hs-neutral-200);
+}
+
+trix-toolbar .trix-button--dialog + .trix-button--dialog:hover {
+    background: var(--hs-neutral-50);
+}
+
+/* ── Unified border wrapper ──────────────────────────────────── */
+.hs-wysiwyg-wrap {
+    border: 1px solid var(--hs-neutral-200);
+    border-radius: var(--hs-radius-sm);
+    overflow: hidden;
+    transition: border-color 150ms, box-shadow 150ms;
+}
+
+.hs-wysiwyg-wrap:focus-within {
+    border-color: var(--hs-green-600);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--hs-green-600) 20%, transparent);
+}
+
+/* ── Editor area ────────────────────────────────────────────── */
+.hs-wysiwyg-editor.trix-content,
+trix-editor.hs-wysiwyg-editor {
+    box-sizing: border-box;
+    border: none;
+    border-radius: 0;
+    padding: 12px 14px;
+    min-height: 320px;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--hs-neutral-900);
+    background-color: var(--hs-neutral-0);
+    outline: none;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Empty placeholder */
+.hs-wysiwyg-editor.trix-content:empty:not(:focus)::before {
+    color: var(--hs-neutral-400);
+    content: attr(placeholder);
+}
+
+/* ── Prose content styles inside the editor ─────────────────── */
+.trix-content * {
+    box-sizing: border-box;
+}
+
+.trix-content h1 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--hs-neutral-900);
+    margin: 0.75em 0 0.25em;
+}
+
+.trix-content p {
+    margin: 0 0 0.5em;
+}
+
+.trix-content p:last-child {
+    margin-bottom: 0;
+}
+
+.trix-content ul,
+.trix-content ol {
+    padding-left: 1.5em;
+    margin: 0.4em 0 0.6em;
+}
+
+.trix-content li {
+    margin: 0.2em 0;
+}
+
+.trix-content strong {
+    font-weight: 600;
+}
+
+.trix-content em {
+    font-style: italic;
+}
+
+.trix-content blockquote {
+    border: 0 solid var(--hs-green-600);
+    border-left-width: 3px;
+    margin: 0.75em 0 0.75em 0.25em;
+    padding-left: 0.875em;
+    color: var(--hs-neutral-600);
+}
+
+.trix-content pre {
+    display: inline-block;
+    width: 100%;
+    font-family: ui-monospace, monospace;
+    font-size: 0.8125rem;
+    padding: 0.5em 0.75em;
+    white-space: pre;
+    background-color: var(--hs-neutral-50);
+    border: 1px solid var(--hs-neutral-200);
+    border-radius: var(--hs-radius-xs);
+    overflow-x: auto;
+}
+
+/* Attachment (file embed) — minimal fallback */
+.trix-content .attachment {
+    display: inline-block;
+    position: relative;
+    max-width: 100%;
+}
+
+/* ── Dark mode adjustments ──────────────────────────────────── */
+:is(.dark, .dark *) trix-toolbar .trix-button--icon::before {
+    filter: invert(1);
+}
+
+:is(.dark, .dark *) .hs-wysiwyg-wrap {
+    border-color: var(--hs-neutral-700);
+}
+
+:is(.dark, .dark *) trix-toolbar .trix-button-row {
+    background-color: var(--hs-neutral-100);
+    border-color: var(--hs-neutral-700);
+}
+
+/* ============================================================
+   PRODUCT DESCRIPTION PROSE — Detail page rich-text render
+   Used with {!! $renderedDescription !!} inside .hs-prose div.
+   ============================================================ */
+.hs-prose {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--hs-neutral-700);
+    max-width: 65ch;
+}
+.hs-prose h1, .hs-prose h2, .hs-prose h3 {
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--hs-neutral-900);
+    margin-top: 1em;
+    margin-bottom: 0.4em;
+}
+.hs-prose h1 { font-size: 1.125rem; }
+.hs-prose h2 { font-size: 1rem; }
+.hs-prose h3 { font-size: 0.875rem; }
+.hs-prose p { margin: 0 0 0.6em; }
+.hs-prose p:last-child { margin-bottom: 0; }
+.hs-prose ul, .hs-prose ol { padding-left: 1.5em; margin: 0.5em 0 0.75em; }
+.hs-prose li { margin: 0.25em 0; }
+.hs-prose strong { font-weight: 600; color: var(--hs-neutral-900); }
+.hs-prose em { font-style: italic; }
+.hs-prose blockquote {
+    border-left: 3px solid var(--hs-green-600);
+    margin: 0.75em 0;
+    padding: 0.25em 0 0.25em 1em;
+    color: var(--hs-neutral-600);
+}
+.hs-prose a { color: var(--hs-green-700); text-decoration: underline; text-underline-offset: 2px; }
+.hs-prose a:hover { color: var(--hs-green-800); }
+
+/* Fade overlay when prose is clamped */
+.hs-prose--clamped {
+    position: relative;
+}
+.hs-prose--clamped::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2.5rem;
+    background: linear-gradient(to bottom, transparent, var(--hs-neutral-0));
+    pointer-events: none;
 }

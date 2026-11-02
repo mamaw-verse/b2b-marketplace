@@ -29,7 +29,7 @@ final class DemoSubscriptionSeeder extends Seeder
             return;
         }
 
-        $trialDays = $plan->trial_days ?? config('marketplace.initial_subscription_trial_days', 180);
+        $trialDays = (int) $plan->trial_days;
         $shops = Shop::where('status', 'active')->get();
         $created = 0;
 

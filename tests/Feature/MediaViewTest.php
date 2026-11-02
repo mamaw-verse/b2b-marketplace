@@ -23,7 +23,7 @@ beforeEach(function () {
 test('unauthenticated users can view a document attached to a published product', function () {
     $shop = Shop::factory()->create(['status' => 'active']);
     $plan = SubscriptionPlan::factory()->create();
-    Subscription::factory()->trialing()->create([
+    Subscription::factory()->active()->create([
         'shop_id' => $shop->id,
         'subscription_plan_id' => $plan->id,
     ]);

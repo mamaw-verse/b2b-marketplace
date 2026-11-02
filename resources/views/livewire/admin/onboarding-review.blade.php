@@ -268,7 +268,7 @@
     </div>
 
     {{-- Action Modal (Request Revision / Reject) --}}
-    <flux:modal wire:model="showActionModal" class="md:w-96">
+    <flux:modal wire:model="showActionModal" class="w-full sm:w-auto md:w-96">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">
@@ -285,11 +285,12 @@
                 <flux:error name="notes" />
             </flux:field>
 
-            <div class="flex justify-end gap-3">
-                <flux:button variant="ghost" wire:click="$set('showActionModal', false)">{{ __('Cancel') }}</flux:button>
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
+                <flux:button variant="ghost" wire:click="$set('showActionModal', false)" class="w-full sm:w-auto">{{ __('Cancel') }}</flux:button>
                 <flux:button
                     :variant="$action === 'reject' ? 'danger' : 'primary'"
                     wire:click="submitAction"
+                    class="w-full sm:w-auto"
                 >
                     {{ $action === 'request_revision' ? 'Submit Revision Request' : 'Confirm Rejection' }}
                 </flux:button>

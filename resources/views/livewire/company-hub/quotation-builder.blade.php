@@ -85,7 +85,9 @@
                                             icon="trash"
                                             wire:click="confirmRemoveItem({{ $index }})"
                                             class="shrink-0 text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
-                                        />
+                                        >
+                                            <span class="sr-only">{{ __('Remove item') }}</span>
+                                        </flux:button>
                                     @endif
                                 </div>
 

@@ -59,8 +59,75 @@
             </div>
         </div>
 
-        {{-- Table --}}
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->items as $item)
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $item->title }}</p>
+                            <p class="text-xs text-[var(--hs-neutral-500)] truncate">{{ $item->destination_url }}</p>
+                        </div>
+                        @if (! $item->is_active)
+                            <flux:badge color="zinc" size="sm">{{ __('Inactive') }}</flux:badge>
+                        @elseif ($item->starts_at->isFuture())
+                            <flux:badge color="blue" size="sm">{{ __('Scheduled') }}</flux:badge>
+                        @elseif ($item->ends_at->isPast())
+                            <flux:badge color="zinc" size="sm">{{ __('Expired') }}</flux:badge>
+                        @else
+                            <flux:badge color="green" size="sm">{{ __('Live') }}</flux:badge>
+                        @endif
+                    </div>
+                    <div class="mt-2 flex items-center gap-2">
+                        @if ($item->tier)
+                            <flux:badge color="{{ match($item->tier->name) { 'Gold' => 'yellow', 'Silver' => 'zinc', 'Bronze' => 'orange', default => 'zinc' } }}" size="sm">
+                                {{ $item->tier->name }}
+                            </flux:badge>
+                        @else
+                            <span class="text-xs text-[var(--hs-neutral-400)]">—</span>
+                        @endif
+                        @foreach ($item->placements as $placement)
+                            <flux:badge size="sm" color="blue">
+                                {{ str_replace('_', ' ', ucfirst($placement->placement_key)) }}
+                            </flux:badge>
+                        @endforeach
+                    </div>
+                    <div class="mt-2 text-xs text-[var(--hs-neutral-600)]">
+                        {{ $item->starts_at->format('M j, Y') }} → {{ $item->ends_at->format('M j, Y') }}
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <flux:button
+                            href="{{ route('admin.sponsored-content.edit', $item) }}"
+                            wire:navigate
+                            size="sm"
+                            variant="ghost"
+                            icon="pencil-square"
+                        />
+                        <flux:button
+                            wire:click="confirmToggleActive({{ $item->id }})"
+                            size="sm"
+                            variant="ghost"
+                            icon="{{ $item->is_active ? 'eye-slash' : 'eye' }}"
+                        />
+                        <flux:button
+                            wire:click="confirmDelete({{ $item->id }})"
+                            size="sm"
+                            variant="ghost"
+                            icon="trash"
+                            class="text-[var(--hs-danger-500)]"
+                        />
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-12 text-center text-[var(--hs-neutral-500)]">
+                    {{ __('No sponsored content found.') }}
+                    <a href="{{ route('admin.sponsored-content.create') }}" wire:navigate class="text-[var(--hs-green-600)] underline ml-1">{{ __('Create your first entry.') }}</a>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Title') }}</flux:table.column>

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Concerns\RequiresHumanPass;
 use App\Mail\SourcingRequestAcknowledgment;
 use App\Models\SourcingRequest;
 use App\Models\User;
 use App\Notifications\SourcingRequestReceivedNotification;
-use App\Rules\TurnstileRule;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -20,7 +20,7 @@ use Livewire\WithFileUploads;
 
 final class ProductSourcingForm extends Component
 {
-    use WithFileUploads;
+    use RequiresHumanPass, WithFileUploads;
 
     public string $name = '';
 
@@ -38,8 +38,6 @@ final class ProductSourcingForm extends Component
      * are silently discarded without persisting a request.
      */
     public string $honeypot = '';
-
-    public string $turnstile_token = '';
 
     public bool $submitted = false;
 
@@ -71,6 +69,8 @@ final class ProductSourcingForm extends Component
 
             return;
         }
+
+        $this->guardHuman();
 
         $this->validate();
 
@@ -125,7 +125,6 @@ final class ProductSourcingForm extends Component
             'product_name' => ['required', 'string', 'max:255'],
             'product_description' => ['nullable', 'string', 'max:5000'],
             'reference_file' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx'],
-            'turnstile_token' => ['required', 'string', new TurnstileRule],
         ];
     }
 
@@ -137,7 +136,6 @@ final class ProductSourcingForm extends Component
         return [
             'reference_file.mimes' => 'Accepted file types: JPG, PNG, GIF, WebP, PDF, DOC, DOCX.',
             'reference_file.max' => 'The reference file must not exceed 10 MB.',
-            'turnstile_token.required' => 'Please complete the security check.',
         ];
     }
 
@@ -157,8 +155,7 @@ final class ProductSourcingForm extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['name', 'email', 'product_name', 'product_description', 'reference_file', 'honeypot', 'turnstile_token']);
+        $this->reset(['name', 'email', 'product_name', 'product_description', 'reference_file', 'honeypot']);
         $this->resetErrorBag();
-        $this->dispatch('sourcing-turnstile-reset');
     }
 }

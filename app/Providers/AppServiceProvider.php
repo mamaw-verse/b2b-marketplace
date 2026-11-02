@@ -17,6 +17,7 @@ use App\Search\PostgresSearchEngine;
 use App\Services\DltDisbursementService;
 use App\Services\DltPaymentService;
 use App\Services\MockDltDisbursementService;
+use App\Services\TurnstileVerifier;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -39,6 +40,14 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(TurnstileVerifier::class, function () {
+            return new TurnstileVerifier(
+                secret: (string) config('services.turnstile.secret'),
+                expectedHostname: config('humancheck.expected_hostname'),
+                expectedAction: config('humancheck.expected_action'),
+            );
+        });
+
         $this->app->singleton(DltPaymentService::class);
 
         // Route the notification "mail" channel through our channel that
@@ -108,15 +117,8 @@ final class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
-            : null,
-        );
+        Password::defaults(fn (): Password => Password::min(6)
+            ->when(app()->isProduction(), fn (Password $password): Password => $password->uncompromised()));
     }
 
     /**

@@ -21,28 +21,72 @@
         </div>
 
         {{-- Filters --}}
-        <div class="px-6 pt-5 flex flex-wrap items-end gap-4">
-            <div>
-                <flux:select wire:model.live="type" label="{{ __('Type') }}" size="sm" class="w-40">
+        <div class="px-6 pt-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+            <div class="w-full sm:w-40">
+                <flux:select wire:model.live="type" label="{{ __('Type') }}" size="sm" class="w-full sm:w-40">
                     <flux:select.option value="">{{ __('All Types') }}</flux:select.option>
                     <flux:select.option value="escrow_hold">{{ __('Escrow Hold') }}</flux:select.option>
                     <flux:select.option value="payout">{{ __('Payout') }}</flux:select.option>
                     <flux:select.option value="refund">{{ __('Refund') }}</flux:select.option>
                 </flux:select>
             </div>
-            <div>
-                <flux:input wire:model.live.debounce.500ms="shopId" label="{{ __('Shop ID') }}" placeholder="{{ __('Filter by shop') }}" size="sm" class="w-32" />
+            <div class="w-full sm:w-32">
+                <flux:input wire:model.live.debounce.500ms="shopId" label="{{ __('Shop ID') }}" placeholder="{{ __('Filter by shop') }}" size="sm" class="w-full sm:w-32" />
             </div>
-            <div>
-                <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
+            <div class="w-full sm:w-auto">
+                <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" class="w-full sm:w-auto" />
             </div>
-            <div>
-                <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
+            <div class="w-full sm:w-auto">
+                <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" class="w-full sm:w-auto" />
             </div>
         </div>
 
-        {{-- Table --}}
-        <div class="p-6">
+        {{-- Mobile: stacked card list --}}
+        <div class="p-6 lg:hidden">
+            @if ($this->entries->isEmpty())
+                <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No ledger entries found.') }}</p>
+            @else
+                <div class="divide-y divide-[var(--hs-neutral-100)]">
+                    @foreach ($this->entries as $entry)
+                        <div class="py-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    @if ($entry->type === 'escrow_hold')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-info-50)] text-[var(--hs-info-700)]">{{ __('Escrow') }}</span>
+                                    @elseif ($entry->type === 'payout')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-success-50)] text-[var(--hs-success-700)]">{{ __('Payout') }}</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]">{{ __('Refund') }}</span>
+                                    @endif
+                                </div>
+                                <p class="text-right font-medium text-[var(--hs-neutral-900)]">₱{{ number_format((float) $entry->amount, 2) }}</p>
+                            </div>
+                            <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Date') }}</dt>
+                                    <dd class="text-[var(--hs-neutral-700)]">{{ \Illuminate\Support\Carbon::parse($entry->created_at)->format('M d, Y') }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Order') }}</dt>
+                                    <dd class="text-[var(--hs-neutral-700)]">#{{ $entry->order_id }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Shop') }}</dt>
+                                    <dd class="text-[var(--hs-neutral-700)]">{{ $entry->shop_name ?? '—' }}</dd>
+                                </div>
+                            </dl>
+                            @if ($entry->note)
+                                <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">{{ $entry->note }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mt-4">{{ $this->entries->links() }}</div>
+            @endif
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden p-6 lg:block">
             @if ($this->entries->isEmpty())
                 <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No ledger entries found.') }}</p>
             @else

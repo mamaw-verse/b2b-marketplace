@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Concerns\RequiresHumanPass;
 use App\Mail\CertificationApplicationAcknowledgment;
 use App\Models\CertificationApplication;
 use App\Models\User;
 use App\Notifications\CertificationInterestNotification;
-use App\Rules\TurnstileRule;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -25,7 +25,7 @@ use Livewire\WithFileUploads;
 #[Title('Apply for Certificate')]
 final class ApplyForCertificate extends Component
 {
-    use WithFileUploads;
+    use RequiresHumanPass, WithFileUploads;
 
     public string $email = '';
 
@@ -39,8 +39,6 @@ final class ApplyForCertificate extends Component
 
     /** @var TemporaryUploadedFile|null */
     public $document = null;
-
-    public string $turnstile_token = '';
 
     /** Set once the application is accepted, swaps the form for a confirmation. */
     public bool $submitted = false;
@@ -79,6 +77,8 @@ final class ApplyForCertificate extends Component
 
             return;
         }
+
+        $this->guardHuman();
 
         $this->validate();
 
@@ -124,7 +124,6 @@ final class ApplyForCertificate extends Component
             'email' => ['required', 'email', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
             'document' => ['required', 'file', 'max:10240', 'mimes:doc,docx,pdf'],
-            'turnstile_token' => ['required', 'string', new TurnstileRule],
         ];
     }
 
@@ -136,7 +135,6 @@ final class ApplyForCertificate extends Component
         return [
             'document.mimes' => 'Only DOC, DOCX and PDF files are accepted.',
             'document.max' => 'The Letter of Intent must not exceed 10 MB.',
-            'turnstile_token.required' => 'Please complete the security check.',
         ];
     }
 
@@ -157,8 +155,7 @@ final class ApplyForCertificate extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['email', 'company_name', 'website', 'document', 'turnstile_token']);
+        $this->reset(['email', 'company_name', 'website', 'document']);
         $this->resetErrorBag();
-        $this->dispatch('turnstile-reset');
     }
 }

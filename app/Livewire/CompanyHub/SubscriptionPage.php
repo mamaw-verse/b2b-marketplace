@@ -40,7 +40,7 @@ final class SubscriptionPage extends Component
         }
 
         if ($this->shouldStartTrial($shop, $plan)) {
-            $trialDays = $plan->trial_days ?? config('marketplace.initial_subscription_trial_days', 180);
+            $trialDays = (int) $plan->trial_days;
 
             $subscription = Subscription::create([
                 'shop_id' => $shop->id,
@@ -198,14 +198,17 @@ final class SubscriptionPage extends Component
 
     private function shouldStartTrial(Shop $shop, SubscriptionPlan $plan): bool
     {
-        // Trials only apply to the DLT payment flow. Manual-payment instances
-        // always go through the bank-transfer + admin-verification path.
-        if (config('marketplace.payment_method') !== 'dlt') {
-            return false;
-        }
+        // A cancelled subscription means the shop never actually activated — they
+        // abandoned or cancelled before any payment was processed. Don't count
+        // those against trial eligibility; only non-cancelled records disqualify.
+        $hasPreviousNonCancelledSubscription = $shop->subscriptions()
+            ->whereNotIn('status', ['cancelled'])
+            ->exists();
 
-        return $shop->country_code === config('marketplace.trial_eligible_country')
-            && $plan->trial_days !== null
-            && ! $shop->subscriptions()->exists();
+        // The plan's trial_days field is the sole source of truth.
+        // No country or payment-method restrictions — if the admin configures a
+        // trial on the plan, every newly-approved seller gets it.
+        return (int) $plan->trial_days > 0
+            && ! $hasPreviousNonCancelledSubscription;
     }
 }

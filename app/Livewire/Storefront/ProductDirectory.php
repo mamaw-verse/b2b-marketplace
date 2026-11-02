@@ -144,6 +144,14 @@ final class ProductDirectory extends Component
 
     public function render(): View
     {
-        return view('livewire.storefront.product-directory');
+        $selectedCategory = $this->selectedCategory;
+        $ogTitle = $selectedCategory
+            ? $selectedCategory->name.' Products — '.config('app.name')
+            : __('Product Directory — :app', ['app' => config('app.name')]);
+        $ogDescription = $selectedCategory
+            ? __('Browse halal-certified :category products from verified suppliers on :app.', ['category' => $selectedCategory->name, 'app' => config('app.name')])
+            : __('Discover thousands of halal-certified products from verified suppliers and manufacturers on :app.', ['app' => config('app.name')]);
+
+        return view('livewire.storefront.product-directory', compact('ogTitle', 'ogDescription'));
     }
 }

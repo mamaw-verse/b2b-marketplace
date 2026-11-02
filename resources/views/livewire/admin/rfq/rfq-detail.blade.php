@@ -82,14 +82,14 @@
                 <flux:heading size="lg" class="mb-4">{{ __('RFQ Details') }}</flux:heading>
                 <div class="space-y-4">
                     <div>
-                        <div class="text-sm font-medium text-zinc-500">{{ __('Requirements') }}</div>
-                        <div class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">{{ $rfq->description ?: __('No requirements provided.') }}</div>
+                        <div class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Requirements') }}</div>
+                        <div class="mt-1 text-sm text-[var(--hs-neutral-900)] whitespace-pre-wrap">{{ $rfq->description ?: __('No requirements provided.') }}</div>
                     </div>
                 </div>
 
                 @if($rfq->attachments->isNotEmpty())
                     <div class="mt-6">
-                        <div class="text-sm font-medium text-zinc-500 mb-2">{{ __('Attachments') }}</div>
+                        <div class="text-sm font-medium text-[var(--hs-neutral-500)] mb-2">{{ __('Attachments') }}</div>
                         <div class="flex flex-col gap-2">
                             @foreach($rfq->attachments as $attachment)
                                 <a href="{{ route('media.view', $attachment) }}" target="_blank" class="flex items-center gap-2 p-3 rounded-lg border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] hover:bg-[var(--hs-neutral-100)] transition group">
@@ -128,21 +128,21 @@
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
                     @if($displayName)
                         <div>
-                            <dt class="text-sm font-medium text-zinc-500">{{ __('Business Name') }}</dt>
-                            <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $displayName }}</dd>
+                            <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Business Name') }}</dt>
+                            <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $displayName }}</dd>
                         </div>
                     @endif
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Contact Email') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $displayEmail ?: __('N/A') }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Contact Email') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $displayEmail ?: __('N/A') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Contact Phone') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $displayPhone ?: __('N/A') }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Contact Phone') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $displayPhone ?: __('N/A') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Billing Address') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Billing Address') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             @if($displayBilling)
                                 {{ $displayBilling }}<br />
                             @endif
@@ -153,8 +153,8 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Shipping Address') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Shipping Address') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             @if($displayShipping)
                                 {{ $displayShipping }}<br />
                             @endif
@@ -185,8 +185,8 @@
                 <flux:heading size="lg" class="mb-4">{{ __('Supplier Information') }}</flux:heading>
                 <div class="space-y-4">
                     <div>
-                        <div class="text-sm font-medium text-zinc-500">{{ __('Target Shop') }}</div>
-                        <div class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <div class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Target Shop') }}</div>
+                        <div class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             <a href="{{ route('admin.merchants.show', $recipient->shop_id) }}" class="text-[var(--hs-green-700)] hover:underline" wire:navigate>
                                 {{ $recipient->shop->registered_business_name }}
                             </a>
@@ -197,23 +197,23 @@
                 @if($rfq->product?->shop)
                     @php $sellerShop = $rfq->product->shop; @endphp
                     <div class="mt-6 pt-6 border-t border-[var(--hs-neutral-100)]">
-                        <div class="text-sm font-medium text-zinc-500 mb-3">{{ __('Business Information') }}</div>
+                        <div class="text-sm font-medium text-[var(--hs-neutral-500)] mb-3">{{ __('Business Information') }}</div>
                         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm">
                             @if($sellerShop->email)
                                 <div>
-                                    <dt class="font-medium text-zinc-500">{{ __('Email') }}</dt>
-                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->email }}</dd>
+                                    <dt class="font-medium text-[var(--hs-neutral-500)]">{{ __('Email') }}</dt>
+                                    <dd class="mt-0.5 text-[var(--hs-neutral-900)]">{{ $sellerShop->email }}</dd>
                                 </div>
                             @endif
                             @if($sellerShop->phone)
                                 <div>
-                                    <dt class="font-medium text-zinc-500">{{ __('Phone') }}</dt>
-                                    <dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $sellerShop->phone }}</dd>
+                                    <dt class="font-medium text-[var(--hs-neutral-500)]">{{ __('Phone') }}</dt>
+                                    <dd class="mt-0.5 text-[var(--hs-neutral-900)]">{{ $sellerShop->phone }}</dd>
                                 </div>
                             @endif
                             <div class="sm:col-span-2">
-                                <dt class="font-medium text-zinc-500">{{ __('Address') }}</dt>
-                                <dd class="mt-0.5 text-zinc-900 dark:text-white">
+                                <dt class="font-medium text-[var(--hs-neutral-500)]">{{ __('Address') }}</dt>
+                                <dd class="mt-0.5 text-[var(--hs-neutral-900)]">
                                     @if($sellerShop->address_1)
                                         {{ $sellerShop->address_1 }}<br />
                                     @endif

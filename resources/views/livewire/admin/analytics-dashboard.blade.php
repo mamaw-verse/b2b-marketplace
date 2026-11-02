@@ -26,7 +26,7 @@
 
             @if($period === 'custom')
                 <flux:input type="date" wire:model.live="customFrom" size="sm" class="w-36" />
-                <span class="text-sm text-zinc-500">{{ __('to') }}</span>
+                <span class="text-sm text-[var(--hs-neutral-500)]">{{ __('to') }}</span>
                 <flux:input type="date" wire:model.live="customTo" size="sm" class="w-36" />
             @endif
         </div>
@@ -37,14 +37,14 @@
         @if(config('marketplace.features.orders_enabled'))
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('GMV') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['gmv'] ?? 0), 2) }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('GMV') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['gmv'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Total Orders') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['total_orders'] ?? 0 }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Total Orders') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ $metrics['total_orders'] ?? 0 }}</span>
                 </div>
             </flux:card>
         @endif
@@ -52,17 +52,17 @@
         @if(config('marketplace.features.payouts_enabled'))
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Payouts Disbursed') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_payouts_disbursed'] ?? 0), 2) }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Payouts Disbursed') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_payouts_disbursed'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
         @endif
 
         <a href="{{ route('admin.merchants.index') }}" wire:navigate class="block group">
-            <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
+            <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-[var(--hs-warning-500)]/60">
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Businesses') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['total_active_sellers'] ?? 0 }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Active Businesses') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ $metrics['total_active_sellers'] ?? 0 }}</span>
                 </div>
             </flux:card>
         </a>
@@ -70,10 +70,10 @@
         @if(config('marketplace.features.reviews_enabled'))
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Avg Rating') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Avg Rating') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">
                         @if (($metrics['platform_average_rating'] ?? 0) > 0)
-                            {{ number_format((float) $metrics['platform_average_rating'], 2) }} <span class="text-base font-normal text-zinc-500">/ 5.00</span>
+                            {{ number_format((float) $metrics['platform_average_rating'], 2) }} <span class="text-base font-normal text-[var(--hs-neutral-500)]">/ 5.00</span>
                         @else
                             —
                         @endif
@@ -85,11 +85,11 @@
         {{-- Open RFQs (pending + in_progress) --}}
         @if(config('marketplace.features.admin_rfq_management_enabled'))
             <a href="{{ route('admin.rfqs.index', ['status' => 'all']) }}" wire:navigate class="block group">
-                <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
+                <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-[var(--hs-warning-500)]/60">
                     <div class="flex flex-col">
-                        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Open RFQs') }}</span>
-                        <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['open_rfq_count'] ?? 0 }}</span>
-                        <span class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ __('pending & in progress') }}</span>
+                        <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Open RFQs') }}</span>
+                        <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ $metrics['open_rfq_count'] ?? 0 }}</span>
+                        <span class="mt-1 text-xs text-[var(--hs-neutral-400)]">{{ __('pending & in progress') }}</span>
                     </div>
                 </flux:card>
             </a>
@@ -97,22 +97,22 @@
 
         {{-- Open Sourcing Requests (pending + in_progress) --}}
         <a href="{{ route('admin.sourcing-requests.index', ['status' => 'pending']) }}" wire:navigate class="block group">
-            <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-amber-400/60">
+            <flux:card class="h-full transition group-hover:ring-2 group-hover:ring-[var(--hs-warning-500)]/60">
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Open Sourcing') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ $metrics['open_sourcing_count'] ?? 0 }}</span>
-                    <span class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ __('pending & in progress') }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Open Sourcing') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ $metrics['open_sourcing_count'] ?? 0 }}</span>
+                    <span class="mt-1 text-xs text-[var(--hs-neutral-400)]">{{ __('pending & in progress') }}</span>
                 </div>
             </flux:card>
         </a>
 
         {{-- Expiring / Expired Certificates --}}
         <a href="{{ route('admin.certifications.index', ['status' => 'expiring_soon']) }}" wire:navigate class="block group">
-            <flux:card class="h-full transition {{ ($metrics['expiring_cert_count'] ?? 0) > 0 ? 'group-hover:ring-2 group-hover:ring-red-400/60' : 'group-hover:ring-2 group-hover:ring-amber-400/60' }}">
+            <flux:card class="h-full transition {{ ($metrics['expiring_cert_count'] ?? 0) > 0 ? 'group-hover:ring-2 group-hover:ring-[var(--hs-danger-500)]/60' : 'group-hover:ring-2 group-hover:ring-[var(--hs-warning-500)]/60' }}">
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Expiring Certs') }}</span>
-                    <span class="text-2xl font-semibold {{ ($metrics['expiring_cert_count'] ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white' }} mt-1 tabular-nums">{{ $metrics['expiring_cert_count'] ?? 0 }}</span>
-                    <span class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ __('expiring soon & expired') }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Expiring Certs') }}</span>
+                    <span class="text-2xl font-semibold {{ ($metrics['expiring_cert_count'] ?? 0) > 0 ? 'text-[var(--hs-danger-700)]' : 'text-[var(--hs-neutral-900)]' }} mt-1 tabular-nums">{{ $metrics['expiring_cert_count'] ?? 0 }}</span>
+                    <span class="mt-1 text-xs text-[var(--hs-neutral-400)]">{{ __('expiring soon & expired') }}</span>
                 </div>
             </flux:card>
         </a>
@@ -120,26 +120,26 @@
         {{-- GA Stats --}}
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Active Users (GA)') }}</span>
-                <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['active_users'] ?? 0) : '—' }}</span>
+                <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Active Users (GA)') }}</span>
+                <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['active_users'] ?? 0) : '—' }}</span>
             </div>
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Sessions (GA)') }}</span>
-                <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['sessions'] ?? 0) : '—' }}</span>
+                <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Sessions (GA)') }}</span>
+                <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['sessions'] ?? 0) : '—' }}</span>
             </div>
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Page Views (GA)') }}</span>
-                <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['page_views'] ?? 0) : '—' }}</span>
+                <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Page Views (GA)') }}</span>
+                <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">{{ isset($metrics['ga']) && $metrics['ga'] !== null ? number_format($metrics['ga']['page_views'] ?? 0) : '—' }}</span>
             </div>
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Bounce Rate (GA)') }}</span>
-                <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
+                <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Bounce Rate (GA)') }}</span>
+                <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">
                     @if (isset($metrics['ga']) && $metrics['ga'] !== null && ($metrics['ga']['bounce_rate'] ?? null) !== null)
                         {{ number_format($metrics['ga']['bounce_rate'], 1) }}%
                     @else
@@ -150,8 +150,8 @@
         </flux:card>
         <flux:card>
             <div class="flex flex-col">
-                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Avg. Session (GA)') }}</span>
-                <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">
+                <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Avg. Session (GA)') }}</span>
+                <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">
                     @if (isset($metrics['ga']) && $metrics['ga'] !== null && ($metrics['ga']['avg_session_duration'] ?? null) !== null)
                         @php
                             $seconds = max(0, (int) $metrics['ga']['avg_session_duration']);
@@ -172,14 +172,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Transaction Fees Collected') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_transaction_fees_collected'] ?? 0), 2) }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Transaction Fees Collected') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_transaction_fees_collected'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
             <flux:card>
                 <div class="flex flex-col">
-                    <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Commission Fees Collected') }}</span>
-                    <span class="text-2xl font-semibold text-zinc-900 dark:text-white mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_commission_fees_collected'] ?? 0), 2) }}</span>
+                    <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Commission Fees Collected') }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_commission_fees_collected'] ?? 0), 2) }}</span>
                 </div>
             </flux:card>
         </div>
@@ -189,13 +189,13 @@
     @if(config('marketplace.features.orders_enabled'))
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Revenue Trend') }}</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Revenue Trend') }}</flux:heading>
                 <div class="relative" style="height: 260px;" wire:ignore>
                     <canvas x-ref="revenueChart"></canvas>
                 </div>
             </flux:card>
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Orders Trend') }}</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Orders Trend') }}</flux:heading>
                 <div class="relative" style="height: 260px;" wire:ignore>
                     <canvas x-ref="ordersChart"></canvas>
                 </div>
@@ -207,24 +207,24 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         @if(config('marketplace.features.subscriptions_enabled'))
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Subscriptions') }}</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Subscriptions') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
                     <div class="shrink-0" style="width: 180px; height: 180px;" wire:ignore>
                         <canvas x-ref="subscriptionsDonut"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
-                        <p class="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{{ __('Counts by Status') }}</p>
+                        <p class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-2">{{ __('Counts by Status') }}</p>
                         @forelse($metrics['subscriptions']['counts'] ?? [] as $count)
-                            <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ $count['status'] ?? '' }}</span>
-                                <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $count['count'] ?? 0 }}</span>
+                            <div class="flex justify-between py-2 border-b border-[var(--hs-neutral-200)] last:border-0">
+                                <span class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)] capitalize">{{ $count['status'] ?? '' }}</span>
+                                <span class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ $count['count'] ?? 0 }}</span>
                             </div>
                         @empty
-                            <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No subscription data.') }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No subscription data.') }}</p>
                         @endforelse
                         <div class="mt-4 pt-4">
-                            <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('Trial to Paid Conversion') }}</p>
-                            <p class="text-xl font-bold text-zinc-900 dark:text-white tabular-nums mt-1">{{ $metrics['subscriptions']['trial_to_paid_conversion'] ?? 0 }}%</p>
+                            <p class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)]">{{ __('Trial to Paid Conversion') }}</p>
+                            <p class="text-xl font-bold text-[var(--hs-neutral-900)] tabular-nums mt-1">{{ $metrics['subscriptions']['trial_to_paid_conversion'] ?? 0 }}%</p>
                         </div>
                     </div>
                 </div>
@@ -233,16 +233,16 @@
 
         @if(config('marketplace.features.certification_apply_enabled'))
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Certifications') }}</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Certifications') }}</flux:heading>
                 <div class="flex flex-wrap gap-6 items-start">
                     <div class="shrink-0" style="width: 180px; height: 180px;" wire:ignore>
                         <canvas x-ref="certificationsDonut"></canvas>
                     </div>
                     <div class="flex-1 min-w-[200px]">
                         @foreach(['under_review', 'active', 'expiring_soon', 'expired', 'rejected'] as $status)
-                            <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400 capitalize">{{ __(str_replace('_', ' ', $status)) }}</span>
-                                <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $metrics['certifications'][$status] ?? 0 }}</span>
+                            <div class="flex justify-between py-2 border-b border-[var(--hs-neutral-200)] last:border-0">
+                                <span class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)] capitalize">{{ __(str_replace('_', ' ', $status)) }}</span>
+                                <span class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ $metrics['certifications'][$status] ?? 0 }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -255,18 +255,18 @@
     @if(config('marketplace.features.sponsored_content_enabled'))
         <div class="grid grid-cols-1 gap-6">
             <flux:card>
-                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-zinc-500">{{ __('Sponsored Content Performance') }}</flux:heading>
+                <flux:heading size="sm" class="mb-4 uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Sponsored Content Performance') }}</flux:heading>
                 <div class="relative" style="height: 200px;" wire:ignore>
                     <canvas x-ref="sponsoredChart"></canvas>
                 </div>
                 <div class="mt-6">
                     @forelse($metrics['sponsored_content'] ?? [] as $event)
-                        <div class="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-700 last:border-0">
-                            <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ $event['tier_name'] ?? '' }} — <span class="capitalize">{{ $event['event_type'] ?? '' }}</span></span>
-                            <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $event['count'] ?? 0 }}</span>
+                        <div class="flex justify-between py-2 border-b border-[var(--hs-neutral-200)] last:border-0">
+                            <span class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)]">{{ $event['tier_name'] ?? '' }} — <span class="capitalize">{{ $event['event_type'] ?? '' }}</span></span>
+                            <span class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ $event['count'] ?? 0 }}</span>
                         </div>
                     @empty
-                        <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No event data.') }}</p>
+                        <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No event data.') }}</p>
                     @endforelse
                 </div>
             </flux:card>

@@ -56,7 +56,11 @@ final class FortifyServiceProvider extends ServiceProvider
         Fortify::loginView(fn () => view('pages::auth.login'));
         Fortify::verifyEmailView(fn () => view('pages::auth.verify-email'));
         Fortify::twoFactorChallengeView(fn () => view('pages::auth.two-factor-challenge'));
-        Fortify::confirmPasswordView(fn () => view('pages::auth.confirm-password'));
+        Fortify::confirmPasswordView(fn (Request $request) => view('pages::auth.confirm-password', [
+            'hasGoogleIdentity' => filled($request->user()?->google_id),
+            'hasPasskeys' => $request->user()?->passkeys()->exists() ?? false,
+            'hasPassword' => filled($request->user()?->getAuthPassword()),
+        ]));
         Fortify::registerView(fn () => view('pages::auth.register'));
         Fortify::resetPasswordView(fn () => view('pages::auth.reset-password'));
         Fortify::requestPasswordResetLinkView(fn () => view('pages::auth.forgot-password'));

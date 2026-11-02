@@ -1,16 +1,16 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Business Onboarding') }}</h1>
+        <div class="border-b border-[var(--hs-neutral-100)] px-4 py-4 sm:px-6 sm:py-5">
+            <h1 class="text-lg font-semibold text-[var(--hs-neutral-900)] sm:text-xl">{{ __('Business Onboarding') }}</h1>
             <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Complete all steps to register your business on the marketplace.') }}</p>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             {{-- Stepper / Progress indicator — only shown while the form is active --}}
             @if (!in_array($onboardingStatus, ['submitted', 'approved', 'rejected']))
-            <nav aria-label="{{ __('Onboarding progress') }}" class="mb-4">
-                <ol class="flex items-center">
+            <nav aria-label="{{ __('Onboarding progress') }}" class="mb-5 sm:mb-6" data-onboarding-stepper>
+                <ol class="flex items-start">
                     @for ($step = 1; $step <= 4; $step++)
                         @php
                             $stepLabel = match ($step) {
@@ -20,11 +20,11 @@
                                 4 => __('Documents'),
                             };
                         @endphp
-                        <li class="flex items-center {{ $step < 4 ? 'flex-1' : '' }}" @if ($step === $currentStep) aria-current="step" @endif>
+                        <li class="flex items-start {{ $step < 4 ? 'flex-1' : '' }}" @if ($step === $currentStep) aria-current="step" @endif>
                             {{-- Step circle --}}
                             <div class="flex flex-col items-center">
                                 <div @class([
-                                    'flex size-7 sm:size-10 items-center justify-center rounded-full text-xs sm:text-sm font-bold border-2 transition',
+                                    'flex size-8 items-center justify-center rounded-full border-2 text-xs font-bold transition sm:size-10 sm:text-sm',
                                     'bg-[var(--hs-green-600)] border-[var(--hs-green-600)] text-white' => $step === $currentStep,
                                     'bg-[var(--hs-green-50)] border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => $step < $currentStep,
                                     'bg-[var(--hs-neutral-100)] border-[var(--hs-neutral-200)] text-[var(--hs-neutral-500)]' => $step > $currentStep,
@@ -46,7 +46,7 @@
                             {{-- Connecting line --}}
                             @if ($step < 4)
                                 <div @class([
-                                    'flex-1 h-0.5 mx-1 sm:mx-2',
+                                    'mx-1 mt-[15px] h-0.5 flex-1 rounded-full sm:mx-2 sm:mt-[19px]',
                                     'bg-[var(--hs-green-600)]' => $step < $currentStep,
                                     'bg-[var(--hs-neutral-200)]' => $step >= $currentStep,
                                 ])></div>
@@ -188,7 +188,7 @@
                 @endif
 
                 {{-- Step content --}}
-                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-6 [&_[data-flux-error]]:mt-1 [&_[data-flux-label]]:mb-1.5">
+                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-50)] p-4 sm:p-6 [&_[data-flux-error]]:mt-1 [&_[data-flux-label]]:mb-1.5">
                     @switch($currentStep)
                         @case(1)
                             @include('livewire.company-hub.steps.step-1-company-profile')

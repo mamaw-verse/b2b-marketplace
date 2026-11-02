@@ -29,6 +29,8 @@ final class ProductList extends Component
 
     public ?string $confirmingAction = null;
 
+    public ?int $confirmingDeleteId = null;
+
     public function updatedStatusFilter(): void
     {
         $this->resetPage();
@@ -72,8 +74,33 @@ final class ProductList extends Component
         $this->confirmingAction = null;
     }
 
+    public function confirmDeleteProduct(int $productId): void
+    {
+        $this->confirmingDeleteId = $productId;
+        Flux::modal('delete-product-confirm')->show();
+    }
+
+    public function deleteProduct(): void
+    {
+        if (! $this->confirmingDeleteId) {
+            return;
+        }
+
+        $product = $this->findOwnedProduct($this->confirmingDeleteId);
+
+        abort_unless($product->status === 'archived', 403, 'Only archived products may be deleted.');
+
+        Gate::authorize('delete', $product);
+
+        $product->delete();
+        IndexProductJob::dispatch($product)->afterCommit();
+
+        $this->confirmingDeleteId = null;
+        Flux::toast(__('Product deleted.'), variant: 'success');
+    }
+
     /**
-     * Whether the authenticated shop has an active or trialing subscription.
+     * Whether the authenticated shop has an active (paid) subscription.
      * Used to show the subscription prompt banner on this page.
      */
     #[Computed]
@@ -85,7 +112,7 @@ final class ProductList extends Component
 
         $shop = Auth::user()?->shop;
 
-        return $shop !== null && $shop->hasActiveOrTrialingSubscription();
+        return $shop !== null && $shop->hasActiveSubscription();
     }
 
     /**

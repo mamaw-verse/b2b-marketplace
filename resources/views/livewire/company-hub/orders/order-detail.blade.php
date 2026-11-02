@@ -3,8 +3,8 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[20px] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-md)] overflow-hidden">
 
         {{-- Header --}}
-        <div class="px-8 pt-7 pb-6 border-b border-[var(--hs-neutral-100)]">
-            <div class="flex items-start justify-between gap-6 flex-wrap">
+        <div class="px-5 sm:px-8 pt-7 pb-6 border-b border-[var(--hs-neutral-100)]">
+            <div class="flex items-start justify-between gap-4 sm:gap-6 flex-wrap">
                 <div>
                     <div class="flex items-center gap-2.5">
                         <h1 class="text-[22px] font-[650] tracking-[-0.01em] text-[var(--hs-neutral-900)]">{{ $order->order_number }}</h1>
@@ -35,7 +35,7 @@
         <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_300px] items-stretch">
 
             {{-- MAIN COLUMN — flat sections separated by hairline dividers --}}
-            <div class="min-w-0 px-8 pb-8 pt-6">
+            <div class="min-w-0 px-5 sm:px-8 pb-8 pt-6">
 
                 @if (session('success'))
                     <div class="mb-6 p-3 bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] rounded-lg text-sm text-[var(--hs-green-700)]">{{ session('success') }}</div>
@@ -143,8 +143,8 @@
                             <span class="text-[var(--hs-neutral-400)] font-normal normal-case tracking-normal">· {{ $order->items->count() }}</span>
                         </h2>
                     </div>
-                    <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden">
-                        <table class="w-full text-[13.5px]">
+                    <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-x-auto">
+                        <table class="w-full text-[13.5px] min-w-[480px]">
                             <thead>
                                 <tr class="bg-[var(--hs-neutral-50)]">
                                     <th class="text-left text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold px-4 py-2.5 w-8">#</th>

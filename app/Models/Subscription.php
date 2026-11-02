@@ -53,11 +53,6 @@ final class Subscription extends Model
         return $this->hasMany(PaymentAttempt::class);
     }
 
-    public function isActiveOrTrialing(): bool
-    {
-        return in_array($this->status, ['active', 'trialing'], true);
-    }
-
     /**
      * @return array<string, string>
      */

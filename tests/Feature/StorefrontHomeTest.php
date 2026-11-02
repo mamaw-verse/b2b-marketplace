@@ -24,7 +24,7 @@ test('hero section renders split-layout headline', function () {
 test('hero section renders CTA buttons', function () {
     $response = $this->get(route('home'));
 
-    $response->assertSee('Join the Movement');
+    $response->assertSee('Register Now');
     $response->assertSee('See How It Works');
 });
 

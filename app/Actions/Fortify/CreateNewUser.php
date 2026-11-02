@@ -24,7 +24,7 @@ final class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             ...$this->profileRules(),
-            'password' => $this->passwordRules(),
+            'password' => $this->accountCreationPasswordRules(),
             'terms' => ['accepted'],
             'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
         ], [

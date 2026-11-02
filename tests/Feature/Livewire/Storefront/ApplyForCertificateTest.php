@@ -20,6 +20,7 @@ beforeEach(function () {
     Mail::fake();
     Notification::fake();
     Role::firstOrCreate(['name' => 'admin']);
+    config(['humancheck.enabled' => false]);
 });
 
 it('renders the apply for certificate component', function () {
@@ -56,15 +57,16 @@ it('rejects submissions if the honeypot is filled', function () {
     Notification::assertNothingSent();
 });
 
-it('rejects submissions if the turnstile token is missing or invalid', function () {
+it('rejects submissions when human check is enabled and pass is missing', function () {
+    config(['humancheck.enabled' => true]);
+
     $component = Livewire::test(ApplyForCertificate::class);
 
     $component->set('company_name', 'Test Corp')
         ->set('email', 'test@test.com')
-        ->set('turnstile_token', 'invalid-token')
         ->set('document', UploadedFile::fake()->create('loi.pdf', 100, 'application/pdf'))
         ->call('submit')
-        ->assertHasErrors(['turnstile_token']);
+        ->assertHasErrors(['human_check']);
 
     expect(CertificationApplication::count())->toBe(0);
 });
@@ -80,7 +82,6 @@ it('creates a certification application and sends notifications', function () {
 
     $component->set('company_name', 'Test Corp')
         ->set('email', 'test@test.com')
-        ->set('turnstile_token', 'valid-token')
         ->set('document', $file)
         ->call('submit')
         ->assertHasNoErrors()

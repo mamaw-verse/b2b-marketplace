@@ -7,6 +7,7 @@ use App\Mail\SourcingRequestAcknowledgment;
 use App\Models\SourcingRequest;
 use App\Models\User;
 use App\Notifications\SourcingRequestReceivedNotification;
+use App\Support\HumanPass;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,7 @@ beforeEach(function () {
     Storage::fake('s3');
     Notification::fake();
     Mail::fake();
+    config(['humancheck.enabled' => false]);
 });
 
 test('the sourcing request page renders the form', function () {
@@ -43,7 +45,6 @@ test('a public visitor can submit a sourcing request', function () {
         ->set('email', 'john@example.com')
         ->set('product_name', 'Bulk turmeric powder')
         ->set('product_description', 'High curcumin content, need about 500kg.')
-        ->set('turnstile_token', 'valid-token')
         ->call('submit')
         ->assertHasNoErrors()
         ->assertSet('submitted', true);
@@ -84,20 +85,33 @@ test('validation fails when required fields are missing', function () {
         ->set('name', '')
         ->set('email', '')
         ->set('product_name', '')
-        ->set('turnstile_token', '')
         ->call('submit')
-        ->assertHasErrors(['name', 'email', 'product_name', 'turnstile_token'])
-        ->assertHasErrors(['turnstile_token' => 'Please complete the security check.']);
+        ->assertHasErrors(['name', 'email', 'product_name']);
 });
 
-test('validation fails when captcha token is invalid', function () {
+test('submission is blocked when human check is enabled and pass is missing', function () {
+    config(['humancheck.enabled' => true]);
+
     Livewire::test(ProductSourcingForm::class)
         ->set('name', 'John')
         ->set('email', 'john@example.com')
         ->set('product_name', 'Coffee beans')
-        ->set('turnstile_token', 'invalid-token')
         ->call('submit')
-        ->assertHasErrors(['turnstile_token']);
+        ->assertHasErrors(['human_check']);
+});
+
+test('submission succeeds when human check is enabled and pass cookie is present', function () {
+    config(['humancheck.enabled' => true]);
+
+    $cookie = HumanPass::issue(request());
+
+    Livewire::withCookie(HumanPass::COOKIE_NAME, $cookie->getValue())
+        ->test(ProductSourcingForm::class)
+        ->set('name', 'John')
+        ->set('email', 'john@example.com')
+        ->set('product_name', 'Coffee beans')
+        ->call('submit')
+        ->assertHasNoErrors(['human_check']);
 });
 
 test('honeypot submission is silently discarded', function () {
@@ -106,7 +120,6 @@ test('honeypot submission is silently discarded', function () {
         ->set('email', 'bot@spam.com')
         ->set('product_name', 'Spam')
         ->set('honeypot', 'http://spamsite.com')
-        ->set('turnstile_token', 'valid-token')
         ->call('submit')
         ->assertSet('submitted', true);
 
@@ -124,7 +137,6 @@ test('reference file is stored to s3 when upload provided', function () {
         ->set('email', 'john@example.com')
         ->set('product_name', 'Honey')
         ->set('reference_file', UploadedFile::fake()->image('reference.jpg'))
-        ->set('turnstile_token', 'valid-token')
         ->call('submit');
 
     $request = SourcingRequest::first();
@@ -140,7 +152,6 @@ test('reference file is optional', function () {
         ->set('name', 'John')
         ->set('email', 'john@example.com')
         ->set('product_name', 'Honey')
-        ->set('turnstile_token', 'valid-token')
         ->call('submit');
 
     expect(SourcingRequest::first()->reference_file_path)->toBeNull();
@@ -151,7 +162,6 @@ test('success state is shown after submission', function () {
         ->set('name', 'John')
         ->set('email', 'john@example.com')
         ->set('product_name', 'Honey')
-        ->set('turnstile_token', 'valid-token')
         ->call('submit')
         ->assertSet('submitted', true)
         ->assertSee('Request Submitted')

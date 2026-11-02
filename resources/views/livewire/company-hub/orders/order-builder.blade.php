@@ -180,7 +180,7 @@
                     @else
                         {{-- Editable items for standalone orders --}}
                         <template x-if="items.length">
-                            <div class="grid grid-cols-12 gap-2 mb-1.5 px-0.5 text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">
+                            <div class="hidden sm:grid grid-cols-12 gap-2 mb-1.5 px-0.5 text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">
                                 <div class="col-span-4">{{ __('Description') }}</div>
                                 <div class="col-span-2">{{ __('Qty') }}</div>
                                 <div class="col-span-2">{{ __('Unit') }}</div>
@@ -191,9 +191,9 @@
                         </template>
 
                         <template x-for="(item, index) in items" :key="index">
-                            <div class="grid grid-cols-12 gap-2 mb-2 items-start">
-                                <div class="col-span-4"><input x-model="item.description" placeholder="{{ __('Description') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                                <div class="col-span-2">
+                            <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 mb-2 items-start">
+                                <div class="col-span-2 sm:col-span-4"><input x-model="item.description" placeholder="{{ __('Description') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                                <div class="sm:col-span-2">
                                     <input
                                         x-model.number="item.quantity"
                                         type="number"
@@ -207,7 +207,7 @@
                                     />
                                     <p x-show="item.quantity === '' || item.quantity < 1" x-cloak class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ __('Min 1') }}</p>
                                 </div>
-                                <div class="col-span-2">
+                                <div class="sm:col-span-2">
                                     {{-- Unit dropdown from curated units (S4.T15) --}}
                                     <select x-model="item.unit" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]">
                                         @foreach ($unitGroups as $groupName => $groupUnits)
@@ -219,18 +219,19 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-span-2"><input x-model.number="item.unit_price" type="number" min="0" step="0.01" placeholder="{{ __('Unit Price') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                                <div class="col-span-1 text-right text-sm text-[var(--hs-neutral-700)] tabular-nums pt-2" x-text="money(rowSubtotal(item))"></div>
-                                <div class="col-span-1 flex justify-end">
+                                <div class="sm:col-span-2"><input x-model.number="item.unit_price" type="number" min="0" step="0.01" placeholder="{{ __('Unit Price') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                                <div class="col-span-1 hidden sm:block text-right text-sm text-[var(--hs-neutral-700)] tabular-nums pt-2" x-text="money(rowSubtotal(item))"></div>
+                                <div class="col-span-1 hidden sm:flex justify-end">
                                     <flux:button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
                                         icon="trash"
                                         @click="items.splice(index, 1)"
-                                        aria-label="{{ __('Remove item') }}"
                                         class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
-                                    />
+                                    >
+                                        <span class="sr-only">{{ __('Remove item') }}</span>
+                                    </flux:button>
                                 </div>
                             </div>
                         </template>
@@ -249,7 +250,7 @@
                     </div>
 
                     <template x-if="fees.length">
-                        <div class="grid grid-cols-12 gap-2 mb-1.5 px-0.5 text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">
+                        <div class="hidden sm:grid grid-cols-12 gap-2 mb-1.5 px-0.5 text-[11px] uppercase tracking-[.04em] text-[var(--hs-neutral-500)] font-semibold">
                             <div class="col-span-6">{{ __('Fee label') }}</div>
                             <div class="col-span-4">{{ __('Amount') }}</div>
                             <div class="col-span-2"></div>
@@ -258,8 +259,8 @@
 
                     <template x-for="(fee, index) in fees" :key="index">
                         <div class="grid grid-cols-12 gap-2 mb-2 items-center">
-                            <div class="col-span-6"><input x-model="fee.label" placeholder="{{ __('Fee Label') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
-                            <div class="col-span-4"><input x-model.number="fee.amount" type="number" min="0" step="0.01" placeholder="{{ __('Amount') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                            <div class="col-span-7 sm:col-span-6"><input x-model="fee.label" placeholder="{{ __('Fee Label') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
+                            <div class="col-span-3 sm:col-span-4"><input x-model.number="fee.amount" type="number" min="0" step="0.01" placeholder="{{ __('Amount') }}" class="w-full rounded-md border border-[var(--hs-neutral-200)] px-3 py-2 text-sm bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-900)]" /></div>
                             <div class="col-span-2 flex justify-end">
                                 <flux:button
                                     type="button"
@@ -267,9 +268,10 @@
                                     size="sm"
                                     icon="trash"
                                     @click="fees.splice(index, 1)"
-                                    aria-label="{{ __('Remove fee') }}"
                                     class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)]"
-                                />
+                                >
+                                    <span class="sr-only">{{ __('Remove fee') }}</span>
+                                </flux:button>
                             </div>
                         </div>
                     </template>

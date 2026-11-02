@@ -21,12 +21,15 @@ final class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             CategorySeeder::class,
+            SubscriptionPlanSeeder::class,
+            SponsoredContentTierSeeder::class,
+
+            // FOR LOCAL DEV ONLY
+            // DemoSubscriptionSeeder::class,   // Phase 6 — give seeded shops a free trial
             // DemoDataSeeder::class,
             // DemoUsersSeeder::class,
-            SubscriptionPlanSeeder::class,
-            // DemoSubscriptionSeeder::class,   // Phase 6 — give seeded shops a free trial
-            SponsoredContentTierSeeder::class,
             // SponsoredContentSeeder::class,
+
             // Phase3Seeder and PayoutSettingsSeeder are preserved in the codebase
             // but excluded from the default seed — orders/payouts are disabled in
             // Phase 6. Re-add them manually when testing transactional features.
@@ -38,7 +41,8 @@ final class DatabaseSeeder extends Seeder
                 'first_name' => 'Admin',
                 'last_name' => 'User',
                 'email_verified_at' => now(),
-                'password' => Hash::make('j0xzB2T7MdI2'),
+                // 'password' => Hash::make('j0xzB2T7MdI2'),
+                'password' => Hash::make('password'),
             ]
         );
         $admin->assignRole('admin');

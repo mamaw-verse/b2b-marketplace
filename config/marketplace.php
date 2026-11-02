@@ -44,17 +44,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Free-Trial Eligible Country
-    |--------------------------------------------------------------------------
-    |
-    | The country code whose merchants get the PH-style free subscription
-    | trial. Defaults to PH but can be overridden per instance if needed.
-    |
-    */
-    'trial_eligible_country' => mb_strtoupper((string) env('MARKETPLACE_TRIAL_ELIGIBLE_COUNTRY', 'PH')),
-
-    /*
-    |--------------------------------------------------------------------------
     | Platform Commission Rate
     |--------------------------------------------------------------------------
     |
@@ -74,8 +63,6 @@ return [
     |
     */
     'auto_accept_days' => (int) env('MARKETPLACE_AUTO_ACCEPT_DAYS', 7),
-
-    'initial_subscription_trial_days' => (int) env('MARKETPLACE_INITIAL_SUBSCRIPTION_TRIAL_DAYS', 180),
 
     /*
     |--------------------------------------------------------------------------
@@ -116,7 +103,7 @@ return [
         // (retained per requirements.md §4.5/§5), just decoupled from RFQ auto-threading.
 
         // Phase 6 net-new capabilities, on by default
-        'subscriptions_enabled' => (bool) env('MARKETPLACE_SUBSCRIPTIONS_ENABLED', true),
+        'subscriptions_enabled' => (bool) env('MARKETPLACE_SUBSCRIPTIONS_ENABLED', false),
         'certification_apply_enabled' => (bool) env('MARKETPLACE_CERTIFICATION_APPLY_ENABLED', true),
         'sponsored_content_enabled' => (bool) env('MARKETPLACE_SPONSORED_CONTENT_ENABLED', true),
         'admin_rfq_management_enabled' => (bool) env('MARKETPLACE_ADMIN_RFQ_MANAGEMENT_ENABLED', true),

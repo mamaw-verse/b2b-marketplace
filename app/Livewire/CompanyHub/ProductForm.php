@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub;
 
 use App\Jobs\IndexProductJob;
+use App\Jobs\OptimizeImageJob;
 use App\Models\Category;
 use App\Models\Product;
 use Flux\Flux;
@@ -137,15 +138,24 @@ final class ProductForm extends Component
 
         abort_unless((bool) $shop, 403, 'You must have a registered shop to manage products.');
 
+        // Sanitize rich-text HTML: allow safe formatting tags only.
+        $allowedTags = '<h1><h2><p><br><strong><b><em><i><ul><ol><li><blockquote><del>';
+        $sanitizedDescription = $this->description
+            ? strip_tags($this->description, $allowedTags)
+            : null;
+
         $data = [
             'name' => $this->name,
-            'description' => $this->description ?: null,
+            'description' => $sanitizedDescription,
             'variant_attributes_schema' => $this->variantAttributesSchema,
         ];
 
         if ($this->featured_image) {
             $path = $this->featured_image->store('products/images', 's3');
             $data['featured_image_path'] = $path;
+
+            // Dispatch async image optimization for the featured image.
+            OptimizeImageJob::dispatch($path);
         } elseif ($this->removeFeaturedImage) {
             $data['featured_image_path'] = null;
         }
@@ -219,6 +229,32 @@ final class ProductForm extends Component
     public function render()
     {
         return view('livewire.company-hub.product-form');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function validationAttributes(): array
+    {
+        return [
+            'name' => 'Product Name',
+            'description' => 'Description',
+            'category_ids' => 'Categories',
+            'category_ids.*' => 'Category',
+            'featured_image' => 'Featured Image',
+            'variantAttributesSchema' => 'Product Options',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'featured_image.image' => 'The featured image must be a JPEG, PNG, or WebP file.',
+            'featured_image.max' => 'The featured image must not exceed 5 MB.',
+        ];
     }
 
     /**

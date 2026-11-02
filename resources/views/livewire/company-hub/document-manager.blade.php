@@ -38,37 +38,26 @@
                 </div>
             @endif
 
-            {{-- Documents table --}}
-            <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-x-auto">
-                <flux:table>
-                    <flux:table.columns>
-                        <flux:table.column>{{ __('Filename') }}</flux:table.column>
-                        <flux:table.column>{{ __('Type') }}</flux:table.column>
-                        <flux:table.column>{{ __('Uploaded') }}</flux:table.column>
-                        <flux:table.column>{{ __('Scan Status') }}</flux:table.column>
-                        <flux:table.column>{{ __('Actions') }}</flux:table.column>
-                    </flux:table.columns>
+            {{-- Documents: card list on mobile, table on sm+ --}}
+            <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] overflow-hidden">
 
-                    <flux:table.rows>
-                        @forelse ($this->documents as $document)
-                            <flux:table.row :key="$document->id" wire:key="doc-row-{{ $document->id }}">
-                                <flux:table.cell variant="strong">
-                                    <div class="flex items-center gap-2">
-                                        @if ($document->scan_status === 'infected')
-                                            <flux:icon name="exclamation-circle" class="size-4 shrink-0 text-[var(--hs-danger-500)]" />
-                                        @elseif ($document->scan_status === 'clean')
-                                            <flux:icon name="document-check" class="size-4 shrink-0 text-[var(--hs-green-600)]" />
-                                        @else
-                                            <flux:icon name="document" class="size-4 shrink-0 text-[var(--hs-neutral-400)]" />
-                                        @endif
-                                        <span class="truncate max-w-[200px]">{{ $document->original_filename }}</span>
-                                    </div>
-                                </flux:table.cell>
-                                <flux:table.cell>
+                {{-- Mobile card list (hidden on sm+) --}}
+                <div class="sm:hidden divide-y divide-[var(--hs-neutral-100)]">
+                    @forelse ($this->documents as $document)
+                        <div class="flex items-start gap-3 px-4 py-3.5" wire:key="doc-card-{{ $document->id }}">
+                            <div class="shrink-0 mt-0.5">
+                                @if ($document->scan_status === 'infected')
+                                    <flux:icon name="exclamation-circle" class="size-5 text-[var(--hs-danger-500)]" />
+                                @elseif ($document->scan_status === 'clean')
+                                    <flux:icon name="document-check" class="size-5 text-[var(--hs-green-600)]" />
+                                @else
+                                    <flux:icon name="document" class="size-5 text-[var(--hs-neutral-400)]" />
+                                @endif
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-[var(--hs-neutral-900)]">{{ $document->original_filename }}</p>
+                                <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                                     <x-hs-badge variant="tag" :label="strtoupper($document->extension)" />
-                                </flux:table.cell>
-                                <flux:table.cell>{{ $document->created_at->format('M d, Y') }}</flux:table.cell>
-                                <flux:table.cell class="py-0">
                                     @switch($document->scan_status)
                                         @case('clean')
                                             <flux:badge color="green" size="sm" icon="check-circle">{{ __('Verified') }}</flux:badge>
@@ -82,23 +71,83 @@
                                         @default
                                             <flux:badge size="sm">{{ __('Uploaded') }}</flux:badge>
                                     @endswitch
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    <div class="flex items-center gap-1">
-                                        <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $document->id }})" />
-                                        <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmRemoveDocument({{ $document->id }})" />
-                                    </div>
-                                </flux:table.cell>
-                            </flux:table.row>
-                        @empty
-                            <flux:table.row>
-                                <flux:table.cell colspan="5" class="text-center">
-                                    <x-hs-empty-state icon="document" title="{{ __('No documents attached') }}" subtitle="{{ __('Upload documents for your product.') }}" />
-                                </flux:table.cell>
-                            </flux:table.row>
-                        @endforelse
-                    </flux:table.rows>
-                </flux:table>
+                                    <span class="text-xs text-[var(--hs-neutral-400)]">{{ $document->created_at->format('M d, Y') }}</span>
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-1">
+                                <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $document->id }})" />
+                                <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmRemoveDocument({{ $document->id }})" />
+                            </div>
+                        </div>
+                    @empty
+                        <div class="px-4 py-4">
+                            <x-hs-empty-state icon="document" title="{{ __('No documents attached') }}" subtitle="{{ __('Upload documents for your product.') }}" />
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- Desktop table (hidden on mobile) --}}
+                <div class="hidden sm:block overflow-x-auto">
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>{{ __('Filename') }}</flux:table.column>
+                            <flux:table.column>{{ __('Type') }}</flux:table.column>
+                            <flux:table.column>{{ __('Uploaded') }}</flux:table.column>
+                            <flux:table.column>{{ __('Scan Status') }}</flux:table.column>
+                            <flux:table.column>{{ __('Actions') }}</flux:table.column>
+                        </flux:table.columns>
+
+                        <flux:table.rows>
+                            @forelse ($this->documents as $document)
+                                <flux:table.row :key="$document->id" wire:key="doc-row-{{ $document->id }}">
+                                    <flux:table.cell variant="strong">
+                                        <div class="flex items-center gap-2">
+                                            @if ($document->scan_status === 'infected')
+                                                <flux:icon name="exclamation-circle" class="size-4 shrink-0 text-[var(--hs-danger-500)]" />
+                                            @elseif ($document->scan_status === 'clean')
+                                                <flux:icon name="document-check" class="size-4 shrink-0 text-[var(--hs-green-600)]" />
+                                            @else
+                                                <flux:icon name="document" class="size-4 shrink-0 text-[var(--hs-neutral-400)]" />
+                                            @endif
+                                            <span class="truncate max-w-[200px]">{{ $document->original_filename }}</span>
+                                        </div>
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <x-hs-badge variant="tag" :label="strtoupper($document->extension)" />
+                                    </flux:table.cell>
+                                    <flux:table.cell>{{ $document->created_at->format('M d, Y') }}</flux:table.cell>
+                                    <flux:table.cell class="py-0">
+                                        @switch($document->scan_status)
+                                            @case('clean')
+                                                <flux:badge color="green" size="sm" icon="check-circle">{{ __('Verified') }}</flux:badge>
+                                                @break
+                                            @case('pending')
+                                                <flux:badge color="yellow" size="sm">{{ __('Scanning…') }}</flux:badge>
+                                                @break
+                                            @case('infected')
+                                                <flux:badge color="red" size="sm" icon="x-circle">{{ __('Failed scan') }}</flux:badge>
+                                                @break
+                                            @default
+                                                <flux:badge size="sm">{{ __('Uploaded') }}</flux:badge>
+                                        @endswitch
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <div class="flex items-center gap-1">
+                                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $document->id }})" />
+                                            <flux:button variant="ghost" size="sm" icon="trash" wire:click="confirmRemoveDocument({{ $document->id }})" />
+                                        </div>
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @empty
+                                <flux:table.row>
+                                    <flux:table.cell colspan="5" class="text-center">
+                                        <x-hs-empty-state icon="document" title="{{ __('No documents attached') }}" subtitle="{{ __('Upload documents for your product.') }}" />
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @endforelse
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
             </div>
         </div>
     </div>

@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\EnsureFeatureEnabled;
+use App\Http\Middleware\EnsureHumanPass;
 use App\Http\Middleware\SetLocale;
+use App\Support\HumanPass;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->encryptCookies(except: [
+            HumanPass::COOKIE_NAME,
+        ]);
         $middleware->web(append: [
             SetLocale::class,
         ]);
@@ -30,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'feature' => EnsureFeatureEnabled::class,
+            'human' => EnsureHumanPass::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

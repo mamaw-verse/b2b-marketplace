@@ -33,41 +33,71 @@
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Transaction Fees') }}</p>
-                <p class="text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_transaction_fees, 2) }}</p>
+                <p class="text-lg font-semibold text-[var(--hs-danger-700)]">-₱{{ number_format((float) $payout->total_transaction_fees, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Commission Fees') }}</p>
-                <p class="text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_commission_fees, 2) }}</p>
+                <p class="text-lg font-semibold text-[var(--hs-danger-700)]">-₱{{ number_format((float) $payout->total_commission_fees, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Net Amount') }}</p>
-                <p class="text-lg font-semibold text-green-700">₱{{ number_format((float) $payout->net_amount, 2) }}</p>
+                <p class="text-lg font-semibold text-[var(--hs-green-700)]">₱{{ number_format((float) $payout->net_amount, 2) }}</p>
             </div>
         </div>
 
         {{-- Payout Items --}}
         <div class="p-6 border-b border-[var(--hs-neutral-100)]">
             <h2 class="text-sm font-semibold text-[var(--hs-neutral-700)] mb-3">{{ __('Orders (:count)', ['count' => $payout->orders_count]) }}</h2>
-            <table class="w-full text-sm">
-                <thead><tr class="border-b border-[var(--hs-neutral-100)]">
-                    <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Order') }}</th>
-                    <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Escrowed') }}</th>
-                    <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Tx Fee') }}</th>
-                    <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Commission') }}</th>
-                    <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Net') }}</th>
-                </tr></thead>
-                <tbody>
-                    @foreach ($payout->items as $item)
-                        <tr class="border-b border-[var(--hs-neutral-50)]">
-                            <td class="py-2 px-2 font-medium text-[var(--hs-neutral-900)]">#{{ $item->order_id }}</td>
-                            <td class="py-2 px-2 text-right font-mono">₱{{ number_format((float) $item->escrowed_amount, 2) }}</td>
-                            <td class="py-2 px-2 text-right font-mono text-red-600">-₱{{ number_format((float) $item->transaction_fee, 2) }}</td>
-                            <td class="py-2 px-2 text-right font-mono text-red-600">-₱{{ number_format((float) $item->commission_fee, 2) }}</td>
-                            <td class="py-2 px-2 text-right font-mono text-green-700">₱{{ number_format((float) $item->net_amount, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+
+            {{-- Mobile: stacked card list --}}
+            <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+                @foreach ($payout->items as $item)
+                    <div class="py-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">#{{ $item->order_id }}</p>
+                            <p class="font-mono text-[var(--hs-green-700)] text-right">₱{{ number_format((float) $item->net_amount, 2) }}</p>
+                        </div>
+                        <dl class="mt-2 grid grid-cols-3 gap-x-2 text-xs">
+                            <div>
+                                <dt class="text-[var(--hs-neutral-500)]">{{ __('Escrowed') }}</dt>
+                                <dd class="font-mono text-[var(--hs-neutral-700)]">₱{{ number_format((float) $item->escrowed_amount, 2) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[var(--hs-neutral-500)]">{{ __('Tx Fee') }}</dt>
+                                <dd class="font-mono text-[var(--hs-danger-700)]">-₱{{ number_format((float) $item->transaction_fee, 2) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[var(--hs-neutral-500)]">{{ __('Commission') }}</dt>
+                                <dd class="font-mono text-[var(--hs-danger-700)]">-₱{{ number_format((float) $item->commission_fee, 2) }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Desktop: table --}}
+            <div class="hidden overflow-x-auto lg:block">
+                <table class="w-full text-sm">
+                    <thead><tr class="border-b border-[var(--hs-neutral-100)]">
+                        <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Order') }}</th>
+                        <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Escrowed') }}</th>
+                        <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Tx Fee') }}</th>
+                        <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Commission') }}</th>
+                        <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Net') }}</th>
+                    </tr></thead>
+                    <tbody>
+                        @foreach ($payout->items as $item)
+                            <tr class="border-b border-[var(--hs-neutral-50)]">
+                                <td class="py-2 px-2 font-medium text-[var(--hs-neutral-900)]">#{{ $item->order_id }}</td>
+                                <td class="py-2 px-2 text-right font-mono">₱{{ number_format((float) $item->escrowed_amount, 2) }}</td>
+                                <td class="py-2 px-2 text-right font-mono text-[var(--hs-danger-700)]">-₱{{ number_format((float) $item->transaction_fee, 2) }}</td>
+                                <td class="py-2 px-2 text-right font-mono text-[var(--hs-danger-700)]">-₱{{ number_format((float) $item->commission_fee, 2) }}</td>
+                                <td class="py-2 px-2 text-right font-mono text-[var(--hs-green-700)]">₱{{ number_format((float) $item->net_amount, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Disbursement History --}}
@@ -76,24 +106,49 @@
             @if ($payout->disbursements->isEmpty())
                 <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No disbursement attempts yet.') }}</p>
             @else
-                <table class="w-full text-sm">
-                    <thead><tr class="border-b border-[var(--hs-neutral-100)]">
-                        <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Status') }}</th>
-                        <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Reference') }}</th>
-                        <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Amount') }}</th>
-                        <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Attempted') }}</th>
-                    </tr></thead>
-                    <tbody>
-                        @foreach ($payout->disbursements as $disbursement)
-                            <tr class="border-b border-[var(--hs-neutral-50)]">
-                                <td class="py-2 px-2"><x-hs-status-pill :status="$disbursement->status" /></td>
-                                <td class="py-2 px-2 text-[var(--hs-neutral-700)] font-mono text-xs">{{ $disbursement->dlt_reference_id ?? '—' }}</td>
-                                <td class="py-2 px-2 text-right font-mono">₱{{ number_format((float) $disbursement->amount, 2) }}</td>
-                                <td class="py-2 px-2 text-[var(--hs-neutral-500)]">{{ $disbursement->attempted_at?->diffForHumans() ?? '—' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                {{-- Mobile: stacked card list --}}
+                <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+                    @foreach ($payout->disbursements as $disbursement)
+                        <div class="py-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <x-hs-status-pill :status="$disbursement->status" />
+                                <p class="font-mono text-[var(--hs-neutral-900)] text-right">₱{{ number_format((float) $disbursement->amount, 2) }}</p>
+                            </div>
+                            <dl class="mt-2 grid grid-cols-2 gap-x-4 text-xs">
+                                <div>
+                                    <dt class="text-[var(--hs-neutral-500)]">{{ __('Reference') }}</dt>
+                                    <dd class="font-mono text-[var(--hs-neutral-700)]">{{ $disbursement->dlt_reference_id ?? '—' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[var(--hs-neutral-500)]">{{ __('Attempted') }}</dt>
+                                    <dd class="text-[var(--hs-neutral-500)]">{{ $disbursement->attempted_at?->diffForHumans() ?? '—' }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Desktop: table --}}
+                <div class="hidden overflow-x-auto lg:block">
+                    <table class="w-full text-sm">
+                        <thead><tr class="border-b border-[var(--hs-neutral-100)]">
+                            <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Status') }}</th>
+                            <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Reference') }}</th>
+                            <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Amount') }}</th>
+                            <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Attempted') }}</th>
+                        </tr></thead>
+                        <tbody>
+                            @foreach ($payout->disbursements as $disbursement)
+                                <tr class="border-b border-[var(--hs-neutral-50)]">
+                                    <td class="py-2 px-2"><x-hs-status-pill :status="$disbursement->status" /></td>
+                                    <td class="py-2 px-2 text-[var(--hs-neutral-700)] font-mono text-xs">{{ $disbursement->dlt_reference_id ?? '—' }}</td>
+                                    <td class="py-2 px-2 text-right font-mono">₱{{ number_format((float) $disbursement->amount, 2) }}</td>
+                                    <td class="py-2 px-2 text-[var(--hs-neutral-500)]">{{ $disbursement->attempted_at?->diffForHumans() ?? '—' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         </div>
     </div>

@@ -2,7 +2,13 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Subscription') }}</h1>
-            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Choose a yearly plan to keep your products visible on the marketplace.') }}</p>
+            <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">
+                @if (config('marketplace.features.subscriptions_enabled'))
+                    {{ __('Choose a yearly plan to keep your products visible on the marketplace.') }}
+                @else
+                    {{ __('The marketplace is currently free. Subscription plans are not required right now.') }}
+                @endif
+            </p>
         </div>
 
         <div class="p-6 space-y-6">

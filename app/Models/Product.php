@@ -86,7 +86,7 @@ final class Product extends Model
             && $this->shop?->status === 'active';
 
         if ($visible && config('marketplace.features.subscriptions_enabled')) {
-            $visible = $this->shop?->hasActiveOrTrialingSubscription();
+            $visible = $this->shop?->hasActiveSubscription();
         }
 
         return (bool) $visible;
@@ -140,7 +140,7 @@ final class Product extends Model
     /**
      * Scope products that are visible in the marketplace.
      * When subscriptions are enabled, only products from shops with an
-     * active or trialing subscription are returned.
+     * active (paid) subscription are returned.
      */
     public function scopeMarketplaceVisible(Builder $query): Builder
     {
@@ -153,7 +153,7 @@ final class Product extends Model
         if (config('marketplace.features.subscriptions_enabled')) {
             $query->whereHas('shop', fn (Builder $shopQuery) => $shopQuery
                 ->whereHas('subscriptions', fn (Builder $subscriptionQuery) => $subscriptionQuery
-                    ->whereIn('status', ['active', 'trialing'])));
+                    ->where('status', 'active')));
         }
 
         return $query;

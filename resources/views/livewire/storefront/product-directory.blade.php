@@ -1,13 +1,29 @@
+@push('meta')
+    <meta name="description" content="{{ $ogDescription }}">
+
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="{{ url()->current() }}">
+    <meta property="og:title"       content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
+    <meta property="og:site_name"   content="{{ config('app.name') }}">
+
+    <meta name="twitter:card"        content="summary">
+    <meta name="twitter:title"       content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
+@endpush
+
 <div>
 
     {{-- ═══════════════════════════════════════════════════════════
          HERO
     ═══════════════════════════════════════════════════════════ --}}
     <section class="border-b border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-12">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 pb-6 sm:pt-12 sm:pb-12">
 
             {{-- Eyebrow --}}
-            <div class="flex items-center gap-3 mb-4">
+            <div class="hidden sm:flex items-center gap-3 mb-4">
                 <span class="w-6 h-px bg-[var(--hs-gold-500)]"></span>
 
                 <span class="font-sans text-[11px] tracking-[2.2px] uppercase text-[var(--hs-gold-600)]">
@@ -16,13 +32,13 @@
             </div>
 
             {{-- Heading --}}
-            <h1 class="font-[var(--hs-font-display)] font-semibold text-4xl sm:text-[46px] tracking-tight leading-tight text-[var(--hs-neutral-900)] mb-3">
+            <h1 class="font-[var(--hs-font-display)] font-semibold text-2xl sm:text-4xl sm:text-[46px] tracking-tight leading-tight text-[var(--hs-neutral-900)] mb-2 sm:mb-3">
                 {{ __('Product Directory') }}
             </h1>
 
             {{-- Description + Stats --}}
-            <div class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[var(--hs-neutral-500)] text-sm mb-8 max-w-3xl">
-                <span>
+            <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1.5 sm:gap-x-5 sm:gap-y-2 text-[var(--hs-neutral-500)] text-sm mb-5 sm:mb-8 max-w-3xl">
+                <span class="hidden sm:inline">
                     {{ __('Browse halal-certified products sourced directly from audited suppliers.') }}
                 </span>
 

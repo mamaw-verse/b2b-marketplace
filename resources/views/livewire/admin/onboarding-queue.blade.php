@@ -41,8 +41,40 @@
             @endforeach
         </div>
 
-        {{-- Onboarding submissions table --}}
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->onboardings as $onboarding)
+                <a href="{{ route('admin.onboardings.show', $onboarding) }}" wire:navigate class="block px-6 py-4 hover:bg-[var(--hs-neutral-50)] transition">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $onboarding->registered_business_name }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $onboarding->user?->first_name }} {{ $onboarding->user?->last_name }}</p>
+                        </div>
+                        <x-hs-status-pill :status="$onboarding->status" />
+                    </div>
+                    <div class="mt-2 flex items-center gap-3 text-sm">
+                        <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Submitted') }}</span>
+                        <span class="text-[var(--hs-neutral-600)]">{{ $onboarding->submitted_at?->format('M d, Y') ?? '—' }}</span>
+                    </div>
+                    <div class="mt-2">
+                        <flux:button variant="ghost" size="sm" icon="eye" href="{{ route('admin.onboardings.show', $onboarding) }}" wire:navigate x-on:click.stop>
+                            {{ $onboarding->status === 'submitted' ? 'Review' : 'View' }}
+                        </flux:button>
+                    </div>
+                </a>
+            @empty
+                <div class="px-6 py-10 text-center">
+                    <x-hs-empty-state
+                        icon="folder"
+                        title="{{ __('No submissions') }}"
+                        subtitle="{{ __('No onboarding submissions found for this status.') }}"
+                    />
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Business Name') }}</flux:table.column>
@@ -101,13 +133,13 @@
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-
-            {{-- Only show pagination when there is more than one page --}}
-            @if ($this->onboardings->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
-                    {{ $this->onboardings->links() }}
-                </div>
-            @endif
         </div>
+
+        {{-- Pagination (shared by mobile and desktop) --}}
+        @if ($this->onboardings->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
+                {{ $this->onboardings->links() }}
+            </div>
+        @endif
     </div>
 </div>

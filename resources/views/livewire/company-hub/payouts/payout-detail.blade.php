@@ -11,26 +11,27 @@
         <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-[var(--hs-neutral-100)]">
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Gross Amount') }}</p>
-                <p class="text-lg font-semibold text-[var(--hs-neutral-900)]">₱{{ number_format((float) $payout->gross_amount, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-[var(--hs-neutral-900)]">₱{{ number_format((float) $payout->gross_amount, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Transaction Fees') }}</p>
-                <p class="text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_transaction_fees, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_transaction_fees, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Commission Fees') }}</p>
-                <p class="text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_commission_fees, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_commission_fees, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Net Amount') }}</p>
-                <p class="text-lg font-semibold text-green-700">₱{{ number_format((float) $payout->net_amount, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-green-700">₱{{ number_format((float) $payout->net_amount, 2) }}</p>
             </div>
         </div>
 
         {{-- Order Breakdown --}}
         <div class="p-6">
             <h2 class="text-sm font-semibold text-[var(--hs-neutral-700)] mb-3">{{ __('Order Breakdown') }}</h2>
-            <table class="w-full text-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm min-w-[400px]">
                 <thead><tr class="border-b border-[var(--hs-neutral-100)]">
                     <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Order') }}</th>
                     <th class="text-right py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Escrowed') }}</th>

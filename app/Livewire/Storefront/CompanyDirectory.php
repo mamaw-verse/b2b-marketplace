@@ -16,7 +16,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.storefront')]
-#[Title('Company Directory')]
+#[Title('Business Directory')]
 final class CompanyDirectory extends Component
 {
     use WithPagination;
@@ -110,6 +110,14 @@ final class CompanyDirectory extends Component
 
     public function render(): View
     {
-        return view('livewire.storefront.company-directory');
+        $selectedCategory = $this->selectedCategory;
+        $ogTitle = $selectedCategory
+            ? $selectedCategory->name.' Suppliers — '.config('app.name')
+            : __('Business Directory — :app', ['app' => config('app.name')]);
+        $ogDescription = $selectedCategory
+            ? __('Find verified halal-certified :category businesses and suppliers on :app.', ['category' => $selectedCategory->name, 'app' => config('app.name')])
+            : __('Discover verified halal-certified businesses, suppliers, and manufacturers on :app.', ['app' => config('app.name')]);
+
+        return view('livewire.storefront.company-directory', compact('ogTitle', 'ogDescription'));
     }
 }

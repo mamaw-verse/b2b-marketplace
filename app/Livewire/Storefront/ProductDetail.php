@@ -23,7 +23,7 @@ final class ProductDetail extends Component
             && $product->shop->status === 'active';
 
         if ($visible && config('marketplace.features.subscriptions_enabled')) {
-            $visible = $product->shop->hasActiveOrTrialingSubscription();
+            $visible = $product->shop->hasActiveSubscription();
         }
 
         abort_unless($visible, 404);
@@ -37,6 +37,7 @@ final class ProductDetail extends Component
             'documents',
             'categories.parent',
             'shop',
+            'shop.certificates',
         ]);
     }
 

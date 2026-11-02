@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Jobs\OptimizeImageJob;
 use App\Jobs\ScanUploadedFileJob;
 use App\Models\Media;
 use Illuminate\Http\UploadedFile;
@@ -109,6 +110,11 @@ final class MediaUploadService
 
         if ($scanningEnabled) {
             ScanUploadedFileJob::dispatch($media);
+        }
+
+        // Dispatch async image optimization for image files (non-blocking).
+        if (str_starts_with($media->mime_type, 'image/')) {
+            OptimizeImageJob::dispatch($storagePath);
         }
 
         return $media;

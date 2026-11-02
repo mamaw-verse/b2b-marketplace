@@ -169,8 +169,8 @@
                                         </button>
 
                                         @if ($expandedQuotations[$quotation->id] ?? false)
-                                            <div class="mt-2 overflow-hidden rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)]">
-                                                <table class="w-full text-xs">
+                                            <div class="mt-2 overflow-x-auto rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)]">
+                                                <table class="w-full text-xs min-w-[400px]">
                                                     <thead class="bg-[var(--hs-neutral-50)] text-[var(--hs-neutral-500)]">
                                                         <tr>
                                                             <th class="px-3 py-2 text-left font-medium">{{ __('Description') }}</th>
@@ -304,7 +304,7 @@
     </div>
 
     {{-- Close Modal --}}
-    <flux:modal name="close-rfq" wire:model="showCloseModal">
+    <flux:modal name="close-rfq" wire:model="showCloseModal" class="w-full sm:w-auto md:w-[480px]">
         <div class="space-y-4">
             <flux:heading size="lg">{{ __('Close RFQ') }}</flux:heading>
             <p class="text-sm text-[var(--hs-neutral-600)]">
@@ -318,12 +318,12 @@
                 rows="3"
             />
 
-            <div class="flex items-center gap-3">
-                <flux:button variant="danger" wire:click="closeRfq">
-                    {{ __('Confirm Close') }}
-                </flux:button>
-                <flux:button variant="ghost" wire:click="$set('showCloseModal', false)">
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <flux:button variant="ghost" wire:click="$set('showCloseModal', false)" class="w-full sm:w-auto">
                     {{ __('Cancel') }}
+                </flux:button>
+                <flux:button variant="danger" wire:click="closeRfq" class="w-full sm:w-auto">
+                    {{ __('Confirm Close') }}
                 </flux:button>
             </div>
         </div>

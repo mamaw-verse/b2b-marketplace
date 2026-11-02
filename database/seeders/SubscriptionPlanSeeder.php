@@ -19,7 +19,7 @@ final class SubscriptionPlanSeeder extends Seeder
                 'price' => '600.00',
                 'currency' => 'PHP',
                 'billing_period' => 'yearly',
-                'trial_days' => config('marketplace.initial_subscription_trial_days', 180),
+                'trial_days' => 180,
                 'is_active' => true,
             ]
         );

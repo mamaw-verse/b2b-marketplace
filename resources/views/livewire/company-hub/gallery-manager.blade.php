@@ -16,6 +16,8 @@
 
         <div class="p-6">
 
+            <p class="mb-1.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Images must not contain contact information such as phone numbers, email addresses, social media links, or website URLs.') }}</p>
+
             {{-- Upload dropzone --}}
             <x-hs-dropzone
                 input-id="gallery-photo-input"
@@ -73,7 +75,7 @@
                                 type="button"
                                 wire:click="confirmRemoveImage({{ $item->id }})"
                                 aria-label="{{ __('Remove image') }}"
-                                class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white text-xs opacity-0 transition group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
+                                class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white text-xs transition sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
                             >
                                 <flux:icon name="x-mark" variant="mini" class="size-3.5" />
                             </button>

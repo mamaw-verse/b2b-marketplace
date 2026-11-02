@@ -8,7 +8,9 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\SponsoredContent;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -20,8 +22,8 @@ final class HeroSearch extends Component
 {
     public string $query = '';
 
-    /** @var array<int, mixed> */
-    public array $productResults = [];
+    /** @var SupportCollection<int, Product> */
+    public SupportCollection $productResults;
 
     public function updatedQuery(): void
     {
@@ -31,12 +33,15 @@ final class HeroSearch extends Component
     public function search(): void
     {
         if (mb_strlen($this->query) < 2) {
-            $this->productResults = [];
+            $this->productResults = new SupportCollection;
 
             return;
         }
 
-        $this->productResults = Product::search($this->query)->take(8)->get()->toArray();
+        $this->productResults = Product::search($this->query)
+            ->query(fn (Builder $q) => $q->with(['shop', 'variants']))
+            ->take(8)
+            ->get();
     }
 
     /**

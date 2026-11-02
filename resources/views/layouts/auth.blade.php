@@ -8,8 +8,8 @@
     </head>
     <body class="min-h-screen bg-[var(--hs-neutral-50)] antialiased">
         {{-- Center stage --}}
-        <div class="flex min-h-svh items-center justify-center px-6 py-16 sm:py-10">
-            <div class="w-full max-w-3xl overflow-hidden rounded-[var(--hs-radius-panel)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-xs grid grid-cols-1 lg:grid-cols-2">
+        <div class="flex min-h-svh items-start justify-center px-4 py-4 sm:px-6 sm:py-8 lg:items-center">
+            <div class="grid w-full max-w-4xl grid-cols-1 overflow-hidden rounded-[var(--hs-radius-panel)] border border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-0)] shadow-xs lg:grid-cols-[1fr_27rem]">
 
                 {{-- Left: promo / benefits column --}}
                 <div class="relative hidden border-r border-[var(--hs-neutral-200)] lg:block">
@@ -59,27 +59,56 @@
                 </div>
 
                 {{-- Right: form column --}}
-                <div class="p-8 sm:p-10">
-                    {{-- Tabs --}}
-                    <div class="mb-6 flex gap-5 border-b border-[var(--hs-neutral-200)]">
-                        <a href="{{ route('login') }}" wire:navigate
-                           @class([
-                               'pb-3 text-sm font-bold border-b-2 -mb-px transition',
-                               'text-[var(--hs-green-900)] border-[var(--hs-green-900)]' => $activeTab === 'login',
-                               'text-[var(--hs-neutral-400)] border-transparent hover:text-[var(--hs-neutral-600)]' => $activeTab !== 'login',
-                           ])
-                        >{{ __('Log in') }}</a>
-                        <a href="{{ route('register') }}" wire:navigate
-                           @class([
-                               'pb-3 text-sm font-bold border-b-2 -mb-px transition',
-                               'text-[var(--hs-green-900)] border-[var(--hs-green-900)]' => $activeTab === 'register',
-                               'text-[var(--hs-neutral-400)] border-transparent hover:text-[var(--hs-neutral-600)]' => $activeTab !== 'register',
-                           ])
-                        >{{ __('Create account') }}</a>
+                <main class="p-5 sm:p-8">
+                    {{-- Mobile brand header (left promo panel is hidden below lg) --}}
+                    <div class="mb-6 flex items-center justify-between lg:hidden">
+                        <a href="{{ route('home') }}" wire:navigate>
+                            <img src="/images/brand-logo.png" alt="{{ config('app.name') }}" class="h-8 w-auto">
+                        </a>
+                        <a href="{{ route('home') }}" wire:navigate class="text-sm font-semibold text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]">
+                            &larr; {{ __('Back to site') }}
+                        </a>
                     </div>
 
+                    {{-- Tabs --}}
+                    <nav
+                        class="mb-6 grid min-h-11 grid-cols-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-neutral-100)] p-1"
+                        role="tablist"
+                        aria-label="{{ __('Account access') }}"
+                        x-data="authTabs(@js($activeTab), @js(route('login')), @js(route('register')))"
+                        x-on:keydown.arrow-left.prevent="switchTab('left')"
+                        x-on:keydown.arrow-right.prevent="switchTab('right')"
+                        x-on:keydown.home.prevent="window.Livewire?.navigate(@js(route('login'))) ?? window.location.assign(@js(route('login')))"
+                        x-on:keydown.end.prevent="window.Livewire?.navigate(@js(route('register'))) ?? window.location.assign(@js(route('register')))"
+                    >
+                        <a
+                            href="{{ route('login') }}"
+                            wire:navigate
+                            role="tab"
+                            aria-selected="{{ $activeTab === 'login' ? 'true' : 'false' }}"
+                            tabindex="{{ $activeTab === 'login' ? '0' : '-1' }}"
+                            @class([
+                                'flex min-h-11 items-center justify-center rounded-[calc(var(--hs-radius-sm)-2px)] px-3 text-sm font-semibold transition motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2',
+                                'bg-[var(--hs-neutral-0)] text-[var(--hs-green-900)] shadow-xs' => $activeTab === 'login',
+                                'text-[var(--hs-neutral-700)] hover:text-[var(--hs-neutral-900)]' => $activeTab !== 'login',
+                            ])
+                        >{{ __('Log in') }}</a>
+                        <a
+                            href="{{ route('register') }}"
+                            wire:navigate
+                            role="tab"
+                            aria-selected="{{ $activeTab === 'register' ? 'true' : 'false' }}"
+                            tabindex="{{ $activeTab === 'register' ? '0' : '-1' }}"
+                            @class([
+                                'flex min-h-11 items-center justify-center rounded-[calc(var(--hs-radius-sm)-2px)] px-3 text-sm font-semibold transition motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2',
+                                'bg-[var(--hs-neutral-0)] text-[var(--hs-green-900)] shadow-xs' => $activeTab === 'register',
+                                'text-[var(--hs-neutral-700)] hover:text-[var(--hs-neutral-900)]' => $activeTab !== 'register',
+                            ])
+                        >{{ __('Create account') }}</a>
+                    </nav>
+
                     {{ $slot }}
-                </div>
+                </main>
             </div>
         </div>
 
@@ -88,6 +117,8 @@
                 <flux:toast />
             </flux:toast.group>
         @endpersist
+
+        <x-turnstile-gate />
 
         @livewireScripts
         @fluxScripts

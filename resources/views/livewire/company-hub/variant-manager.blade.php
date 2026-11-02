@@ -66,16 +66,18 @@
                                 size="sm"
                                 :icon="$variant['status'] === 'published' ? 'archive-box' : 'arrow-up-circle'"
                                 wire:click="toggleStatus({{ $variant['id'] }})"
-                                tooltip="{{ $variant['status'] === 'published' ? __('Archive') : __('Publish') }}"
-                            />
+                            >
+                                <span class="hidden sm:inline">{{ $variant['status'] === 'published' ? __('Archive') : __('Publish') }}</span>
+                            </flux:button>
 
                             <flux:button
                                 variant="ghost"
                                 size="sm"
                                 icon="pencil-square"
                                 wire:click="openEditVariant({{ $variant['id'] }})"
-                                tooltip="{{ __('Edit') }}"
-                            />
+                            >
+                                <span class="hidden sm:inline">{{ __('Edit') }}</span>
+                            </flux:button>
                         </div>
                     </div>
 
@@ -332,7 +334,9 @@
                         icon="trash"
                         wire:click="confirmRemoveQuantityBreak({{ $breakIndex }})"
                         class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)] shrink-0"
-                    />
+                    >
+                        <span class="sr-only">{{ __('Remove') }}</span>
+                    </flux:button>
                 </div>
             @endforeach
 

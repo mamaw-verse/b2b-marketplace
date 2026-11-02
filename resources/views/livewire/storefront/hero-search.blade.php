@@ -1,3 +1,19 @@
+@push('meta')
+    <meta name="description" content="{{ __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]) }}">
+
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="{{ url()->current() }}">
+    <meta property="og:title"       content="{{ config('app.name') }} — {{ __('Discover Halal-Certified Companies & Products') }}">
+    <meta property="og:description" content="{{ __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]) }}">
+    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
+    <meta property="og:site_name"   content="{{ config('app.name') }}">
+
+    <meta name="twitter:card"        content="summary">
+    <meta name="twitter:title"       content="{{ config('app.name') }} — {{ __('Discover Halal-Certified Companies & Products') }}">
+    <meta name="twitter:description" content="{{ __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]) }}">
+    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
+@endpush
+
 <div>
     {{-- ═══════════════════════════════════════════════════════════
          HERO SECTION
@@ -37,7 +53,7 @@
                         <a href="{{ route('register') }}" wire:navigate
                            class="inline-flex items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
                             <flux:icon.arrow-right class="size-4" />
-                            {{ __('Join the Movement') }}
+                            {{ __('Register Now') }}
                         </a>
                         <a href="#supply-chain"
                            class="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
@@ -48,15 +64,28 @@
 
                 </div>
 
-                {{-- ── Visual column: Featured Voice card (desktop only) ─────── --}}
-                <div class="hidden lg:block lg:col-span-5">
+                {{-- ── Visual column: Featured Voice card ─────── --}}
+                {{-- Desktop: full 2:3 carousel card; Mobile: compact trust pill row --}}
+                <div class="lg:col-span-5">
 
-                    {{--
-                        Fixed 2:3 aspect ratio card (matches tall creative: 400×600).
-                        All slides are absolute-positioned inside a relative container,
-                        so the card height is always stable regardless of content.
-                        Slides: 0 = Ismail Abaya, 1 = MHCB, 2 = Sponsored tall ads.
-                    --}}
+                    {{-- Mobile-only compact trust strip (shows instead of the tall carousel) --}}
+                    <div class="lg:hidden flex flex-wrap justify-center gap-2 mt-2">
+                        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-[var(--hs-green-300)]">
+                            <flux:icon.shield-check class="size-3.5 text-[var(--hs-gold-400)]" />
+                            {{ __('MHCB-Verified Suppliers') }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80">
+                            <flux:icon.globe-alt class="size-3.5 text-white/60" />
+                            {{ __('Global B2B Network') }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80">
+                            <flux:icon.check-badge class="size-3.5 text-white/60" />
+                            {{ __('Halal Certified') }}
+                        </span>
+                    </div>
+
+                    {{-- Desktop full carousel --}}
+                    <div class="hidden lg:block">
                     <div
                         x-data="{
                             index: 0,
@@ -277,6 +306,7 @@
                             </div>{{-- /aspect-ratio frame --}}
                         </div>{{-- /gradient border --}}
                     </div>{{-- /x-data --}}
+                    </div>{{-- /hidden lg:block --}}
                 </div>{{-- /visual column --}}
 
             </div>
@@ -310,8 +340,11 @@
             </div>
 
             {{-- Category pills --}}
-            <div class="mt-4 pt-3 flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
-                <span class="text-xs text-[var(--hs-neutral-400)] font-medium whitespace-nowrap mr-1 shrink-0">{{ __('Popular:') }}</span>
+            <div class="mt-4 pt-3 relative">
+                {{-- Right-fade to indicate scrollability on mobile --}}
+                <div class="pointer-events-none absolute right-0 top-3 bottom-0.5 w-12 bg-gradient-to-l from-[var(--hs-neutral-0)] to-transparent z-10 sm:hidden"></div>
+                <div class="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
+                    <span class="text-xs text-[var(--hs-neutral-400)] font-medium whitespace-nowrap mr-1 shrink-0">{{ __('Popular:') }}</span>
                 <a href="{{ route('storefront.companies') }}" wire:navigate
                    class="shrink-0 px-3 py-1.5 rounded-lg bg-[var(--hs-green-800)] text-white text-xs font-semibold whitespace-nowrap">
                     {{ __('All Businesses') }}
@@ -322,7 +355,8 @@
                         {{ $category->name }}
                     </a>
                 @endforeach
-            </div>
+                </div>{{-- /pills scroll row --}}
+            </div>{{-- /relative wrapper --}}
 
         </div>
     </section>
@@ -330,8 +364,8 @@
     {{-- ═══════════════════════════════════════════════════════════
          PRODUCT SEARCH RESULTS
     ═══════════════════════════════════════════════════════════ --}}
-    @if (mb_strlen($query) >= 2)
-        @php $hasProducts = count($productResults) > 0; @endphp
+    @if ($query !== '' && mb_strlen($query) >= 2)
+        @php $hasProducts = $productResults->isNotEmpty(); @endphp
         <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <div class="flex items-center justify-between mb-6 sm:mb-8">
                 <p class="text-sm text-[var(--hs-neutral-500)]">
@@ -347,20 +381,7 @@
             @if ($hasProducts)
                 <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                     @foreach ($productResults as $result)
-                        <a href="{{ route('storefront.product', $result['id']) }}" wire:navigate
-                           class="group flex flex-col rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)] transition hover:shadow-[var(--hs-shadow-md)] hover:border-[var(--hs-green-200)] overflow-hidden">
-                            <div class="aspect-square bg-[var(--hs-green-50)] flex items-center justify-center">
-                                <flux:icon.cube class="size-8 text-[var(--hs-neutral-300)]" />
-                            </div>
-                            <div class="p-3">
-                                <p class="truncate text-sm font-semibold text-[var(--hs-neutral-900)] group-hover:text-[var(--hs-green-700)]">
-                                    {{ $result['name'] ?? __('Unknown') }}
-                                </p>
-                                <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)] truncate">
-                                    {{ $result['shop_name'] ?? '' }}
-                                </p>
-                            </div>
-                        </a>
+                        <x-hs-product-card :product="$result" />
                     @endforeach
                 </div>
             @else
@@ -569,32 +590,38 @@
                     </h2>
                 </div>
 
-                {{-- Steps grid --}}
-                <div class="relative">
-                    {{-- connecting line (desktop only) --}}
-                    <div class="hidden lg:block absolute left-[7%] right-[7%] top-[34px] border-t-2 border-dashed border-[var(--hs-neutral-300)]"></div>
+                    {{-- Steps grid --}}
+                    {{--
+                        7 items in a 2-col mobile grid = 3 full rows + 1 orphan.
+                        We use a CSS trick: the last item gets col-span-2 on mobile
+                        and is centered, removing the orphaned-left look.
+                    --}}
+                    <div class="relative">
+                        {{-- connecting line (desktop only) --}}
+                        <div class="hidden lg:block absolute left-[7%] right-[7%] top-[34px] border-t-2 border-dashed border-[var(--hs-neutral-300)]"></div>
 
-                    <div class="relative grid grid-cols-2 gap-y-8 gap-x-3 sm:gap-y-10 sm:gap-x-4 sm:grid-cols-4 lg:grid-cols-7">
-                        @foreach ([
-                            ['stage' => '01', 'icon' => 'map-pin',             'title' => 'Farm & Source',        'desc' => 'Sustainable & ethical sourcing'],
-                            ['stage' => '02', 'icon' => 'cog-6-tooth',         'title' => 'Process & Produce',    'desc' => 'Halal compliant production'],
-                            ['stage' => '03', 'icon' => 'shield-check',        'title' => 'Certify & Assure',     'desc' => 'Halal certification & QA'],
-                            ['stage' => '04', 'icon' => 'archive-box',         'title' => 'Pack & Store',         'desc' => 'Halal-safe packaging & storage'],
-                            ['stage' => '05', 'icon' => 'truck',               'title' => 'Distribute & Deliver', 'desc' => 'Trusted logistics & distribution'],
-                            ['stage' => '06', 'icon' => 'building-storefront', 'title' => 'Retail & Sell',        'desc' => 'Halal retail & business partners'],
-                            ['stage' => '07', 'icon' => 'heart',               'title' => 'Consume & Trust',      'desc' => 'Confident halal consumers'],
-                        ] as $step)
-                            <div class="group relative z-10 flex flex-col items-center text-center px-1 sm:px-2">
-                                <div class="flex size-14 sm:size-16 lg:size-[68px] items-center justify-center rounded-full border-2 border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-[var(--hs-shadow-sm)] transition group-hover:border-[var(--hs-gold-500)] group-hover:text-[var(--hs-gold-600)] group-hover:-translate-y-1">
-                                    <flux:icon :icon="$step['icon']" class="size-5 sm:size-6" />
+                        <div class="relative grid grid-cols-2 gap-y-8 gap-x-3 sm:gap-y-10 sm:gap-x-4 sm:grid-cols-4 lg:grid-cols-7">
+                            @foreach ([
+                                ['stage' => '01', 'icon' => 'map-pin',             'title' => 'Farm & Source',        'desc' => 'Sustainable & ethical sourcing'],
+                                ['stage' => '02', 'icon' => 'cog-6-tooth',         'title' => 'Process & Produce',    'desc' => 'Halal compliant production'],
+                                ['stage' => '03', 'icon' => 'shield-check',        'title' => 'Certify & Assure',     'desc' => 'Halal certification & QA'],
+                                ['stage' => '04', 'icon' => 'archive-box',         'title' => 'Pack & Store',         'desc' => 'Halal-safe packaging & storage'],
+                                ['stage' => '05', 'icon' => 'truck',               'title' => 'Distribute & Deliver', 'desc' => 'Trusted logistics & distribution'],
+                                ['stage' => '06', 'icon' => 'building-storefront', 'title' => 'Retail & Sell',        'desc' => 'Halal retail & business partners'],
+                                ['stage' => '07', 'icon' => 'heart',               'title' => 'Consume & Trust',      'desc' => 'Confident halal consumers'],
+                            ] as $i => $step)
+                                {{-- Last item (index 6) spans 2 cols on mobile so it centers itself --}}
+                                <div class="group relative z-10 flex flex-col items-center text-center px-1 sm:px-2 {{ $i === 6 ? 'col-span-2 sm:col-span-1' : '' }}">
+                                    <div class="flex size-14 sm:size-16 lg:size-[68px] items-center justify-center rounded-full border-2 border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-[var(--hs-shadow-sm)] transition group-hover:border-[var(--hs-gold-500)] group-hover:text-[var(--hs-gold-600)] group-hover:-translate-y-1">
+                                        <flux:icon :icon="$step['icon']" class="size-5 sm:size-6" />
+                                    </div>
+                                    <span class="mt-3 sm:mt-4 block text-[0.62rem] sm:text-[0.68rem] font-extrabold tracking-[0.06em] text-[var(--hs-gold-600)]">{{ __('STAGE :stage', ['stage' => $step['stage']]) }}</span>
+                                    <h4 class="mt-1 text-[0.8rem] sm:text-[0.88rem] font-extrabold text-[var(--hs-neutral-900)]">{{ __($step['title']) }}</h4>
+                                    <p class="mt-1 text-[0.72rem] sm:text-[0.76rem] leading-snug text-[var(--hs-neutral-500)]">{{ __($step['desc']) }}</p>
                                 </div>
-                                <span class="mt-3 sm:mt-4 block text-[0.62rem] sm:text-[0.68rem] font-extrabold tracking-[0.06em] text-[var(--hs-gold-600)]">{{ __('STAGE :stage', ['stage' => $step['stage']]) }}</span>
-                                <h4 class="mt-1 text-[0.8rem] sm:text-[0.88rem] font-extrabold text-[var(--hs-neutral-900)]">{{ __($step['title']) }}</h4>
-                                <p class="mt-1 text-[0.72rem] sm:text-[0.76rem] leading-snug text-[var(--hs-neutral-500)]">{{ __($step['desc']) }}</p>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
-                </div>
             </div>
         </section>
 
@@ -618,10 +645,8 @@
 
                     {{-- Current instance — "You are here" --}}
                     @php $p = $this->instancePortal; @endphp
-                    <div class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_6px_32px_rgba(0,0,0,0.22)]"
-                         style="min-height: 220px;">
-                        {{-- Full-bleed landmark photo --}}
-                        @if (!empty($p['landmark_image']))
+                    <div class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_6px_32px_rgba(0,0,0,0.22)] min-h-[160px] sm:min-h-[220px]">
+                         @if (!empty($p['landmark_image']))
                             <img src="{{ $p['landmark_image'] }}"
                                  alt="{{ __(':name landmark', ['name' => $p['display_name']]) }}"
                                  class="absolute inset-0 w-full h-full object-cover object-center">
@@ -657,8 +682,7 @@
                         @endphp
 
                         <{{ $tag }} {{ $attrs }}
-                            class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
-                            style="min-height: 220px;"
+                            class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] min-h-[160px] sm:min-h-[220px] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
                         >
                             {{-- Full-bleed landmark photo --}}
                             @if (!empty($portal['landmark_image']))

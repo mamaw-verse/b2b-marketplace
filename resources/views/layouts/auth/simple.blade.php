@@ -24,6 +24,8 @@
             </flux:toast.group>
         @endpersist
 
+        <x-turnstile-gate />
+
         @fluxScripts
     </body>
 </html>

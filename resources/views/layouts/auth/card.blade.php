@@ -1,3 +1,5 @@
+@props(['title' => null])
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -6,12 +8,8 @@
     <body class="min-h-screen bg-[var(--hs-neutral-50)] antialiased">
         <div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div class="flex w-full max-w-md flex-col gap-6">
-                <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="size-9 fill-current text-[var(--hs-neutral-900)]" />
-                    </span>
-
-                    <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+                <a href="{{ route('home') }}" class="flex items-center justify-center" wire:navigate>
+                    <img src="/images/brand-logo.png" alt="{{ config('app.name', 'Laravel') }}" class="h-10 w-auto">
                 </a>
 
                 <div class="flex flex-col gap-6">
@@ -28,6 +26,9 @@
             </flux:toast.group>
         @endpersist
 
+        <x-turnstile-gate />
+
+        @livewireScripts
         @fluxScripts
     </body>
 </html>

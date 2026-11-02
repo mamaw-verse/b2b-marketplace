@@ -46,9 +46,9 @@
                         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                     </button>
                 @endunless
-                {{-- Logo: hidden on mobile for storefront (drawer shows it), always shown on portal --}}
-                <a href="{{ route('home') }}" class="{{ $isPortal ? 'flex' : 'hidden sm:flex' }} items-center gap-2.5 mr-1" wire:navigate>
-                    <img src="/images/brand-logo.png" alt="1Halal Store" class="h-9 w-auto">
+                {{-- Logo: shown on mobile for storefront (small), always shown on portal --}}
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 mr-1" wire:navigate>
+                    <img src="/images/brand-logo.png" alt="1Halal Store" class="h-7 sm:h-9 w-auto">
                     @unless ($isPortal)
                         @php
                             $flagMap = ['PH'=>'🇵🇭','MY'=>'🇲🇾','SA'=>'🇸🇦','BN'=>'🇧🇳','ID'=>'🇮🇩','TR'=>'🇹🇷'];

@@ -268,12 +268,12 @@ final class Shop extends Model
     }
 
     /**
-     * Determine whether the shop has an active or trialing subscription.
+     * Determine whether the shop has an active (paid) subscription.
      */
-    public function hasActiveOrTrialingSubscription(): bool
+    public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()
-            ->whereIn('status', ['active', 'trialing'])
+            ->where('status', 'active')
             ->exists();
     }
 

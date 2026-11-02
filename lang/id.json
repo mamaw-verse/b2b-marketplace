@@ -777,7 +777,6 @@
   "JPG, PNG or WebP · max 20 MB": "JPG, PNG atau WebP · maks 20 MB",
   "Join Us": "Bergabung",
   "Join business matching, events, training and consultancy": "Ikuti business matching, acara, pelatihan, dan konsultasi",
-  "Join the Movement": "Ikuti Gerakan Ini",
   "Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.": "Bergabunglah dengan penjual halal terverifikasi di seluruh Filipina. Mulai mendaftar gratis — bayar komisi hanya saat Anda berhasil menjual. Tanpa biaya bulanan, tanpa biaya tersembunyi.",
   "Joined": "Bergabung",
   "Keep invitation": "Pertahankan undangan",
@@ -1317,6 +1316,7 @@
   "Regenerate codes": "Buat ulang kode",
   "Register": "Daftar",
   "Register Business": "Daftarkan Bisnis",
+  "Register Now": "Daftar Sekarang",
   "Register Your Business": "Daftarkan Bisnis Anda",
   "Register Your Company": "Daftarkan Perusahaan Anda",
   "Register as Seller": "Daftar sebagai Penjual",
@@ -2510,5 +2510,8 @@
   "Product options only apply to subcategories. Select a parent group above to define them.": "Opsi produk hanya berlaku untuk subkategori. Pilih grup induk di atas untuk mendefinisikannya.",
   "This category has subcategories and cannot be nested under a group.": "Kategori ini memiliki subkategori dan tidak dapat disarangkan di bawah grup.",
   "Sort Order": "Urutan",
-  "Lower numbers appear first among siblings.": "Nomor yang lebih kecil tampil lebih dulu di antara kategori sejajar."
+  "Lower numbers appear first among siblings.": "Nomor yang lebih kecil tampil lebih dulu di antara kategori sejajar.",
+  "Subscriptions are currently disabled": "Langganan saat ini dinonaktifkan",
+  "These settings are saved and will take effect once the development team enables subscriptions for this instance.": "Pengaturan ini tersimpan dan akan berlaku setelah tim pengembang mengaktifkan langganan untuk instansi ini.",
+  "The marketplace is currently free. Subscription plans are not required right now.": "Marketplace saat ini gratis. Paket langganan tidak diperlukan untuk saat ini."
 }

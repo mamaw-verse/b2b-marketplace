@@ -13,21 +13,21 @@
                     <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search by name or email...') }}" />
                 </div>
                 
-                <div class="flex gap-2">
-                    <flux:select wire:model.live="statusFilter" class="w-40" placeholder="{{ __('All Statuses') }}">
+                <div class="flex flex-col gap-2 md:flex-row">
+                    <flux:select wire:model.live="statusFilter" class="w-full md:w-40" placeholder="{{ __('All Statuses') }}">
                         <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
                         <flux:select.option value="suspended">{{ __('Suspended') }}</flux:select.option>
                         <flux:select.option value="onboarding">{{ __('Onboarding') }}</flux:select.option>
                     </flux:select>
 
-                    <flux:select wire:model.live="subscriptionFilter" class="w-40" placeholder="{{ __('Any Subscription') }}">
+                    <flux:select wire:model.live="subscriptionFilter" class="w-full md:w-40" placeholder="{{ __('Any Subscription') }}">
                         <flux:select.option value="trialing">{{ __('Trialing') }}</flux:select.option>
                         <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
                         <flux:select.option value="lapsed">{{ __('Lapsed') }}</flux:select.option>
                         <flux:select.option value="none">{{ __('No Subscription') }}</flux:select.option>
                     </flux:select>
 
-                    <flux:select wire:model.live="certificationFilter" class="w-44" placeholder="{{ __('Any Certification') }}">
+                    <flux:select wire:model.live="certificationFilter" class="w-full md:w-44" placeholder="{{ __('Any Certification') }}">
                         <flux:select.option value="certified">{{ __('Halal Certified') }}</flux:select.option>
                         <flux:select.option value="not_certified">{{ __('Not Certified') }}</flux:select.option>
                     </flux:select>
@@ -35,8 +35,66 @@
             </div>
         </div>
 
-        {{-- Table --}}
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse($this->merchants as $merchant)
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $merchant->storefront_name }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $merchant->user->email }}</p>
+                        </div>
+                        <flux:badge color="{{ $merchant->status === 'active' ? 'green' : ($merchant->status === 'suspended' ? 'red' : 'zinc') }}">
+                            {{ ucfirst($merchant->status) }}
+                        </flux:badge>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Country') }}</dt>
+                            <dd class="text-[var(--hs-neutral-900)]">{{ $merchant->country_code }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Subscription') }}</dt>
+                            <dd>
+                                @if($merchant->latestSubscription)
+                                    <flux:badge size="sm" color="{{ in_array($merchant->latestSubscription->status, ['active', 'trialing']) ? 'green' : 'zinc' }}">
+                                        {{ ucfirst($merchant->latestSubscription->status) }}
+                                    </flux:badge>
+                                @else
+                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('None') }}</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Certified') }}</dt>
+                            <dd>
+                                @if($merchant->is_halal_certified)
+                                    <flux:badge size="sm" color="green">{{ __('Yes') }}</flux:badge>
+                                @else
+                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('No') }}</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Joined') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $merchant->created_at->format('M d, Y') }}</dd>
+                        </div>
+                    </dl>
+                    <div class="mt-3">
+                        <flux:button variant="ghost" size="sm" href="{{ route('admin.merchants.show', $merchant) }}" wire:navigate>
+                            {{ __('View') }}
+                        </flux:button>
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">
+                    {{ __('No merchants found matching your filters.') }}
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Storefront') }}</flux:table.column>
@@ -52,8 +110,8 @@
                     @forelse($this->merchants as $merchant)
                         <flux:table.row>
                             <flux:table.cell>
-                                <div class="font-medium text-zinc-900 dark:text-white">{{ $merchant->storefront_name }}</div>
-                                <div class="text-xs text-zinc-500">{{ $merchant->user->email }}</div>
+                                <div class="font-medium text-[var(--hs-neutral-900)]">{{ $merchant->storefront_name }}</div>
+                                <div class="text-xs text-[var(--hs-neutral-500)]">{{ $merchant->user->email }}</div>
                             </flux:table.cell>
                             <flux:table.cell>{{ $merchant->country_code }}</flux:table.cell>
                             <flux:table.cell>
@@ -67,14 +125,14 @@
                                         {{ ucfirst($merchant->latestSubscription->status) }}
                                     </flux:badge>
                                 @else
-                                    <span class="text-xs text-zinc-500">{{ __('None') }}</span>
+                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('None') }}</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if($merchant->is_halal_certified)
                                     <flux:badge color="green">{{ __('Yes') }}</flux:badge>
                                 @else
-                                    <span class="text-xs text-zinc-500">{{ __('No') }}</span>
+                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('No') }}</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>{{ $merchant->created_at->format('M d, Y') }}</flux:table.cell>
@@ -86,19 +144,19 @@
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="7" class="text-center text-zinc-500 py-8">
+                            <flux:table.cell colspan="7" class="text-center text-[var(--hs-neutral-500)] py-8">
                                 {{ __('No merchants found matching your filters.') }}
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-
-            @if ($this->merchants->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
-                    {{ $this->merchants->links() }}
-                </div>
-            @endif
         </div>
+
+        @if ($this->merchants->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
+                {{ $this->merchants->links() }}
+            </div>
+        @endif
     </div>
 </div>

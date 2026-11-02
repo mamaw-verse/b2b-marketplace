@@ -108,12 +108,14 @@ final class SearchController extends Controller
     {
         $product->loadMissing('shop');
 
+        $subscriptionsEnabled = (bool) config('marketplace.features.subscriptions_enabled', true);
+
         if (
             $product->status !== 'published'
             || $product->moderation_status !== 'active'
             || ! $product->shop
-            || ! $product->shop->hasActiveOrTrialingSubscription()
             || $product->shop->status !== 'active'
+            || ($subscriptionsEnabled && ! $product->shop->hasActiveSubscription())
         ) {
             abort(404);
         }

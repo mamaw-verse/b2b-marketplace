@@ -4,11 +4,11 @@
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('My Orders') }}</h1>
         </div>
 
-        <div class="px-6 pt-5">
-            <div class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-fit flex-wrap">
+        <div class="px-4 sm:px-6 pt-5">
+            <div class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-full sm:w-fit overflow-x-auto scrollbar-hide">
                 @foreach (['to_pay' => __('To Pay'), 'to_ship' => __('To Ship'), 'to_receive' => __('To Receive'), 'completed' => __('Completed'), 'cancelled' => __('Cancelled'), 'disputed' => __('Disputes')] as $key => $label)
                     <button wire:click="$set('tab', '{{ $key }}')" @class([
-                        'px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition flex items-center gap-2',
+                        'shrink-0 px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition flex items-center gap-2',
                         'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm' => $tab === $key,
                         'text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-800)]' => $tab !== $key
                     ])>
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             @if ($this->orders->isEmpty())
                 <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No orders in this tab.') }}</p>
             @else

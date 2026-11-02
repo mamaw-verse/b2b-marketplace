@@ -18,8 +18,58 @@
             </div>
         </div>
 
-        {{-- Certificates Table --}}
-        <div class="overflow-x-auto">
+        {{-- Certificates: card list on mobile, table on sm+ --}}
+
+        {{-- Mobile card list (hidden on sm+) --}}
+        <div class="sm:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->certificates as $certificate)
+                <div class="flex items-start justify-between gap-3 px-5 py-4" wire:key="cert-card-{{ $certificate->id }}">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium text-[var(--hs-neutral-500)] uppercase tracking-wide">{{ __('Expires') }}</p>
+                        <p class="mt-0.5 font-semibold text-[var(--hs-neutral-900)]">
+                            {{ $certificate->expiry_date?->format('M d, Y') ?? '—' }}
+                        </p>
+                        <div class="mt-1.5">
+                            @switch($certificate->status)
+                                @case('active')
+                                    <flux:badge color="green" size="sm" icon="check-circle">{{ __('Active') }}</flux:badge>
+                                    @break
+                                @case('expiring_soon')
+                                    <flux:badge color="yellow" size="sm" icon="clock">{{ __('Expiring Soon') }}</flux:badge>
+                                    @break
+                                @case('expired')
+                                    <flux:badge color="red" size="sm" icon="x-circle">{{ __('Expired') }}</flux:badge>
+                                    @break
+                                @case('under_review')
+                                    <flux:badge color="blue" size="sm" icon="magnifying-glass">{{ __('Under Review') }}</flux:badge>
+                                    @break
+                                @default
+                                    <flux:badge size="sm">{{ str($certificate->status)->headline() }}</flux:badge>
+                            @endswitch
+                        </div>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                        @if ($certificate->media_id)
+                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $certificate->media_id }})">
+                                {{ __('View') }}
+                            </flux:button>
+                        @endif
+                        @if ($certificate->status === 'expired')
+                            <flux:button variant="primary" size="sm" icon="check-badge" href="{{ route('apply.certificate') }}" wire:navigate>
+                                {{ __('Apply') }}
+                            </flux:button>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="px-5 py-4">
+                    <x-hs-empty-state icon="package" title="{{ __('No certificates yet') }}" subtitle="{{ __('Add your halal certificates to get started.') }}" />
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop table (hidden on mobile) --}}
+        <div class="hidden sm:block overflow-x-auto">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Expiry Date') }}</flux:table.column>
@@ -63,7 +113,7 @@
                             <flux:table.cell align="end">
                                 <div class="flex justify-end gap-1">
                                     @if ($certificate->media_id)
-                                        <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $certificate->media_id }})" tooltip="{{ __('View') }}">
+                                        <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDocument({{ $certificate->media_id }})">
                                             {{ __('View') }}
                                         </flux:button>
                                     @endif
@@ -89,7 +139,7 @@
     </div>
 
     {{-- Add Certificate Modal --}}
-    <flux:modal wire:model="showAddModal" class="md:w-[32rem]">
+    <flux:modal wire:model="showAddModal" class="w-full sm:w-auto md:w-[32rem]">
         <form wire:submit="saveCertificate" class="space-y-5" @if ($uploadedScanStatus === 'pending') wire:poll.5s="refreshScanStatus" @endif>
             <div>
                 <flux:heading size="lg">{{ __('Add Certificate') }}</flux:heading>

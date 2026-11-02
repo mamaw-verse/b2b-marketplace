@@ -24,6 +24,36 @@ test('the single settings page loads directly without password confirmation', fu
     $this->actingAs($user)->get(route('profile.edit'))->assertOk();
 });
 
+test('sensitive security controls require recent identity confirmation', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    $this->actingAs($user)
+        ->get(route('profile.edit'))
+        ->assertOk()
+        ->assertSee('Confirm your identity')
+        ->assertDontSee('Manage your two-factor authentication settings')
+        ->assertDontSee('Manage your passkeys for passwordless sign-in');
+
+    Livewire::actingAs($user)
+        ->test('pages::settings.profile')
+        ->call('disable')
+        ->assertRedirect(route('password.confirm'));
+});
+
+test('direct two-factor security actions also require recent identity confirmation', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    Livewire::actingAs($user)
+        ->test('pages::settings.two-factor-setup-modal', ['requiresConfirmation' => true])
+        ->call('startTwoFactorSetup')
+        ->assertRedirect(route('password.confirm'));
+
+    Livewire::actingAs($user)
+        ->test('pages::settings.two-factor.recovery-codes')
+        ->call('regenerateRecoveryCodes')
+        ->assertRedirect(route('password.confirm'));
+});
+
 test('the single settings page renders profile, appearance and security sections', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
 

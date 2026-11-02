@@ -80,7 +80,7 @@ final class Dashboard extends Component
     }
 
     /**
-     * Active or trialing subscription for the seller's shop.
+     * Active (paid) subscription for the seller's shop.
      * Null if no active subscription exists.
      */
     #[Computed]
@@ -92,7 +92,7 @@ final class Dashboard extends Component
 
         return Subscription::query()
             ->where('shop_id', $this->shop->id)
-            ->whereIn('status', ['active', 'trialing'])
+            ->where('status', 'active')
             ->latest()
             ->first();
     }

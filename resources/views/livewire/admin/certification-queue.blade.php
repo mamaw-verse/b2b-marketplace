@@ -27,7 +27,47 @@
             </div>
         </div>
 
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->certificates as $certificate)
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $certificate->shop?->registered_business_name ?? '—' }}</p>
+                        </div>
+                        <flux:badge :color="match ($certificate->status) {
+                            'expired' => 'red',
+                            'expiring_soon' => 'yellow',
+                            'under_review' => 'blue',
+                            'rejected' => 'red',
+                            default => 'green',
+                        }">{{ str($certificate->status)->headline() }}</flux:badge>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Date Submitted') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $certificate->created_at?->format('M d, Y') }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Expiry of Certificate') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $certificate->expiry_date?->format('M d, Y') }}</dd>
+                        </div>
+                    </dl>
+                    @if ($certificate->media_id)
+                        <div class="mt-3">
+                            <flux:button size="sm" variant="ghost" icon="eye" wire:click="viewCertificate({{ $certificate->id }})">
+                                {{ __('View') }}
+                            </flux:button>
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('No halal certifications found.') }}</div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Business Name') }}</flux:table.column>
@@ -64,10 +104,11 @@
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-            @if ($this->certificates->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">{{ $this->certificates->links() }}</div>
-            @endif
         </div>
+
+        @if ($this->certificates->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">{{ $this->certificates->links() }}</div>
+        @endif
     </div>
 
     {{-- Secondary: Application Queue (read-only log) --}}
@@ -76,7 +117,37 @@
             <h2 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Halal Certificate Applicants') }}</h2>
         </div>
 
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->applications as $application)
+                <div class="px-6 py-4">
+                    <p class="font-medium text-[var(--hs-neutral-900)]">{{ $application->company_name ?? $application->shop?->registered_business_name ?? '—' }}</p>
+                    <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Submitted') }} {{ $application->created_at?->format('M d, Y') }}</p>
+                    <div class="mt-3">
+                        @php
+                            $previewable = $this->canPreviewApplicationDocument($application->document_path);
+                            $downloadUrl = $previewable ? null : $this->applicationDocumentUrl($application->id, true);
+                        @endphp
+                        @if ($previewable)
+                            <flux:button size="sm" variant="ghost" icon="eye" wire:click="viewApplicationDocument({{ $application->id }})">
+                                {{ __('View Document') }}
+                            </flux:button>
+                        @elseif ($downloadUrl)
+                            <flux:button size="sm" variant="ghost" icon="arrow-down-tray" href="{{ $downloadUrl }}">
+                                {{ __('Download') }}
+                            </flux:button>
+                        @else
+                            <flux:text>—</flux:text>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('No certification applications found.') }}</div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Business Name') }}</flux:table.column>
@@ -111,10 +182,11 @@
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-            @if ($this->applications->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">{{ $this->applications->links() }}</div>
-            @endif
         </div>
+
+        @if ($this->applications->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">{{ $this->applications->links() }}</div>
+        @endif
     </div>
 
     {{-- Certificate Document Viewer (with Approve action for under_review certs) --}}

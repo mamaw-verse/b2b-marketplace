@@ -48,12 +48,12 @@
                 <flux:heading size="sm" class="mb-3">{{ __('Business Identity') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 mb-6">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Registered Business Name') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->registered_business_name }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Registered Business Name') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->registered_business_name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Business Structure') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Business Structure') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             {{ match ($shop->business_structure) {
                                 'sole_proprietorship' => __('Sole Proprietorship'),
                                 'partnership'         => __('Partnership'),
@@ -63,11 +63,11 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Account Owner') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->user->name }} ({{ $shop->user->email }})</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Account Owner') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->user->name }} ({{ $shop->user->email }})</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Status') }}</dt>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Status') }}</dt>
                         <dd class="mt-1">
                             <flux:badge color="{{ $shop->status === 'active' ? 'green' : ($shop->status === 'suspended' ? 'red' : 'zinc') }}">
                                 {{ ucfirst($shop->status) }}
@@ -82,16 +82,16 @@
                 <flux:heading size="sm" class="mb-3">{{ __('Contact') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 mb-6">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Phone') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->phone ?: '—' }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Phone') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->phone ?: '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Email') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->email ?: '—' }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Email') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->email ?: '—' }}</dd>
                     </div>
                     <div class="sm:col-span-2">
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Address') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Address') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             {{ implode(', ', array_filter([
                                 $shop->address_1,
                                 $shop->address_2,
@@ -110,16 +110,16 @@
                 <flux:heading size="sm" class="mb-3">{{ __('Legal Identifiers') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-5 mb-6">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('DTI/SEC Number') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->dti_sec_number ?: '—' }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('DTI/SEC Number') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->dti_sec_number ?: '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('TIN') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->tax_identification_number ?: '—' }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('TIN') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->tax_identification_number ?: '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('FDA LTO Number') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->fda_lto_number ?: '—' }}</dd>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('FDA LTO Number') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->fda_lto_number ?: '—' }}</dd>
                     </div>
                 </dl>
 
@@ -129,10 +129,10 @@
                 <flux:heading size="sm" class="mb-3">{{ __('Operations') }}</flux:heading>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 mb-6">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Product Categories') }}</dt>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Product Categories') }}</dt>
                         <dd class="mt-1">
                             @if ($shop->categories->isEmpty())
-                                <span class="text-sm text-zinc-500">—</span>
+                                <span class="text-sm text-[var(--hs-neutral-500)]">—</span>
                             @else
                                 <div class="flex flex-wrap gap-1.5">
                                     @foreach ($shop->categories as $category)
@@ -143,8 +143,8 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Export Readiness') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Export Readiness') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             {{ match ($shop->export_readiness_status) {
                                 'never_exported'       => __('Never Exported'),
                                 'exporting_regionally' => __('Exporting Regionally'),
@@ -154,8 +154,8 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Avg. Production Lead Time') }}</dt>
-                        <dd class="mt-1 text-sm text-zinc-900 dark:text-white">
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Avg. Production Lead Time') }}</dt>
+                        <dd class="mt-1 text-sm text-[var(--hs-neutral-900)]">
                             {{ $shop->average_production_lead_time ? __(':days days', ['days' => $shop->average_production_lead_time]) : '—' }}
                         </dd>
                     </div>
@@ -191,7 +191,7 @@
                 @endphp
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-5">
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Value Chain Positions') }}</dt>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Value Chain Positions') }}</dt>
                         <dd class="mt-1">
                             @if (!empty($shop->value_chain_positions))
                                 <div class="flex flex-wrap gap-1.5">
@@ -200,12 +200,12 @@
                                     @endforeach
                                 </div>
                             @else
-                                <span class="text-sm text-zinc-500">—</span>
+                                <span class="text-sm text-[var(--hs-neutral-500)]">—</span>
                             @endif
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-zinc-500">{{ __('Capabilities') }}</dt>
+                        <dt class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Capabilities') }}</dt>
                         <dd class="mt-1">
                             @if (!empty($shop->capabilities))
                                 <div class="flex flex-wrap gap-1.5">
@@ -214,7 +214,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <span class="text-sm text-zinc-500">—</span>
+                                <span class="text-sm text-[var(--hs-neutral-500)]">—</span>
                             @endif
                         </dd>
                     </div>
@@ -224,11 +224,11 @@
             <flux:card>
                 <div class="flex items-center justify-between mb-4">
                     <flux:heading size="lg">{{ __('Products') }}</flux:heading>
-                    <span class="text-sm text-zinc-500">{{ __(':count total', ['count' => $this->products->count()]) }}</span>
+                    <span class="text-sm text-[var(--hs-neutral-500)]">{{ __(':count total', ['count' => $this->products->count()]) }}</span>
                 </div>
 
                 @if($this->products->isEmpty())
-                    <p class="text-sm text-zinc-500 py-4 text-center">{{ __('This business has no products yet.') }}</p>
+                    <p class="text-sm text-[var(--hs-neutral-500)] py-4 text-center">{{ __('This business has no products yet.') }}</p>
                 @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach($this->products as $product)
@@ -320,18 +320,18 @@
                 @if($shop->latestSubscription)
                     <div class="space-y-4">
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">{{ __('Current Status') }}</div>
+                            <div class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Current Status') }}</div>
                             <flux:badge color="{{ in_array($shop->latestSubscription->status, ['active', 'trialing']) ? 'green' : 'zinc' }}" class="mt-1">
                                 {{ ucfirst($shop->latestSubscription->status) }}
                             </flux:badge>
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">{{ __('Started') }}</div>
-                            <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->latestSubscription->created_at->format('M d, Y') }}</div>
+                            <div class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Started') }}</div>
+                            <div class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->latestSubscription->created_at->format('M d, Y') }}</div>
                         </div>
                     </div>
                 @else
-                    <div class="text-sm text-zinc-500">{{ __('No subscription record found.') }}</div>
+                    <div class="text-sm text-[var(--hs-neutral-500)]">{{ __('No subscription record found.') }}</div>
                 @endif
             </flux:card>
 
@@ -339,7 +339,7 @@
                 <flux:heading size="lg" class="mb-4">{{ __('Halal Certificates') }}</flux:heading>
 
                 @if ($shop->certificates->isEmpty())
-                    <p class="text-sm text-zinc-500">{{ __('No certificates on file.') }}</p>
+                    <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No certificates on file.') }}</p>
                 @else
                     <ul class="space-y-2">
                         @foreach ($shop->certificates as $certificate)
@@ -361,7 +361,7 @@
                                 <div class="flex items-center gap-3">
                                     <flux:badge color="{{ $certStatusColor }}" size="sm">{{ $certStatusLabel }}</flux:badge>
                                     @if ($certificate->expiry_date)
-                                        <span class="text-xs text-zinc-500">
+                                        <span class="text-xs text-[var(--hs-neutral-500)]">
                                             {{ __('Expires :date', ['date' => $certificate->expiry_date->format('M d, Y')]) }}
                                         </span>
                                     @endif
@@ -381,7 +381,7 @@
                 <flux:heading size="lg" class="mb-4">{{ __('Submitted Documents') }}</flux:heading>
 
                 @if ($shop->documents->isEmpty())
-                    <p class="text-sm text-zinc-500">{{ __('No documents on file.') }}</p>
+                    <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No documents on file.') }}</p>
                 @else
                     @php
                         $documentLabels = \App\Livewire\CompanyHub\OnboardingWizard::REQUIRED_DOCUMENTS;
@@ -391,10 +391,10 @@
                             <li class="flex items-center gap-3 px-4 py-3" wire:key="doc-{{ $document->id }}">
                                 <flux:icon name="document" class="size-5 shrink-0 text-[var(--hs-neutral-500)]" />
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-zinc-900 dark:text-white">
+                                    <p class="text-sm font-medium text-[var(--hs-neutral-900)]">
                                         {{ __($documentLabels[$document->description] ?? ($document->description ?: __('Document'))) }}
                                     </p>
-                                    <p class="truncate text-xs text-zinc-500">{{ $document->original_filename }}</p>
+                                    <p class="truncate text-xs text-[var(--hs-neutral-500)]">{{ $document->original_filename }}</p>
                                 </div>
                                 @if ($document->pivot->is_verified)
                                     <flux:badge color="green" size="sm" icon="check-circle">{{ __('Verified') }}</flux:badge>
@@ -418,16 +418,16 @@
                 @if($shop->onboarding)
                     <div class="space-y-4">
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">{{ __('Submitted') }}</div>
-                            <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->onboarding->submitted_at?->format('M d, Y') ?? 'N/A' }}</div>
+                            <div class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Submitted') }}</div>
+                            <div class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->onboarding->submitted_at?->format('M d, Y') ?? 'N/A' }}</div>
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-zinc-500">{{ __('Approved') }}</div>
-                            <div class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $shop->onboarding->approved_at?->format('M d, Y') ?? 'N/A' }}</div>
+                            <div class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Approved') }}</div>
+                            <div class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $shop->onboarding->approved_at?->format('M d, Y') ?? 'N/A' }}</div>
                         </div>
                     </div>
                 @else
-                    <div class="text-sm text-zinc-500">{{ __('No onboarding record found.') }}</div>
+                    <div class="text-sm text-[var(--hs-neutral-500)]">{{ __('No onboarding record found.') }}</div>
                 @endif
             </flux:card>
         </div>

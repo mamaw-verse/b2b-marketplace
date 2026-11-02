@@ -19,6 +19,7 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - './docker/php/99-hardening.ini:/etc/php/8.5/cli/conf.d/99-hardening.ini'
         networks:
             - sail
         depends_on:
@@ -40,6 +41,7 @@ services:
             LARAVEL_SAIL: 1
         volumes:
             - '.:/var/www/html'
+            - './docker/php/99-hardening.ini:/etc/php/8.5/cli/conf.d/99-hardening.ini'
         networks:
             - sail
         depends_on:
@@ -61,6 +63,7 @@ services:
             LARAVEL_SAIL: 1
         volumes:
             - '.:/var/www/html'
+            - './docker/php/99-hardening.ini:/etc/php/8.5/cli/conf.d/99-hardening.ini'
         networks:
             - sail
         depends_on:

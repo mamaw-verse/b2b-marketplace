@@ -1,316 +1,262 @@
-<x-layouts::auth :title="__('Register')" activeTab="register">
-    <p class="mb-5 text-sm text-[var(--hs-neutral-500)] leading-relaxed">
-        {{ __('Set up your business profile in a few minutes.') }}
-    </p>
+<x-layouts::auth :title="__('Create account')" activeTab="register">
+    @php
+        $hasSummaryErrors = $errors->hasAny(['first_name', 'last_name', 'email', 'password', 'terms', 'cf-turnstile-response']);
+    @endphp
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('register.store') }}" class="space-y-4" x-data="{
-        legalOpen: false,
-        agreed: {{ old('terms') ? 'true' : 'false' }},
-        readComplete: false,
-        progress: 0,
-        updateLegalProgress() {
-            const el = this.$refs.legalBody;
-            if (! el) return;
-            const max = el.scrollHeight - el.clientHeight;
-            this.progress = max > 0 ? Math.min(100, Math.round((el.scrollTop / max) * 100)) : 100;
-            if (el.scrollTop + el.clientHeight >= el.scrollHeight - 24) {
-                this.readComplete = true;
-            }
-        },
-        openLegal() {
-            this.legalOpen = true;
-            this.$nextTick(() => this.updateLegalProgress());
-        }
-    }">
-        @csrf
-
-        <!-- Name (two-col) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <flux:input
-                name="first_name"
-                :label="__('First name')"
-                :value="old('first_name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="given-name"
-                :placeholder="__('First name')"
-            />
-            <flux:input
-                name="last_name"
-                :label="__('Last name')"
-                :value="old('last_name')"
-                type="text"
-                required
-                autocomplete="family-name"
-                :placeholder="__('Last name')"
-            />
+    <div
+        x-data="registrationForm({
+            firstName: @js(old('first_name', '')),
+            lastName: @js(old('last_name', '')),
+            email: @js(old('email', '')),
+            password: '',
+            terms: @js((bool) old('terms')),
+        }, @js($hasSummaryErrors))"
+    >
+        <div>
+            <h1 class="font-[var(--hs-font-display)] text-2xl font-bold text-[var(--hs-neutral-900)]">{{ __('Create account') }}</h1>
+            <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-600)]">
+                {{ __('Create your account to set up your business profile. You’ll add your business details next.') }}
+            </p>
         </div>
 
-        <!-- Email Address -->
-        <flux:input
-            name="email"
-            :label="__('Work email')"
-            :value="old('email')"
-            type="email"
-            required
-            autocomplete="email"
-            placeholder="you@business.com"
-        />
+        <x-auth-session-status class="mt-4" :status="session('status')" />
 
-        <!-- Password + Strength Meter -->
-        <div x-data="{
-            password: '',
-            showPassword: false,
-            showConfirm: false,
+        @if ($hasSummaryErrors)
+            <div
+                x-ref="errorSummary"
+                tabindex="-1"
+                role="alert"
+                class="mt-4 rounded-[var(--hs-radius-sm)] border border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)] p-3 text-sm text-[var(--hs-danger-700)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2"
+            >
+                <p class="font-semibold">{{ __('Please check the following:') }}</p>
+                <ul class="mt-1 list-disc space-y-1 ps-5">
+                    @foreach ($errors->all() as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-            get hasMinLength()  { return this.password.length >= 12; },
-            get hasUppercase()  { return /[A-Z]/.test(this.password); },
-            get hasLowercase()  { return /[a-z]/.test(this.password); },
-            get hasNumber()     { return /[0-9]/.test(this.password); },
-            get hasSymbol()     { return /[^A-Za-z0-9]/.test(this.password); },
+        <div
+            x-ref="clientErrorSummary"
+            tabindex="-1"
+            role="alert"
+            x-show="Object.values(errors).some(Boolean)"
+            x-cloak
+            class="mt-4 rounded-[var(--hs-radius-sm)] border border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)] p-3 text-sm text-[var(--hs-danger-700)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2"
+        >
+            <p class="font-semibold">{{ __('Please check the following:') }}</p>
+            <ul class="mt-1 list-disc space-y-1 ps-5">
+                <template x-for="message in Object.values(errors).filter(Boolean)" :key="message">
+                    <li x-text="message"></li>
+                </template>
+            </ul>
+        </div>
 
-            get metCount() {
-                return [this.hasMinLength, this.hasUppercase, this.hasLowercase, this.hasNumber, this.hasSymbol]
-                    .filter(Boolean).length;
-            },
+        <div class="mt-6">
+            <x-google-auth-button />
+        </div>
 
-            /** 0 = empty, 1 = weak, 2 = fair, 3 = good, 4 = strong */
-            get strength() {
-                if (this.password.length === 0) return 0;
-                if (this.metCount <= 2) return 1;
-                if (this.metCount === 3) return 2;
-                if (this.metCount === 4) return 3;
-                return 4;
-            },
+        <div class="relative my-6" aria-hidden="true">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-[var(--hs-neutral-300)]"></div></div>
+            <div class="relative flex justify-center"><span class="bg-[var(--hs-neutral-0)] px-3 text-sm text-[var(--hs-neutral-700)]">{{ __('or') }}</span></div>
+        </div>
 
-            get strengthLabel() {
-                return ['', '{{ __('Weak') }}', '{{ __('Fair') }}', '{{ __('Good') }}', '{{ __('Strong') }}'][this.strength];
-            },
+        <form method="POST" action="{{ route('register.store') }}" data-human x-on:submit="submit($event)" novalidate class="grid gap-4">
+            @csrf
 
-            get strengthColor() {
-                return [
-                    '',
-                    'bg-[var(--hs-danger-500)]',
-                    'bg-[var(--hs-warning-500)]',
-                    'bg-[var(--hs-info-500)]',
-                    'bg-[var(--hs-success-500)]',
-                ][this.strength];
-            },
-
-            get strengthTextColor() {
-                return [
-                    '',
-                    'text-[var(--hs-danger-700)]',
-                    'text-[var(--hs-warning-700)]',
-                    'text-[var(--hs-info-700)]',
-                    'text-[var(--hs-success-700)]',
-                ][this.strength];
-            },
-        }">
-
-            {{-- Password input --}}
-            <flux:field>
-                <flux:label>{{ __('Create password') }}</flux:label>
+            <div class="grid gap-2">
+                <label data-flux-label for="register-first-name" class="text-sm font-medium leading-tight text-[var(--hs-neutral-900)]">{{ __('First name') }}</label>
                 <div class="relative">
                     <input
-                        name="password"
-                        :type="showPassword ? 'text' : 'password'"
-                        x-model="password"
+                        id="register-first-name"
+                        name="first_name"
+                        type="text"
+                        autocomplete="given-name"
+                        autocapitalize="words"
+                        enterkeyhint="next"
                         required
+                        autofocus
+                        x-model="firstName"
+                        x-on:blur="validateOnBlur('firstName')"
+                        x-on:input="if (errors.firstName) validate('firstName')"
+                        x-bind:aria-invalid="Boolean(errors.firstName) || @js($errors->has('first_name'))"
+                        aria-describedby="register-first-name-error"
+                        x-bind:class="errors.firstName ? '!border-[var(--hs-danger-500)] pe-11' : ''"
+                        data-flux-control data-flux-group-target
+                        @class([
+                            'h-12 w-full appearance-none rounded-[var(--hs-radius-sm)] border shadow-xs leading-[1.375rem] border-[var(--hs-neutral-400)] bg-[var(--hs-neutral-0)] px-3 text-base text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+                            '!border-[var(--hs-danger-500)] pe-11' => $errors->has('first_name'),
+                        ])
+                    />
+                    @if ($errors->has('first_name'))
+                        <flux:icon.exclamation-circle class="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-[var(--hs-danger-700)]" />
+                    @endif
+                    <flux:icon.exclamation-circle x-show="errors.firstName" x-cloak class="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-[var(--hs-danger-700)]" />
+                </div>
+                <p id="register-first-name-error" x-show="errors.firstName" x-text="errors.firstName" x-cloak class="text-sm text-[var(--hs-danger-700)]"></p>
+                @error('first_name')<p class="text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="grid gap-2">
+                <label data-flux-label for="register-last-name" class="text-sm font-medium leading-tight text-[var(--hs-neutral-900)]">{{ __('Last name') }}</label>
+                <div class="relative">
+                    <input
+                        id="register-last-name"
+                        name="last_name"
+                        type="text"
+                        autocomplete="family-name"
+                        autocapitalize="words"
+                        enterkeyhint="next"
+                        required
+                        x-model="lastName"
+                        x-on:blur="validateOnBlur('lastName')"
+                        x-on:input="if (errors.lastName) validate('lastName')"
+                        x-bind:aria-invalid="Boolean(errors.lastName) || @js($errors->has('last_name'))"
+                        aria-describedby="register-last-name-error"
+                        x-bind:class="errors.lastName ? '!border-[var(--hs-danger-500)] pe-11' : ''"
+                        data-flux-control data-flux-group-target
+                        @class([
+                            'h-12 w-full appearance-none rounded-[var(--hs-radius-sm)] border shadow-xs leading-[1.375rem] border-[var(--hs-neutral-400)] bg-[var(--hs-neutral-0)] px-3 text-base text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+                            '!border-[var(--hs-danger-500)] pe-11' => $errors->has('last_name'),
+                        ])
+                    />
+                    @if ($errors->has('last_name'))
+                        <flux:icon.exclamation-circle class="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-[var(--hs-danger-700)]" />
+                    @endif
+                    <flux:icon.exclamation-circle x-show="errors.lastName" x-cloak class="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-[var(--hs-danger-700)]" />
+                </div>
+                <p id="register-last-name-error" x-show="errors.lastName" x-text="errors.lastName" x-cloak class="text-sm text-[var(--hs-danger-700)]"></p>
+                @error('last_name')<p class="text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="grid gap-2">
+                <label data-flux-label for="register-email" class="text-sm font-medium leading-tight text-[var(--hs-neutral-900)]">{{ __('Work email') }}</label>
+                <div class="relative">
+                    <input
+                        id="register-email"
+                        name="email"
+                        type="email"
+                        inputmode="email"
+                        autocomplete="email"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        enterkeyhint="next"
+                        required
+                        x-model="email"
+                        x-on:blur="validateOnBlur('email')"
+                        x-on:input="if (errors.email) validate('email')"
+                        x-bind:aria-invalid="Boolean(errors.email) || @js($errors->has('email'))"
+                        aria-describedby="register-email-error"
+                        x-bind:class="errors.email ? '!border-[var(--hs-danger-500)]' : ''"
+                        data-flux-control data-flux-group-target
+                        @class([
+                            'h-12 w-full appearance-none rounded-[var(--hs-radius-sm)] border shadow-xs leading-[1.375rem] border-[var(--hs-neutral-400)] bg-[var(--hs-neutral-0)] px-3 pe-11 text-base text-[var(--hs-neutral-900)] placeholder:text-[var(--hs-neutral-600)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+                            '!border-[var(--hs-danger-500)]' => $errors->has('email'),
+                        ])
+                        placeholder="you@company.com"
+                    />
+                    @if ($errors->has('email'))
+                        <flux:icon.exclamation-circle class="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-[var(--hs-danger-700)]" />
+                    @endif
+                    <flux:icon.exclamation-circle x-show="errors.email" x-cloak class="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-[var(--hs-danger-700)]" />
+                </div>
+                <p id="register-email-error" x-show="errors.email" x-text="errors.email" x-cloak class="text-sm text-[var(--hs-danger-700)]"></p>
+                @error('email')<p class="text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="grid gap-2" x-data="{ showPassword: false }">
+                <label data-flux-label for="register-password" class="text-sm font-medium leading-tight text-[var(--hs-neutral-900)]">{{ __('Password') }}</label>
+                <div class="relative">
+                    <input
+                        id="register-password"
+                        name="password"
+                        x-bind:type="showPassword ? 'text' : 'password'"
                         autocomplete="new-password"
-                        placeholder="{{ __('At least 12 characters') }}"
-                        passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                        class="w-full rounded-[var(--hs-radius-sm)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
-                        aria-describedby="password-strength-desc"
+                        enterkeyhint="done"
+                        required
+                        minlength="6"
+                        passwordrules="minlength: 6"
+                        x-model="password"
+                        x-on:blur="validateOnBlur('password'); capsLock = false"
+                        x-on:input="if (errors.password) validate('password')"
+                        x-on:keyup="capsLock = $event.getModifierState('CapsLock')"
+                        x-bind:aria-invalid="Boolean(errors.password) || @js($errors->has('password'))"
+                        aria-describedby="register-password-help register-password-strength register-password-error register-caps-lock"
+                        x-bind:class="errors.password ? '!border-[var(--hs-danger-500)]' : ''"
+                        data-flux-control data-flux-group-target
+                        @class([
+                            'h-12 w-full appearance-none rounded-[var(--hs-radius-sm)] border shadow-xs leading-[1.375rem] border-[var(--hs-neutral-400)] bg-[var(--hs-neutral-0)] px-3 pe-12 text-base text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+                            '!border-[var(--hs-danger-500)]' => $errors->has('password'),
+                        ])
                     />
                     <button
                         type="button"
-                        @click="showPassword = !showPassword"
-                        :aria-label="showPassword ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
+                        x-on:click="showPassword = ! showPassword"
+                        x-bind:aria-label="showPassword ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
+                        x-bind:aria-pressed="showPassword"
+                        class="absolute inset-y-0 end-0 flex min-h-11 min-w-11 items-center justify-center rounded-[var(--hs-radius-sm)] text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2"
                     >
-                        <flux:icon.eye x-show="!showPassword" class="size-5" />
+                        <flux:icon.eye x-show="! showPassword" class="size-5" />
                         <flux:icon.eye-slash x-show="showPassword" x-cloak class="size-5" />
                     </button>
                 </div>
-
-                {{-- Strength meter bar (only shown once user starts typing) --}}
-                <div x-show="password.length > 0" x-cloak class="mt-2 space-y-1.5" id="password-strength-desc">
-                    {{-- Segmented bar --}}
-                    <div class="flex gap-1" role="meter" :aria-valuenow="strength" aria-valuemin="0" aria-valuemax="4" :aria-label="'{{ __('Password strength') }}: ' + strengthLabel">
+                <p id="register-password-help" class="text-sm text-[var(--hs-neutral-700)]">{{ __('At least 6 characters. Longer passphrases are welcome.') }}</p>
+                <div id="register-password-strength" x-show="password.length > 0" x-cloak class="grid gap-1.5" aria-live="polite">
+                    <div class="flex gap-1" role="meter" aria-valuemin="1" aria-valuemax="4" x-bind:aria-valuenow="strength" x-bind:aria-valuetext="strengthLabel">
                         <template x-for="segment in 4" :key="segment">
-                            <div
-                                class="h-1.5 flex-1 rounded-full transition-colors duration-[var(--hs-duration-normal)]"
-                                :class="segment <= strength ? strengthColor : 'bg-[var(--hs-neutral-200)]'"
-                            ></div>
+                            <span class="h-1.5 flex-1 rounded-full motion-reduce:transition-none" x-bind:class="segment <= strength ? strengthClass : 'bg-[var(--hs-neutral-200)]'"></span>
                         </template>
                     </div>
-                    {{-- Label --}}
-                    <p class="text-xs font-medium transition-colors duration-[var(--hs-duration-normal)]" :class="strengthTextColor" x-text="strengthLabel" aria-live="polite"></p>
+                    <p class="text-xs font-medium text-[var(--hs-neutral-700)]"><span>{{ __('Password strength:') }}</span> <span x-text="strengthLabel"></span></p>
                 </div>
+                <p id="register-password-error" x-show="errors.password" x-text="errors.password" x-cloak class="text-sm text-[var(--hs-danger-700)]"></p>
+                @error('password')<p class="text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>@enderror
+                <p id="register-caps-lock" x-show="capsLock" x-cloak class="text-sm text-[var(--hs-warning-700)]">{{ __('Caps Lock is on.') }}</p>
+            </div>
 
-                {{-- Requirements checklist --}}
-                <ul x-show="password.length > 0" x-cloak class="mt-2 space-y-1" aria-label="{{ __('Password requirements') }}">
-                    <template x-for="[met, label] in [
-                        [hasMinLength, '{{ __('At least 12 characters') }}'],
-                        [hasUppercase, '{{ __('Uppercase letter (A–Z)') }}'],
-                        [hasLowercase, '{{ __('Lowercase letter (a–z)') }}'],
-                        [hasNumber,    '{{ __('Number (0–9)') }}'],
-                        [hasSymbol,    '{{ __('Symbol (!@#$ …)') }}'],
-                    ]" :key="label">
-                        <li class="flex items-center gap-1.5 text-xs transition-colors duration-[var(--hs-duration-fast)]"
-                            :class="met ? 'text-[var(--hs-success-700)]' : 'text-[var(--hs-neutral-500)]'"
-                            :aria-label="label + (met ? ' — met' : ' — not met')"
-                        >
-                            <svg x-show="met" class="size-3.5 shrink-0" fill="none" viewBox="0 0 16 16" aria-hidden="true">
-                                <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.15"/>
-                                <path d="M5 8l2.5 2.5L11 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <svg x-show="!met" class="size-3.5 shrink-0 text-[var(--hs-neutral-300)]" fill="none" viewBox="0 0 16 16" aria-hidden="true">
-                                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
-                            </svg>
-                            <span x-text="label"></span>
-                        </li>
-                    </template>
-                </ul>
+            <input type="hidden" name="cf-turnstile-response" value="">
+            <flux:error name="cf-turnstile-response" />
 
-                <flux:error name="password" />
-            </flux:field>
-
-            {{-- Confirm Password --}}
-            <flux:field class="mt-4">
-                <flux:label>{{ __('Confirm password') }}</flux:label>
-                <div class="relative">
+            <div class="grid gap-2">
+                <label class="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--hs-neutral-800)]">
                     <input
-                        name="password_confirmation"
-                        :type="showConfirm ? 'text' : 'password'"
+                        id="terms"
+                        name="terms"
+                        type="checkbox"
+                        value="1"
                         required
-                        autocomplete="new-password"
-                        placeholder="{{ __('Confirm password') }}"
-                        passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                        class="w-full rounded-[var(--hs-radius-sm)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2 pr-10 text-sm text-[var(--hs-neutral-900)] focus:border-[var(--hs-green-600)] focus:outline-none focus:ring-1 focus:ring-[var(--hs-green-600)]"
+                        x-model="terms"
+                        x-on:change="if (errors.terms) validate('terms')"
+                        x-bind:aria-invalid="Boolean(errors.terms) || @js($errors->has('terms'))"
+                        aria-describedby="register-terms-error"
+                        class="mt-2 size-5 shrink-0 rounded border-[var(--hs-neutral-400)] accent-[var(--hs-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2"
                     />
-                    <button
-                        type="button"
-                        @click="showConfirm = !showConfirm"
-                        :aria-label="showConfirm ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-700)]"
-                    >
-                        <flux:icon.eye x-show="!showConfirm" class="size-5" />
-                        <flux:icon.eye-slash x-show="showConfirm" x-cloak class="size-5" />
-                    </button>
-                </div>
-                <flux:error name="password_confirmation" />
-            </flux:field>
-
-        </div>{{-- end password x-data --}}
-
-        <!-- Turnstile -->
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-        <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}"></div>
-        @error('cf-turnstile-response') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
-
-        <!-- Terms acceptance -->
-        <flux:field>
-            <div class="flex items-start gap-2.5">
-                <input
-                    type="checkbox"
-                    id="terms"
-                    name="terms"
-                    value="1"
-                    x-model="agreed"
-                    @click.prevent="agreed ? agreed = false : openLegal()"
-                    required
-                    class="mt-0.5 size-4 shrink-0 rounded border-[var(--hs-neutral-300)] accent-[var(--hs-green-600)] cursor-pointer"
-                />
-                <span class="text-xs text-[var(--hs-neutral-500)] leading-relaxed">
-                    {{ __('I have read and agree to the') }}
-                    <button type="button" @click.stop="openLegal()" class="font-semibold text-[var(--hs-green-900)] hover:underline bg-transparent border-none p-0 cursor-pointer text-xs">{{ __('Terms of Service and Privacy Policy') }}</button>.
-                </span>
+                    <span>
+                        {{ __('By creating an account, you agree to our') }}
+                        <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener noreferrer" class="text-[var(--hs-green-700)] underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2">{{ __('Terms of Service') }}</a>
+                        {{ __('and') }}
+                        <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener noreferrer" class="text-[var(--hs-green-700)] underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2">{{ __('Privacy Policy') }}</a>.
+                    </span>
+                </label>
+                <p id="register-terms-error" x-show="errors.terms" x-text="errors.terms" x-cloak class="text-sm text-[var(--hs-danger-700)]"></p>
+                @error('terms')<p class="text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>@enderror
             </div>
-            <flux:error name="terms" />
-        </flux:field>
 
-        <!-- Terms / Privacy modal: full combined document, Agree unlocks at the bottom -->
-        <div
-            x-show="legalOpen"
-            x-transition.opacity.duration.200ms
-            class="fixed inset-0 z-50 flex items-center justify-center p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label="{{ __('Terms of Service and Privacy Policy') }}"
-            @keydown.escape.window="legalOpen = false"
-            style="display: none;"
-        >
-            <div class="absolute inset-0 bg-black/50" @click="legalOpen = false"></div>
-
-            <div class="relative flex flex-col w-full max-w-3xl max-h-[85vh] rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-xl)]">
-                {{-- Header --}}
-                <div class="shrink-0 border-b border-[var(--hs-neutral-100)] px-6 py-4">
-                    <flux:heading size="lg">{{ __('Terms of Service and Privacy Policy') }}</flux:heading>
-                    <flux:text class="mt-1 text-[var(--hs-neutral-500)]">{{ __('Please read the full document, then tap Agree below.') }}</flux:text>
-                    {{-- Reading progress --}}
-                    <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--hs-neutral-100)]" role="progressbar" aria-label="{{ __('Reading progress') }}" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
-                        <div class="h-full rounded-full bg-[var(--hs-green-600)] transition-[width]" :style="`width: ${progress}%`"></div>
-                    </div>
-                </div>
-
-                {{-- Scrollable full document --}}
-                <div x-ref="legalBody" @scroll="updateLegalProgress()" class="flex-1 overflow-y-auto px-6 py-5">
-                    <h3 class="text-lg font-bold text-[var(--hs-neutral-900)]">{{ __('Terms of Service') }}</h3>
-                    <div class="mt-2">
-                        @include('partials.legal.terms-body')
-                    </div>
-
-                    <hr class="my-8 border-[var(--hs-neutral-200)]">
-
-                    <h3 class="text-lg font-bold text-[var(--hs-neutral-900)]">{{ __('Privacy Policy') }}</h3>
-                    <div class="mt-2">
-                        @include('partials.legal.privacy-body')
-                    </div>
-
-                    {{-- End-of-document marker --}}
-                    <div class="mt-8 flex items-center gap-2.5 rounded-xl bg-[var(--hs-green-50)] border border-[var(--hs-green-100)] p-4">
-                        <flux:icon.check-circle class="size-5 shrink-0 text-[var(--hs-green-700)]" />
-                        <p class="text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('You have reached the end of the document. You may now tap Agree below.') }}</p>
-                    </div>
-                </div>
-
-                {{-- Footer --}}
-                <div class="shrink-0 flex flex-col gap-3 border-t border-[var(--hs-neutral-100)] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-xs leading-relaxed" :class="readComplete ? 'text-[var(--hs-green-700)] font-semibold' : 'text-[var(--hs-neutral-500)]'">
-                        <span x-show="! readComplete">{{ __('Scroll to the bottom to enable Agree') }} (<span x-text="progress"></span>%)</span>
-                        <span x-show="readComplete" style="display: none;">{{ __('Thanks for reading — you can now agree.') }}</span>
-                    </p>
-                    <div class="flex items-center justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="legalOpen = false"
-                            class="rounded-lg px-4 py-2 text-sm font-semibold text-[var(--hs-neutral-600)] bg-transparent border-none cursor-pointer hover:bg-[var(--hs-neutral-100)] transition"
-                        >{{ __('Close') }}</button>
-                        <button
-                            type="button"
-                            @click="agreed = true; legalOpen = false"
-                            :disabled="! readComplete"
-                            :class="readComplete ? 'bg-[var(--hs-green-600)] hover:bg-[var(--hs-green-700)] cursor-pointer' : 'bg-[var(--hs-neutral-200)] cursor-not-allowed'"
-                            class="rounded-lg px-5 py-2 text-sm font-semibold text-white border-none transition"
-                        >{{ __('Agree') }}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <flux:button type="submit" variant="primary" class="!w-full" data-test="register-user-button">
-            {{ __('Create account') }}
-        </flux:button>
-    </form>
-
-    <p class="mt-4 text-center text-sm text-[var(--hs-neutral-500)]">
-        {{ __('Already registered?') }}
-        <a href="{{ route('login') }}" wire:navigate class="font-bold text-[var(--hs-green-600)] hover:underline">{{ __('Log in') }}</a>
-    </p>
+            <button
+                type="submit"
+                x-bind:disabled="! isValid || loading"
+                x-bind:aria-busy="loading"
+                class="flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-green-600)] px-4 text-base font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-[var(--hs-green-700)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--hs-neutral-300)] disabled:text-[var(--hs-neutral-700)]"
+                data-test="register-user-button"
+            >
+                <svg x-show="loading" x-cloak class="size-5 motion-safe:animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z" />
+                </svg>
+                <span x-show="! loading">{{ __('Create account') }}</span>
+                <span x-show="loading" x-cloak>{{ __('Creating account...') }}</span>
+            </button>
+        </form>
+    </div>
 </x-layouts::auth>

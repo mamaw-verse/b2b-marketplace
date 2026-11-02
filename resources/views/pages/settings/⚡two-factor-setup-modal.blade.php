@@ -36,6 +36,15 @@ new class extends Component {
     #[On('start-two-factor-setup')]
     public function startTwoFactorSetup(): void
     {
+        $confirmedAt = (int) session()->get('auth.password_confirmed_at', 0);
+
+        if (now()->timestamp - $confirmedAt >= (int) config('auth.password_timeout', 10800)) {
+            session()->put('url.intended', route('profile.edit').'#security');
+            $this->redirect(route('password.confirm'), navigate: true);
+
+            return;
+        }
+
         $enableTwoFactorAuthentication = app(EnableTwoFactorAuthentication::class);
         $enableTwoFactorAuthentication(auth()->user());
 
@@ -154,7 +163,7 @@ new class extends Component {
 
 <flux:modal
     name="two-factor-setup-modal"
-    class="max-w-md md:min-w-md"
+    class="w-full sm:w-auto max-w-md md:min-w-md"
     @close="closeModal"
 >
         <div class="space-y-6">

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\HumanCheckController;
 use App\Http\Controllers\OrderPaymentCallbackController;
 use App\Http\Controllers\SponsoredContentClickController;
 use App\Http\Controllers\SubscriptionPaymentCallbackController;
@@ -29,6 +31,10 @@ Route::post('/locale', function (Request $request) {
     return back();
 })->name('locale.switch');
 
+Route::post('/human-check', HumanCheckController::class)
+    ->middleware('throttle:20,1')
+    ->name('human-check');
+
 Route::livewire('/', 'storefront.hero-search')->name('home');
 Route::livewire('/companies', 'storefront.company-directory')->name('storefront.companies');
 Route::livewire('/companies/{shop}', 'storefront.company-profile')->name('storefront.company');
@@ -40,6 +46,16 @@ Route::livewire('/about', 'storefront.about-page')->name('about');
 Route::livewire('/terms', 'legal.terms-page')->name('legal.terms');
 Route::livewire('/privacy', 'legal.privacy-page')->name('legal.privacy');
 Route::livewire('/faq', 'legal.faq-page')->name('help.faq');
+
+Route::middleware(['guest', 'throttle:6,1'])->group(function () {
+    Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+});
+
+Route::middleware(['auth', 'throttle:6,1'])->group(function () {
+    Route::get('/auth/google/confirm', [GoogleAuthController::class, 'confirmRedirect'])->name('auth.google.confirm');
+    Route::get('/auth/google/confirm/callback', [GoogleAuthController::class, 'confirmCallback'])->name('auth.google.confirm.callback');
+});
 
 /*
 | Media viewer.
@@ -150,7 +166,7 @@ Route::get('products/{product}/featured-image', function (Product $product) {
 
     $isPublic = $product->status === 'published'
         && $product->shop?->status === 'active'
-        && (! $subscriptionsEnabled || $product->shop->hasActiveOrTrialingSubscription());
+        && (! $subscriptionsEnabled || $product->shop->hasActiveSubscription());
 
     if (! $isPublic) {
         $user = auth()->user();

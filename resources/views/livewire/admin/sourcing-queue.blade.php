@@ -18,7 +18,46 @@
             </div>
         </div>
 
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->requests as $sourcingRequest)
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <a href="{{ route('admin.sourcing-requests.show', $sourcingRequest) }}" wire:navigate class="font-medium text-[var(--hs-green-700)] hover:underline">
+                                {{ $sourcingRequest->name }}
+                            </a>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $sourcingRequest->email }}</p>
+                        </div>
+                        <flux:badge :color="match ($sourcingRequest->status) {
+                            'completed' => 'green',
+                            'in_progress' => 'yellow',
+                            default => 'gray',
+                        }">{{ str($sourcingRequest->status)->headline() }}</flux:badge>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Product') }}</dt>
+                            <dd class="text-[var(--hs-neutral-900)]">{{ $sourcingRequest->product_name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Date') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $sourcingRequest->created_at?->format('M d, Y') }}</dd>
+                        </div>
+                    </dl>
+                    <div class="mt-3">
+                        <flux:button size="sm" variant="ghost" icon="eye" href="{{ route('admin.sourcing-requests.show', $sourcingRequest) }}" wire:navigate>
+                            {{ __('View') }}
+                        </flux:button>
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('No sourcing requests found.') }}</div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Name') }}</flux:table.column>
@@ -59,10 +98,11 @@
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-            @if ($this->requests->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">{{ $this->requests->links() }}</div>
-            @endif
         </div>
+
+        @if ($this->requests->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">{{ $this->requests->links() }}</div>
+        @endif
     </div>
 
     @include('livewire.admin.document-viewer')

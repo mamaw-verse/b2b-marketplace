@@ -48,6 +48,14 @@ final class ProductPolicy
 
         $shop = $product->shop;
 
-        return $shop->status === 'active' && $shop->hasActiveOrTrialingSubscription();
+        if ($shop->status !== 'active') {
+            return false;
+        }
+
+        if (! config('marketplace.features.subscriptions_enabled')) {
+            return true;
+        }
+
+        return $shop->hasActiveSubscription();
     }
 }

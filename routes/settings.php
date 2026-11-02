@@ -6,15 +6,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
+
+    // Single settings page: profile + appearance + security. Unverified users
+    // may update a mistyped email; sensitive actions remain protected individually.
+    Route::livewire('settings/profile', 'pages::settings.profile')->name('profile.edit');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Single settings page: profile + appearance + security. No
-    // password.confirm gate so the page loads directly; sensitive actions
-    // stay protected individually (password change requires the current
-    // password; Fortify 2FA/passkey flows require recent confirmation).
-    Route::livewire('settings/profile', 'pages::settings.profile')->name('profile.edit');
-
     // Backward-compat: former standalone pages now live as sections on
     // the single profile page. Route names are kept so existing links
     // (sidebar bookmarks, passkey flows) keep working.

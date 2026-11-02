@@ -13,28 +13,55 @@
             @if ($this->eligibleSellers->isEmpty())
                 <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No sellers currently eligible for payout.') }}</p>
             @else
-                <table class="w-full text-sm">
-                    <thead><tr class="border-b border-[var(--hs-neutral-100)]">
-                        <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)]">{{ __('Shop') }}</th>
-                        <th class="text-center py-3 px-2 text-[var(--hs-neutral-600)]">{{ __('Eligible Orders') }}</th>
-                        <th class="text-right py-3 px-2 text-[var(--hs-neutral-600)]">{{ __('Net Releasable') }}</th>
-                        <th class="py-3 px-2"></th>
-                    </tr></thead>
-                    <tbody>
-                        @foreach ($this->eligibleSellers as $seller)
-                            <tr class="border-b border-[var(--hs-neutral-50)]">
-                                <td class="py-3 px-2 font-medium text-[var(--hs-neutral-900)]">{{ $seller['shop_name'] }}</td>
-                                <td class="py-3 px-2 text-center text-[var(--hs-neutral-700)]">{{ $seller['eligible_orders_count'] }}</td>
-                                <td class="py-3 px-2 text-right font-mono text-[var(--hs-neutral-900)]">₱{{ number_format($seller['releasable_amount'], 2) }}</td>
-                                <td class="py-3 px-2 text-right">
-                                    <flux:modal.trigger name="confirm-create-batch-{{ $seller['shop_id'] }}">
-                                        <flux:button size="sm">{{ __('Create Batch') }}</flux:button>
-                                    </flux:modal.trigger>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                {{-- Mobile: stacked card list --}}
+                <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+                    @foreach ($this->eligibleSellers as $seller)
+                        <div class="py-4">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $seller['shop_name'] }}</p>
+                            <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Eligible Orders') }}</dt>
+                                    <dd class="text-[var(--hs-neutral-700)]">{{ $seller['eligible_orders_count'] }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Net Releasable') }}</dt>
+                                    <dd class="font-mono text-[var(--hs-neutral-900)]">₱{{ number_format($seller['releasable_amount'], 2) }}</dd>
+                                </div>
+                            </dl>
+                            <div class="mt-3">
+                                <flux:modal.trigger name="confirm-create-batch-{{ $seller['shop_id'] }}">
+                                    <flux:button size="sm">{{ __('Create Batch') }}</flux:button>
+                                </flux:modal.trigger>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Desktop: table --}}
+                <div class="hidden overflow-x-auto lg:block">
+                    <table class="w-full text-sm">
+                        <thead><tr class="border-b border-[var(--hs-neutral-100)]">
+                            <th class="text-left py-3 px-2 text-[var(--hs-neutral-600)]">{{ __('Shop') }}</th>
+                            <th class="text-center py-3 px-2 text-[var(--hs-neutral-600)]">{{ __('Eligible Orders') }}</th>
+                            <th class="text-right py-3 px-2 text-[var(--hs-neutral-600)]">{{ __('Net Releasable') }}</th>
+                            <th class="py-3 px-2"></th>
+                        </tr></thead>
+                        <tbody>
+                            @foreach ($this->eligibleSellers as $seller)
+                                <tr class="border-b border-[var(--hs-neutral-50)]">
+                                    <td class="py-3 px-2 font-medium text-[var(--hs-neutral-900)]">{{ $seller['shop_name'] }}</td>
+                                    <td class="py-3 px-2 text-center text-[var(--hs-neutral-700)]">{{ $seller['eligible_orders_count'] }}</td>
+                                    <td class="py-3 px-2 text-right font-mono text-[var(--hs-neutral-900)]">₱{{ number_format($seller['releasable_amount'], 2) }}</td>
+                                    <td class="py-3 px-2 text-right">
+                                        <flux:modal.trigger name="confirm-create-batch-{{ $seller['shop_id'] }}">
+                                            <flux:button size="sm">{{ __('Create Batch') }}</flux:button>
+                                        </flux:modal.trigger>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         </div>
     </div>

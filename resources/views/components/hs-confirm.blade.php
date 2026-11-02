@@ -30,10 +30,10 @@ $icons = [
 $icon = $icons[$variant] ?? 'information-circle';
 @endphp
 
-<flux:modal name="{{ $name }}" class="md:w-[400px] !p-0">
+<flux:modal name="{{ $name }}" class="w-full sm:w-auto md:w-[400px] !p-0">
     <div class="flex flex-col">
         {{-- Body --}}
-        <div class="px-6 py-5">
+        <div class="px-4 sm:px-6 py-5">
             <div class="flex items-start gap-4">
                 <div class="shrink-0 flex items-center justify-center size-10 rounded-full {{ $iconClass }}">
                     <flux:icon name="{{ $icon }}" variant="mini" class="size-5" />
@@ -49,10 +49,10 @@ $icon = $icons[$variant] ?? 'information-circle';
         </div>
 
         {{-- Footer --}}
-        <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-6 py-4">
-            <div class="flex justify-end gap-2">
+        <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-4 sm:px-6 py-4">
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                 <flux:modal.close>
-                    <flux:button variant="ghost">{{ $cancelText }}</flux:button>
+                    <flux:button variant="ghost" class="w-full sm:w-auto">{{ $cancelText }}</flux:button>
                 </flux:modal.close>
                 <div x-on:click="$flux.modal('{{ $name }}').close()">
                     {{ $action }}

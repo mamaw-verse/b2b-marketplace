@@ -85,14 +85,18 @@ final class ApproveOnboardingAction
 
             $shop->categories()->sync($categoryIds);
 
-            if ($shop->country_code === 'PH') {
+            // Auto-start a free trial on approval only when subscriptions are
+            // enabled and an active plan with trial_days > 0 exists.
+            // When subscriptions_enabled is false the system is free for all
+            // sellers — no subscription record is needed at all.
+            if (config('marketplace.features.subscriptions_enabled')) {
                 $plan = SubscriptionPlan::query()
-                    ->where('country_scope', 'PH')
                     ->where('is_active', true)
+                    ->where('trial_days', '>', 0)
                     ->first();
 
-                if ($plan) {
-                    $trialDays = (int) config('marketplace.initial_subscription_trial_days', 180);
+                if ($plan !== null) {
+                    $trialDays = (int) $plan->trial_days;
                     Subscription::create([
                         'shop_id' => $shop->id,
                         'subscription_plan_id' => $plan->id,

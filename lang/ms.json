@@ -777,7 +777,6 @@
   "JPG, PNG or WebP · max 20 MB": "JPG, PNG atau WebP · maksimum 20 MB",
   "Join Us": "Sertai Kami",
   "Join business matching, events, training and consultancy": "Sertai pemadanan perniagaan, acara, latihan dan perundingan",
-  "Join the Movement": "Sertai Gerakan",
   "Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.": "Sertai penjual halal yang disahkan di seluruh Filipina. Mula menyenarai secara percuma — hanya bayar komisen apabila anda membuat jualan. Tiada caj bulanan, tiada yuran tersembunyi.",
   "Joined": "Menyertai",
   "Keep invitation": "Kekalkan jemputan",
@@ -1317,6 +1316,7 @@
   "Regenerate codes": "Menjana semula kod",
   "Register": "Daftar",
   "Register Business": "Daftar Perniagaan",
+  "Register Now": "Daftar Sekarang",
   "Register Your Business": "Daftarkan Perniagaan Anda",
   "Register Your Company": "Daftarkan Syarikat Anda",
   "Register as Seller": "Daftar sebagai Penjual",
@@ -2510,5 +2510,8 @@
   "Product options only apply to subcategories. Select a parent group above to define them.": "Pilihan produk hanya terpakai pada subkategori. Pilih kumpulan induk di atas untuk mentakrifkannya.",
   "This category has subcategories and cannot be nested under a group.": "Kategori ini mempunyai subkategori dan tidak boleh diletakkan di bawah kumpulan.",
   "Sort Order": "Susunan",
-  "Lower numbers appear first among siblings.": "Nombor yang lebih kecil dipaparkan dahulu dalam kalangan kategori setara."
+  "Lower numbers appear first among siblings.": "Nombor yang lebih kecil dipaparkan dahulu dalam kalangan kategori setara.",
+  "Subscriptions are currently disabled": "Langganan kini dinyahdayakan",
+  "These settings are saved and will take effect once the development team enables subscriptions for this instance.": "Tetapan ini disimpan dan akan berkuat kuasa setelah pasukan pembangunan mengaktifkan langganan untuk instans ini.",
+  "The marketplace is currently free. Subscription plans are not required right now.": "Pasaran kini percuma. Pelan langganan tidak diperlukan buat masa ini."
 }

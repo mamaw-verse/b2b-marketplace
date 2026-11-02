@@ -123,7 +123,7 @@
                             <img x-bind:src="previewUrl" class="w-full h-full object-cover" alt="" />
                             <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
                                 <button type="button" x-on:click="clear()"
-                                    class="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-red-600">
+                                    class="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-[var(--hs-danger-700)]">
                                     <flux:icon name="trash" class="size-3.5" />{{ __('Remove') }}
                                 </button>
                             </div>
@@ -211,7 +211,7 @@
                                 <img x-bind:src="previewUrl" class="w-full h-full object-cover" alt="" />
                                 <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
                                     <button type="button" x-on:click="clear()"
-                                        class="flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] font-semibold text-red-600">
+                                        class="flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] font-semibold text-[var(--hs-danger-700)]">
                                         <flux:icon name="trash" class="size-3" />{{ __('Remove') }}
                                     </button>
                                 </div>

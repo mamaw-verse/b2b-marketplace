@@ -1,9 +1,9 @@
 @props([
     'optionsRoute' => 'passkey.login-options',
     'submitRoute' => 'passkey.login',
-    'label' => __('Sign in with a passkey'),
-    'loadingLabel' => __('Authenticating...'),
-    'separator' => __('Or continue with email'),
+    'label' => __('Continue with a passkey'),
+    'loadingLabel' => __('Checking passkey...'),
+    'autofill' => true,
 ])
 
 @assets
@@ -11,21 +11,46 @@
 @endassets
 
 <div
+    {{ $attributes }}
     x-data="{
         supported: false,
         loading: false,
         error: null,
-        updateSupport() {
+        async ready() {
             this.supported = Boolean(window.Passkeys?.isSupported());
+
+            if (this.supported && @js($autofill)) {
+                try {
+                    const response = await window.Passkeys.autofill({
+                        routes: {
+                            options: '{{ route($optionsRoute) }}',
+                            submit: '{{ route($submitRoute) }}',
+                        },
+                    });
+
+                    if (response) {
+                        window.localStorage.setItem('auth.lastMethod', 'passkey');
+                        window.Livewire?.navigate(response.redirect || '/dashboard') ?? window.location.assign(response.redirect || '/dashboard');
+                    }
+                } catch (error) {
+                    if (error.constructor?.name !== 'UserCancelledError') {
+                        this.error = error.message;
+                    }
+                }
+            }
         },
         init() {
-            this.updateSupport();
+            if (window.Passkeys) {
+                this.ready();
+                return;
+            }
 
-            window.addEventListener('passkeys:ready', () => this.updateSupport(), { once: true });
+            window.addEventListener('passkeys:ready', () => this.ready(), { once: true });
         },
         async verify() {
             this.loading = true;
             this.error = null;
+
             try {
                 const response = await window.Passkeys.verify({
                     routes: {
@@ -33,44 +58,30 @@
                         submit: '{{ route($submitRoute) }}',
                     },
                 });
-                Livewire.navigate(response.redirect || '/dashboard');
-            } catch (e) {
-                if (e.constructor?.name !== 'UserCancelledError') {
-                    this.error = e.message;
+                window.localStorage.setItem('auth.lastMethod', 'passkey');
+                window.Livewire?.navigate(response.redirect || '/dashboard') ?? window.location.assign(response.redirect || '/dashboard');
+            } catch (error) {
+                if (error.constructor?.name !== 'UserCancelledError') {
+                    this.error = error.message;
                 }
             } finally {
                 this.loading = false;
             }
         },
     }"
+    x-show="supported"
+    x-cloak
 >
-    <template x-if="supported">
-        <div>
-            <div class="grid gap-2">
-                <flux:button
-                    variant="outline"
-                    icon="finger-print"
-                    class="w-full"
-                    x-on:click="verify()"
-                    x-bind:disabled="loading"
-                >
-                    <span x-show="!loading">{{ $label }}</span>
-                    <span x-show="loading" x-cloak>{{ $loadingLabel }}</span>
-                </flux:button>
-                <p x-show="error" x-text="error" x-cloak
-                   class="text-sm text-center text-red-600"></p>
-            </div>
-
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-[var(--hs-neutral-200)]"></div>
-                </div>
-                <div class="relative flex justify-center text-xs uppercase">
-                    <span class="px-2 text-[var(--hs-neutral-500)] bg-[var(--hs-neutral-0)]">
-                        {{ $separator }}
-                    </span>
-                </div>
-            </div>
-        </div>
-    </template>
+    <button
+        type="button"
+        class="flex min-h-12 w-full items-center justify-center gap-3 rounded-[var(--hs-radius-sm)] border border-[var(--hs-neutral-400)] bg-[var(--hs-neutral-0)] px-4 text-base font-semibold text-[var(--hs-neutral-900)] shadow-xs transition motion-reduce:transition-none hover:bg-[var(--hs-neutral-100)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        x-on:click="verify()"
+        x-bind:disabled="loading"
+        x-bind:aria-busy="loading"
+    >
+        <flux:icon.finger-print class="size-5 shrink-0" />
+        <span x-show="! loading">{{ $label }}</span>
+        <span x-show="loading" x-cloak>{{ $loadingLabel }}</span>
+    </button>
+    <p x-show="error" x-text="error" x-cloak role="alert" class="mt-2 text-center text-sm text-[var(--hs-danger-700)]"></p>
 </div>

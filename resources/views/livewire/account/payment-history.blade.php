@@ -5,7 +5,7 @@
         </div>
 
         {{-- Filters --}}
-        <div class="px-6 pt-5 flex flex-wrap items-end gap-4">
+        <div class="px-4 sm:px-6 pt-5 flex flex-wrap items-end gap-4">
             <div>
                 <flux:select wire:model.live="status" label="{{ __('Status') }}" size="sm" class="w-32">
                     <flux:select.option value="">{{ __('All') }}</flux:select.option>
@@ -21,11 +21,34 @@
             </div>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             @if ($this->transactions->isEmpty())
                 <p class="text-center text-[var(--hs-neutral-500)] py-8">{{ __('No transactions found.') }}</p>
             @else
-                <div class="overflow-x-auto">
+                {{-- Mobile card list (hidden on sm+) --}}
+                <div class="sm:hidden space-y-3">
+                    @foreach ($this->transactions as $txn)
+                        <div class="flex items-start justify-between gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    @if ($txn->resource_type === 'payment')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-success-50)] text-[var(--hs-success-700)]">{{ __('Paid') }}</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]">{{ __('Refund') }}</span>
+                                    @endif
+                                    <span class="text-xs text-[var(--hs-neutral-400)]">Order #{{ $txn->order_id }}</span>
+                                </div>
+                                <p class="text-xs text-[var(--hs-neutral-500)] mt-1">
+                                    {{ \Illuminate\Support\Carbon::parse($txn->date)->format('M d, Y') }}
+                                </p>
+                            </div>
+                            <p class="shrink-0 font-semibold text-[var(--hs-neutral-900)]">₱{{ number_format((float) $txn->amount, 2) }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Desktop table (hidden on mobile) --}}
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-[var(--hs-neutral-100)]">
@@ -61,6 +84,7 @@
                         </tbody>
                     </table>
                 </div>
+
                 <div class="mt-4">{{ $this->transactions->links() }}</div>
             @endif
         </div>

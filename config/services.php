@@ -60,6 +60,12 @@ return [
         'disbursement_enabled' => (bool) env('DLT_DISBURSEMENT_ENABLED', false),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
+
     'google_analytics' => [
         'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
         'property_id' => env('GA4_PROPERTY_ID'),

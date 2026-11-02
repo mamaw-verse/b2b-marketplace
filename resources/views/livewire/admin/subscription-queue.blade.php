@@ -57,7 +57,47 @@
             </flux:select>
         </div>
 
-        <div class="mt-5 overflow-x-auto">
+        {{-- Mobile: stacked card list --}}
+        <div class="mt-5 lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->subscriptions as $subscription)
+                @php $attempt = $subscription->paymentAttempts->first(); @endphp
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $subscription->shop->registered_business_name }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $subscription->shop->user?->email }}</p>
+                        </div>
+                        <flux:badge :color="match($subscription->status) {
+                            'active' => 'green',
+                            'trialing' => 'blue',
+                            'pending_payment' => 'yellow',
+                            default => 'zinc',
+                        }">
+                            {{ str($subscription->status)->headline() }}
+                        </flux:badge>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Plan') }}</dt>
+                            <dd class="text-[var(--hs-neutral-900)]">{{ $subscription->plan->name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Payment Date') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $attempt?->created_at?->format('M d, Y') ?? __('—') }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Period') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $subscription->current_period_end?->format('M d, Y') ?? __('Not set') }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('No subscriptions found.') }}</div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden mt-5 overflow-x-auto lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Business') }}</flux:table.column>
@@ -127,7 +167,78 @@
             </p>
         </div>
 
-        <div class="mt-1 overflow-x-auto">
+        {{-- Mobile: stacked card list --}}
+        <div class="mt-1 lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->pendingPaymentSubscriptions as $subscription)
+                @php $attempt = $subscription->paymentAttempts->first(); @endphp
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $subscription->shop->registered_business_name }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $subscription->shop->user?->email }}</p>
+                        </div>
+                        @if ($attempt)
+                            @if ($attempt->isManual())
+                                <flux:badge size="sm" color="blue" icon="banknotes">{{ __('Manual') }}</flux:badge>
+                            @else
+                                <flux:badge size="sm" color="zinc" icon="credit-card">{{ __('DLT') }}</flux:badge>
+                            @endif
+                        @endif
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Plan') }}</dt>
+                            <dd class="text-[var(--hs-neutral-900)]">{{ $subscription->plan->name }}</dd>
+                            <dd class="text-xs text-[var(--hs-neutral-500)]">{{ $subscription->plan->currency }} {{ number_format((float) $subscription->plan->price, 2) }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Initiated') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $attempt?->created_at?->format('M d, Y H:i') ?? $subscription->created_at->format('M d, Y H:i') }}</dd>
+                        </div>
+                    </dl>
+                    @if ($attempt?->manual_reference_number)
+                        <div class="mt-2 flex items-center gap-1.5">
+                            <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Ref:') }}</span>
+                            <code class="text-xs font-mono bg-[var(--hs-neutral-100)] px-2 py-0.5 rounded-md text-[var(--hs-neutral-800)] tracking-wide">{{ $attempt->manual_reference_number }}</code>
+                        </div>
+                    @endif
+                    @if ($attempt?->dlt_merchant_transaction_id)
+                        <div class="mt-2 flex items-center gap-1.5">
+                            <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Tx ID:') }}</span>
+                            <code class="text-xs font-mono bg-[var(--hs-neutral-100)] px-2 py-0.5 rounded-md text-[var(--hs-neutral-800)] truncate">{{ $attempt->dlt_merchant_transaction_id }}</code>
+                        </div>
+                    @endif
+                    @if ($attempt?->dlt_payment_status)
+                        <div class="mt-2">
+                            <flux:badge size="sm" color="{{ $attempt->dlt_payment_status === 'PENDING' ? 'yellow' : 'zinc' }}">{{ $attempt->dlt_payment_status }}</flux:badge>
+                        </div>
+                    @endif
+                    {{-- Actions --}}
+                    <div class="mt-3 flex gap-2">
+                        @if ($attempt && $attempt->isManual())
+                            <flux:button size="sm" variant="primary" icon="eye" wire:click="confirmActivate({{ $subscription->id }})" wire:loading.attr="disabled" wire:target="confirmActivate({{ $subscription->id }})">
+                                {{ __('Review & Activate') }}
+                            </flux:button>
+                        @else
+                            <flux:button size="sm" variant="primary" icon="check-circle" wire:click="confirmActivate({{ $subscription->id }})" wire:loading.attr="disabled" wire:target="confirmActivate({{ $subscription->id }})">
+                                {{ __('Activate') }}
+                            </flux:button>
+                        @endif
+                        <flux:button size="sm" variant="ghost" icon="x-circle" wire:click="confirmCancel({{ $subscription->id }})">
+                            {{ __('Cancel') }}
+                        </flux:button>
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center">
+                    <flux:icon name="check-circle" class="size-8 mx-auto text-[var(--hs-success-700)]" />
+                    <p class="mt-2 text-sm text-[var(--hs-neutral-500)]">{{ __('No pending payment subscriptions. All clear!') }}</p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden mt-1 overflow-x-auto lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Business') }}</flux:table.column>
@@ -264,7 +375,7 @@
 </x-hs-confirm>
 
 {{-- Manual payment: Review receipt + Activate modal --}}
-<flux:modal name="confirm-activate-manual" class="md:w-[56rem] lg:w-[68rem] max-w-[calc(100vw-2rem)]">
+<flux:modal name="confirm-activate-manual" class="w-full md:w-[56rem] lg:w-[68rem] max-w-[calc(100vw-2rem)]">
     <div class="space-y-4">
         <div class="flex items-start justify-between gap-4 pe-10">
             <div>
@@ -385,12 +496,22 @@
 </x-hs-confirm>
 
 {{-- Subscription Settings Modal --}}
-<flux:modal wire:model="showSettingsModal" class="md:w-[32rem]">
+<flux:modal wire:model="showSettingsModal" class="w-full sm:w-auto md:w-[32rem]">
     <div class="space-y-6">
         <div>
             <flux:heading size="lg">{{ __('Subscription Settings') }}</flux:heading>
             <flux:text class="mt-1">{{ __('Configure subscription plan pricing and availability.') }}</flux:text>
         </div>
+
+        @unless (config('marketplace.features.subscriptions_enabled'))
+            <div class="flex items-start gap-3 rounded-lg border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] px-4 py-3">
+                <flux:icon name="exclamation-triangle" class="size-4 shrink-0 mt-0.5 text-[var(--hs-warning-600)]" />
+                <div class="text-sm text-[var(--hs-warning-700)]">
+                    <p class="font-medium">{{ __('Subscriptions are currently disabled') }}</p>
+                    <p class="mt-0.5">{{ __('These settings are saved and will take effect once the development team enables subscriptions for this instance.') }}</p>
+                </div>
+            </div>
+        @endunless
 
         @foreach ($settingsPlans as $index => $plan)
             <div class="space-y-4 {{ $index > 0 ? 'pt-4 border-t border-[var(--hs-neutral-100)]' : '' }}">
@@ -441,11 +562,11 @@
             </div>
         @endforeach
 
-        <div class="flex justify-end gap-3 pt-2">
-            <flux:button variant="ghost" wire:click="$set('showSettingsModal', false)">
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
+            <flux:button variant="ghost" wire:click="$set('showSettingsModal', false)" class="w-full sm:w-auto">
                 {{ __('Cancel') }}
             </flux:button>
-            <flux:button variant="primary" wire:click="saveSettings">
+            <flux:button variant="primary" wire:click="saveSettings" class="w-full sm:w-auto">
                 {{ __('Save') }}
             </flux:button>
         </div>

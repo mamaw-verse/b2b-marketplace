@@ -7,7 +7,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
 @endphp
 <a href="{{ route('storefront.product', $product) }}" wire:navigate {{ $attributes->merge(['class' => 'group block rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] overflow-hidden shadow-[var(--hs-shadow-sm)] transition hover:shadow-[var(--hs-shadow-md)] hover:border-[var(--hs-green-200)]']) }}>
     {{-- Image / Placeholder --}}
-    <div class="relative aspect-[4/3] {{ $bgColor }} flex items-center justify-center overflow-hidden">
+    <div class="relative aspect-square sm:aspect-[4/3] {{ $bgColor }} flex items-center justify-center overflow-hidden">
         @if($product->featured_image_path)
             <img src="{{ $product->featured_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover" />
         @else

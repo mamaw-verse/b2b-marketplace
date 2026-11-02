@@ -46,8 +46,52 @@
             <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search by RFQ title, buyer email, or shop name...') }}" />
         </div>
 
-        {{-- Table --}}
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse($this->rfqs as $recipient)
+                @php
+                    $adminStatus = $recipient->admin_status ?? 'pending';
+                    $color = match($adminStatus) {
+                        'pending' => 'yellow',
+                        'in_progress' => 'blue',
+                        'resolved' => 'green',
+                        'closed' => 'zinc',
+                        default => 'zinc',
+                    };
+                @endphp
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)] line-clamp-1" title="{{ $recipient->rfq->title }}">{{ $recipient->rfq->title }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $recipient->rfq->buyer->email ?? 'Unknown Buyer' }}</p>
+                        </div>
+                        <flux:badge :color="$color">{{ str_replace('_', ' ', ucfirst($adminStatus)) }}</flux:badge>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Target Business') }}</dt>
+                            <dd class="text-[var(--hs-neutral-900)] truncate" title="{{ $recipient->shop->registered_business_name }}">{{ $recipient->shop->registered_business_name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Date') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $recipient->created_at->format('M d, Y g:i A') }}</dd>
+                        </div>
+                    </dl>
+                    <div class="mt-3">
+                        <flux:button variant="ghost" size="sm" href="{{ route('admin.rfqs.show', $recipient->rfq_id) }}" wire:navigate>
+                            {{ __('View') }}
+                        </flux:button>
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center text-sm text-[var(--hs-neutral-500)]">
+                    {{ __('No RFQs found matching your criteria.') }}
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('RFQ / Buyer') }}</flux:table.column>
@@ -61,11 +105,11 @@
                     @forelse($this->rfqs as $recipient)
                         <flux:table.row>
                             <flux:table.cell>
-                                <div class="font-medium text-zinc-900 dark:text-white line-clamp-1" title="{{ $recipient->rfq->title }}">{{ $recipient->rfq->title }}</div>
-                                <div class="text-xs text-zinc-500">{{ $recipient->rfq->buyer->email ?? 'Unknown Buyer' }}</div>
+                                <div class="font-medium text-[var(--hs-neutral-900)] line-clamp-1" title="{{ $recipient->rfq->title }}">{{ $recipient->rfq->title }}</div>
+                                <div class="text-xs text-[var(--hs-neutral-500)]">{{ $recipient->rfq->buyer->email ?? 'Unknown Buyer' }}</div>
                             </flux:table.cell>
                             <flux:table.cell class="w-48 max-w-[12rem]">
-                                <div class="font-medium text-zinc-900 dark:text-white truncate" title="{{ $recipient->shop->registered_business_name }}">{{ $recipient->shop->registered_business_name }}</div>
+                                <div class="font-medium text-[var(--hs-neutral-900)] truncate" title="{{ $recipient->shop->registered_business_name }}">{{ $recipient->shop->registered_business_name }}</div>
                             </flux:table.cell>
                             <flux:table.cell>
                                 @php
@@ -91,19 +135,19 @@
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="6" class="text-center text-zinc-500 py-8">
+                            <flux:table.cell colspan="6" class="text-center text-[var(--hs-neutral-500)] py-8">
                                 {{ __('No RFQs found matching your criteria.') }}
                             </flux:table.cell>
                         </flux:table.row>
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-
-            @if ($this->rfqs->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
-                    {{ $this->rfqs->links() }}
-                </div>
-            @endif
         </div>
+
+        @if ($this->rfqs->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
+                {{ $this->rfqs->links() }}
+            </div>
+        @endif
     </div>
 </div>

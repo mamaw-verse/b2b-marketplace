@@ -32,8 +32,68 @@
             </div>
         </div>
 
-        {{-- Accounts table --}}
-        <div class="overflow-hidden">
+        {{-- Mobile: stacked card list --}}
+        <div class="lg:hidden divide-y divide-[var(--hs-neutral-100)]">
+            @forelse ($this->accounts as $account)
+                <div class="px-6 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="font-medium text-[var(--hs-neutral-900)]">{{ $account->shop?->storefront_name }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ $account->bank_name }}</p>
+                        </div>
+                        <span @class([
+                            'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                            'bg-[var(--hs-warning-50)] text-[var(--hs-warning-700)]' => $account->verification_status === 'pending',
+                            'bg-[var(--hs-success-50)] text-[var(--hs-success-700)]' => $account->verification_status === 'verified',
+                            'bg-[var(--hs-danger-50)] text-[var(--hs-danger-700)]' => $account->verification_status === 'rejected',
+                        ])>
+                            {{ ucfirst($account->verification_status) }}
+                        </span>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Account Holder') }}</dt>
+                            <dd class="text-[var(--hs-neutral-900)]">{{ $account->account_holder_name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Submitted') }}</dt>
+                            <dd class="text-[var(--hs-neutral-600)]">{{ $account->created_at?->format('M d, Y') }}</dd>
+                        </div>
+                    </dl>
+                    @if ($account->verification_status === 'pending')
+                        <div class="mt-3 flex gap-2">
+                            <flux:modal.trigger name="confirm-verify-account-{{ $account->id }}">
+                                <flux:button variant="primary" size="sm">
+                                    {{ __('Verify') }}
+                                </flux:button>
+                            </flux:modal.trigger>
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                wire:click="openRejectModal({{ $account->id }})"
+                            >
+                                {{ __('Reject') }}
+                            </flux:button>
+                        </div>
+                    @elseif ($account->verification_status === 'rejected')
+                        <p class="mt-2 text-xs text-[var(--hs-neutral-500)]" title="{{ $account->rejection_reason }}">
+                            {{ Str::limit($account->rejection_reason, 30) }}
+                        </p>
+                    @endif
+                </div>
+            @empty
+                <div class="px-6 py-10 text-center">
+                    <x-hs-empty-state
+                        icon="banknotes"
+                        title="{{ __('No payout accounts') }}"
+                        subtitle="{{ __('No payout accounts found for this status.') }}"
+                    />
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: table --}}
+        <div class="hidden overflow-hidden lg:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('Shop') }}</flux:table.column>
@@ -112,17 +172,17 @@
                     @endforelse
                 </flux:table.rows>
             </flux:table>
-
-            @if ($this->accounts->hasPages())
-                <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
-                    {{ $this->accounts->links() }}
-                </div>
-            @endif
         </div>
+
+        @if ($this->accounts->hasPages())
+            <div class="px-6 py-4 border-t border-[var(--hs-neutral-100)]">
+                {{ $this->accounts->links() }}
+            </div>
+        @endif
     </div>
 
     {{-- Rejection Modal --}}
-    <flux:modal name="reject-payout-account">
+    <flux:modal name="reject-payout-account" class="w-full sm:w-auto md:w-[440px]">
         <div class="space-y-4">
             <flux:heading size="lg">{{ __('Reject Payout Account') }}</flux:heading>
             <p class="text-sm text-[var(--hs-neutral-600)]">
@@ -138,11 +198,11 @@
             />
             @error('rejectionReason') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
-            <div class="flex justify-end gap-3 pt-2">
-                <flux:button variant="ghost" x-on:click="$flux.modal('reject-payout-account').close()">
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
+                <flux:button variant="ghost" x-on:click="$flux.modal('reject-payout-account').close()" class="w-full sm:w-auto">
                     {{ __('Cancel') }}
                 </flux:button>
-                <flux:button variant="danger" wire:click="rejectAccount">
+                <flux:button variant="danger" wire:click="rejectAccount" class="w-full sm:w-auto">
                     {{ __('Reject Account') }}
                 </flux:button>
             </div>

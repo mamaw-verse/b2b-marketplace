@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.portal', ['portal' => 'account'])]
-#[Title('My RFQs')]
+#[Title('My Request for Quotation')]
 final class RfqList extends Component
 {
     public string $statusFilter = '';

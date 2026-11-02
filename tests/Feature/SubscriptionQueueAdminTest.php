@@ -95,20 +95,20 @@ test('pending payments tab shows pending_payment subscriptions that have reached
         ->assertSee('Stuck Corp');
 });
 
-test('pending payments tab does not show subscriptions that never reached DLT', function () {
+test('pending payments tab shows subscriptions that have no payment attempts yet', function () {
     $plan = SubscriptionPlan::factory()->create();
     $shop = Shop::factory()->create(['status' => 'active', 'country_code' => config('marketplace.instance_country'), 'registered_business_name' => 'No Attempt Corp']);
-    $subscription = Subscription::factory()->create([
+    Subscription::factory()->create([
         'shop_id' => $shop->id,
         'subscription_plan_id' => $plan->id,
         'status' => 'pending_payment',
     ]);
-    // No PaymentAttempt created — user never reached the payment wall.
+    // No PaymentAttempt created — user abandoned before the payment page.
 
     Livewire::actingAs($this->admin)
         ->test(SubscriptionQueue::class)
         ->call('switchTab', 'pending_payments')
-        ->assertDontSee('No Attempt Corp');
+        ->assertSee('No Attempt Corp');
 });
 
 test('pending payments tab does not show active subscriptions', function () {

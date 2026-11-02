@@ -15,7 +15,7 @@ beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
     $this->shop = Shop::factory()->create(['status' => 'active']);
     $plan = SubscriptionPlan::factory()->create();
-    Subscription::factory()->trialing()->create([
+    Subscription::factory()->active()->create([
         'shop_id' => $this->shop->id,
         'subscription_plan_id' => $plan->id,
     ]);
@@ -114,4 +114,28 @@ test('product owner does not see the request quote CTA for their own product', f
         ->assertOk()
         ->assertSee('This is your product')
         ->assertSee('You cannot request a quote for your own products.');
+});
+
+test('plain-text description with newlines renders as line breaks on detail page', function () {
+    $product = Product::factory()->create([
+        'shop_id' => $this->shop->id,
+        'status' => 'published',
+        'description' => "First line.\nSecond line.\r\nThird line.",
+    ]);
+
+    $this->get(route('storefront.product', $product))
+        ->assertOk()
+        ->assertSee('<br />', false);
+});
+
+test('html description from wysiwyg is rendered without double-escaping', function () {
+    $product = Product::factory()->create([
+        'shop_id' => $this->shop->id,
+        'status' => 'published',
+        'description' => '<p>Grass-fed, <strong>certified halal</strong>.</p>',
+    ]);
+
+    $this->get(route('storefront.product', $product))
+        ->assertOk()
+        ->assertSee('<strong>certified halal</strong>', false);
 });

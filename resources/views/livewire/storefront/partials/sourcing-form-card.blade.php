@@ -69,17 +69,8 @@
                 </flux:field>
             </div>
 
-            {{-- Turnstile CAPTCHA --}}
-            <div class="mt-4" wire:ignore x-data="{
-                init() {
-                    window.onSourcingTurnstileCallback = (token) => {
-                        $wire.set('turnstile_token', token);
-                    }
-                }
-            }" @sourcing-turnstile-reset.window="turnstile.reset()">
-                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-                <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}" data-callback="onSourcingTurnstileCallback"></div>
-                <flux:error name="turnstile_token" />
+            <div class="mt-4">
+                <flux:error name="human_check" />
             </div>
         </div>
 

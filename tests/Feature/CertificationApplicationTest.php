@@ -9,6 +9,7 @@ use App\Models\CertificationApplication;
 use App\Models\ShopCertificate;
 use App\Models\User;
 use App\Notifications\CertificationInterestNotification;
+use App\Support\HumanPass;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
@@ -21,6 +22,7 @@ beforeEach(function () {
     Storage::fake('s3');
     Notification::fake();
     Mail::fake();
+    config(['humancheck.enabled' => false]);
 });
 
 test('a public visitor can apply for halal certification', function () {
@@ -33,7 +35,6 @@ test('a public visitor can apply for halal certification', function () {
         ->set('company_name', 'Acme Foods Inc.')
         ->set('email', 'contact@acme.com')
         ->set('document', UploadedFile::fake()->create('loi.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'))
-        ->set('turnstile_token', 'valid-token')
         ->call('submit')
         ->assertHasNoErrors()
         ->assertSet('submitted', true);
@@ -60,7 +61,6 @@ test('all admins are notified when a public visitor applies', function () {
         ->set('company_name', 'Test Co.')
         ->set('email', 'test@example.com')
         ->set('document', UploadedFile::fake()->create('loi.pdf', 100, 'application/pdf'))
-        ->set('turnstile_token', 'valid-token')
         ->call('submit');
 
     $admins->each(fn (User $admin) => Notification::assertSentTo($admin, CertificationInterestNotification::class));
@@ -70,20 +70,33 @@ test('validation fails when required fields are missing', function () {
     Livewire::test(ApplyForCertificate::class)
         ->set('company_name', '')
         ->set('email', '')
-        ->set('turnstile_token', '')
         ->call('submit')
-        ->assertHasErrors(['email', 'company_name', 'document', 'turnstile_token'])
-        ->assertHasErrors(['turnstile_token' => 'Please complete the security check.']);
+        ->assertHasErrors(['email', 'company_name', 'document']);
 });
 
-test('validation fails when the captcha token is invalid', function () {
+test('submission is blocked when human check is enabled and pass is missing', function () {
+    config(['humancheck.enabled' => true]);
+
     Livewire::test(ApplyForCertificate::class)
         ->set('company_name', 'Acme')
         ->set('email', 'a@b.com')
         ->set('document', UploadedFile::fake()->create('loi.pdf', 100, 'application/pdf'))
-        ->set('turnstile_token', 'invalid-token')
         ->call('submit')
-        ->assertHasErrors(['turnstile_token']);
+        ->assertHasErrors(['human_check']);
+});
+
+test('submission succeeds when human check is enabled and pass cookie is present', function () {
+    config(['humancheck.enabled' => true]);
+
+    $cookie = HumanPass::issue(request());
+
+    Livewire::withCookie(HumanPass::COOKIE_NAME, $cookie->getValue())
+        ->test(ApplyForCertificate::class)
+        ->set('company_name', 'Acme')
+        ->set('email', 'a@b.com')
+        ->set('document', UploadedFile::fake()->create('loi.pdf', 100, 'application/pdf'))
+        ->call('submit')
+        ->assertHasNoErrors(['human_check']);
 });
 
 test('honeypot submission is silently discarded', function () {
@@ -92,7 +105,6 @@ test('honeypot submission is silently discarded', function () {
         ->set('email', 'bot@spam.com')
         ->set('website', 'http://spamsite.com')
         ->set('document', UploadedFile::fake()->create('loi.pdf', 100, 'application/pdf'))
-        ->set('turnstile_token', 'valid-token')
         ->call('submit')
         ->assertSet('submitted', true);
 

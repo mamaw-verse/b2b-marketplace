@@ -11,7 +11,6 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
-use Illuminate\Support\Facades\Config;
 
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
@@ -118,20 +117,16 @@ test('approval syncs product categories onto the new shop via the pivot', functi
     $this->assertDatabaseHas('shop_categories', ['shop_id' => $shop->id, 'category_id' => $catB->id]);
 });
 
-test('approval succeeds and creates an active shop when certificates are complete', function () {
+test('approval succeeds, creates an active shop, and auto-starts a trial when subscriptions are enabled and the plan has trial_days', function () {
+    config(['marketplace.features.subscriptions_enabled' => true]);
+
     $admin = User::factory()->create();
     $admin->assignRole('admin');
     $seller = User::factory()->create();
     $seller->assignRole('seller');
 
-    // Pin the trial length so the assertion doesn't depend on the local .env.
-    Config::set('marketplace.initial_subscription_trial_days', 180);
-
     $onboarding = makeOnboardingFor($seller);
-
-    $plan = SubscriptionPlan::factory()->philippines()->create([
-        'name' => 'Philippines Premium Plan',
-    ]);
+    $plan = SubscriptionPlan::factory()->create(['trial_days' => 180, 'is_active' => true]);
 
     $media = Media::factory()->create(['uploaded_by_id' => $seller->id]);
 
@@ -147,9 +142,79 @@ test('approval succeeds and creates an active shop when certificates are complet
 
     expect($shop->status)->toBe('active');
     expect($onboarding->fresh()->status)->toBe('approved');
+
     $subscription = Subscription::query()->where('shop_id', $shop->id)->firstOrFail();
 
     expect($subscription->status)->toBe('trialing')
         ->and($subscription->subscription_plan_id)->toBe($plan->id)
         ->and($subscription->trial_ends_at->diffInDays(now(), false))->toBeBetween(-180, -179);
+});
+
+test('approval does not create a trial when subscriptions_enabled is false', function () {
+    config(['marketplace.features.subscriptions_enabled' => false]);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $onboarding = makeOnboardingFor($seller);
+    SubscriptionPlan::factory()->create(['trial_days' => 180, 'is_active' => true]);
+
+    $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
+
+    expect($shop->status)->toBe('active');
+    expect(Subscription::query()->where('shop_id', $shop->id)->exists())->toBeFalse();
+});
+
+test('approval auto-starts trial regardless of payment method when subscriptions are enabled', function () {
+    config(['marketplace.features.subscriptions_enabled' => true]);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $onboarding = makeOnboardingFor($seller);
+    SubscriptionPlan::factory()->create(['trial_days' => 90, 'is_active' => true]);
+
+    $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
+
+    expect(Subscription::query()->where('shop_id', $shop->id)->where('status', 'trialing')->exists())->toBeTrue();
+});
+
+test('approval auto-starts trial regardless of shop country when subscriptions are enabled', function () {
+    config(['marketplace.features.subscriptions_enabled' => true]);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $onboarding = makeOnboardingFor($seller, ['country_code' => 'MY']);
+    $plan = SubscriptionPlan::factory()->create(['trial_days' => 60, 'is_active' => true]);
+
+    $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
+
+    $subscription = Subscription::query()->where('shop_id', $shop->id)->firstOrFail();
+
+    expect($subscription->status)->toBe('trialing')
+        ->and($subscription->subscription_plan_id)->toBe($plan->id)
+        ->and($subscription->trial_ends_at->diffInDays(now(), false))->toBeBetween(-60, -59);
+});
+
+test('approval does not create a trial when no active plan has trial_days set', function () {
+    config(['marketplace.features.subscriptions_enabled' => true]);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+
+    $onboarding = makeOnboardingFor($seller);
+    SubscriptionPlan::factory()->create(['trial_days' => null, 'is_active' => true]);
+
+    $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
+
+    expect(Subscription::query()->where('shop_id', $shop->id)->exists())->toBeFalse();
 });

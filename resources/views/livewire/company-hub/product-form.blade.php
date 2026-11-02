@@ -22,13 +22,13 @@
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
                 {{-- Description --}}
-                <flux:textarea
-                    wire:model="description"
+                <x-hs-wysiwyg
+                    wire-model="description"
                     label="{{ __('Description') }}"
+                    description="{{ __('Do not include contact information such as phone numbers, email addresses, social media links, or website URLs.') }}"
                     placeholder="{{ __('Describe your product...') }}"
-                    rows="4"
                 />
-                @error('description') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                @error('description') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
 
                 {{-- ── Categories (toggle pills via Livewire action) ─────────── --}}
                 <div>
@@ -60,7 +60,8 @@
 
                 {{-- ── Featured Image ────────────────────────────────────────── --}}
                 <div>
-                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1.5">{{ __('Featured Image') }}</label>
+                    <label class="block text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('Featured Image') }}</label>
+                    <p class="mb-1.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Images must not contain contact information such as phone numbers, email addresses, social media links, or website URLs.') }}</p>
 
                     @php
                         $existingImage = (! $removeFeaturedImage && $product?->featured_image_path)
@@ -74,22 +75,24 @@
 
                     @if ($previewUrl)
                         {{-- Preview state: show image with remove/replace button --}}
-                        <div class="relative inline-block group">
-                            <img
-                                src="{{ $previewUrl }}"
-                                alt="{{ __('Featured image preview') }}"
-                                class="h-40 w-40 rounded-[var(--hs-radius-card)] object-cover border border-[var(--hs-neutral-200)]"
-                            />
-                            <button
-                                type="button"
-                                wire:click="clearFeaturedImage"
-                                aria-label="{{ __('Remove image') }}"
-                                class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white opacity-0 transition group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
-                            >
-                                <flux:icon name="x-mark" variant="mini" class="size-3.5" />
-                            </button>
+                        <div class="inline-block group">
+                            <div class="relative inline-block">
+                                <img
+                                    src="{{ $previewUrl }}"
+                                    alt="{{ __('Featured image preview') }}"
+                                    class="h-40 w-40 rounded-[var(--hs-radius-card)] object-cover border border-[var(--hs-neutral-200)]"
+                                />
+                                <button
+                                    type="button"
+                                    wire:click="clearFeaturedImage"
+                                    aria-label="{{ __('Remove image') }}"
+                                    class="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-[var(--hs-danger-500)] text-white transition sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[var(--hs-danger-700)]"
+                                >
+                                    <flux:icon name="x-mark" variant="mini" class="size-3.5" />
+                                </button>
+                            </div>
                             <p class="mt-1.5 text-xs text-[var(--hs-neutral-500)]">
-                                {{ __('Hover to remove and replace.') }}
+                                {{ __('Click ✕ to remove and replace.') }}
                             </p>
                         </div>
                     @else
@@ -97,7 +100,7 @@
                         <x-hs-dropzone
                             input-id="featured-image-input"
                             wire-model="featured_image"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp"
                             :multiple="false"
                             hint="{{ __('JPEG, PNG, WebP — up to 5MB') }}"
                             loading-target="featured_image"
@@ -213,7 +216,9 @@
                                         icon="trash"
                                         wire:click="confirmRemoveAttribute('{{ $key }}')"
                                         class="text-[var(--hs-danger-500)] hover:bg-[var(--hs-danger-50)] shrink-0"
-                                    />
+                                    >
+                                        <span class="sr-only">{{ __('Remove') }}</span>
+                                    </flux:button>
                                 </div>
                             @endforeach
                         </div>
@@ -286,9 +291,9 @@
     </x-hs-confirm>
 
     {{-- Subscription Required --}}
-    <flux:modal name="subscription-required" class="md:w-[420px] !p-0">
+    <flux:modal name="subscription-required" class="w-full sm:w-auto md:w-[420px] !p-0">
         <div class="flex flex-col">
-            <div class="px-6 py-5">
+            <div class="px-4 sm:px-6 py-5">
                 <div class="flex items-start gap-4">
                     <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-yellow-600 bg-yellow-50">
                         <flux:icon name="exclamation-triangle" variant="mini" class="size-5" />
@@ -301,7 +306,7 @@
                     </div>
                 </div>
             </div>
-            <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-6 py-4">
+            <div class="shrink-0 border-t border-[var(--hs-neutral-100)] px-4 sm:px-6 py-4">
                 <div class="flex justify-end gap-2">
                     <flux:modal.close>
                         <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>

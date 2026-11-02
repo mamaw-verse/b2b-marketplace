@@ -228,6 +228,10 @@ new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settin
      */
     public function confirmDelete(int $passkeyId): void
     {
+        if (! $this->requireRecentAuthentication()) {
+            return;
+        }
+
         $passkey = auth()->user()->passkeys()->findOrFail($passkeyId);
 
         $this->deletingPasskeyId = $passkey->id;
@@ -240,7 +244,7 @@ new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settin
      */
     public function deletePasskey(DeletePasskey $deletePasskey): void
     {
-        if (! $this->deletingPasskeyId) {
+        if (! $this->requireRecentAuthentication() || ! $this->deletingPasskeyId) {
             return;
         }
 
@@ -276,9 +280,33 @@ new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settin
      */
     public function disable(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
+        if (! $this->requireRecentAuthentication()) {
+            return;
+        }
+
         $disableTwoFactorAuthentication(auth()->user());
 
         $this->twoFactorEnabled = false;
+    }
+
+    #[Computed]
+    public function hasRecentAuthentication(): bool
+    {
+        $confirmedAt = (int) session()->get('auth.password_confirmed_at', 0);
+
+        return now()->timestamp - $confirmedAt < (int) config('auth.password_timeout', 10800);
+    }
+
+    private function requireRecentAuthentication(): bool
+    {
+        if ($this->hasRecentAuthentication) {
+            return true;
+        }
+
+        session()->put('url.intended', route('profile.edit').'#security');
+        $this->redirect(route('password.confirm'), navigate: true);
+
+        return false;
     }
 
     #[Computed]
@@ -439,6 +467,18 @@ new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settin
                 </div>
             </form>
 
+            @if (! $this->hasRecentAuthentication)
+                <flux:callout class="mt-12" variant="warning" icon="lock-closed" heading="{{ __('Confirm your identity') }}">
+                    <flux:text>
+                        {{ __('Confirm your identity before managing two-factor authentication, passkeys, or recovery codes.') }}
+                    </flux:text>
+                    <div class="mt-4">
+                        <flux:button :href="route('password.confirm')" variant="primary">
+                            {{ __('Confirm identity') }}
+                        </flux:button>
+                    </div>
+                </flux:callout>
+            @else
             @if ($canManageTwoFactor)
                 <section class="mt-12">
                     <flux:heading>{{ __('Two-factor authentication') }}</flux:heading>
@@ -537,6 +577,7 @@ new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settin
                         <x-passkey-registration />
                     </div>
                 </section>
+            @endif
             @endif
         </x-pages::settings.layout>
         </div>

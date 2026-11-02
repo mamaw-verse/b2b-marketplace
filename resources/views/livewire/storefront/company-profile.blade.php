@@ -1,3 +1,32 @@
+@php
+    $ogTitle       = $shop->storefront_name . ' — ' . config('app.name');
+    $ogDescription = filled($shop->company_description)
+        ? Str::limit(strip_tags($shop->company_description), 160)
+        : __('Discover :name on :app — a verified halal-certified business on the marketplace.', ['name' => $shop->storefront_name, 'app' => config('app.name')]);
+    $ogUrl         = url()->current();
+@endphp
+
+@push('meta')
+    {{-- Primary --}}
+    <meta name="description" content="{{ $ogDescription }}">
+
+    {{-- Open Graph --}}
+    <meta property="og:type"        content="business.business">
+    <meta property="og:url"         content="{{ $ogUrl }}">
+    <meta property="og:title"       content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
+    <meta property="og:image:alt"   content="{{ $shop->storefront_name }}">
+    <meta property="og:site_name"   content="{{ config('app.name') }}">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card"        content="summary">
+    <meta name="twitter:title"       content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
+    <meta name="twitter:image:alt"   content="{{ $shop->storefront_name }}">
+@endpush
+
 <div>
     {{-- Dark Header Band --}}
     <section class="bg-[var(--hs-green-950)] py-12">
@@ -71,52 +100,16 @@
     {{-- Main Content Card --}}
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 pb-12">
         <div class="rounded-[var(--hs-radius-panel)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-md)] p-4 sm:p-8">
-            <div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
-                {{-- Main Content (2/3) --}}
-                <div class="lg:col-span-2 space-y-8">
-                    {{-- Value Chain Stepper --}}
-                    @if (!empty($shop->value_chain_positions))
-                        <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Value Chain Positions') }}</h2>
-                            <x-hs-value-chain :steps="$shop->value_chain_positions" />
-                        </section>
-                    @endif
+            {{--
+                Mobile: sidebar renders first (order-first) so trust signals
+                (categories, certs, export readiness) are visible before scrolling
+                through long product/review lists.
+                Desktop (lg): three-col grid with sidebar on the right (lg:col-span-1).
+            --}}
+            <div class="grid grid-cols-1 gap-8 lg:gap-10 lg:grid-cols-3">
 
-                    {{-- Capabilities --}}
-                    @if (!empty($shop->capabilities))
-                        <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Capabilities') }}</h2>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($shop->capabilities as $capability)
-                                    <x-hs-badge variant="tag" :label="ucfirst(str_replace('_', ' ', $capability))" />
-                                @endforeach
-                            </div>
-                        </section>
-                    @endif
-
-                    {{-- Products Grid --}}
-                    @if ($shop->products->count() > 0)
-                        <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Products') }}</h2>
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                @foreach ($shop->products as $product)
-                                    <x-hs-product-card :product="$product" />
-                                @endforeach
-                            </div>
-                        </section>
-                    @endif
-
-                    {{-- Reviews --}}
-                    @if ($shop->total_reviews > 0)
-                        <section>
-                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Reviews') }}</h2>
-                            <livewire:storefront.review-list reviewable-type="shop" :reviewable-id="$shop->id" />
-                        </section>
-                    @endif
-                </div>
-
-                {{-- Sidebar (1/3) --}}
-                <aside class="space-y-6">
+                {{-- Sidebar (1/3) — first on mobile, right column on lg --}}
+                <aside class="order-first lg:order-last space-y-6">
                     {{-- Categories (grouped by top-level category group) --}}
                     @php
                         $activeCategories = $shop->products->pluck('categories')->flatten()->unique('id');
@@ -169,6 +162,50 @@
                         </section>
                     @endif
                 </aside>
+
+                {{-- Main Content (2/3) --}}
+                <div class="lg:col-span-2 space-y-8">
+                    {{-- Value Chain Stepper --}}
+                    @if (!empty($shop->value_chain_positions))
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Value Chain Positions') }}</h2>
+                            <x-hs-value-chain :steps="$shop->value_chain_positions" />
+                        </section>
+                    @endif
+
+                    {{-- Capabilities --}}
+                    @if (!empty($shop->capabilities))
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Capabilities') }}</h2>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($shop->capabilities as $capability)
+                                    <x-hs-badge variant="tag" :label="ucfirst(str_replace('_', ' ', $capability))" />
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    {{-- Products Grid --}}
+                    @if ($shop->products->count() > 0)
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Products') }}</h2>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                @foreach ($shop->products as $product)
+                                    <x-hs-product-card :product="$product" />
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    {{-- Reviews --}}
+                    @if ($shop->total_reviews > 0)
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Reviews') }}</h2>
+                            <livewire:storefront.review-list reviewable-type="shop" :reviewable-id="$shop->id" />
+                        </section>
+                    @endif
+                </div>
+
             </div>
         </div>
     </div>
