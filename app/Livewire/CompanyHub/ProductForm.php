@@ -32,6 +32,8 @@ final class ProductForm extends Component
 
     public string $slug = '';
 
+    public bool $slugIsAuto = true;
+
     public string $description = '';
 
     /** @var array<int, int> */
@@ -53,9 +55,35 @@ final class ProductForm extends Component
             $this->product = $product;
             $this->name = $product->name;
             $this->slug = $product->slug ?? '';
+            $this->slugIsAuto = false;
             $this->description = $product->description ?? '';
             $this->category_ids = $product->categories()->pluck('categories.id')->map(fn ($id) => (int) $id)->all();
             $this->variantAttributesSchema = $product->variant_attributes_schema ?? [];
+        }
+    }
+
+    /**
+     * Keep the slug in sync with the product name on the create form until the
+     * seller edits it manually. Duplicates get a unique suffix.
+     */
+    public function updatedName(): void
+    {
+        if ($this->product || ! $this->slugIsAuto) {
+            return;
+        }
+
+        $this->slug = $this->generateSlugFromName();
+    }
+
+    /**
+     * Clearing the slug resumes automatic generation on the create form.
+     */
+    public function updatedSlug(?string $value = null): void
+    {
+        $this->slugIsAuto = blank($value);
+
+        if ($this->slugIsAuto && ! $this->product) {
+            $this->slug = $this->generateSlugFromName();
         }
     }
 
@@ -292,6 +320,18 @@ final class ProductForm extends Component
             'featured_image' => ['nullable', 'image', 'max:5120'],
             'variantAttributesSchema' => 'array',
         ];
+    }
+
+    /**
+     * Build a unique slug candidate from the current product name.
+     */
+    private function generateSlugFromName(): string
+    {
+        if (blank($this->name)) {
+            return '';
+        }
+
+        return app(SlugGenerator::class)->generate(Product::class, $this->name, $this->product?->id);
     }
 
     /**

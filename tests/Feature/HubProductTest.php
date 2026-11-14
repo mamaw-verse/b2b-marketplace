@@ -120,6 +120,40 @@ test('gallery manager shows no-contact-information notice', function () {
         ->assertSee('Square images (1:1) work best — e.g. 1000 × 1000 px each.');
 });
 
+test('product form auto-generates the slug from the product name on create', function () {
+    Livewire::actingAs($this->seller)
+        ->test(ProductForm::class)
+        ->set('name', 'Halal Beef Ribs')
+        ->assertSet('slug', 'halal-beef-ribs');
+});
+
+test('product form makes auto-generated slugs unique when the name collides', function () {
+    Product::factory()->create(['shop_id' => $this->shop->id, 'slug' => 'halal-beef-ribs']);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductForm::class)
+        ->set('name', 'Halal Beef Ribs')
+        ->assertSet('slug', 'halal-beef-ribs-2');
+});
+
+test('product form keeps a manually edited slug when the name changes', function () {
+    Livewire::actingAs($this->seller)
+        ->test(ProductForm::class)
+        ->set('name', 'Halal Beef Ribs')
+        ->set('slug', 'premium-ribs')
+        ->set('name', 'Halal Beef Ribs Deluxe')
+        ->assertSet('slug', 'premium-ribs');
+});
+
+test('editing a product does not rewrite its slug when the name changes', function () {
+    $product = Product::factory()->create(['shop_id' => $this->shop->id, 'name' => 'Original Name', 'slug' => 'original-name']);
+
+    Livewire::actingAs($this->seller)
+        ->test(ProductForm::class, ['product' => $product])
+        ->set('name', 'Renamed Product')
+        ->assertSet('slug', 'original-name');
+});
+
 test('product form saves rich-text html description', function () {
     Livewire::actingAs($this->seller)
         ->test(ProductForm::class)

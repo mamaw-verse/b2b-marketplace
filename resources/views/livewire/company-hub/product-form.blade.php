@@ -14,7 +14,7 @@
 
                 {{-- Product Name --}}
                 <flux:input
-                    wire:model="name"
+                    wire:model.live.debounce.500ms="name"
                     label="{{ __('Product Name') }}"
                     placeholder="{{ __('Enter product name') }}"
                     required
@@ -22,10 +22,10 @@
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
                 <div>
-                    <flux:input wire:model="slug" :label="__('Product URL slug')" placeholder="{{ __('Leave blank to generate from the product name') }}" />
+                    <flux:input wire:model.live.debounce.500ms="slug" :label="__('Product URL slug')" placeholder="{{ __('Auto-generated from the product name') }}" />
                     <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
                         {{ __('Public URL:') }} <span class="font-medium">{{ url('/products/'.($slug ?: Str::slug($name))) }}</span>
-                        {{ __('Changing the slug keeps the old link working.') }}
+                        {{ __('Auto-generated from the product name. Edit it to customize; duplicates get a unique suffix.') }}
                     </p>
                     @error('slug') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                 </div>
