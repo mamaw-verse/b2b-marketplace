@@ -83,6 +83,12 @@ final class AppServiceProvider extends ServiceProvider
         );
 
         Gate::define('accessHub', function (User $user) {
+            return $user->activeShop !== null
+                && $user->activeShop->status === 'active'
+                && $user->activeShop->deleted_at === null;
+        });
+
+        Gate::define('manageShop', function (User $user) {
             return $user->shop !== null
                 && $user->shop->status === 'active'
                 && $user->shop->deleted_at === null;

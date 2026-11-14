@@ -16,7 +16,7 @@ final class FulfilmentPolicy
      */
     public function create(User $user, Order $order): bool
     {
-        return $user->id === $order->shop->user_id
+        return $order->shop->isManagedBy($user)
             && $order->status === 'paid'
             && ! $order->fulfilments()->exists();
     }
@@ -26,7 +26,7 @@ final class FulfilmentPolicy
      */
     public function update(User $user, Fulfilment $fulfilment): bool
     {
-        return $user->id === $fulfilment->order->shop->user_id
+        return $fulfilment->order->shop->isManagedBy($user)
             && in_array($fulfilment->status, ['pending', 'shipped']);
     }
 
@@ -35,7 +35,7 @@ final class FulfilmentPolicy
      */
     public function ship(User $user, Fulfilment $fulfilment): bool
     {
-        return $user->id === $fulfilment->order->shop->user_id
+        return $fulfilment->order->shop->isManagedBy($user)
             && $fulfilment->status === 'pending';
     }
 
@@ -44,7 +44,7 @@ final class FulfilmentPolicy
      */
     public function deliver(User $user, Fulfilment $fulfilment): bool
     {
-        return $user->id === $fulfilment->order->shop->user_id
+        return $fulfilment->order->shop->isManagedBy($user)
             && $fulfilment->status === 'shipped';
     }
 
@@ -53,7 +53,7 @@ final class FulfilmentPolicy
      */
     public function returnToSeller(User $user, Fulfilment $fulfilment): bool
     {
-        return $user->id === $fulfilment->order->shop->user_id
+        return $fulfilment->order->shop->isManagedBy($user)
             && $fulfilment->status === 'shipped';
     }
 }

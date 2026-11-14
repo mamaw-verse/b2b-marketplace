@@ -3,10 +3,11 @@
     $ogDescription = filled($shop->company_description)
         ? Str::limit(strip_tags($shop->company_description), 160)
         : __('Discover :name on :app — a verified halal-certified business on the marketplace.', ['name' => $shop->storefront_name, 'app' => config('app.name')]);
-    $ogUrl         = url()->current();
+    $ogUrl         = route('storefront.company', $shop);
 @endphp
 
 @push('meta')
+    <link rel="canonical" href="{{ $ogUrl }}">
     {{-- Primary --}}
     <meta name="description" content="{{ $ogDescription }}">
 

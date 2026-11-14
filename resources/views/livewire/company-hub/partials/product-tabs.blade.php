@@ -77,6 +77,22 @@
                 <span>{{ __('Documents') }}</span>
             </a>
 
+            @if (config('marketplace.features.product_video_enabled'))
+                {{-- Video --}}
+                <a
+                    href="{{ route('hub.products.video', $product) }}"
+                    wire:navigate
+                    @class([
+                        'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
+                        'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.video'),
+                        'border-transparent text-[var(--hs-neutral-500)] hover:border-[var(--hs-neutral-300)] hover:text-[var(--hs-neutral-800)]' => !request()->routeIs('hub.products.video'),
+                    ])
+                >
+                    <flux:icon name="film" variant="mini" class="shrink-0" />
+                    <span>{{ __('Video') }}</span>
+                </a>
+            @endif
+
         </nav>
     </div>
 @endif

@@ -16,44 +16,47 @@ final class ReconcileMediaOrphansJob implements ShouldQueue
     use Queueable;
 
     /**
+     * Every database column that references media.id.
+     *
+     * @var array<string, list<string>>
+     */
+    public const array REFERENCES = [
+        'shop_onboarding_documents' => ['media_id'],
+        'shop_documents' => ['media_id'],
+        'product_documents' => ['media_id'],
+        'product_gallery' => ['media_id'],
+        'shop_onboarding_certificates' => ['media_id'],
+        'shop_certificates' => ['media_id'],
+        'dispute_media' => ['media_id'],
+        'certification_applications' => ['media_id'],
+        'quotation_attachments' => ['media_id'],
+        'rfq_attachments' => ['media_id'],
+        'message_attachments' => ['media_id'],
+        'sponsored_content' => ['media_id', 'wide_media_id', 'tall_media_id'],
+        'payment_attempts' => ['receipt_media_id'],
+        'products' => ['video_media_id'],
+    ];
+
+    /**
      * Find orphaned media rows and delete them along with their S3 objects.
      */
     public function handle(): void
     {
         $gracePeriod = Carbon::now()->subDays(7);
 
-        Media::query()
-            ->where('created_at', '<', $gracePeriod)
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('shop_onboarding_documents')
-                    ->whereColumn('shop_onboarding_documents.media_id', 'media.id');
-            })
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('shop_documents')
-                    ->whereColumn('shop_documents.media_id', 'media.id');
-            })
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('product_documents')
-                    ->whereColumn('product_documents.media_id', 'media.id');
-            })
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('product_gallery')
-                    ->whereColumn('product_gallery.media_id', 'media.id');
-            })
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('shop_onboarding_certificates')
-                    ->whereColumn('shop_onboarding_certificates.media_id', 'media.id');
-            })
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('shop_certificates')
-                    ->whereColumn('shop_certificates.media_id', 'media.id');
-            })
+        $orphans = Media::query()->where('created_at', '<', $gracePeriod);
+
+        foreach (self::REFERENCES as $table => $columns) {
+            foreach ($columns as $column) {
+                $orphans->whereNotExists(function ($subquery) use ($table, $column) {
+                    $subquery->select(DB::raw(1))
+                        ->from($table)
+                        ->whereColumn("{$table}.{$column}", 'media.id');
+                });
+            }
+        }
+
+        $orphans
             ->chunk(100, function ($mediaRecords) {
                 foreach ($mediaRecords as $media) {
                     Storage::disk('s3')->delete($media->storage_path);

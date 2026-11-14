@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Jobs\IndexShopJob;
+use App\Models\Concerns\HasSlug;
 use Database\Factories\ShopFactory;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Laravel\Scout\Builder as ScoutBuilder;
 use Laravel\Scout\Searchable;
 
@@ -23,6 +25,7 @@ use Laravel\Scout\Searchable;
  * @property int $id
  * @property string $registered_business_name
  * @property string $storefront_name
+ * @property string|null $slug
  * @property string $business_structure
  * @property string $dti_sec_number
  * @property string $tax_identification_number
@@ -50,11 +53,12 @@ use Laravel\Scout\Searchable;
 final class Shop extends Model
 {
     /** @use HasFactory<ShopFactory> */
-    use HasFactory, Searchable, SoftDeletes;
+    use HasFactory, HasSlug, Searchable, SoftDeletes;
 
     protected $fillable = [
         'registered_business_name',
         'storefront_name',
+        'slug',
         'business_structure',
         'dti_sec_number',
         'tax_identification_number',
@@ -85,6 +89,11 @@ final class Shop extends Model
         return 'shops';
     }
 
+    public function slugSource(): string
+    {
+        return $this->storefront_name;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -92,6 +101,7 @@ final class Shop extends Model
     {
         return [
             'id' => (string) $this->id,
+            'slug' => $this->slug,
             'storefront_name' => $this->storefront_name,
             'registered_business_name' => $this->registered_business_name,
             'city' => $this->city ?? '',
@@ -157,6 +167,44 @@ final class Shop extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function staff(): HasMany
+    {
+        return $this->hasMany(ShopStaff::class);
+    }
+
+    public function activeStaff(): HasMany
+    {
+        return $this->staff()->where('status', 'active');
+    }
+
+    public function staffSeatsUsed(): int
+    {
+        return $this->staff()->where(function (EloquentBuilder $query): void {
+            $query->where('status', 'active')->orWhere(function (EloquentBuilder $pending): void {
+                $pending->where('status', 'invited')->where('expires_at', '>', now());
+            });
+        })->count();
+    }
+
+    public function isManagedBy(User $user): bool
+    {
+        return $this->status === 'active'
+            && $this->deleted_at === null
+            && ($user->activeShop?->is($this) ?? false);
+    }
+
+    /** @return Collection<int, User> */
+    public function operationalRecipients(): Collection
+    {
+        $recipients = collect([$this->user])->filter();
+        if (config('marketplace.features.staff_enabled')) {
+            $recipients = $recipients->merge($this->activeStaff()->with('user')->get()->pluck('user'));
+        }
+
+        return $recipients
+            ->filter()->unique('id')->values();
     }
 
     /**

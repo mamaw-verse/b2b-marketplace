@@ -36,7 +36,7 @@ final class OrderQueue extends Component
     #[Computed]
     public function awardedQuotations(): Collection
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return new Collection;
@@ -58,7 +58,7 @@ final class OrderQueue extends Component
     #[Computed]
     public function tabCounts(): array
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return ['all' => 0, 'draft' => 0, 'pending_payment' => 0, 'to_fulfil' => 0, 'disputed' => 0];
@@ -78,7 +78,7 @@ final class OrderQueue extends Component
     #[Computed]
     public function orders(): LengthAwarePaginator
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);

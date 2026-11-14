@@ -9,6 +9,7 @@ use App\Actions\SubmitOrderAction;
 use App\Events\OrderSubmittedForPayment;
 use App\Models\Order;
 use App\Models\ProductVariant;
+use App\Models\Quotation;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -96,7 +97,7 @@ final class OrderBuilder extends Component
             return collect();
         }
 
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return collect();
@@ -115,7 +116,7 @@ final class OrderBuilder extends Component
 
     public function mount(?int $orderId = null, ?int $quotationId = null, ?int $buyerUserId = null, ?Order $order = null): void
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         // For edit route: /hub/orders/{order}/edit (route model binding)
         if ($order?->exists) {
@@ -134,6 +135,11 @@ final class OrderBuilder extends Component
                 $this->redirectRoute('hub.orders.index');
 
                 return;
+            }
+
+            if ($quotationId) {
+                $quotation = Quotation::with('rfqRecipient')->findOrFail($quotationId);
+                Gate::authorize('createOrder', $quotation);
             }
 
             $result = (new CreateOrderAction)->execute($shop, $quotationId, $buyerUserId);

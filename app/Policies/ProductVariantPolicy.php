@@ -18,7 +18,7 @@ final class ProductVariantPolicy
      */
     public function view(User $user, ProductVariant $productVariant): bool
     {
-        return $user->id === $productVariant->product->shop->user_id;
+        return $productVariant->product->shop?->isManagedBy($user) ?? false;
     }
 
     /**
@@ -26,7 +26,7 @@ final class ProductVariantPolicy
      */
     public function update(User $user, ProductVariant $productVariant): bool
     {
-        return $user->id === $productVariant->product->shop->user_id;
+        return $productVariant->product->shop?->isManagedBy($user) ?? false;
     }
 
     /**
@@ -34,6 +34,6 @@ final class ProductVariantPolicy
      */
     public function delete(User $user, ProductVariant $productVariant): bool
     {
-        return $user->id === $productVariant->product->shop->user_id;
+        return $productVariant->product->shop?->isManagedBy($user) ?? false;
     }
 }

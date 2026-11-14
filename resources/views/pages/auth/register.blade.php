@@ -7,7 +7,7 @@
         x-data="registrationForm({
             firstName: @js(old('first_name', '')),
             lastName: @js(old('last_name', '')),
-            email: @js(old('email', '')),
+            email: @js(old('email', request()->query('email', ''))),
             password: '',
             terms: @js((bool) old('terms')),
         }, @js($hasSummaryErrors))"

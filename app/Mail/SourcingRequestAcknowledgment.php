@@ -31,7 +31,7 @@ final class SourcingRequestAcknowledgment extends Mailable implements ShouldQueu
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.sourcing-request-acknowledgment',
+            view: 'emails.sourcing-request-acknowledgment',
             with: [
                 'sourcingRequest' => $this->sourcingRequest,
             ],

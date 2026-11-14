@@ -25,7 +25,7 @@ final class RfqQueue extends Component
     #[Computed]
     public function rfqs()
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return collect();
@@ -50,7 +50,7 @@ final class RfqQueue extends Component
     #[Computed]
     public function statusCounts(): array
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return ['received' => 0, 'reviewed' => 0, 'in_progress' => 0, 'closed' => 0];

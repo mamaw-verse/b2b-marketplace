@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Merchants;
 
+use App\Actions\Staff\RevokeStaffAction;
 use App\Livewire\Concerns\HasDocumentViewer;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\ShopStaff;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +27,8 @@ final class MerchantShow extends Component
     public Shop $shop;
 
     public ?int $previewProductId = null;
+
+    public ?int $confirmingStaffId = null;
 
     public function mount(Shop $shop): void
     {
@@ -99,6 +103,33 @@ final class MerchantShow extends Component
         $this->shop->reactivate();
 
         $this->dispatch('toast', message: 'Merchant reactivated successfully.');
+    }
+
+    /** @return Collection<int, ShopStaff> */
+    #[Computed]
+    public function staffMembers(): Collection
+    {
+        return $this->shop->staff()->with(['user', 'inviter'])->orderByDesc('created_at')->get();
+    }
+
+    public function confirmRemoveStaff(int $staffId): void
+    {
+        Gate::authorize('merchant.manage');
+        abort_unless((bool) config('marketplace.features.staff_enabled'), 404);
+        $this->shop->staff()->findOrFail($staffId);
+        $this->confirmingStaffId = $staffId;
+        Flux::modal('admin-remove-staff-confirm')->show();
+    }
+
+    public function removeStaff(RevokeStaffAction $action): void
+    {
+        Gate::authorize('merchant.manage');
+        abort_unless((bool) config('marketplace.features.staff_enabled'), 404);
+        $staff = $this->shop->staff()->findOrFail($this->confirmingStaffId);
+        $action->execute($staff, auth()->user());
+        $this->confirmingStaffId = null;
+        unset($this->staffMembers);
+        Flux::modal('admin-remove-staff-confirm')->close();
     }
 
     public function render(): View

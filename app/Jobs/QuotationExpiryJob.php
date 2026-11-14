@@ -9,6 +9,7 @@ use App\Notifications\QuotationExpiredNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Scan submitted quotations past their valid_until date and expire them.
@@ -37,14 +38,12 @@ final class QuotationExpiryJob implements ShouldQueue
 
             // Notify both parties
             $buyer = $quotation->rfq->user;
-            $seller = $quotation->rfqRecipient->shop->user ?? null;
+            $shop = $quotation->rfqRecipient->shop;
 
             if ($buyer) {
                 $buyer->notify(new QuotationExpiredNotification($quotation));
             }
-            if ($seller) {
-                $seller->notify(new QuotationExpiredNotification($quotation));
-            }
+            Notification::send($shop->operationalRecipients(), new QuotationExpiredNotification($quotation));
 
             $count++;
         }

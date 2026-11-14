@@ -39,7 +39,7 @@ final class Dashboard extends Component
     #[Computed]
     public function shop(): ?Shop
     {
-        return Auth::user()?->shop;
+        return Auth::user()?->activeShop;
     }
 
     /**

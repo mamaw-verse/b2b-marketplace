@@ -82,6 +82,7 @@ final class VariantManager extends Component
 
     public function saveVariant(): void
     {
+        $this->authorize('update', $this->product());
         $this->form->validate();
 
         $data = $this->form->toVariantData($this->product()->id);
@@ -104,6 +105,7 @@ final class VariantManager extends Component
 
     public function toggleStatus(int $variantId): void
     {
+        $this->authorize('update', $this->product());
         $variant = ProductVariant::where('id', $variantId)
             ->where('product_id', $this->product()->id)
             ->firstOrFail();
@@ -154,6 +156,7 @@ final class VariantManager extends Component
 
     public function saveQuantityBreaks(): void
     {
+        $this->authorize('update', $this->product());
         $breaks = collect($this->quantityBreaks)
             ->filter(fn (array $b) => $b['min_qty'] !== '' && $b['price'] !== '')
             ->map(fn (array $b) => ['min_qty' => (int) $b['min_qty'], 'price' => (float) $b['price']])

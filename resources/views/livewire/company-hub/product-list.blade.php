@@ -92,6 +92,9 @@
                                     {{ trans_choice(':count variant|:count variants', $product->variants_count, ['count' => $product->variants_count]) }}
                                 </span>
                                 <span class="text-xs text-[var(--hs-neutral-400)]">{{ $product->created_at->format('M d, Y') }}</span>
+                                @if ($product->lastEditor)
+                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Last edited by :name', ['name' => trim($product->lastEditor->first_name.' '.$product->lastEditor->last_name)]) }}</span>
+                                @endif
                             </div>
                         </div>
                         <div class="flex shrink-0 items-center gap-1">
@@ -159,6 +162,7 @@
                         <flux:table.column>{{ __('Status') }}</flux:table.column>
                         <flux:table.column>{{ __('Variants') }}</flux:table.column>
                         <flux:table.column>{{ __('Created') }}</flux:table.column>
+                        <flux:table.column>{{ __('Last edited by') }}</flux:table.column>
                         <flux:table.column align="end">{{ __('Actions') }}</flux:table.column>
                     </flux:table.columns>
 
@@ -169,6 +173,7 @@
                                 <flux:table.cell><x-hs-status-pill :status="$product->status" /></flux:table.cell>
                                 <flux:table.cell>{{ $product->variants_count }}</flux:table.cell>
                                 <flux:table.cell class="text-[var(--hs-neutral-600)]">{{ $product->created_at->format('M d, Y') }}</flux:table.cell>
+                                <flux:table.cell class="text-[var(--hs-neutral-600)]">{{ $product->lastEditor ? trim($product->lastEditor->first_name.' '.$product->lastEditor->last_name) : '—' }}</flux:table.cell>
                                 <flux:table.cell align="end">
                                     <div class="flex justify-end gap-1">
                                         @if ($product->status === 'published')

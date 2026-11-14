@@ -35,6 +35,7 @@ final class ProductDetail extends Component
             'variants' => fn ($query) => $query->published(),
             'gallery',
             'documents',
+            'video',
             'categories.parent',
             'shop',
             'shop.certificates',

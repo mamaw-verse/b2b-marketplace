@@ -54,7 +54,8 @@ test('storefront_name falls back to registered_business_name when null on the on
 
     $shop = app(ApproveOnboardingAction::class)->execute($onboarding->fresh(), $admin);
 
-    expect($shop->storefront_name)->toBe($onboarding->registered_business_name);
+    expect($shop->storefront_name)->toBe($onboarding->registered_business_name)
+        ->and($shop->slug)->toBe('approve-co');
     $this->assertDatabaseHas('shops', [
         'id' => $shop->id,
         'storefront_name' => $onboarding->registered_business_name,

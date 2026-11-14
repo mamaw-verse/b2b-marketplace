@@ -71,13 +71,11 @@ fatal_error_backtraces = 0
 HARDENING
 done
 
-# Upload limits — defaults (upload_max_filesize=2M, post_max_size=8M) reject
-# product/certificate images. App-level validation still caps featured images
-# at 5MB and Livewire temp uploads at 12MB; post_max_size must exceed
-# upload_max_filesize to leave room for the rest of the request body.
+# Upload limits — allow the 50MB product video cap with room for multipart
+# overhead. Feature-specific validation still enforces each persisted upload.
 sudo tee "/etc/php/${PHP_VERSION}/fpm/conf.d/99-uploads.ini" > /dev/null <<'UPLOADS'
-upload_max_filesize = 10M
-post_max_size = 12M
+upload_max_filesize = 52M
+post_max_size = 56M
 UPLOADS
 
 sudo systemctl restart "php${PHP_VERSION}-fpm"

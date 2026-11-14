@@ -40,6 +40,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read string|null $photo_url
+ * @property-read Shop|null $active_shop
  */
 #[Fillable(['first_name', 'last_name', 'email', 'email_verified_at', 'google_id', 'password', 'phone', 'photo_path'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -102,6 +103,29 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function shop(): HasOne
     {
         return $this->hasOne(Shop::class);
+    }
+
+    public function staffMembership(): HasOne
+    {
+        return $this->hasOne(ShopStaff::class)->where('status', 'active');
+    }
+
+    protected function activeShop(): Attribute
+    {
+        return Attribute::get(fn (): ?Shop => $this->shop
+            ?? ((bool) config('marketplace.features.staff_enabled') ? $this->staffMembership?->shop : null))->shouldCache();
+    }
+
+    public function isShopOwner(): bool
+    {
+        return $this->shop !== null;
+    }
+
+    public function isShopStaff(): bool
+    {
+        return (bool) config('marketplace.features.staff_enabled')
+            && $this->shop === null
+            && $this->staffMembership !== null;
     }
 
     /**

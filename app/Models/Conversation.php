@@ -50,8 +50,24 @@ final class Conversation extends Model
      */
     public function scopeForUser(Builder $query, User $user): Builder
     {
-        return $query->where('buyer_user_id', $user->id)
-            ->orWhereHas('shop', fn (Builder $q) => $q->where('user_id', $user->id));
+        return $query->where(function (Builder $query) use ($user): void {
+            $query->where('buyer_user_id', $user->id)
+                ->orWhere(function (Builder $participantQuery) use ($user): void {
+                    $participantQuery->whereHas('shop', function (Builder $shopQuery) use ($user): void {
+                        $shopQuery->where('status', 'active')
+                            ->whereNull('deleted_at')
+                            ->where(function (Builder $memberQuery) use ($user): void {
+                                $memberQuery->where('user_id', $user->id);
+
+                                if (config('marketplace.features.staff_enabled')) {
+                                    $memberQuery->orWhereHas('staff', fn (Builder $staffQuery) => $staffQuery
+                                        ->where('user_id', $user->id)
+                                        ->where('status', 'active'));
+                                }
+                            });
+                    });
+                });
+        });
     }
 
     /**
@@ -60,7 +76,7 @@ final class Conversation extends Model
     public function hasParticipant(User $user): bool
     {
         return $user->id === $this->buyer_user_id
-            || $user->id === $this->shop->user_id;
+            || $this->shop->isManagedBy($user);
     }
 
     /**

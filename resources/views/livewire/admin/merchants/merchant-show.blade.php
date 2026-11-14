@@ -221,6 +221,30 @@
                 </dl>
             </flux:card>
 
+            @if (config('marketplace.features.staff_enabled'))
+                <flux:card>
+                    <flux:heading size="lg">{{ __('Shop staff') }}</flux:heading>
+                    <div class="mt-4 divide-y divide-[var(--hs-neutral-200)]">
+                        @forelse ($this->staffMembers as $member)
+                            <div class="flex flex-wrap items-center justify-between gap-3 py-3">
+                                <div>
+                                    <p class="font-medium text-[var(--hs-neutral-900)]">{{ $member->user?->name ?? $member->email }}</p>
+                                    <p class="text-sm text-[var(--hs-neutral-600)]">{{ $member->email }} · {{ ucfirst($member->status) }}</p>
+                                </div>
+                                @if (in_array($member->status, ['active', 'invited'], true))
+                                    <flux:button size="sm" variant="danger" wire:click="confirmRemoveStaff({{ $member->id }})">{{ __('Remove') }}</flux:button>
+                                @endif
+                            </div>
+                        @empty
+                            <p class="py-4 text-sm text-[var(--hs-neutral-600)]">{{ __('No staff records for this shop.') }}</p>
+                        @endforelse
+                    </div>
+                    <x-hs-confirm name="admin-remove-staff-confirm" :title="__('Remove staff access')" :message="__('This person will immediately lose access to the shop.')" variant="danger">
+                        <x-slot name="action"><flux:button variant="danger" wire:click="removeStaff" wire:loading.attr="disabled">{{ __('Confirm removal') }}</flux:button></x-slot>
+                    </x-hs-confirm>
+                </flux:card>
+            @endif
+
             <flux:card>
                 <div class="flex items-center justify-between mb-4">
                     <flux:heading size="lg">{{ __('Products') }}</flux:heading>

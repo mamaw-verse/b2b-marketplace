@@ -67,7 +67,7 @@ final class ProductList extends Component
             return;
         }
 
-        $product->update(['status' => $newStatus]);
+        $product->update(['status' => $newStatus, 'updated_by_id' => Auth::id()]);
         IndexProductJob::dispatch($product)->afterCommit();
 
         $this->confirmingProductId = null;
@@ -110,7 +110,7 @@ final class ProductList extends Component
             return true;
         }
 
-        $shop = Auth::user()?->shop;
+        $shop = Auth::user()?->activeShop;
 
         return $shop !== null && $shop->hasActiveSubscription();
     }
@@ -121,13 +121,13 @@ final class ProductList extends Component
     #[Computed]
     public function products(): LengthAwarePaginator
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         if (! $shop) {
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
         }
 
-        return Product::withCount('variants')
+        return Product::with(['lastEditor:id,first_name,last_name'])->withCount('variants')
             ->where('shop_id', $shop->id)
             ->when($this->statusFilter, fn ($query) => $query->where('status', $this->statusFilter))
             ->orderByDesc('created_at')
@@ -141,7 +141,7 @@ final class ProductList extends Component
 
     private function findOwnedProduct(int $productId): Product
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         return Product::where('shop_id', $shop->id)->findOrFail($productId);
     }

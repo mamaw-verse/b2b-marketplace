@@ -48,6 +48,7 @@ final class HubProductController extends Controller
     public function store(StoreProductRequest $request): JsonResponse
     {
         $shop = $this->getActiveShopOrFail($request);
+        Gate::authorize('createProduct', $shop);
 
         $validated = $request->validated();
 
@@ -55,6 +56,7 @@ final class HubProductController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'status' => 'archived',
+            'updated_by_id' => $request->user()->id,
         ]);
 
         if (! empty($validated['category_ids'])) {
@@ -78,6 +80,7 @@ final class HubProductController extends Controller
         $product->update([
             'name' => $validated['name'] ?? $product->name,
             'description' => array_key_exists('description', $validated) ? $validated['description'] : $product->description,
+            'updated_by_id' => $request->user()->id,
         ]);
 
         if (array_key_exists('category_ids', $validated)) {
@@ -106,7 +109,7 @@ final class HubProductController extends Controller
             ]);
         }
 
-        $product->update(['status' => 'published']);
+        $product->update(['status' => 'published', 'updated_by_id' => $request->user()->id]);
 
         IndexProductJob::dispatch($product)->afterCommit();
 
@@ -127,6 +130,7 @@ final class HubProductController extends Controller
             'currency' => $validated['currency'] ?? 'PHP',
             'status' => $validated['status'] ?? 'archived',
         ]);
+        $product->update(['updated_by_id' => $request->user()->id]);
 
         return response()->json(['data' => $variant], 201);
     }
@@ -143,6 +147,7 @@ final class HubProductController extends Controller
         }
 
         $variant->update($request->validated());
+        $product->update(['updated_by_id' => $request->user()->id]);
 
         return response()->json(['data' => $variant]);
     }
@@ -164,6 +169,7 @@ final class HubProductController extends Controller
             'media_id' => $media->id,
             'sort_order' => $request->integer('sort_order', 0),
         ]);
+        $product->update(['updated_by_id' => $request->user()->id]);
 
         return response()->json(['data' => $galleryEntry->load('media')], 201);
     }
@@ -182,6 +188,7 @@ final class HubProductController extends Controller
         );
 
         $product->documents()->attach($media->id);
+        $product->update(['updated_by_id' => $request->user()->id]);
 
         return response()->json(['data' => $media], 201);
     }
@@ -191,7 +198,7 @@ final class HubProductController extends Controller
      */
     private function getActiveShopOrFail(Request $request): Shop
     {
-        $shop = $request->user()->shop;
+        $shop = $request->user()->activeShop;
 
         if (! $shop || $shop->status !== 'active') {
             abort(403, 'You must have an active shop to manage products.');

@@ -4,7 +4,7 @@
     $isStorefront = ! $isAdminOrHub;
     $user = auth()->user();
     $isAdmin = $user?->hasRole('admin');
-    $shop = $user?->shop;
+    $shop = $user?->activeShop;
     // Seller access is driven by an approved (active) shop, not the Spatie role.
     // Onboarding approval sets shops.status = 'active' but does not assign a role,
     // so gating on shop status keeps the header in sync with the sidebar.

@@ -26,6 +26,42 @@ A B2B Halal Marketplace application built with Laravel.
    ```
    *Note: Our application uses Minio for S3-compatible storage. Make sure `LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=local` is set in your `.env` to prevent temporary upload issues, while final storage goes to S3/Minio.*
 
+Product video uploads (when `MARKETPLACE_PRODUCT_VIDEO_ENABLED=true`) accept MP4 and WebM files up to 50 MB by default. Set `MARKETPLACE_PRODUCT_VIDEO_MAX_KB` to change the application-level limit. Livewire temporary uploads are capped globally at 50 MB and throttled to 20 requests per minute; PHP-FPM is configured for 52 MB files and 56 MB request bodies by `bin/server-setup.sh`. Ensure any reverse proxy or CDN permits request bodies of at least 56 MB. `AWS_TEMPORARY_URL` must use the browser-reachable S3/MinIO endpoint for signed video playback. For local MinIO, use `http://localhost:9000` (the `.env.example` value); in production, set it to the public HTTPS S3-compatible endpoint or leave it unset when `AWS_ENDPOINT` is already browser reachable. Presigned video URLs last 30 minutes and support byte-range playback through S3/MinIO.
+
+Seller staff are controlled by `MARKETPLACE_STAFF_ENABLED` (default `false`) with `MARKETPLACE_MAX_STAFF_PER_SHOP` set to `2` by default. Keep both feature flags off until the target environment has passed feature QA. The slug backfill command is `vendor/bin/sail artisan slugs:backfill`.
+
+### Testing product video uploads against live S3
+
+To exercise the real upload path locally without polluting production media paths:
+
+1. Set the real bucket credentials in `.env` (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_USE_PATH_STYLE_ENDPOINT=false`). Leave `AWS_ENDPOINT`, `AWS_URL`, and `AWS_TEMPORARY_URL` empty so presigned playback URLs point at the real S3 host; otherwise `AWS_TEMPORARY_URL` must exactly match the signing host or GETs return `403 SignatureDoesNotMatch`.
+2. Point local video uploads at a dedicated prefix:
+   ```dotenv
+   MARKETPLACE_PRODUCT_VIDEO_ENABLED=true
+   MARKETPLACE_VIDEO_STORAGE_PREFIX=test-media/videos
+   ```
+   Videos are then stored under `test-media/videos/YYYY/MM/DD/<uuid>.mp4|webm`; product images and documents still use `media/...`.
+3. Apply config changes with `vendor/bin/sail artisan config:clear`.
+4. Upload through **Hub → Products → Edit product → Video** and confirm playback on the storefront.
+
+Delete the test videos later (objects, media rows, and `products.video_media_id` references):
+
+```bash
+vendor/bin/sail artisan media:purge-videos            # dry run
+vendor/bin/sail artisan media:purge-videos --force    # delete under configured prefix
+vendor/bin/sail artisan media:purge-videos --prefix=test-media/videos --force
+```
+
+The command also removes any orphan objects left directly under the prefix. Keep the prefix unique to testing; never point it at a shared production media path.
+
+### Slug and feature rollout
+
+Deploy the nullable slug columns, redirect table, and slug generation first (Deploy A). Run `vendor/bin/sail artisan slugs:backfill` against that environment and verify that `shops.slug` and `products.slug` contain no `NULL` values. Only then deploy the slug constraints and storefront slug routes (Deploy B). Do not run Deploy B against an environment where backfill is incomplete; its migration intentionally aborts if null slugs remain.
+
+After deployment, enable `MARKETPLACE_PRODUCT_VIDEO_ENABLED` and `MARKETPLACE_STAFF_ENABLED` separately, only after QA for each feature and its environment-specific upload, storage, authorization, and notification behavior. Set `AWS_TEMPORARY_URL` to the endpoint browsers use to reach S3/MinIO; local MinIO commonly uses `http://localhost:9000`, while production should use its public HTTPS endpoint.
+
+Rollback: restore storefront routes to `{shop}` and `{product}` ID binding if slug routing needs to be disabled; slug columns and redirect rows can remain. Set either feature flag to `false` to hide and block that feature. Keep the additive video and staff schema in place during application rollback; do not drop their columns or tables as part of the rollback.
+
 3. **Start Docker services (Sail):**
    ```bash
    vendor/bin/sail up -d

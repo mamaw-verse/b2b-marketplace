@@ -14,9 +14,10 @@
 @php
     $portal ??= 'portal';
     $user = auth()->user();
-    $shop = $user?->shop;
+    $shop = $user?->activeShop;
+    $isStaff = $user?->isShopStaff() ?? false;
     $isOnboarded = $shop?->status === 'active';
-    $isOnboarding = $shop && $shop->status === 'inactive';
+    $isOnboarding = ! $isStaff && $user?->shop && $user->shop->status === 'inactive';
     $isSuspended  = $shop?->status === 'suspended';
 @endphp
 
@@ -235,6 +236,7 @@
             <div class="pt-4 mt-2 border-t border-[var(--hs-neutral-200)]">
                 <p class="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-400)]">{{ __('Business') }}</p>
 
+                @unless ($isStaff)
                 <a href="{{ route('hub.shop.profile') }}" @class([
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
                     'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('hub.shop.profile'),
@@ -243,6 +245,7 @@
                     <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72" /></svg>
                     {{ __('Business Profile') }}
                 </a>
+                @endunless
 
                 <a href="{{ route('hub.products.index') }}" @class([
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
@@ -253,6 +256,29 @@
                     {{ __('Products') }}
                 </a>
 
+                @if (config('marketplace.features.staff_enabled') && ! $isStaff)
+                    <a href="{{ route('hub.team') }}" @class([
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
+                        'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('hub.team'),
+                        'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('hub.team'),
+                    ]) wire:navigate>
+                        <flux:icon name="users" class="size-5 shrink-0" />
+                        {{ __('Team') }}
+                    </a>
+                @endif
+
+                @if (config('marketplace.features.staff_enabled') && $isStaff)
+                    <a href="{{ route('hub.team.leave') }}" @class([
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
+                        'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('hub.team.leave'),
+                        'text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] hover:text-[var(--hs-neutral-900)]' => !request()->routeIs('hub.team.leave'),
+                    ]) wire:navigate>
+                        <flux:icon name="arrow-left-start-on-rectangle" class="size-5 shrink-0" />
+                        {{ __('Leave shop') }}
+                    </a>
+                @endif
+
+                @unless ($isStaff)
                 <a href="{{ route('hub.certifications.index') }}" @class([
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
                     'bg-[var(--hs-green-50)] text-[var(--hs-green-700)] border border-[var(--hs-green-200)]' => request()->routeIs('hub.certifications.*'),
@@ -272,6 +298,7 @@
                         {{ __('Subscription') }}
                     </a>
                 @endif
+                @endunless
 
                 @if(config('marketplace.features.chat_enabled'))
                     <a href="{{ route('hub.messages') }}" @class([
@@ -321,6 +348,7 @@
                     </a>
                 @endif
 
+                @unless ($isStaff)
                 @if(config('marketplace.features.payouts_enabled'))
                     <a href="{{ route('hub.earnings') }}" @class([
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition border border-transparent',
@@ -339,6 +367,7 @@
                         {{ __('Payout Account') }}
                     </a>
                 @endif
+                @endunless
 
             </div>
 
@@ -353,7 +382,7 @@
                 {{ __('Complete Onboarding') }}
             </a>
 
-        @else
+        @elseif (! $isStaff)
             {{-- ─── Buyer-only (no shop) — prompt to Register Business ─────────── --}}
             @unless ($isSuspended)
             <a href="{{ route('account.onboarding') }}" @class([

@@ -31,6 +31,16 @@ final class MediaUploadService
     ];
 
     /**
+     * Video MIME types and their matching filename extensions.
+     *
+     * @var array<string, list<string>>
+     */
+    private const array VIDEO_MIMES = [
+        'video/mp4' => ['mp4'],
+        'video/webm' => ['webm'],
+    ];
+
+    /**
      * Maximum file size in bytes (20 MB).
      */
     private const int MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -86,9 +96,28 @@ final class MediaUploadService
     {
         $this->validate($file);
 
+        return $this->persist($file, $uploaderId, $description);
+    }
+
+    /** Store a validated product video without dispatching image optimization. */
+    public function storeVideo(UploadedFile $file, int $uploaderId, string $description = 'Product video'): Media
+    {
+        $this->validateVideo($file);
+
+        return $this->persist(
+            $file,
+            $uploaderId,
+            $description,
+            (string) config('marketplace.video.storage_prefix', 'media'),
+        );
+    }
+
+    /** Persist an already validated upload and dispatch applicable background work. */
+    private function persist(UploadedFile $file, int $uploaderId, string $description, string $storagePrefix = 'media'): Media
+    {
         $extension = mb_strtolower($file->getClientOriginalExtension());
         $originalFilename = $file->getClientOriginalName();
-        $storagePath = $this->generateStoragePath($extension);
+        $storagePath = $this->generateStoragePath($extension, $storagePrefix);
 
         Storage::disk('s3')->putFileAs(
             dirname($storagePath),
@@ -165,13 +194,45 @@ final class MediaUploadService
     }
 
     /**
+     * Validate product video MIME, extension, and configured size limits.
+     *
+     * @throws ValidationException
+     */
+    private function validateVideo(UploadedFile $file): void
+    {
+        $errors = [];
+        $maxKilobytes = (int) config('marketplace.video.max_kb', 51200);
+        $mimeType = $file->getMimeType();
+        $extension = mb_strtolower($file->getClientOriginalExtension());
+
+        if ($file->getSize() > $maxKilobytes * 1024) {
+            $errors['file'][] = __('The video must not exceed :size MB.', ['size' => (int) ceil($maxKilobytes / 1024)]);
+        }
+
+        if (! isset(self::VIDEO_MIMES[$mimeType])) {
+            $errors['file'][] = __('Only MP4 and WebM videos are allowed.');
+        } elseif (! in_array($extension, self::VIDEO_MIMES[$mimeType], true)) {
+            $errors['file'][] = __('The video extension does not match its file type.');
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+    }
+
+    /**
      * Generate a unique storage path for the file.
      */
-    private function generateStoragePath(string $extension): string
+    private function generateStoragePath(string $extension, string $prefix = 'media'): string
     {
         $uuid = Str::uuid()->toString();
         $datePrefix = now()->format('Y/m/d');
+        $prefix = trim($prefix, '/');
 
-        return "media/{$datePrefix}/{$uuid}.{$extension}";
+        if ($prefix === '') {
+            $prefix = 'media';
+        }
+
+        return "{$prefix}/{$datePrefix}/{$uuid}.{$extension}";
     }
 }

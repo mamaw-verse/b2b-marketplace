@@ -10,6 +10,16 @@ use App\Models\User;
 
 final class QuotationPolicy
 {
+    public function createOrder(User $user, Quotation $quotation): bool
+    {
+        if (! config('marketplace.features.orders_enabled') || ! config('marketplace.features.quotations_enabled')) {
+            return false;
+        }
+
+        return $quotation->rfqRecipient->shop->isManagedBy($user)
+            && $quotation->status === 'awarded';
+    }
+
     /**
      * Seller can create a quotation if their shop matches the rfq_recipient's shop.
      */
@@ -19,7 +29,7 @@ final class QuotationPolicy
             return false;
         }
 
-        return $user->shop?->id === $rfqRecipient->shop_id;
+        return $rfqRecipient->shop->isManagedBy($user);
     }
 
     /**
@@ -31,7 +41,7 @@ final class QuotationPolicy
             return false;
         }
 
-        return $user->shop?->id === $quotation->rfqRecipient->shop_id
+        return $quotation->rfqRecipient->shop->isManagedBy($user)
             && $quotation->isDraft();
     }
 
@@ -44,7 +54,7 @@ final class QuotationPolicy
             return false;
         }
 
-        return $user->shop?->id === $quotation->rfqRecipient->shop_id
+        return $quotation->rfqRecipient->shop->isManagedBy($user)
             && $quotation->isDraft();
     }
 
@@ -57,7 +67,7 @@ final class QuotationPolicy
             return false;
         }
 
-        return $user->shop?->id === $quotation->rfqRecipient->shop_id
+        return $quotation->rfqRecipient->shop->isManagedBy($user)
             && $quotation->isDraft()
             && $quotation->items()->count() > 0;
     }
@@ -71,7 +81,7 @@ final class QuotationPolicy
             return false;
         }
 
-        return $user->shop?->id === $quotation->rfqRecipient->shop_id
+        return $quotation->rfqRecipient->shop->isManagedBy($user)
             && $quotation->isSubmitted();
     }
 
@@ -111,7 +121,7 @@ final class QuotationPolicy
         }
 
         // Seller owns it
-        if ($user->shop?->id === $quotation->rfqRecipient->shop_id) {
+        if ($quotation->rfqRecipient->shop->isManagedBy($user)) {
             return true;
         }
 

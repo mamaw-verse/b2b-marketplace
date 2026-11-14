@@ -32,5 +32,5 @@ Broadcast::channel('order.{id}', function (User $user, int $id) {
     $order = Order::findOrFail($id);
 
     return $user->id === $order->buyer_user_id
-        || $user->id === $order->shop->user_id;
+        || $order->shop->isManagedBy($user);
 });

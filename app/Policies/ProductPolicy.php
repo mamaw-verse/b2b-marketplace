@@ -18,7 +18,7 @@ final class ProductPolicy
      */
     public function view(User $user, Product $product): bool
     {
-        return $user->id === $product->shop->user_id;
+        return $product->shop?->isManagedBy($user) ?? false;
     }
 
     /**
@@ -26,7 +26,7 @@ final class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->id === $product->shop->user_id;
+        return $product->shop?->isManagedBy($user) ?? false;
     }
 
     /**
@@ -34,7 +34,7 @@ final class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->id === $product->shop->user_id;
+        return $product->shop?->isManagedBy($user) ?? false;
     }
 
     /**
@@ -42,7 +42,7 @@ final class ProductPolicy
      */
     public function publish(User $user, Product $product): bool
     {
-        if ($user->id !== $product->shop->user_id) {
+        if (! ($product->shop?->isManagedBy($user) ?? false)) {
             return false;
         }
 

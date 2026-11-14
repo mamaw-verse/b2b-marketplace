@@ -42,6 +42,11 @@ final class ShopPolicy
      */
     public function createProduct(User $user, Shop $shop): bool
     {
-        return $user->id === $shop->user_id && $shop->status === 'active';
+        return $shop->isManagedBy($user) && $shop->status === 'active';
+    }
+
+    public function manageStaff(User $user, Shop $shop): bool
+    {
+        return $user->id === $shop->user_id;
     }
 }

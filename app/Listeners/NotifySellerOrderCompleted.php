@@ -6,15 +6,13 @@ namespace App\Listeners;
 
 use App\Events\OrderCompleted;
 use App\Notifications\OrderCompletedNotification;
+use Illuminate\Support\Facades\Notification;
 
 final class NotifySellerOrderCompleted
 {
     public function handle(OrderCompleted $event): void
     {
-        $seller = $event->order->shop->user ?? null;
-
-        if ($seller) {
-            $seller->notify(new OrderCompletedNotification($event->order));
-        }
+        $shop = $event->order->shop;
+        Notification::send($shop->operationalRecipients(), new OrderCompletedNotification($event->order));
     }
 }

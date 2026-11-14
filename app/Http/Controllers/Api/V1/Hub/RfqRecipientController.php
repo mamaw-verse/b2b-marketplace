@@ -17,7 +17,7 @@ final class RfqRecipientController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $shop = $request->user()->shop;
+        $shop = $request->user()->activeShop;
 
         if (! $shop) {
             return response()->json(['data' => [], 'meta' => ['next_cursor' => null, 'prev_cursor' => null, 'per_page' => 20]]);

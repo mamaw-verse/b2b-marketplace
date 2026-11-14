@@ -43,7 +43,7 @@ final class CreateOrderAction
      */
     private function createFromQuotation(Shop $shop, int $quotationId): array
     {
-        return DB::transaction(function () use ($quotationId): array {
+        return DB::transaction(function () use ($shop, $quotationId): array {
             $quotation = Quotation::where('id', $quotationId)
                 ->lockForUpdate()
                 ->first();
@@ -66,6 +66,14 @@ final class CreateOrderAction
             }
 
             $quotation->load(['items', 'rfq.user', 'rfqRecipient']);
+
+            if ($quotation->rfqRecipient->shop_id !== $shop->id) {
+                return [
+                    'success' => false,
+                    'order' => new Order,
+                    'error' => 'Quotation does not belong to this shop.',
+                ];
+            }
 
             $buyerUser = $quotation->rfq->user;
             $buyerSnapshot = $quotation->buyer_snapshot ?? [];

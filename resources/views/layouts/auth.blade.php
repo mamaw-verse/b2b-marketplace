@@ -1,4 +1,4 @@
-@props(['title' => config('app.name'), 'activeTab' => 'login'])
+@props(['title' => config('app.name'), 'activeTab' => 'login', 'showTabs' => true])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -71,6 +71,7 @@
                     </div>
 
                     {{-- Tabs --}}
+                    @if ($showTabs)
                     <nav
                         class="mb-6 grid min-h-11 grid-cols-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-neutral-100)] p-1"
                         role="tablist"
@@ -106,6 +107,7 @@
                             ])
                         >{{ __('Create account') }}</a>
                     </nav>
+                    @endif
 
                     {{ $slot }}
                 </main>

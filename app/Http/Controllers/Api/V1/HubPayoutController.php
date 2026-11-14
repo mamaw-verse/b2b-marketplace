@@ -21,6 +21,7 @@ final class HubPayoutController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        Gate::authorize('manageShop');
         $shop = $request->user()->shop;
 
         if (! $shop) {
@@ -39,6 +40,7 @@ final class HubPayoutController extends Controller
      */
     public function show(Request $request, Payout $payout): JsonResponse
     {
+        Gate::authorize('manageShop');
         Gate::authorize('view', $payout);
 
         $payout->load(['items.order', 'disbursements']);
@@ -51,6 +53,7 @@ final class HubPayoutController extends Controller
      */
     public function balance(Request $request): JsonResponse
     {
+        Gate::authorize('manageShop');
         $shop = $request->user()->shop;
 
         if (! $shop) {

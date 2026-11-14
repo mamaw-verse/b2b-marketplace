@@ -4,10 +4,11 @@
     $ogImage       = $product->featured_image_path
         ? route('products.featured-image', $product)
         : asset('images/brand-logo.png');
-    $ogUrl         = url()->current();
+    $ogUrl         = route('storefront.product', $product);
 @endphp
 
 @push('meta')
+    <link rel="canonical" href="{{ $ogUrl }}">
     {{-- Primary --}}
     <meta name="description" content="{{ $ogDescription }}">
 
@@ -77,13 +78,22 @@
             ];
         })->values();
 
-        // Gallery: featured image first, then gallery images (deduped)
-        // Each entry is an object { src, alt } for the Alpine imageGallery component.
+        // Keep the product video first, followed by the featured and gallery images.
+        // Each entry is an object { type, src, alt } for the Alpine imageGallery component.
         $galleryImages = collect();
         $productName = $product->name;
         $galleryIdx = 0;
+        if (config('marketplace.features.product_video_enabled') && $product->video?->scan_status === 'clean') {
+            $galleryImages->push([
+                'type' => 'video',
+                'src' => route('media.view', $product->video),
+                'poster' => $product->featured_image_url,
+                'mimeType' => $product->video->mime_type,
+                'alt' => $productName . ' — ' . __('Product video'),
+            ]);
+        }
         if ($product->featured_image_path) {
-            $galleryImages->push(['src' => $product->featured_image_url, 'alt' => $productName]);
+            $galleryImages->push(['type' => 'image', 'src' => $product->featured_image_url, 'alt' => $productName]);
             $galleryIdx++;
         }
         if ($product->gallery->count() > 0) {
@@ -91,7 +101,7 @@
             $product->gallery->each(function ($img) use ($galleryImages, $featured, $productName, &$galleryIdx) {
                 if ($img->image_url !== $featured) {
                     $galleryIdx++;
-                    $galleryImages->push(['src' => $img->image_url, 'alt' => $productName . ' — image ' . $galleryIdx]);
+                    $galleryImages->push(['type' => 'image', 'src' => $img->image_url, 'alt' => $productName . ' — image ' . $galleryIdx]);
                 }
             });
         }
@@ -167,45 +177,41 @@
                 {{-- Main image with hover-zoom --}}
                 <div class="rounded-[var(--hs-radius-card)] overflow-hidden border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)] p-3">
                     <div
-                        class="relative rounded-[var(--hs-radius-md)] overflow-hidden bg-[var(--hs-neutral-50)] group cursor-zoom-in aspect-square select-none"
+                        class="relative rounded-[var(--hs-radius-md)] overflow-hidden bg-[var(--hs-neutral-50)] group aspect-square select-none"
                         @mousemove.passive="onMouseMove($event)"
                         @mouseleave="onMouseLeave()"
-                        @click="openLightbox(active)"
-                        role="button"
-                        tabindex="0"
-                        @keydown.enter.prevent="openLightbox(active)"
-                        @keydown.space.prevent="openLightbox(active)"
-                        :aria-label="'{{ __('Enlarge image') }}: ' + images[active].alt"
+                        @click="if (images[active].type !== 'video') openLightbox(active)"
+                        :role="images[active].type === 'video' ? null : 'button'"
+                        :tabindex="images[active].type === 'video' ? -1 : 0"
+                        @keydown.enter.prevent="if (images[active].type !== 'video') openLightbox(active)"
+                        @keydown.space.prevent="if (images[active].type !== 'video') openLightbox(active)"
+                        :class="images[active].type === 'video' ? 'cursor-default' : 'cursor-zoom-in'"
+                        :aria-label="images[active].type === 'video' ? images[active].alt : '{{ __('Enlarge image') }}: ' + images[active].alt"
                     >
-                        {{-- Images --}}
-                        @if ($galleryImages->count() > 1)
-                            <img
-                                x-ref="mainImg"
-                                :src="images[active].src"
-                                :alt="images[active].alt"
-                                x-effect="$el.style.opacity = '0'; requestAnimationFrame(() => { $el.style.opacity = '1'; })"
-                                class="w-full h-full object-contain"
-                                style="will-change: transform; transition: opacity 150ms ease-out, transform 200ms ease-out;"
-                                :style="zooming
-                                    ? `transform: scale(2.2); transform-origin: ${originX}% ${originY}%; transition: opacity 150ms ease-out;`
-                                    : 'transform: scale(1);'"
-                                draggable="false"
-                            />
-                        @else
-                            <img
-                                :src="images[0].src"
-                                :alt="images[0].alt"
-                                class="w-full h-full object-contain"
-                                style="will-change: transform;"
-                                :style="zooming ? `transform: scale(2.2); transform-origin: ${originX}% ${originY}%; transition: none;` : 'transform: scale(1); transition: transform 200ms ease-out;'"
-                                draggable="false"
-                            />
-                        @endif
+                        <img
+                            x-show="images[active].type !== 'video'"
+                            x-ref="mainImg"
+                            :src="images[active].type === 'image' ? images[active].src : ''"
+                            :alt="images[active].alt"
+                            x-effect="$el.style.opacity = '0'; requestAnimationFrame(() => { $el.style.opacity = '1'; })"
+                            class="w-full h-full object-contain"
+                            style="will-change: transform; transition: opacity 150ms ease-out, transform 200ms ease-out;"
+                            :style="zooming
+                                ? `transform: scale(2.2); transform-origin: ${originX}% ${originY}%; transition: opacity 150ms ease-out;`
+                                : 'transform: scale(1);'"
+                            draggable="false"
+                        />
+                        <template x-if="images[active].type === 'video'">
+                            <video controls autoplay muted preload="metadata" playsinline class="absolute inset-0 size-full object-contain bg-black" :poster="images[active].poster || undefined" :aria-label="images[active].alt" @click.stop>
+                                <source :src="images[active].src" :type="images[active].mimeType">
+                                {{ __('Your browser does not support video playback.') }}
+                            </video>
+                        </template>
 
                         {{-- Hover hint — fades after first interaction --}}
                         <div
                             class="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-[var(--hs-radius-pill)] bg-black/50 text-white text-[11px] font-medium pointer-events-none transition-opacity duration-300"
-                            x-show="showHint"
+                            x-show="showHint && images[active].type !== 'video'"
                             x-transition:leave="transition ease-in duration-500"
                             x-transition:leave-start="opacity-100"
                             x-transition:leave-end="opacity-0"
@@ -216,6 +222,7 @@
                         <button
                             type="button"
                             class="absolute bottom-2 end-2 size-10 flex items-center justify-center rounded-[var(--hs-radius-md)] bg-black/40 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                            x-show="images[active].type !== 'video'"
                             @click.stop="openLightbox(active)"
                             aria-label="{{ __('Enlarge image') }}"
                         >
@@ -228,8 +235,7 @@
                     {{-- Thumbnails --}}
                     @if ($galleryImages->count() > 1)
                         <div
-                            class="grid gap-2 mt-3"
-                            :class="images.length <= 5 ? 'grid-cols-' + images.length : 'grid-cols-5'"
+                            class="flex gap-2 mt-3 overflow-x-auto pb-1"
                             role="list"
                             aria-label="{{ __('Product images') }}"
                         >
@@ -240,12 +246,17 @@
                                     @click="active = i; showHint = false;"
                                     @keydown.arrow-right.prevent="active = Math.min(active + 1, images.length - 1)"
                                     @keydown.arrow-left.prevent="active = Math.max(active - 1, 0)"
-                                    class="rounded-[var(--hs-radius-sm)] overflow-hidden border-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--hs-green-600)]"
+                                    class="relative size-20 shrink-0 rounded-[var(--hs-radius-sm)] overflow-hidden border-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--hs-green-600)]"
                                     :class="active === i ? 'border-[var(--hs-green-600)] ring-1 ring-[var(--hs-green-600)]' : 'border-[var(--hs-neutral-200)] hover:border-[var(--hs-neutral-300)]'"
-                                    :aria-label="'{{ __('View image') }} ' + (i + 1)"
+                                    :aria-label="(img.type === 'video' ? '{{ __('Play product video') }}' : '{{ __('View image') }}') + ' ' + (i + 1)"
                                     :aria-current="active === i ? 'true' : 'false'"
                                 >
-                                    <img :src="img.src" :alt="img.alt" class="w-full aspect-square object-contain" loading="lazy" />
+                                    <template x-if="img.type === 'video'">
+                                        <div class="size-full flex items-center justify-center bg-black text-white" aria-hidden="true">
+                                            <flux:icon name="play" variant="mini" class="size-7" />
+                                        </div>
+                                    </template>
+                                    <img x-show="img.type !== 'video'" :src="img.type === 'image' ? img.src : ''" :alt="img.alt" class="size-full object-contain" loading="lazy" />
                                 </button>
                             </template>
                         </div>
@@ -355,14 +366,20 @@
                             @touchend.passive="onLbTouchEnd($event)"
                         >
                             <template x-for="(img, i) in images" :key="i">
-                                <img
-                                    x-show="lightboxIndex === i"
-                                    :src="img.src"
+                                    <img
+                                    x-show="lightboxIndex === i && img.type !== 'video'"
+                                    :src="img.type === 'image' ? img.src : ''"
                                     :alt="img.alt"
                                     class="max-w-full max-h-full object-contain select-none"
                                     :style="`transform: scale(${lbZoom}) translate(${lbPanX / lbZoom}px, ${lbPanY / lbZoom}px); transition: ${lbDragging ? 'none' : 'transform 200ms ease-out'};`"
                                     draggable="false"
                                 />
+                            </template>
+                            <template x-if="images[lightboxIndex]?.type === 'video'">
+                                <video controls autoplay playsinline class="max-w-full max-h-full" :poster="images[lightboxIndex].poster || undefined" @click.stop>
+                                    <source :src="images[lightboxIndex].src" :type="images[lightboxIndex].mimeType">
+                                    {{ __('Your browser does not support video playback.') }}
+                                </video>
                             </template>
                         </div>
 
@@ -420,12 +437,17 @@
                                         type="button"
                                         role="listitem"
                                         @click="lightboxIndex = i; lbZoomReset();"
-                                        class="shrink-0 size-14 rounded-[var(--hs-radius-sm)] overflow-hidden border-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                                        class="relative shrink-0 size-20 rounded-[var(--hs-radius-sm)] overflow-hidden border-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
                                         :class="lightboxIndex === i ? 'border-white ring-1 ring-white' : 'border-white/20 hover:border-white/50'"
                                         :aria-label="'{{ __('View image') }} ' + (i + 1)"
                                         :aria-current="lightboxIndex === i ? 'true' : 'false'"
                                     >
-                                        <img :src="img.src" :alt="img.alt" class="w-full h-full object-contain" loading="lazy" />
+                                        <template x-if="img.type === 'video'">
+                                            <div class="size-full flex items-center justify-center bg-black text-white" aria-hidden="true">
+                                                <flux:icon name="play" variant="mini" class="size-7" />
+                                            </div>
+                                        </template>
+                                        <img x-show="img.type !== 'video'" :src="img.type === 'image' ? img.src : ''" :alt="img.alt" class="size-full object-contain" loading="lazy" />
                                     </button>
                                 </template>
                             </div>
@@ -613,7 +635,7 @@
             <div class="flex items-start justify-between gap-4">
                 <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)] leading-tight">{{ $product->name }}</h1>
                 @auth
-                    @if (auth()->user()->shop?->id === $product->shop_id)
+                    @if (auth()->user()->activeShop?->id === $product->shop_id)
                         <a href="{{ route('hub.products.edit', $product) }}" wire:navigate
                            class="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[var(--hs-neutral-200)] px-3 py-1.5 text-sm font-medium text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-50)] transition">
                             <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
@@ -805,7 +827,7 @@
 
             {{-- ============ REQUEST QUOTE CTA ============ --}}
             @if ($product->shop)
-                @if (auth()->check() && auth()->user()->shop?->id === $product->shop_id)
+                @if (auth()->check() && auth()->user()->activeShop?->id === $product->shop_id)
                     <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 flex items-center justify-between gap-4 flex-wrap">
                         <div>
                             <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">{{ __('This is your product') }}</p>
@@ -943,6 +965,8 @@
  */
 Alpine.data('imageGallery', (images, productName) => ({
     images: images.map((img, i) => ({
+        ...img,
+        type: img.type || 'image',
         src: img.src || img,
         alt: img.alt || (productName + (images.length > 1 ? ' — image ' + (i + 1) : '')),
     })),
@@ -972,8 +996,8 @@ Alpine.data('imageGallery', (images, productName) => ({
     _touchSwipeHandled: false,
 
     init() {
-        // Preload first image
-        if (this.images.length > 0) {
+        // Preload the first image without fetching a video before playback.
+        if (this.images.length > 0 && this.images[0].type === 'image') {
             const img = new Image();
             img.src = this.images[0].src;
         }
@@ -989,7 +1013,7 @@ Alpine.data('imageGallery', (images, productName) => ({
 
     // ── Hover zoom ──────────────────────────────────────────────────────────
     onMouseMove(e) {
-        if (this.isTouch || this.reducedMotion) {
+        if (this.isTouch || this.reducedMotion || this.images[this.active]?.type === 'video') {
             return;
         }
         const rect = e.currentTarget.getBoundingClientRect();

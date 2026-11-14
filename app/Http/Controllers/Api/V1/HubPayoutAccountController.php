@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\PayoutAccountPendingNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 
 final class HubPayoutAccountController extends Controller
@@ -20,6 +21,7 @@ final class HubPayoutAccountController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
+        Gate::authorize('manageShop');
         $shop = $request->user()->shop;
 
         if (! $shop) {
@@ -51,6 +53,7 @@ final class HubPayoutAccountController extends Controller
      */
     public function upsert(UpsertPayoutAccountRequest $request): JsonResponse
     {
+        Gate::authorize('manageShop');
         $shop = $request->user()->shop;
 
         $account = $shop->payoutAccount()->updateOrCreate(

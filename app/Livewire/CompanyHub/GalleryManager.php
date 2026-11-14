@@ -38,6 +38,7 @@ final class GalleryManager extends Component
 
     public function uploadPhotos(MediaUploadService $uploader): void
     {
+        $this->authorize('update', $this->product);
         $this->validate([
             'newPhotos' => ['required', 'array', 'min:1'],
             'newPhotos.*' => ['image', 'max:5120'],
@@ -62,6 +63,7 @@ final class GalleryManager extends Component
 
     public function updateGalleryOrder(int|string $id, int $position): void
     {
+        $this->authorize('update', $this->product);
         ProductGallery::where('id', $id)
             ->where('product_id', $this->product->id)
             ->update(['sort_order' => $position]);
@@ -83,6 +85,7 @@ final class GalleryManager extends Component
 
     public function removeImage(): void
     {
+        $this->authorize('update', $this->product);
         if (! $this->confirmingImageId) {
             return;
         }

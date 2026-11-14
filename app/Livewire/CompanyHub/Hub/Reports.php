@@ -36,7 +36,7 @@ final class Reports extends Component
 
     private function loadMetrics(): void
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
         if (! $shop) {
             return;
         }

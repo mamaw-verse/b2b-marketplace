@@ -80,6 +80,35 @@ return [
     */
     'payment_method' => mb_strtolower((string) env('MARKETPLACE_PAYMENT_METHOD', 'dlt')),
 
+    'slugs' => [
+        'reserved' => [
+            'account',
+            'admin',
+            'api',
+            'auth',
+            'companies',
+            'dashboard',
+            'hub',
+            'login',
+            'logout',
+            'portal',
+            'products',
+            'register',
+            'settings',
+        ],
+    ],
+
+    'video' => [
+        'max_kb' => (int) env('MARKETPLACE_PRODUCT_VIDEO_MAX_KB', 51200),
+        // Override on local to isolate uploads made against a live bucket,
+        // e.g. MARKETPLACE_VIDEO_STORAGE_PREFIX=test-media/videos
+        'storage_prefix' => trim((string) env('MARKETPLACE_VIDEO_STORAGE_PREFIX', 'media'), '/'),
+    ],
+
+    'limits' => [
+        'staff_per_shop' => (int) env('MARKETPLACE_MAX_STAFF_PER_SHOP', 2),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Feature Flags
@@ -92,6 +121,7 @@ return [
         // Phase 2-4 Capabilities (now gated, toggled false by default in Phase 6)
         'payouts_enabled' => (bool) env('MARKETPLACE_PAYOUTS_ENABLED', false),
         'orders_enabled' => (bool) env('MARKETPLACE_ORDERS_ENABLED', false),
+        'staff_enabled' => (bool) env('MARKETPLACE_STAFF_ENABLED', false),
         'escrow_payments_enabled' => (bool) env('MARKETPLACE_ESCROW_PAYMENTS_ENABLED', false),
         'fulfilment_enabled' => (bool) env('MARKETPLACE_FULFILMENT_ENABLED', false),
         'disputes_enabled' => (bool) env('MARKETPLACE_DISPUTES_ENABLED', false),
@@ -107,6 +137,7 @@ return [
         'certification_apply_enabled' => (bool) env('MARKETPLACE_CERTIFICATION_APPLY_ENABLED', true),
         'sponsored_content_enabled' => (bool) env('MARKETPLACE_SPONSORED_CONTENT_ENABLED', true),
         'admin_rfq_management_enabled' => (bool) env('MARKETPLACE_ADMIN_RFQ_MANAGEMENT_ENABLED', true),
+        'product_video_enabled' => (bool) env('MARKETPLACE_PRODUCT_VIDEO_ENABLED', false),
     ],
 
 ];

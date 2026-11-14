@@ -61,11 +61,11 @@ final class ReviewPolicy
         $reviewable = $review->reviewable;
 
         if ($reviewable instanceof Shop) {
-            return $user->id === $reviewable->user_id;
+            return $reviewable->isManagedBy($user);
         }
 
         if ($reviewable instanceof Product) {
-            return $user->id === $reviewable->shop->user_id;
+            return $reviewable->shop?->isManagedBy($user) ?? false;
         }
 
         return false;

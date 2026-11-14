@@ -25,7 +25,7 @@ final class SellerHubController extends Controller
         Gate::authorize('accessHub');
 
         return response()->json([
-            'data' => $this->analytics->dashboardCounts($request->user()->shop),
+            'data' => $this->analytics->dashboardCounts($request->user()->activeShop),
         ]);
     }
 
@@ -37,7 +37,7 @@ final class SellerHubController extends Controller
         Gate::authorize('accessHub');
 
         $customers = $this->analytics->customers(
-            $request->user()->shop,
+            $request->user()->activeShop,
             $request->integer('limit', 20),
         );
 
@@ -69,7 +69,7 @@ final class SellerHubController extends Controller
         $to = $from->copy()->addDays($windowDays);
 
         return response()->json([
-            'data' => $this->analytics->reports($request->user()->shop, $windowDays, $from, $to),
+            'data' => $this->analytics->reports($request->user()->activeShop, $windowDays, $from, $to),
         ]);
     }
 
@@ -81,7 +81,7 @@ final class SellerHubController extends Controller
         Gate::authorize('accessHub');
 
         $data = $this->analytics->leaderboards(
-            $request->user()->shop,
+            $request->user()->activeShop,
             $request->query('type', 'products'),
             $request->query('rank_by', 'revenue'),
             $request->integer('limit', 10),

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Auth\RegisteredStaffUserController;
 use App\Http\Controllers\HumanCheckController;
 use App\Http\Controllers\OrderPaymentCallbackController;
 use App\Http\Controllers\SponsoredContentClickController;
@@ -11,6 +12,7 @@ use App\Models\CertificationApplication;
 use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductGallery;
+use App\Models\ShopStaff;
 use App\Models\SourcingRequest;
 use App\Models\SponsoredContent;
 use App\Models\User;
@@ -37,15 +39,29 @@ Route::post('/human-check', HumanCheckController::class)
 
 Route::livewire('/', 'storefront.hero-search')->name('home');
 Route::livewire('/companies', 'storefront.company-directory')->name('storefront.companies');
-Route::livewire('/companies/{shop}', 'storefront.company-profile')->name('storefront.company');
+Route::livewire('/companies/{shop:slug}', 'storefront.company-profile')
+    ->middleware('canonical.slug:shop,storefront.company')
+    ->name('storefront.company');
 Route::livewire('/products', 'storefront.product-directory')->name('storefront.products');
-Route::livewire('/products/{product}', 'storefront.product-detail')->name('storefront.product');
+Route::livewire('/products/{product:slug}', 'storefront.product-detail')
+    ->middleware('canonical.slug:product,storefront.product')
+    ->name('storefront.product');
 Route::livewire('/certification/apply', 'storefront.apply-for-certificate')->name('apply.certificate');
 Route::livewire('/request-a-product', 'storefront.product-sourcing-form')->name('sourcing-request.create');
 Route::livewire('/about', 'storefront.about-page')->name('about');
 Route::livewire('/terms', 'legal.terms-page')->name('legal.terms');
 Route::livewire('/privacy', 'legal.privacy-page')->name('legal.privacy');
 Route::livewire('/faq', 'legal.faq-page')->name('help.faq');
+Route::livewire('/staff/invitations/{token}', 'staff.invitation-page')
+    ->middleware(['throttle:10,1', 'feature:staff_enabled'])
+    ->name('staff.invitations.show');
+
+Route::middleware(['guest', 'throttle:10,1', 'feature:staff_enabled'])->group(function () {
+    Route::get('/staff/invitations/{token}/register', [RegisteredStaffUserController::class, 'create'])
+        ->name('staff.invitations.register');
+    Route::post('/staff/invitations/{token}/register', [RegisteredStaffUserController::class, 'store'])
+        ->name('staff.invitations.register.store');
+});
 
 Route::middleware(['guest', 'throttle:6,1'])->group(function () {
     Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
@@ -65,10 +81,16 @@ Route::middleware(['auth', 'throttle:6,1'])->group(function () {
 | requires an authenticated admin, the original uploader, or the relevant
 | buyer/seller.
 |
-| All responses stream through the app (not direct S3 URLs) so a private
-| bucket keeps working — direct Storage::url() calls 403 on private objects.
+| Media is authorized here. Private object storage is used directly for
+| video playback via short-lived signed URLs, which preserve byte-range support;
+| other media continues streaming through the app.
 */
 Route::get('media/{media}/view', function (Media $media) {
+    if (str_starts_with($media->mime_type, 'video/')) {
+        abort_unless((bool) config('marketplace.features.product_video_enabled'), 404);
+        abort_unless($media->scan_status === 'clean', 404);
+    }
+
     $subscriptionsEnabled = (bool) config('marketplace.features.subscriptions_enabled', true);
 
     $isPublicProductDocument = $media->products()
@@ -88,6 +110,10 @@ Route::get('media/{media}/view', function (Media $media) {
                     ->whereIn('status', ['active', 'trialing'])))))
         ->exists();
 
+    $isPublicProductVideo = (bool) config('marketplace.features.product_video_enabled')
+        && $media->scan_status === 'clean'
+        && Product::marketplaceVisible()->where('video_media_id', $media->id)->exists();
+
     // Sponsored content creatives are public — they appear on the storefront
     // for unauthenticated visitors so their images must be accessible to all.
     $isSponsoredContentCreative = SponsoredContent::where('wide_media_id', $media->id)
@@ -95,7 +121,9 @@ Route::get('media/{media}/view', function (Media $media) {
         ->orWhere('media_id', $media->id)
         ->exists();
 
-    $isPublic = $isPublicProductDocument || $isPublicGalleryImage || $isSponsoredContentCreative;
+    $isPublic = str_starts_with($media->mime_type, 'video/')
+        ? $isPublicProductVideo
+        : $isPublicProductDocument || $isPublicGalleryImage || $isSponsoredContentCreative;
 
     if (! $isPublic) {
         $user = auth()->user();
@@ -104,14 +132,20 @@ Route::get('media/{media}/view', function (Media $media) {
             abort(403);
         }
 
-        $isAdminOrUploader = $user->hasRole('admin') || $media->uploaded_by_id === $user->id;
+        $hasShopStaffHistory = ShopStaff::where('user_id', $user->id)->exists();
+        $isAdminOrUploader = $user->hasRole('admin') || (
+            $media->uploaded_by_id === $user->id
+            && (! $hasShopStaffHistory || ($activeShop?->isManagedBy($user) ?? false))
+        );
 
         // Sellers must see their own draft/archived product images in the hub
         // (gallery manager, product list) even before publishing.
-        $isProductOwner = $user->shop && (
-            $media->products()->where('shop_id', $user->shop->id)->exists()
+        $activeShop = $user->activeShop;
+        $isProductOwner = $activeShop?->isManagedBy($user) && (
+            $media->products()->where('shop_id', $activeShop->id)->exists()
+            || Product::where('video_media_id', $media->id)->where('shop_id', $activeShop->id)->exists()
             || ProductGallery::where('media_id', $media->id)
-                ->whereHas('product', fn ($q) => $q->where('shop_id', $user->shop->id))
+                ->whereHas('product', fn ($q) => $q->where('shop_id', $activeShop->id))
                 ->exists()
         );
 
@@ -122,19 +156,27 @@ Route::get('media/{media}/view', function (Media $media) {
         $isDisputeParty = $media->disputes()
             ->whereHas('order', fn ($q) => $q
                 ->where('buyer_user_id', $user->id)
-                ->orWhereHas('shop', fn ($s) => $s->where('user_id', $user->id))
+                ->when($activeShop?->isManagedBy($user), fn ($query) => $query->orWhere('shop_id', $activeShop->id))
             )
             ->exists();
 
         // RFQ attachments must be viewable by the buyer who created the RFQ and
         // any seller shop that is a recipient of that RFQ.
-        $isRfqRecipient = $user->shop && $media->rfqs()
-            ->whereHas('recipients', fn ($q) => $q->where('shop_id', $user->shop->id))
+        $isRfqRecipient = $activeShop?->isManagedBy($user) && $media->rfqs()
+            ->whereHas('recipients', fn ($q) => $q->where('shop_id', $activeShop->id))
             ->exists();
 
         if (! $isAdminOrUploader && ! $isProductOwner && ! $isDisputeParty && ! $isRfqRecipient) {
             abort(403);
         }
+    }
+
+    if (str_starts_with($media->mime_type, 'video/')) {
+        $url = Storage::disk('s3')->temporaryUrl($media->storage_path, now()->addMinutes(30), [
+            'ResponseContentType' => $media->mime_type,
+        ]);
+
+        return redirect()->away($url)->header('Cache-Control', 'private, max-age=300');
     }
 
     $response = Storage::disk('s3')->response(
@@ -176,7 +218,7 @@ Route::get('products/{product}/featured-image', function (Product $product) {
         }
 
         $isOwnerOrAdmin = $user->hasRole('admin')
-            || ($user->shop && (int) $user->shop->id === (int) $product->shop_id);
+            || ($product->shop?->isManagedBy($user) ?? false);
 
         if (! $isOwnerOrAdmin) {
             abort(403);
@@ -287,64 +329,80 @@ Route::middleware(['auth', 'verified'])->prefix('hub')->name('hub.')->group(func
     // The old hub-dashboard Livewire route is kept for backward-compat
     // (existing links, emails, etc.) and redirects to the unified dashboard.
     Route::redirect('dashboard', '/portal/dashboard')->name('hub-dashboard');
-    Route::livewire('shop/profile', 'company-hub.shop-profile-form')->name('shop.profile');
-    Route::middleware('feature:subscriptions_enabled')->group(function () {
-        Route::livewire('subscription', 'company-hub.subscription-page')->name('subscription');
-        Route::livewire('subscription/{subscription}/pay', 'company-hub.subscription-payment-page')->name('subscription.pay');
-        Route::livewire('subscription/{subscription}/pay/manual', 'company-hub.manual-subscription-payment-page')->name('subscription.pay.manual');
-    });
+    Route::middleware('can:accessHub')->group(function () {
+        Route::middleware('feature:staff_enabled')->group(function () {
+            Route::livewire('team/leave', 'company-hub.leave-shop')->name('team.leave');
+        });
+        Route::middleware('shop.owner')->group(function () {
+            Route::middleware('feature:staff_enabled')->group(function () {
+                Route::livewire('team', 'company-hub.team-manager')->name('team');
+            });
+            Route::livewire('shop/profile', 'company-hub.shop-profile-form')->name('shop.profile');
+            Route::middleware('feature:subscriptions_enabled')->group(function () {
+                Route::livewire('subscription', 'company-hub.subscription-page')->name('subscription');
+                Route::livewire('subscription/{subscription}/pay', 'company-hub.subscription-payment-page')->name('subscription.pay');
+                Route::livewire('subscription/{subscription}/pay/manual', 'company-hub.manual-subscription-payment-page')->name('subscription.pay.manual');
+            });
+        });
 
-    // Product management
-    Route::livewire('products', 'company-hub.product-list')->name('products.index');
-    Route::livewire('products/create', 'company-hub.product-form')->name('products.create');
-    Route::livewire('products/{product}/edit', 'company-hub.product-form')->name('products.edit');
-    Route::livewire('products/{product}/variants', 'company-hub.variant-manager')->name('products.variants');
-    Route::livewire('products/{product}/gallery', 'company-hub.gallery-manager')->name('products.gallery');
-    Route::livewire('products/{product}/documents', 'company-hub.document-manager')->name('products.documents');
+        // Product management
+        Route::livewire('products', 'company-hub.product-list')->name('products.index');
+        Route::livewire('products/create', 'company-hub.product-form')->name('products.create');
+        Route::livewire('products/{product}/edit', 'company-hub.product-form')->name('products.edit');
+        Route::livewire('products/{product}/variants', 'company-hub.variant-manager')->name('products.variants');
+        Route::livewire('products/{product}/gallery', 'company-hub.gallery-manager')->name('products.gallery');
+        Route::livewire('products/{product}/documents', 'company-hub.document-manager')->name('products.documents');
+        Route::middleware('feature:product_video_enabled')->group(function () {
+            Route::livewire('products/{product}/video', 'company-hub.video-manager')->name('products.video');
+        });
 
-    // RFQ management (seller)
-    Route::middleware('feature:seller_rfq_queue_enabled')->group(function () {
-        Route::livewire('rfqs', 'company-hub.rfq-queue')->name('rfqs.index');
-        Route::livewire('rfqs/{rfqRecipient}', 'company-hub.rfq-detail')->name('rfqs.show');
-    });
+        // RFQ management (seller)
+        Route::middleware('feature:seller_rfq_queue_enabled')->group(function () {
+            Route::livewire('rfqs', 'company-hub.rfq-queue')->name('rfqs.index');
+            Route::livewire('rfqs/{rfqRecipient}', 'company-hub.rfq-detail')->name('rfqs.show');
+        });
 
-    // Quotations (seller)
-    Route::middleware('feature:quotations_enabled')->group(function () {
-        Route::livewire('rfqs/{rfqRecipient}/quotations/create', 'company-hub.quotation-builder')->name('quotations.create');
-        Route::livewire('rfqs/{rfqRecipient}/quotations/{quotation}/edit', 'company-hub.quotation-builder')->name('quotations.edit');
-    });
-    Route::middleware('feature:chat_enabled')->group(function () {
-        Route::livewire('messages', 'company-hub.chat-inbox')->name('messages');
-    });
+        // Quotations (seller)
+        Route::middleware('feature:quotations_enabled')->group(function () {
+            Route::livewire('rfqs/{rfqRecipient}/quotations/create', 'company-hub.quotation-builder')->name('quotations.create');
+            Route::livewire('rfqs/{rfqRecipient}/quotations/{quotation}/edit', 'company-hub.quotation-builder')->name('quotations.edit');
+        });
+        Route::middleware('feature:chat_enabled')->group(function () {
+            Route::livewire('messages', 'company-hub.chat-inbox')->name('messages');
+        });
 
-    // Orders (seller)
-    Route::middleware('feature:orders_enabled')->group(function () {
-        Route::livewire('orders', 'company-hub.orders.order-queue')->name('orders.index');
-        Route::livewire('orders/create', 'company-hub.orders.order-builder')->name('orders.create');
-        Route::livewire('orders/{order}/edit', 'company-hub.orders.order-builder')->name('orders.edit');
-        Route::livewire('orders/{order}', 'company-hub.orders.order-detail')->name('orders.show');
-    });
+        // Orders (seller)
+        Route::middleware('feature:orders_enabled')->group(function () {
+            Route::livewire('orders', 'company-hub.orders.order-queue')->name('orders.index');
+            Route::livewire('orders/create', 'company-hub.orders.order-builder')->name('orders.create');
+            Route::livewire('orders/{order}/edit', 'company-hub.orders.order-builder')->name('orders.edit');
+            Route::livewire('orders/{order}', 'company-hub.orders.order-detail')->name('orders.show');
+        });
 
-    // Payout Account & Payouts (seller)
-    Route::middleware('feature:payouts_enabled')->group(function () {
-        Route::livewire('payout-account', 'company-hub.payout-account-form')->name('payout-account');
-        Route::livewire('payouts', 'company-hub.payouts.payout-history')->name('payouts.index');
-        Route::livewire('payouts/{payout}', 'company-hub.payouts.payout-detail')->name('payouts.show');
-    });
+        // Payout Account & Payouts (seller)
+        Route::middleware('feature:payouts_enabled')->group(function () {
+            Route::middleware('shop.owner')->group(function () {
+                Route::livewire('payout-account', 'company-hub.payout-account-form')->name('payout-account');
+                Route::livewire('payouts', 'company-hub.payouts.payout-history')->name('payouts.index');
+                Route::livewire('payouts/{payout}', 'company-hub.payouts.payout-detail')->name('payouts.show');
+            });
+        });
 
-    // Seller Hub pages
-    Route::livewire('customers', 'company-hub.hub.customers-list')->name('customers.index');
-    Route::livewire('reports', 'company-hub.hub.reports')->name('reports');
+        // Seller Hub pages
+        Route::livewire('customers', 'company-hub.hub.customers-list')->name('customers.index');
+        Route::livewire('reports', 'company-hub.hub.reports')->name('reports');
 
-    // Certificates (seller)
-    Route::livewire('certifications', 'company-hub.certificate-list')->name('certifications.index');
+        // Certificates (seller)
+        Route::middleware('shop.owner')->group(function () {
+            Route::livewire('certifications', 'company-hub.certificate-list')->name('certifications.index');
+            Route::livewire('earnings', 'company-hub.earnings.earnings-overview')->name('earnings');
+        });
 
-    // Earnings (seller)
-    Route::livewire('earnings', 'company-hub.earnings.earnings-overview')->name('earnings');
-
-    // Reviews (seller)
-    Route::middleware('feature:reviews_enabled')->group(function () {
-        Route::livewire('reviews', 'company-hub.reviews.review-list')->name('reviews.index');
+        // Earnings (seller)
+        // Reviews (seller)
+        Route::middleware('feature:reviews_enabled')->group(function () {
+            Route::livewire('reviews', 'company-hub.reviews.review-list')->name('reviews.index');
+        });
     });
 });
 
@@ -462,7 +520,7 @@ Route::middleware(['auth', 'feature:orders_enabled'])->group(function () {
         ->name('orders.payment.failure');
 });
 
-Route::middleware(['auth', 'feature:subscriptions_enabled'])->group(function () {
+Route::middleware(['auth', 'shop.owner', 'feature:subscriptions_enabled'])->group(function () {
     Route::get('/hub/subscription/{subscription}/payment/success', [SubscriptionPaymentCallbackController::class, 'success'])
         ->name('hub.subscriptions.payment.success');
     Route::get('/hub/subscription/{subscription}/payment/failure', [SubscriptionPaymentCallbackController::class, 'failure'])

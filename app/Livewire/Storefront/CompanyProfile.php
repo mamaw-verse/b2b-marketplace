@@ -23,7 +23,13 @@ final class CompanyProfile extends Component
             if (! $visible) {
                 // Own shop: redirect to the subscription page with a helpful message.
                 // Other shops: 404 — the profile simply does not exist for them yet.
-                if (auth()->check() && auth()->user()->shop?->id === $shop->id) {
+                if (auth()->check() && auth()->user()->activeShop?->id === $shop->id) {
+                    if (auth()->user()->isShopStaff()) {
+                        $this->redirect(route('hub.products.index'), navigate: true);
+
+                        return;
+                    }
+
                     session()->flash('message', __('Subscribe to make your business profile visible on the marketplace.'));
                     $this->redirect(route('hub.subscription'), navigate: true);
 
@@ -53,7 +59,7 @@ final class CompanyProfile extends Component
         $user = auth()->user();
 
         // Prevent sellers from messaging themselves
-        if ($user->shop && $user->shop->id === $this->shop->id) {
+        if ($user->activeShop && $user->activeShop->id === $this->shop->id) {
             $this->dispatch('toast', message: 'You cannot message your own company.');
 
             return;

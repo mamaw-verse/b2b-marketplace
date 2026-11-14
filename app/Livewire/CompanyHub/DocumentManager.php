@@ -40,6 +40,7 @@ final class DocumentManager extends Component
 
     public function uploadDocuments(MediaUploadService $uploader): void
     {
+        $this->authorize('update', $this->product);
         $this->validate([
             'newDocuments' => ['required', 'array', 'min:1'],
             'newDocuments.*' => ['file', 'max:20480', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp'],
@@ -64,6 +65,7 @@ final class DocumentManager extends Component
 
     public function removeDocument(): void
     {
+        $this->authorize('update', $this->product);
         if (! $this->confirmingDocumentId) {
             return;
         }

@@ -21,6 +21,15 @@
                 />
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
+                <div>
+                    <flux:input wire:model="slug" :label="__('Product URL slug')" placeholder="{{ __('Leave blank to generate from the product name') }}" />
+                    <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
+                        {{ __('Public URL:') }} <span class="font-medium">{{ url('/products/'.($slug ?: Str::slug($name))) }}</span>
+                        {{ __('Changing the slug keeps the old link working.') }}
+                    </p>
+                    @error('slug') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                </div>
+
                 {{-- Description --}}
                 <x-hs-wysiwyg
                     wire-model="description"
@@ -62,6 +71,7 @@
                 <div>
                     <label class="block text-sm font-medium text-[var(--hs-neutral-700)]">{{ __('Featured Image') }}</label>
                     <p class="mb-1.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Images must not contain contact information such as phone numbers, email addresses, social media links, or website URLs.') }}</p>
+                    <p class="mb-2 text-xs text-[var(--hs-neutral-500)]">{{ __('Square images (1:1) work best — e.g. 1000 × 1000 px.') }}</p>
 
                     @php
                         $existingImage = (! $removeFeaturedImage && $product?->featured_image_path)

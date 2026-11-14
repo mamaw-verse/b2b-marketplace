@@ -52,9 +52,9 @@ final class ScanUploadedFileJob implements ShouldQueue
             return;
         }
 
-        $fileContent = Storage::disk('s3')->get($this->media->storage_path);
+        $fileStream = Storage::disk('s3')->readStream($this->media->storage_path);
 
-        if ($fileContent === null) {
+        if (! is_resource($fileStream)) {
             Log::warning('ScanUploadedFileJob: File not found in S3.', [
                 'media_id' => $this->media->id,
                 'path' => $this->media->storage_path,
@@ -64,7 +64,11 @@ final class ScanUploadedFileJob implements ShouldQueue
             return;
         }
 
-        $scanResult = $this->scanWithClamAv($fileContent);
+        try {
+            $scanResult = $this->scanWithClamAv($fileStream);
+        } finally {
+            fclose($fileStream);
+        }
 
         $this->markStatus($scanResult);
 
@@ -79,8 +83,10 @@ final class ScanUploadedFileJob implements ShouldQueue
      *
      * Uses the INSTREAM command to scan content without writing to disk.
      * Returns 'clean' or 'infected'.
+     *
+     * @param  resource  $fileStream
      */
-    private function scanWithClamAv(string $content): string
+    private function scanWithClamAv(mixed $fileStream): string
     {
         $host = config('services.clamav.host', 'localhost');
         $port = (int) config('services.clamav.port', 3310);
@@ -112,15 +118,23 @@ final class ScanUploadedFileJob implements ShouldQueue
 
             // Send file content in chunks (max 2MB per chunk per ClamAV protocol)
             $chunkSize = 2 * 1024 * 1024;
-            $offset = 0;
-            $length = mb_strlen($content);
+            while (! feof($fileStream)) {
+                $chunk = fread($fileStream, $chunkSize);
 
-            while ($offset < $length) {
-                $chunk = mb_substr($content, $offset, $chunkSize);
-                $chunkLength = mb_strlen($chunk);
+                if ($chunk === false) {
+                    throw new RuntimeException('Unable to read uploaded file stream.');
+                }
+
+                if ($chunk === '') {
+                    if (feof($fileStream)) {
+                        break;
+                    }
+
+                    continue;
+                }
+
                 // 4-byte big-endian size prefix
-                fwrite($socket, pack('N', $chunkLength).$chunk);
-                $offset += $chunkSize;
+                fwrite($socket, pack('N', strlen($chunk)).$chunk);
             }
 
             // End stream with zero-length chunk

@@ -6,15 +6,13 @@ namespace App\Listeners;
 
 use App\Events\QuotationAwarded;
 use App\Notifications\QuotationAwardedNotification;
+use Illuminate\Support\Facades\Notification;
 
 final class NotifySellerQuotationAwarded
 {
     public function handle(QuotationAwarded $event): void
     {
-        $seller = $event->quotation->rfqRecipient->shop->user ?? null;
-
-        if ($seller) {
-            $seller->notify(new QuotationAwardedNotification($event->quotation));
-        }
+        $shop = $event->quotation->rfqRecipient->shop;
+        Notification::send($shop->operationalRecipients(), new QuotationAwardedNotification($event->quotation));
     }
 }

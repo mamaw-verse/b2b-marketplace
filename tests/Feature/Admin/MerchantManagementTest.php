@@ -7,6 +7,7 @@ use App\Livewire\Admin\Merchants\MerchantList;
 use App\Livewire\Admin\Merchants\MerchantShow;
 use App\Livewire\CompanyHub\OnboardingWizard;
 use App\Models\Shop;
+use App\Models\ShopStaff;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\Queue;
@@ -60,4 +61,25 @@ it('suspended seller cannot access the onboarding wizard', function () {
     Livewire::actingAs($seller)
         ->test(OnboardingWizard::class)
         ->assertRedirect(route('portal.dashboard'));
+});
+
+it('admin can remove staff access from merchant details when enabled', function () {
+    config()->set('marketplace.features.staff_enabled', true);
+    $owner = User::factory()->create();
+    $shop = Shop::factory()->create(['user_id' => $owner->id]);
+    $staffUser = User::factory()->create();
+    $membership = ShopStaff::factory()->active($staffUser)->create([
+        'shop_id' => $shop->id,
+        'email' => $staffUser->email,
+        'invited_by_id' => $owner->id,
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(MerchantShow::class, ['shop' => $shop])
+        ->assertSee('Shop staff')
+        ->set('confirmingStaffId', $membership->id)
+        ->call('removeStaff');
+
+    expect($membership->fresh()->status)->toBe('revoked')
+        ->and($staffUser->fresh()->activeShop)->toBeNull();
 });

@@ -22,7 +22,7 @@ final class CustomersList extends Component
     #[Computed]
     public function customers(): LengthAwarePaginator
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
         if (! $shop) {
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
         }

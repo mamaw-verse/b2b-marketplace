@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub;
 
 use App\Models\Category;
+use App\Models\Shop;
+use App\Rules\ValidSlug;
+use App\Support\Slugs\SlugGenerator;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +24,8 @@ final class ShopProfileForm extends Component
     public string $registered_business_name = '';
 
     public string $storefront_name = '';
+
+    public string $slug = '';
 
     public string $business_structure = '';
 
@@ -61,6 +66,7 @@ final class ShopProfileForm extends Component
 
         $this->registered_business_name = $shop->registered_business_name ?? '';
         $this->storefront_name = $shop->storefront_name ?? '';
+        $this->slug = $shop->slug ?? '';
         $this->business_structure = $shop->business_structure ?? '';
         $this->phone = $shop->phone ?? '';
         $this->email = $shop->email ?? '';
@@ -79,11 +85,15 @@ final class ShopProfileForm extends Component
 
     public function save(): void
     {
-        $shop = Auth::user()->shop;
+        $shop = Shop::query()->where('user_id', Auth::id())->first();
 
-        abort_unless($shop !== null, 404);
+        abort_unless($shop instanceof Shop, 404);
 
         $validated = $this->validate();
+
+        $validated['slug'] = filled($validated['slug'])
+            ? $validated['slug']
+            : app(SlugGenerator::class)->generate(Shop::class, $shop->storefront_name, $shop->id);
 
         $categoryIds = $validated['product_categories'] ?? [];
         unset($validated['product_categories']);
@@ -141,9 +151,12 @@ final class ShopProfileForm extends Component
      */
     protected function rules(): array
     {
+        $shopId = Shop::query()->where('user_id', Auth::id())->value('id');
+
         return [
             'registered_business_name' => ['required', 'string', 'max:255'],
             'storefront_name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', new ValidSlug(Shop::class, is_numeric($shopId) ? (int) $shopId : null)],
             'business_structure' => ['required', Rule::in(['sole_proprietorship', 'partnership', 'corporation'])],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],

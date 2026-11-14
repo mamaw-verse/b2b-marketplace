@@ -46,6 +46,26 @@ test('order items copy unit and unit_price from quotation items', function () {
         ->and((string) $orderItem->subtotal)->toBe('3006.00');
 });
 
+test('order action cannot create an order from another shop quotation', function () {
+    $buyer = User::factory()->create();
+    $seller = User::factory()->create();
+    $otherSeller = User::factory()->create();
+    $shop = Shop::factory()->create(['user_id' => $seller->id, 'status' => 'active']);
+    $otherShop = Shop::factory()->create(['user_id' => $otherSeller->id, 'status' => 'active']);
+    $rfq = Rfq::factory()->create(['user_id' => $buyer->id]);
+    $recipient = RfqRecipient::factory()->create(['rfq_id' => $rfq->id, 'shop_id' => $shop->id]);
+    $quotation = Quotation::factory()->awarded()->create([
+        'rfq_id' => $rfq->id,
+        'rfq_recipient_id' => $recipient->id,
+    ]);
+
+    $result = (new CreateOrderAction)->execute($otherShop, $quotation->id);
+
+    expect($result['success'])->toBeFalse()
+        ->and($result['error'])->toBe('Quotation does not belong to this shop.');
+    $this->assertDatabaseMissing('orders', ['quotation_id' => $quotation->id]);
+});
+
 test('order items use variant_snapshot unit but always the quotation negotiated unit_price', function () {
     $buyer = User::factory()->create();
     $seller = User::factory()->create();

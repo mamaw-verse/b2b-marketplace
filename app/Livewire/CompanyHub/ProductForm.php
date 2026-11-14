@@ -8,6 +8,8 @@ use App\Jobs\IndexProductJob;
 use App\Jobs\OptimizeImageJob;
 use App\Models\Category;
 use App\Models\Product;
+use App\Rules\ValidSlug;
+use App\Support\Slugs\SlugGenerator;
 use Flux\Flux;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,6 +29,8 @@ final class ProductForm extends Component
     public ?Product $product = null;
 
     public string $name = '';
+
+    public string $slug = '';
 
     public string $description = '';
 
@@ -48,6 +52,7 @@ final class ProductForm extends Component
             $this->authorize('update', $product);
             $this->product = $product;
             $this->name = $product->name;
+            $this->slug = $product->slug ?? '';
             $this->description = $product->description ?? '';
             $this->category_ids = $product->categories()->pluck('categories.id')->map(fn ($id) => (int) $id)->all();
             $this->variantAttributesSchema = $product->variant_attributes_schema ?? [];
@@ -82,6 +87,10 @@ final class ProductForm extends Component
      */
     public function reloadSchemaFromCategories(): void
     {
+        if ($this->product) {
+            $this->authorize('update', $this->product);
+        }
+
         $this->variantAttributesSchema = [];
         $this->populateSchemaFromCategories();
 
@@ -92,7 +101,10 @@ final class ProductForm extends Component
         }
 
         // On edit, persist immediately so the reload survives a page refresh.
-        $this->product?->update(['variant_attributes_schema' => $this->variantAttributesSchema]);
+        $this->product?->update([
+            'variant_attributes_schema' => $this->variantAttributesSchema,
+            'updated_by_id' => Auth::id(),
+        ]);
 
         Flux::toast('Product options reloaded from selected categories.', variant: 'success');
     }
@@ -134,9 +146,14 @@ final class ProductForm extends Component
     {
         $this->validate();
 
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
 
         abort_unless((bool) $shop, 403, 'You must have a registered shop to manage products.');
+        if (! $this->product) {
+            $this->authorize('createProduct', $shop);
+        } else {
+            $this->authorize('update', $this->product);
+        }
 
         // Sanitize rich-text HTML: allow safe formatting tags only.
         $allowedTags = '<h1><h2><p><br><strong><b><em><i><ul><ol><li><blockquote><del>';
@@ -146,8 +163,12 @@ final class ProductForm extends Component
 
         $data = [
             'name' => $this->name,
+            'slug' => filled($this->slug)
+                ? $this->slug
+                : app(SlugGenerator::class)->generate(Product::class, $this->name, $this->product?->id),
             'description' => $sanitizedDescription,
             'variant_attributes_schema' => $this->variantAttributesSchema,
+            'updated_by_id' => Auth::id(),
         ];
 
         if ($this->featured_image) {
@@ -190,7 +211,7 @@ final class ProductForm extends Component
             return;
         }
 
-        $this->product->update(['status' => 'published']);
+        $this->product->update(['status' => 'published', 'updated_by_id' => Auth::id()]);
         IndexProductJob::dispatch($this->product)->afterCommit();
 
         Flux::toast(__('Product published.'), variant: 'success');
@@ -204,7 +225,7 @@ final class ProductForm extends Component
         abort_unless($this->product !== null, 403);
         $this->authorize('update', $this->product);
 
-        $this->product->update(['status' => 'archived']);
+        $this->product->update(['status' => 'archived', 'updated_by_id' => Auth::id()]);
         IndexProductJob::dispatch($this->product)->afterCommit();
 
         Flux::toast(__('Product archived.'), variant: 'success');
@@ -258,12 +279,13 @@ final class ProductForm extends Component
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>|string>
      */
     protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', new ValidSlug(Product::class, $this->product?->id)],
             'description' => ['nullable', 'string', 'max:5000'],
             'category_ids' => ['array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],

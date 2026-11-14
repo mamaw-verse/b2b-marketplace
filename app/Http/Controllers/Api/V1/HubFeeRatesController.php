@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PayoutSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 final class HubFeeRatesController extends Controller
 {
@@ -16,6 +17,7 @@ final class HubFeeRatesController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
+        Gate::authorize('manageShop');
         $shop = $request->user()->shop;
 
         if (! $shop || $shop->status !== 'active') {

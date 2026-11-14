@@ -18,7 +18,7 @@ final class RfqRecipientPolicy
             return false;
         }
 
-        return $user->shop !== null;
+        return $user->activeShop?->status === 'active';
     }
 
     /**
@@ -30,7 +30,7 @@ final class RfqRecipientPolicy
             return false;
         }
 
-        return $user->shop?->id === $rfqRecipient->shop_id;
+        return $rfqRecipient->shop->isManagedBy($user);
     }
 
     /**
@@ -42,7 +42,7 @@ final class RfqRecipientPolicy
             return false;
         }
 
-        return $user->shop?->id === $rfqRecipient->shop_id
+        return $rfqRecipient->shop->isManagedBy($user)
             && ! $rfqRecipient->isTerminal();
     }
 
@@ -55,7 +55,7 @@ final class RfqRecipientPolicy
             return false;
         }
 
-        return $user->shop?->id === $rfqRecipient->shop_id
+        return $rfqRecipient->shop->isManagedBy($user)
             && ! $rfqRecipient->isTerminal();
     }
 
@@ -69,7 +69,7 @@ final class RfqRecipientPolicy
             return false;
         }
 
-        return $user->shop?->id === $rfqRecipient->shop_id
+        return $rfqRecipient->shop->isManagedBy($user)
             && ! $rfqRecipient->isTerminal();
     }
 }

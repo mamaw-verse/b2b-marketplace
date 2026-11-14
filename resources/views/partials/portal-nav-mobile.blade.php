@@ -6,7 +6,7 @@
 --}}
 @php
     $user = auth()->user();
-    $shop = $user?->shop;
+    $shop = $user?->activeShop;
     $isOnboarded = $shop?->status === 'active';
 @endphp
 

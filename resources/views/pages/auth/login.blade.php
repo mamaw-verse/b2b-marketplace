@@ -7,7 +7,7 @@
 
     <div
         x-data="loginForm({
-            email: @js(old('email', '')),
+            email: @js(old('email', request()->query('email', ''))),
             password: '',
         }, @js($hasSummaryErrors))"
         class="grid gap-6"

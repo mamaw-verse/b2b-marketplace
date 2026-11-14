@@ -21,6 +21,7 @@ final class HubEarningsController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         Gate::authorize('accessHub');
+        Gate::authorize('manageShop');
 
         $shop = $request->user()->shop;
         $shopId = $shop->id;

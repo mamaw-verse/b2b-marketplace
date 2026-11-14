@@ -17,6 +17,7 @@
         <div class="p-6">
 
             <p class="mb-1.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Images must not contain contact information such as phone numbers, email addresses, social media links, or website URLs.') }}</p>
+            <p class="mb-3 text-xs text-[var(--hs-neutral-500)]">{{ __('Square images (1:1) work best — e.g. 1000 × 1000 px each.') }}</p>
 
             {{-- Upload dropzone --}}
             <x-hs-dropzone

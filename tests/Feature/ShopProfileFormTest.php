@@ -28,6 +28,7 @@ test('the shop profile form hydrates from the current shop', function () {
         ->test(ShopProfileForm::class)
         ->assertOk()
         ->assertSet('storefront_name', 'Original Name')
+        ->assertSet('slug', 'original-name')
         ->assertSet('city', 'Manila');
 });
 
@@ -46,6 +47,38 @@ test('saving updates the shop record', function () {
         'city' => 'Cebu',
         'export_readiness_status' => 'exporting_regionally',
     ]);
+});
+
+test('slug can be edited and blank slug regenerates from the storefront name', function () {
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->set('slug', 'custom-storefront')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($this->shop->fresh()->slug)->toBe('custom-storefront');
+
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->set('slug', '')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($this->shop->fresh()->slug)->toBe('original-name');
+});
+
+test('shop slug validation rejects numeric and reserved values', function () {
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->set('slug', '123')
+        ->call('save')
+        ->assertHasErrors('slug');
+
+    Livewire::actingAs($this->seller)
+        ->test(ShopProfileForm::class)
+        ->set('slug', 'admin')
+        ->call('save')
+        ->assertHasErrors('slug');
 });
 
 test('validation fails when required fields are cleared', function () {

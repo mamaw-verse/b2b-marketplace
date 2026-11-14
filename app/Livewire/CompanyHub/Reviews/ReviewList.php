@@ -29,7 +29,7 @@ final class ReviewList extends Component
     public function render(): View
     {
         $user = auth()->user();
-        $shop = $user->shop;
+        $shop = $user->activeShop;
 
         $query = Review::query()
             ->where(function ($q) use ($shop) {

@@ -24,21 +24,21 @@ final class Dashboard extends Component
     #[Computed]
     public function shop(): ?Shop
     {
-        return Auth::user()->shop;
+        return Auth::user()->activeShop;
     }
 
     #[Computed]
     public function certificationApplication(): ?CertificationApplication
     {
         return CertificationApplication::query()
-            ->where('shop_id', Auth::user()->shop?->id)
+            ->where('shop_id', Auth::user()->activeShop?->id)
             ->latest('created_at')
             ->first();
     }
 
     public function mount(ShopAnalyticsService $analyticsService): void
     {
-        $shop = Auth::user()->shop;
+        $shop = Auth::user()->activeShop;
         if (! $shop) {
             return;
         }

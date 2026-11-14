@@ -63,14 +63,14 @@ final class ProductModerationList extends Component
             return null;
         }
 
-        return Product::with(['shop', 'variants', 'gallery', 'categories.parent'])
+        return Product::with(['shop', 'variants', 'gallery', 'video', 'categories.parent'])
             ->find($this->previewProductId);
     }
 
     #[Computed]
     public function products(): LengthAwarePaginator
     {
-        $query = Product::with(['shop.latestSubscription']);
+        $query = Product::with(['shop.latestSubscription', 'video']);
 
         if ($this->search) {
             $query->where('name', 'ilike', '%'.$this->search.'%');

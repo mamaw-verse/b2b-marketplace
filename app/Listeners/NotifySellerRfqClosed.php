@@ -6,6 +6,7 @@ namespace App\Listeners;
 
 use App\Events\RfqClosed;
 use App\Notifications\RfqClosedNotification;
+use Illuminate\Support\Facades\Notification;
 
 final class NotifySellerRfqClosed
 {
@@ -14,10 +15,7 @@ final class NotifySellerRfqClosed
         $rfq = $event->rfq;
 
         foreach ($rfq->recipients()->with('shop.user')->get() as $recipient) {
-            $shopOwner = $recipient->shop->user ?? null;
-            if ($shopOwner) {
-                $shopOwner->notify(new RfqClosedNotification($recipient, 'buyer'));
-            }
+            Notification::send($recipient->shop->operationalRecipients(), new RfqClosedNotification($recipient, 'buyer'));
         }
     }
 }

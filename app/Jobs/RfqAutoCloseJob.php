@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Scan open RFQs with no activity for 7+ days and auto-close them.
@@ -55,10 +56,7 @@ final class RfqAutoCloseJob implements ShouldQueue
             if (! config('marketplace.features.admin_rfq_management_enabled')) {
                 // Notify recipient sellers
                 foreach ($rfq->recipients as $recipient) {
-                    $shopOwner = $recipient->shop->user ?? null;
-                    if ($shopOwner) {
-                        $shopOwner->notify(new RfqClosedNotification($recipient, 'system'));
-                    }
+                    Notification::send($recipient->shop->operationalRecipients(), new RfqClosedNotification($recipient, 'system'));
                 }
             }
 

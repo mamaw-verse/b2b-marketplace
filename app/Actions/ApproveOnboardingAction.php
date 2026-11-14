@@ -22,6 +22,10 @@ final class ApproveOnboardingAction
      */
     public function execute(ShopOnboarding $onboarding, User $admin): Shop
     {
+        if (User::whereKey($onboarding->user_id)->first()?->isShopStaff()) {
+            throw new RuntimeException('An active shop staff member cannot be approved as a separate shop owner.');
+        }
+
         if ($onboarding->status === 'approved') {
             throw new RuntimeException('Onboarding has already been approved.');
         }

@@ -33,7 +33,7 @@ final class CertificationApplicationAcknowledgment extends Mailable implements S
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.certification-application-acknowledgment',
+            view: 'emails.certification-application-acknowledgment',
             with: [
                 'application' => $this->application,
             ],

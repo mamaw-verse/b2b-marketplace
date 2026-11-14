@@ -15,6 +15,7 @@ use App\Http\Resources\OrderListResource;
 use App\Http\Resources\OrderResource;
 use App\Models\LedgerEntry;
 use App\Models\Order;
+use App\Models\Quotation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,13 +28,19 @@ final class HubOrderController extends Controller
      */
     public function store(StoreOrderRequest $request): JsonResponse
     {
+        Gate::authorize('accessHub');
         Gate::authorize('create', Order::class);
 
-        $shop = $request->user()->shop;
+        $shop = $request->user()->activeShop;
+        $quotationId = $request->validated('quotation_id');
+        if ($quotationId !== null) {
+            $quotation = Quotation::with('rfqRecipient')->findOrFail($quotationId);
+            Gate::authorize('createOrder', $quotation);
+        }
 
         $result = (new CreateOrderAction)->execute(
             $shop,
-            $request->validated('quotation_id'),
+            $quotationId,
             $request->validated('buyer_user_id'),
         );
 
@@ -56,7 +63,8 @@ final class HubOrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $shop = $request->user()->shop;
+        Gate::authorize('accessHub');
+        $shop = $request->user()->activeShop;
 
         $query = Order::forShop($shop->id);
 

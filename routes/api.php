@@ -105,7 +105,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Company Hub — Product Catalog (requires auth + verified email)
-    Route::middleware(['auth:sanctum', 'verified'])->prefix('hub')->group(function () {
+    Route::middleware(['auth:sanctum', 'verified', 'can:accessHub'])->prefix('hub')->group(function () {
         // Seller RFQ Queue
         Route::get('/rfqs', [RfqRecipientController::class, 'index']);
         Route::get('/rfqs/{rfqRecipient}', [RfqRecipientController::class, 'show']);

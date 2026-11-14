@@ -13,6 +13,7 @@ use App\Models\Review;
 use App\Models\Shop;
 use App\Models\User;
 use App\Notifications\ReviewReceivedNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 final class CreateReviewAction
@@ -95,7 +96,7 @@ final class CreateReviewAction
         };
 
         if ($shop) {
-            $shop->user->notify(new ReviewReceivedNotification($review));
+            Notification::send($shop->operationalRecipients(), new ReviewReceivedNotification($review));
         }
 
         return [

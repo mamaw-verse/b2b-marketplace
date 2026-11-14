@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
+use App\Models\ShopStaff;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
@@ -108,6 +109,36 @@ final class DemoUsersSeeder extends Seeder
 
         $this->attachShopCategories($shop);
         $this->seedProducts($shop);
+        $this->seedStaff($shop, $seller);
+    }
+
+    private function seedStaff(Shop $shop, User $owner): void
+    {
+        $staff = User::firstOrCreate(
+            ['email' => 'staff@gmail.com'],
+            [
+                'first_name' => 'Amina',
+                'last_name' => 'Macapaar',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $staff->assignRole('buyer');
+
+        if ($staff->shop()->exists() || $staff->staffMembership()->exists()) {
+            return;
+        }
+
+        ShopStaff::updateOrCreate(
+            ['shop_id' => $shop->id, 'email' => $staff->email],
+            [
+                'user_id' => $staff->id,
+                'invited_by_id' => $owner->id,
+                'accepted_at' => now(),
+                'status' => 'active',
+            ]
+        );
     }
 
     private function attachShopCategories(Shop $shop): void

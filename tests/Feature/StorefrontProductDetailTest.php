@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 use App\Livewire\Storefront\ProductDetail;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -39,6 +41,24 @@ test('admin_unpublished product returns 404 on storefront', function () {
 test('active moderation_status product is accessible on storefront', function () {
     Livewire::test(ProductDetail::class, ['product' => $this->product])
         ->assertStatus(200);
+});
+
+test('clean enabled product video is the first storefront gallery entry', function () {
+    Config::set('marketplace.features.product_video_enabled', true);
+    $media = Media::factory()->create([
+        'uploaded_by_id' => $this->shop->user_id,
+        'original_filename' => 'product.mp4',
+        'extension' => 'mp4',
+        'mime_type' => 'video/mp4',
+        'storage_path' => 'media/product.mp4',
+        'scan_status' => 'clean',
+    ]);
+    $this->product->update(['video_media_id' => $media->id]);
+
+    $this->get(route('storefront.product', $this->product))
+        ->assertOk()
+        ->assertSee('size-20 shrink-0', false)
+        ->assertSee('Product video', false);
 });
 
 test('flagged product returns 404 on public api', function () {

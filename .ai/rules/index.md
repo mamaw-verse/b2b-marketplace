@@ -6,6 +6,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | app/Livewire/CompanyHub/Fulfilment/**, resources/views/livewire/account/orders/** | .ai/rules/account-orders.md |
 | app/Actions/{CreatePayoutBatchAction,ConfirmReceiptAction,ResolveDisputeAction}.php | .ai/rules/actions.md |
+| app/Models/{Shop,Product,User,Media}.php, app/Jobs/ReconcileMediaOrphansJob.php, app/Services/MediaUploadService.php, config/{marketplace,livewire}.php | .ai/rules/slugs-video-staff.md |
 | app/{Models,Policies,Livewire,Http/Controllers/Api/V1}/**.php | .ai/rules/api-v1.md |
 | app/**/*.php | .ai/rules/app.md |
 | {app/Http/Controllers/Auth/**,resources/views/pages/settings/**,resources/views/pages/auth/confirm-password.blade.php} | .ai/rules/auth.md |
@@ -21,9 +22,12 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Livewire/Storefront/** | .ai/rules/livewire-storefront.md |
 | app/Livewire/**, app/Livewire/**/*.php, app/Livewire/**/RfqDetail.php, app/Livewire/**/*Certificate* | .ai/rules/livewire.md |
 | resources/views/vendor/mail/** | .ai/rules/mail.md |
-| app/Models/Review.php | .ai/rules/models.md |
+| database/migrations/** | .ai/rules/migrations.md |
+| app/Models/Review.php, app/Models/** | .ai/rules/models.md |
+| app/Notifications/** | .ai/rules/notifications.md |
 | resources/views/livewire/company-hub/orders/** | .ai/rules/orders.md |
 | resources/views/partials/portal-nav* | .ai/rules/partials.md |
+| routes/web.php | .ai/rules/routes.md |
 | app/Services/DltPaymentService.php | .ai/rules/services.md |
 | resources/views/livewire/storefront/product-detail.blade.php, resources/views/livewire/storefront/review-list.blade.php, resources/views/livewire/storefront/** | .ai/rules/storefront.md |
 | tests/** | .ai/rules/tests.md |

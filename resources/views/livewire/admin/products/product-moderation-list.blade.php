@@ -75,6 +75,11 @@
                             </a>
                         </div>
                     @endif
+                    @if (config('marketplace.features.product_video_enabled') && $product->video?->scan_status === 'clean')
+                        <div class="mt-2">
+                            <a href="{{ route('media.view', $product->video) }}" target="_blank" rel="noopener" class="text-xs font-medium text-[var(--hs-green-700)] hover:underline">{{ __('Open product video') }}</a>
+                        </div>
+                    @endif
                     <div class="mt-3">
                         @if($product->moderation_status === 'flagged')
                             <flux:button variant="primary" size="sm" x-on:click="$flux.modal('confirm-restore-{{ $product->id }}').show()">
@@ -126,6 +131,9 @@
                                            class="shrink-0 text-[var(--hs-neutral-400)] hover:text-[var(--hs-green-700)] transition">
                                             <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                                         </a>
+                                    @endif
+                                    @if (config('marketplace.features.product_video_enabled') && $product->video?->scan_status === 'clean')
+                                        <a href="{{ route('media.view', $product->video) }}" target="_blank" rel="noopener" class="shrink-0 text-xs font-medium text-[var(--hs-green-700)] hover:underline">{{ __('Video') }}</a>
                                     @endif
                                 </div>
                             </flux:table.cell>
@@ -231,6 +239,13 @@
             @endphp
 
             <flux:heading size="lg">{{ $preview->name }}</flux:heading>
+
+            @if (config('marketplace.features.product_video_enabled') && $preview->video?->scan_status === 'clean')
+                <video controls preload="metadata" playsinline class="mt-4 w-full rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-black" @if ($preview->featured_image_url) poster="{{ $preview->featured_image_url }}" @endif>
+                    <source src="{{ route('media.view', $preview->video) }}" type="{{ $preview->video->mime_type }}">
+                    {{ __('Your browser does not support video playback.') }}
+                </video>
+            @endif
 
             <div class="mt-1 flex items-center gap-2 flex-wrap">
                 <a href="{{ route('admin.merchants.show', $preview->shop_id) }}"

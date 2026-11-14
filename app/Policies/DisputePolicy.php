@@ -47,7 +47,7 @@ final class DisputePolicy
         $order = $dispute->order;
 
         return $user->id === $order->buyer_user_id
-            || $user->id === $order->shop->user_id;
+            || $order->shop->isManagedBy($user);
     }
 
     /**
@@ -62,7 +62,7 @@ final class DisputePolicy
             return false;
         }
 
-        if ($user->id !== $dispute->order->shop->user_id) {
+        if (! $dispute->order->shop->isManagedBy($user)) {
             return false;
         }
 
@@ -84,7 +84,7 @@ final class DisputePolicy
             return false;
         }
 
-        if ($user->id !== $dispute->order->shop->user_id) {
+        if (! $dispute->order->shop->isManagedBy($user)) {
             return false;
         }
 
@@ -104,7 +104,7 @@ final class DisputePolicy
 
         $order = $dispute->order;
         $isParticipant = $user->id === $order->buyer_user_id
-            || $user->id === $order->shop->user_id;
+            || $order->shop->isManagedBy($user);
 
         if (! $isParticipant) {
             return false;

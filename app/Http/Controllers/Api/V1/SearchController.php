@@ -40,7 +40,10 @@ final class SearchController extends Controller
         $searchTimeMs = round((microtime(true) - $startTime) * 1000);
 
         return response()->json([
-            'data' => $results->items(),
+            'data' => collect($results->items())->map(fn (Shop $shop): array => [
+                ...$shop->toArray(),
+                'canonical_url' => route('storefront.company', $shop),
+            ])->all(),
             'meta' => [
                 'found' => count($results->items()),
                 'search_time_ms' => $searchTimeMs,
@@ -76,7 +79,10 @@ final class SearchController extends Controller
         $searchTimeMs = round((microtime(true) - $startTime) * 1000);
 
         return response()->json([
-            'data' => $results->items(),
+            'data' => collect($results->items())->map(fn (Product $product): array => [
+                ...$product->toArray(),
+                'canonical_url' => route('storefront.product', $product),
+            ])->all(),
             'meta' => [
                 'found' => count($results->items()),
                 'search_time_ms' => $searchTimeMs,
@@ -98,7 +104,10 @@ final class SearchController extends Controller
             $query->marketplaceVisible()->limit(10);
         }, 'products.variants']);
 
-        return response()->json(['data' => $shop]);
+        return response()->json(['data' => [
+            ...$shop->toArray(),
+            'canonical_url' => route('storefront.company', $shop),
+        ]]);
     }
 
     /**
@@ -122,7 +131,10 @@ final class SearchController extends Controller
 
         $product->load(['variants', 'gallery', 'documents', 'categories', 'shop']);
 
-        return response()->json(['data' => $product]);
+        return response()->json(['data' => [
+            ...$product->toArray(),
+            'canonical_url' => route('storefront.product', $product),
+        ]]);
     }
 
     /**

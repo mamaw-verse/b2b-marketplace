@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -22,8 +23,12 @@ use Laravel\Scout\Searchable;
  * @property int $id
  * @property int $shop_id
  * @property string $name
+ * @property string|null $slug
  * @property string|null $description
  * @property string|null $featured_image_path
+ * @property int|null $video_media_id
+ * @property int|null $updated_by_id
+ * @property-read User|null $lastEditor
  * @property string $status
  * @property array<string, array<string, mixed>> $variant_attributes_schema
  * @property Carbon|null $deleted_at
@@ -33,13 +38,16 @@ use Laravel\Scout\Searchable;
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
-    use HasFactory, Searchable, SoftDeletes;
+    use HasFactory, HasSlug, Searchable, SoftDeletes;
 
     protected $fillable = [
         'shop_id',
         'name',
+        'slug',
         'description',
         'featured_image_path',
+        'video_media_id',
+        'updated_by_id',
         'status',
         'moderation_status',
         'variant_attributes_schema',
@@ -52,6 +60,11 @@ final class Product extends Model
         return 'products';
     }
 
+    public function slugSource(): string
+    {
+        return $this->name;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -59,6 +72,7 @@ final class Product extends Model
     {
         return [
             'id' => (string) $this->id,
+            'slug' => $this->slug,
             'name' => $this->name,
             'description' => $this->description ?? '',
             'shop_name' => $this->shop->storefront_name ?? '',
@@ -167,6 +181,11 @@ final class Product extends Model
         return $this->belongsTo(Shop::class);
     }
 
+    public function lastEditor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by_id');
+    }
+
     /**
      * Product variants (SKUs).
      */
@@ -189,6 +208,12 @@ final class Product extends Model
     public function documents(): BelongsToMany
     {
         return $this->belongsToMany(Media::class, 'product_documents');
+    }
+
+    /** Product video attached through the single video_media_id reference. */
+    public function video(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'video_media_id');
     }
 
     /**

@@ -18,7 +18,7 @@ final class OrderPolicy
             return false;
         }
 
-        return $user->shop !== null && $user->shop->status === 'active';
+        return $user->activeShop !== null && $user->activeShop->status === 'active';
     }
 
     /**
@@ -31,7 +31,7 @@ final class OrderPolicy
         }
 
         return $user->id === $order->buyer_user_id
-            || $user->id === $order->shop->user_id;
+            || $order->shop->isManagedBy($user);
     }
 
     /**
@@ -43,7 +43,7 @@ final class OrderPolicy
             return false;
         }
 
-        return $user->id === $order->shop->user_id
+        return $order->shop->isManagedBy($user)
             && $order->status === 'draft';
     }
 
@@ -56,7 +56,7 @@ final class OrderPolicy
             return false;
         }
 
-        return $user->id === $order->shop->user_id
+        return $order->shop->isManagedBy($user)
             && $order->status === 'draft';
     }
 
@@ -69,7 +69,7 @@ final class OrderPolicy
             return false;
         }
 
-        return $user->id === $order->shop->user_id
+        return $order->shop->isManagedBy($user)
             && $order->status === 'pending_payment';
     }
 
@@ -109,7 +109,7 @@ final class OrderPolicy
             return false;
         }
 
-        if ($user->id !== $order->shop->user_id) {
+        if (! $order->shop->isManagedBy($user)) {
             return false;
         }
 
@@ -156,7 +156,7 @@ final class OrderPolicy
             return false;
         }
 
-        return $user->id === $order->shop->user_id
+        return $order->shop->isManagedBy($user)
             && $order->status === 'draft';
     }
 
@@ -170,6 +170,6 @@ final class OrderPolicy
             return false;
         }
 
-        return $user->id === $order->shop->user_id;
+        return $order->shop->isManagedBy($user);
     }
 }
