@@ -97,6 +97,7 @@ test('toggleStatus does nothing when no product is being confirmed', function ()
 });
 
 test('seller cannot toggle status of a product belonging to another shop', function () {
+    $this->withoutExceptionHandling();
     $otherShop = Shop::factory()->create(['status' => 'active']);
     $product = Product::factory()->published()->create(['shop_id' => $otherShop->id]);
 
@@ -185,6 +186,7 @@ test('deleteProduct cannot delete a published product', function () {
 });
 
 test('seller cannot delete a product belonging to another shop', function () {
+    $this->withoutExceptionHandling();
     $otherShop = Shop::factory()->create(['status' => 'active']);
     $product = Product::factory()->archived()->create(['shop_id' => $otherShop->id]);
 

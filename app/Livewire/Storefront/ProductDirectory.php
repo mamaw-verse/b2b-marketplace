@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -116,7 +117,8 @@ final class ProductDirectory extends Component
     public function products(): LengthAwarePaginator
     {
         if ($this->query !== '') {
-            $search = Product::search($this->query);
+            $search = Product::search($this->query)
+                ->query(fn (Builder $q) => $q->with(['shop.certificates', 'variants', 'categories']));
 
             if ($this->categoryId) {
                 $category = Category::find($this->categoryId);
@@ -131,7 +133,7 @@ final class ProductDirectory extends Component
         }
 
         $query = Product::marketplaceVisible()
-            ->with(['shop', 'variants', 'categories']);
+            ->with(['shop.certificates', 'variants', 'categories']);
 
         if ($this->categoryId) {
             $query->whereHas('categories', fn ($q) => $q

@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
+use App\Models\ShopCertificate;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use Database\Seeders\RolePermissionSeeder;
@@ -53,7 +54,10 @@ test('clean enabled product video is the first storefront gallery entry', functi
         'storage_path' => 'media/product.mp4',
         'scan_status' => 'clean',
     ]);
-    $this->product->update(['video_media_id' => $media->id]);
+    $this->product->update([
+        'video_media_id' => $media->id,
+        'featured_image_path' => 'products/test.jpg',
+    ]);
 
     $this->get(route('storefront.product', $this->product))
         ->assertOk()
@@ -120,7 +124,7 @@ test('archived variant sku does not render on the storefront', function () {
 test('product detail renders sourcing section at bottom', function () {
     Livewire::test(ProductDetail::class, ['product' => $this->product])
         ->assertSee('Looking for Something Else?')
-        ->assertSee('We can help.')
+        ->assertSee('Our sourcing team will help you find the right product.')
         ->assertSee('Custom Sourcing');
 });
 
@@ -158,4 +162,79 @@ test('html description from wysiwyg is rendered without double-escaping', functi
     $this->get(route('storefront.product', $product))
         ->assertOk()
         ->assertSee('<strong>certified halal</strong>', false);
+});
+
+test('halal certified pill and popover render when shop has active certificate', function () {
+    ShopCertificate::factory()->create([
+        'shop_id' => $this->shop->id,
+        'status' => 'active',
+        'registration_number' => 'MHCB-003123',
+    ]);
+
+    Livewire::test(ProductDetail::class, ['product' => $this->product])
+        ->assertSee('Halal Certified')
+        ->assertSee('click to view certificate details')
+        ->assertSee('MHCB-003123');
+
+    $this->get(route('storefront.product', $this->product))
+        ->assertOk()
+        ->assertSee('click to view certificate details')
+        ->assertSee('MHCB-003123');
+});
+
+test('halal certified pill does not render when shop has no certificates', function () {
+    Livewire::test(ProductDetail::class, ['product' => $this->product])
+        ->assertDontSee('Halal Certified')
+        ->assertDontSee('click to view certificate details');
+
+    $this->get(route('storefront.product', $this->product))
+        ->assertOk()
+        ->assertDontSee('click to view certificate details');
+});
+
+test('halal certified pill does not render when shop only has inactive certificates', function () {
+    ShopCertificate::factory()->expired()->create([
+        'shop_id' => $this->shop->id,
+        'registration_number' => 'MHCB-EXPIRED',
+    ]);
+
+    Livewire::test(ProductDetail::class, ['product' => $this->product])
+        ->assertDontSee('Halal Certified')
+        ->assertDontSee('click to view certificate details')
+        ->assertDontSee('MHCB-EXPIRED');
+
+    $this->get(route('storefront.product', $this->product))
+        ->assertOk()
+        ->assertDontSee('click to view certificate details')
+        ->assertDontSee('MHCB-EXPIRED');
+});
+
+test('redundant halal chain of custody trust strip is not rendered', function () {
+    ShopCertificate::factory()->create([
+        'shop_id' => $this->shop->id,
+        'status' => 'active',
+    ]);
+
+    Livewire::test(ProductDetail::class, ['product' => $this->product])
+        ->assertDontSee('Halal chain of custody verified');
+
+    $this->get(route('storefront.product', $this->product))
+        ->assertOk()
+        ->assertDontSee('Halal chain of custody verified');
+});
+
+test('share buttons render under gallery viewer when product share is enabled', function () {
+    Config::set('marketplace.features.product_share_enabled', true);
+
+    Livewire::test(ProductDetail::class, ['product' => $this->product])
+        ->assertSee('Share this product')
+        ->assertDontSee('Halal chain of custody verified');
+
+    $response = $this->get(route('storefront.product', $this->product));
+    $response->assertOk();
+
+    $content = $response->getContent();
+    $sharePos = strpos($content, 'aria-label="Share this product"');
+
+    expect($sharePos)->not->toBeFalse();
 });

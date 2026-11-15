@@ -75,6 +75,23 @@ test('a logged-in user gets name and email prefilled', function () {
         ->assertSet('email', 'jane@example.com');
 });
 
+test('logged-in users default to using their registered details', function () {
+    $user = User::factory()->create([
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'email' => 'jane@example.com',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductSourcingForm::class)
+        ->assertSet('use_registered_details', true);
+});
+
+test('guests do not use registered details', function () {
+    Livewire::test(ProductSourcingForm::class)
+        ->assertSet('use_registered_details', false);
+});
+
 test('product name is prefilled when provided', function () {
     Livewire::test(ProductSourcingForm::class, ['prefillProductName' => 'Organic Honey'])
         ->assertSet('product_name', 'Organic Honey');

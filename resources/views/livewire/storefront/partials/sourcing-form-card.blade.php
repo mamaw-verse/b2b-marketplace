@@ -16,20 +16,22 @@
         {{-- Product details --}}
         <div class="rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
             <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Product Details') }}</h3>
-            <div class="mt-4 space-y-4">
-                <flux:field>
-                    <flux:label>{{ __('Product Name / Type') }}</flux:label>
-                    <flux:input type="text" wire:model="product_name" placeholder="{{ __('What product are you looking for?') }}" />
-                    <flux:error name="product_name" />
-                </flux:field>
+            <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div class="space-y-4">
+                    <flux:field>
+                        <flux:label>{{ __('Product Name / Type') }}</flux:label>
+                        <flux:input type="text" wire:model="product_name" placeholder="{{ __('What product are you looking for?') }}" />
+                        <flux:error name="product_name" />
+                    </flux:field>
 
-                <flux:field>
-                    <flux:label>{{ __('Product Description & Specifications') }}</flux:label>
-                    <flux:textarea wire:model="product_description" rows="4" placeholder="{{ __('Tell us about the size, material, color, features, technical specifications, or any other requirements. How many units are you looking to purchase?') }}" />
-                    <flux:error name="product_description" />
-                </flux:field>
+                    <flux:field>
+                        <flux:label>{{ __('Product Description & Specifications') }}</flux:label>
+                        <flux:textarea wire:model="product_description" rows="4" placeholder="{{ __('Tell us about the size, material, color, features, technical specifications, or any other requirements. How many units are you looking to purchase?') }}" />
+                        <flux:error name="product_description" />
+                    </flux:field>
+                </div>
 
-                <flux:field>
+                <flux:field class="lg:self-center">
                     <flux:label>{{ __('Reference Image / File') }}</flux:label>
                     <x-hs-dropzone
                         input-id="sourcing-reference-file"
@@ -55,19 +57,40 @@
 
         {{-- Contact details --}}
         <div class="mt-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Your Details') }}</h3>
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <flux:field>
-                    <flux:label>{{ __('Name') }}</flux:label>
-                    <flux:input type="text" wire:model="name" placeholder="{{ __('John Smith') }}" />
-                    <flux:error name="name" />
-                </flux:field>
-                <flux:field>
-                    <flux:label>{{ __('Email Address') }}</flux:label>
-                    <flux:input type="email" wire:model="email" placeholder="{{ __('contact@example.com') }}" />
-                    <flux:error name="email" />
-                </flux:field>
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Your Details') }}</h3>
+                @auth
+                    <label class="flex cursor-pointer items-center gap-2 text-sm font-medium text-[var(--hs-neutral-700)]">
+                        <input
+                            type="checkbox"
+                            wire:model.live="use_registered_details"
+                            class="size-4 shrink-0 rounded border-[var(--hs-neutral-400)] accent-[var(--hs-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2"
+                        />
+                        {{ __('Use my registered details') }}
+                    </label>
+                @endauth
+                @if ($use_registered_details && auth()->user() !== null)
+                    <p class="text-sm text-[var(--hs-neutral-600)]">
+                        {{ __('We will use the contact details on your account:') }}
+                        <span class="font-medium text-[var(--hs-neutral-900)]">{{ $name }} ({{ $email }})</span>
+                    </p>
+                @endif
             </div>
+
+            @if (! ($use_registered_details && auth()->user() !== null))
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <flux:field>
+                        <flux:label>{{ __('Name') }}</flux:label>
+                        <flux:input type="text" wire:model="name" placeholder="{{ __('John Smith') }}" />
+                        <flux:error name="name" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>{{ __('Email Address') }}</flux:label>
+                        <flux:input type="email" wire:model="email" placeholder="{{ __('contact@example.com') }}" />
+                        <flux:error name="email" />
+                    </flux:field>
+                </div>
+            @endif
 
             <div class="mt-4">
                 <flux:error name="human_check" />
@@ -80,8 +103,8 @@
             <input type="text" id="sourcing-honeypot" tabindex="-1" autocomplete="off" wire:model="honeypot" />
         </div>
 
-        <div class="mt-6">
-            <flux:button type="submit" variant="primary" class="!w-full" icon="paper-airplane" wire:loading.attr="disabled">
+        <div class="mt-6 flex justify-end">
+            <flux:button type="submit" variant="primary" icon="paper-airplane" wire:loading.attr="disabled">
                 {{ __('Submit Sourcing Request') }}
             </flux:button>
         </div>

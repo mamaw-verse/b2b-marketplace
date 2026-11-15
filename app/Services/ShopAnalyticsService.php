@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -499,5 +500,52 @@ final class ShopAnalyticsService
             'order_count' => (int) $row->order_count,
             'quantity_purchased' => (float) $row->quantity_purchased,
         ])->toArray();
+    }
+
+    /**
+     * Get product share breakdown by channel for all-time and recent period.
+     *
+     * @return array{
+     *     total: int,
+     *     last_days: int,
+     *     by_channel: array<string, array{all: int, recent: int}>
+     * }
+     */
+    public function productShareBreakdown(Product $product, int $days = 30): array
+    {
+        $allTime = DB::table('product_share_stats')
+            ->where('product_id', $product->id)
+            ->groupBy('channel')
+            ->select('channel', DB::raw('SUM(count) as total'))
+            ->pluck('total', 'channel')
+            ->all();
+
+        $cutoff = today()->subDays($days)->toDateString();
+
+        $recent = DB::table('product_share_stats')
+            ->where('product_id', $product->id)
+            ->where('shared_on', '>=', $cutoff)
+            ->groupBy('channel')
+            ->select('channel', DB::raw('SUM(count) as total'))
+            ->pluck('total', 'channel')
+            ->all();
+
+        /** @var array<string> $channels */
+        $channels = (array) config('marketplace.share.channels', ['copy', 'facebook', 'x', 'messenger', 'native']);
+        $allChannels = array_values(array_unique(array_merge($channels, array_keys($allTime), array_keys($recent))));
+
+        $byChannel = [];
+        foreach ($allChannels as $channel) {
+            $byChannel[$channel] = [
+                'all' => (int) ($allTime[$channel] ?? 0),
+                'recent' => (int) ($recent[$channel] ?? 0),
+            ];
+        }
+
+        return [
+            'total' => (int) array_sum($allTime),
+            'last_days' => (int) array_sum($recent),
+            'by_channel' => $byChannel,
+        ];
     }
 }

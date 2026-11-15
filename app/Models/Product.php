@@ -30,6 +30,7 @@ use Laravel\Scout\Searchable;
  * @property int|null $updated_by_id
  * @property-read User|null $lastEditor
  * @property string $status
+ * @property int $share_count
  * @property array<string, array<string, mixed>> $variant_attributes_schema
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
@@ -233,6 +234,16 @@ final class Product extends Model
     }
 
     /**
+     * Daily share statistics for this product.
+     *
+     * @return HasMany<ProductShareStat, $this>
+     */
+    public function shareStats(): HasMany
+    {
+        return $this->hasMany(ProductShareStat::class);
+    }
+
+    /**
      * Scope a query to only include published products.
      */
     public function scopePublished($query)
@@ -244,6 +255,7 @@ final class Product extends Model
     {
         return [
             'variant_attributes_schema' => 'array',
+            'share_count' => 'integer',
         ];
     }
 

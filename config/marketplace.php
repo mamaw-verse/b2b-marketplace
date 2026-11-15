@@ -109,6 +109,12 @@ return [
         'staff_per_shop' => (int) env('MARKETPLACE_MAX_STAFF_PER_SHOP', 2),
     ],
 
+    'share' => [
+        'public_min' => (int) env('MARKETPLACE_SHARE_PUBLIC_MIN', 5),
+        'dedupe_minutes' => (int) env('MARKETPLACE_SHARE_DEDUPE_MINUTES', 10),
+        'channels' => ['copy', 'facebook', 'messenger', 'x', 'native'],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Feature Flags
@@ -138,6 +144,7 @@ return [
         'sponsored_content_enabled' => (bool) env('MARKETPLACE_SPONSORED_CONTENT_ENABLED', true),
         'admin_rfq_management_enabled' => (bool) env('MARKETPLACE_ADMIN_RFQ_MANAGEMENT_ENABLED', true),
         'product_video_enabled' => (bool) env('MARKETPLACE_PRODUCT_VIDEO_ENABLED', false),
+        'product_share_enabled' => (bool) env('MARKETPLACE_PRODUCT_SHARE_ENABLED', false),
     ],
 
 ];

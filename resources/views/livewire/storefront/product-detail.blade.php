@@ -263,38 +263,21 @@
                     @endif
                 </div>
 
-                {{-- Trust/certification strip --}}
-                @if ($product->shop && $product->shop->certificates?->isNotEmpty())
-                    @php
-                        $activeCert = $product->shop->certificates->first(fn ($c) => $c->status === 'active');
-                    @endphp
-                    @if ($activeCert)
-                        <a
-                            href="{{ route('storefront.company', $product->shop) }}"
-                            wire:navigate
-                            class="flex items-center gap-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] px-3.5 py-2.5 hover:bg-[var(--hs-green-100)] transition group"
-                        >
-                            <flux:icon name="check-badge" variant="mini" class="size-4 text-[var(--hs-green-700)] shrink-0" aria-hidden="true" />
-                            <p class="text-xs font-medium text-[var(--hs-green-800)] flex-1">{{ __('Halal chain of custody verified — certified supplier') }}</p>
-                            <flux:icon name="arrow-right" variant="mini" class="size-3.5 text-[var(--hs-green-700)] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
-                        </a>
-                    @else
-                        <div class="flex items-center gap-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] px-3.5 py-2.5">
-                            <flux:icon name="check-badge" variant="mini" class="size-4 text-[var(--hs-green-700)] shrink-0" aria-hidden="true" />
-                            <p class="text-xs font-medium text-[var(--hs-green-800)]">{{ __('Halal chain of custody verified — certified supplier') }}</p>
-                        </div>
-                    @endif
-                @else
-                    <div class="flex items-center gap-2 rounded-[var(--hs-radius-sm)] bg-[var(--hs-green-50)] border border-[var(--hs-green-200)] px-3.5 py-2.5">
-                        <flux:icon name="check-badge" variant="mini" class="size-4 text-[var(--hs-green-700)] shrink-0" aria-hidden="true" />
-                        <p class="text-xs font-medium text-[var(--hs-green-800)]">{{ __('Halal chain of custody verified — certified supplier') }}</p>
-                    </div>
-                @endif
             @else
                 <div class="flex flex-col items-center justify-center gap-2 rounded-[var(--hs-radius-card)] bg-[var(--hs-neutral-50)] aspect-square border border-[var(--hs-neutral-200)]">
                     <flux:icon name="photo" class="size-16 text-[var(--hs-neutral-300)]" aria-hidden="true" />
                     <p class="text-sm text-[var(--hs-neutral-400)]">{{ __('No images available') }}</p>
                 </div>
+            @endif
+
+            {{-- Share buttons --}}
+            @if (config('marketplace.features.product_share_enabled'))
+                <x-hs-share-buttons
+                    :url="$ogUrl"
+                    :title="$ogTitle"
+                    :text="$product->name"
+                    :share-count="$product->share_count"
+                />
             @endif
 
             {{-- ============ LIGHTBOX (teleported to body) ============ --}}
@@ -487,34 +470,27 @@
                 aria-label="{{ __('Product badges') }}"
             >
                 {{-- Halal trust badge (button → popover with cert details) --}}
-                @php
-                    $hasCertDetails = $shopCert !== null;
-                @endphp
-                <div class="relative shrink-0">
-                    <button
-                        type="button"
-                        class="inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] text-white text-xs font-semibold whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] transition hover:bg-[var(--hs-green-700)]"
-                        @if ($hasCertDetails)
+                @if ($shopCert)
+                    <div class="relative shrink-0">
+                        <button
+                            type="button"
+                            class="inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] text-white text-xs font-semibold whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] transition hover:bg-[var(--hs-green-700)]"
                             @click="certPopoverOpen = !certPopoverOpen"
                             @click.outside="certPopoverOpen = false"
                             :aria-expanded="certPopoverOpen"
                             aria-haspopup="true"
-                        @endif
-                        aria-label="{{ __('Halal Certified') }}{{ $hasCertDetails ? ' — ' . __('click to view certificate details') : '' }}"
-                    >
-                        <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                        </svg>
-                        {{ __('Halal Certified') }}
-                        @if ($hasCertDetails)
+                            aria-label="{{ __('Halal Certified') }} — {{ __('click to view certificate details') }}"
+                        >
+                            <svg class="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                            </svg>
+                            {{ __('Halal Certified') }}
                             <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                             </svg>
-                        @endif
-                    </button>
+                        </button>
 
-                    {{-- Certificate popover --}}
-                    @if ($hasCertDetails)
+                        {{-- Certificate popover --}}
                         <div
                             x-show="certPopoverOpen"
                             x-transition:enter="transition ease-out duration-150"
@@ -556,8 +532,8 @@
                                 </div>
                             </div>
                         </div>
-                    @endif
-                </div>
+                    </div>
+                @endif
 
                 {{-- Primary category chip: parent › child as breadcrumb-style --}}
                 @if ($primaryCategory)
@@ -925,26 +901,20 @@
 
     {{-- ============ SOURCING / LOOKING FOR SOMETHING ELSE ============ --}}
     <section id="sourcing-form" class="mt-12 pt-12 border-t border-[var(--hs-neutral-200)] scroll-mt-24">
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
-            <div class="lg:sticky lg:top-6">
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
-                    <flux:icon name="magnifying-glass" class="size-3.5" />
-                    {{ __('Custom Sourcing') }}
-                </span>
-                <h2 class="mt-4 text-2xl sm:text-3xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight">
-                    {{ __('Looking for Something Else?') }}
-                </h2>
-                <p class="mt-3 text-base font-semibold text-[var(--hs-neutral-900)]">
-                    {{ __('Don’t see exactly what you need? We can help.') }}
-                </p>
-                <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] leading-relaxed">
-                    {{ __('If this product isn’t quite right, or you’re looking for something that isn’t listed on our website, send us your requirements. Our sourcing team can help find products that match your specifications.') }}
-                </p>
-                <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] leading-relaxed">
-                    {{ __('Whether you have a product name, photo, specification, or just an idea of what you need, tell us what you’re looking for and we’ll take it from there.') }}
-                </p>
+        <div>
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-green-100)] bg-[var(--hs-green-50)] px-3.5 py-1.5 text-[0.75rem] font-bold tracking-wide text-[var(--hs-green-700)]">
+                <flux:icon name="magnifying-glass" class="size-3.5" />
+                {{ __('Custom Sourcing') }}
+            </span>
+            <h2 class="mt-4 text-2xl sm:text-3xl font-extrabold text-[var(--hs-neutral-900)] leading-tight tracking-tight">
+                {{ __('Looking for Something Else?') }}
+            </h2>
+            <p class="mt-3 text-sm sm:text-base text-[var(--hs-neutral-500)] leading-relaxed">
+                {{ __('Can’t find what you need? Share your product requirements, specifications, or even a photo. Our sourcing team will help you find the right product.') }}
+            </p>
+            <div class="mt-8">
+                <livewire:storefront.product-sourcing-form :prefill-product-name="$product->name" />
             </div>
-            <livewire:storefront.product-sourcing-form :prefill-product-name="$product->name" />
         </div>
     </section>
 </div>

@@ -272,6 +272,51 @@
         </div>
     </div>
 
+    @if ($product && config('marketplace.features.product_share_enabled'))
+        @php
+            $stats = $this->shareStats;
+            $channelLabels = [
+                'copy' => __('Copy link'),
+                'facebook' => 'Facebook',
+                'x' => 'X',
+                'messenger' => 'Messenger',
+                'native' => __('Mobile share sheet (incl. Instagram)'),
+            ];
+        @endphp
+        <div class="mt-6 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)]">
+            <div class="flex flex-col gap-2 border-b border-[var(--hs-neutral-100)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Sharing') }}</h2>
+                    <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Track how buyers share this product.') }}</p>
+                </div>
+                <div class="flex items-center gap-6 text-sm">
+                    <div>
+                        <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Last 30 days') }}:</span>
+                        <span class="font-semibold text-[var(--hs-neutral-900)]">{{ $stats['last_days'] ?? 0 }}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('All time') }}:</span>
+                        <span class="font-semibold text-[var(--hs-neutral-900)]">{{ $stats['total'] ?? 0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divide-y divide-[var(--hs-neutral-100)]">
+                @foreach ($stats['by_channel'] ?? [] as $channel => $counts)
+                    <div class="flex items-center justify-between px-6 py-3.5 text-sm">
+                        <span class="font-medium text-[var(--hs-neutral-800)]">
+                            {{ $channelLabels[$channel] ?? ucfirst($channel) }}
+                        </span>
+                        <div class="flex items-center gap-6 text-xs text-[var(--hs-neutral-600)]">
+                            <span>{{ __('Last 30 days:') }} <strong class="text-[var(--hs-neutral-900)]">{{ $counts['recent'] ?? 0 }}</strong></span>
+                            <span>{{ __('All time:') }} <strong class="text-[var(--hs-neutral-900)]">{{ $counts['all'] ?? 0 }}</strong></span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <x-hs-confirm
         name="confirm-reload-schema"
         title="{{ __('Reload Product Options') }}"

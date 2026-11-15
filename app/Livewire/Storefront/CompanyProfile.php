@@ -44,7 +44,7 @@ final class CompanyProfile extends Component
 
         $this->shop = $shop;
         $this->shop->load(['categories', 'certificates', 'products' => function ($query) {
-            $query->marketplaceVisible()->with(['variants', 'categories.parent']);
+            $query->marketplaceVisible()->with(['shop.certificates', 'variants', 'categories.parent']);
         }]);
     }
 

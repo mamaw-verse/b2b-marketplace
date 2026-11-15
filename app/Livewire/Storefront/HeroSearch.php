@@ -39,7 +39,7 @@ final class HeroSearch extends Component
         }
 
         $this->productResults = Product::search($this->query)
-            ->query(fn (Builder $q) => $q->with(['shop', 'variants']))
+            ->query(fn (Builder $q) => $q->with(['shop.certificates', 'variants']))
             ->take(8)
             ->get();
     }
@@ -51,7 +51,7 @@ final class HeroSearch extends Component
     public function featuredProducts(): Collection
     {
         return Product::marketplaceVisible()
-            ->with(['shop', 'variants'])
+            ->with(['shop.certificates', 'variants'])
             ->latest()
             ->take(8)
             ->get();

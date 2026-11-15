@@ -45,16 +45,13 @@ final class ProductSourcingForm extends Component
 
     public bool $fullPage = false;
 
+    public bool $use_registered_details = false;
+
     public function mount(?string $prefillProductName = null): void
     {
         $this->fullPage = (request()->route()?->getName() === 'sourcing-request.create');
 
-        $user = auth()->user();
-
-        if ($user !== null) {
-            $this->name = trim(($user->first_name ?? '').' '.($user->last_name ?? ''));
-            $this->email = $user->email ?? '';
-        }
+        $this->prefillContactDetails();
 
         if ($prefillProductName !== null) {
             $this->product_name = $prefillProductName;
@@ -156,6 +153,18 @@ final class ProductSourcingForm extends Component
     private function resetForm(): void
     {
         $this->reset(['name', 'email', 'product_name', 'product_description', 'reference_file', 'honeypot']);
+        $this->prefillContactDetails();
         $this->resetErrorBag();
+    }
+
+    private function prefillContactDetails(): void
+    {
+        $user = auth()->user();
+
+        if ($user !== null) {
+            $this->name = trim(($user->first_name ?? '').' '.($user->last_name ?? ''));
+            $this->email = $user->email ?? '';
+            $this->use_registered_details = true;
+        }
     }
 }

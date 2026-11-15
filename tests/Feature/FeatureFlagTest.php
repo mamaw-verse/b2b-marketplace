@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
 
@@ -25,7 +26,9 @@ test('disabled routes return 404', function () {
         ->get('/account/orders')
         ->assertNotFound();
 
-    $this->actingAs($user)
+    $seller = Shop::factory()->create(['status' => 'active'])->user;
+
+    $this->actingAs($seller)
         ->get('/hub/payouts')
         ->assertNotFound();
 });

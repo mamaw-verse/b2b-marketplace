@@ -9,6 +9,7 @@ use App\Jobs\OptimizeImageJob;
 use App\Models\Category;
 use App\Models\Product;
 use App\Rules\ValidSlug;
+use App\Services\ShopAnalyticsService;
 use App\Support\Slugs\SlugGenerator;
 use Flux\Flux;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -273,6 +274,25 @@ final class ProductForm extends Component
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Share breakdown stats for this product when editing and feature is enabled.
+     *
+     * @return array{
+     *     total: int,
+     *     last_days: int,
+     *     by_channel: array<string, array{all: int, recent: int}>
+     * }|null
+     */
+    #[Computed]
+    public function shareStats(): ?array
+    {
+        if (! $this->product?->exists || ! config('marketplace.features.product_share_enabled')) {
+            return null;
+        }
+
+        return app(ShopAnalyticsService::class)->productShareBreakdown($this->product);
     }
 
     public function render()

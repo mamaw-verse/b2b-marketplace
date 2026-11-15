@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Actions\Storefront\RecordProductShareAction;
 use App\Models\Product;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Throwable;
 
 #[Layout('layouts.storefront')]
 final class ProductDetail extends Component
@@ -46,5 +50,26 @@ final class ProductDetail extends Component
     {
         return view('livewire.storefront.product-detail')
             ->title($this->product->name);
+    }
+
+    #[Renderless]
+    public function trackShare(string $channel, RecordProductShareAction $action): void
+    {
+        if (! config('marketplace.features.product_share_enabled')) {
+            return;
+        }
+
+        $key = 'product-share:'.(auth()->id() ?? request()->ip());
+        if (RateLimiter::tooManyAttempts($key, 30)) {
+            return;
+        }
+        RateLimiter::hit($key, 60);
+
+        try {
+            $fingerprint = sha1((auth()->id() ?? request()->ip()).'|'.request()->userAgent());
+            $action->execute($this->product, $channel, $fingerprint);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }
