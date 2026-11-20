@@ -44,6 +44,11 @@ if [[ ! -d "$ROOT/storage/app/playwright" ]]; then
         laravel.test npx playwright install chromium webkit
 fi
 
+status=0
 vendor/bin/sail exec -T \
     -e PLAYWRIGHT_BROWSERS_PATH="$BROWSERS_PATH" \
-    laravel.test ./vendor/bin/pest -c phpunit.browser.xml --browser "$BROWSER" "${ARGS[@]}"
+    laravel.test ./vendor/bin/pest -c phpunit.browser.xml --browser "$BROWSER" ${ARGS[@]+"${ARGS[@]}"} || status=$?
+
+echo "Browser screenshots (mobile audit + assertion failures) are saved to tests/Browser/Screenshots/."
+
+exit "$status"

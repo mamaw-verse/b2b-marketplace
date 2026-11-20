@@ -297,6 +297,7 @@
                     @keydown.escape.window="if (lightboxOpen) closeLightbox()"
                     @keydown.arrow-left.window="if (lightboxOpen) lightboxPrev()"
                     @keydown.arrow-right.window="if (lightboxOpen) lightboxNext()"
+                    @wheel.prevent
                     x-trap="lightboxOpen"
                 >
                     {{-- Top bar: counter + close --}}
@@ -320,7 +321,6 @@
                     <div
                         class="flex-1 flex items-center justify-center relative overflow-hidden"
                         @click.self="closeLightbox()"
-                        @wheel.passive="onLightboxWheel($event)"
                     >
                         {{-- Prev arrow --}}
                         <button
@@ -344,19 +344,20 @@
                             @mousedown="onLbDragStart($event)"
                             @mousemove.window="onLbDragMove($event)"
                             @mouseup.window="onLbDragEnd()"
-                            @touchstart.passive="onLbTouchStart($event)"
-                            @touchmove.passive="onLbTouchMove($event)"
-                            @touchend.passive="onLbTouchEnd($event)"
+                            @touchstart="onLbTouchStart($event)"
+                            @touchmove.prevent="onLbTouchMove($event)"
+                            @touchend="onLbTouchEnd($event)"
                         >
                             <template x-for="(img, i) in images" :key="i">
+                                <template x-if="lightboxIndex === i && img.type !== 'video'">
                                     <img
-                                    x-show="lightboxIndex === i && img.type !== 'video'"
-                                    :src="img.type === 'image' ? img.src : ''"
-                                    :alt="img.alt"
-                                    class="max-w-full max-h-full object-contain select-none"
-                                    :style="`transform: scale(${lbZoom}) translate(${lbPanX / lbZoom}px, ${lbPanY / lbZoom}px); transition: ${lbDragging ? 'none' : 'transform 200ms ease-out'};`"
-                                    draggable="false"
-                                />
+                                        :src="img.src"
+                                        :alt="img.alt"
+                                        class="max-w-full max-h-full object-contain select-none"
+                                        :style="`transform: scale(${lbZoom}) translate(${lbPanX / lbZoom}px, ${lbPanY / lbZoom}px); transition: ${lbDragging ? 'none' : 'transform 200ms ease-out'};`"
+                                        draggable="false"
+                                    />
+                                </template>
                             </template>
                             <template x-if="images[lightboxIndex]?.type === 'video'">
                                 <video controls autoplay playsinline class="max-w-full max-h-full" :poster="images[lightboxIndex].poster || undefined" @click.stop>
@@ -928,7 +929,7 @@
  * - Active thumbnail switching
  * - Desktop hover-zoom (cursor-following inner zoom via transform-origin)
  * - Lightbox with prev/next, keyboard nav, focus trap, scroll lock
- * - Lightbox zoom (+/−/reset, scroll wheel, double-click)
+ * - Lightbox zoom (+/−/reset, double-click)
  * - Lightbox pan/drag when zoomed
  * - Touch: swipe to change images, pinch-to-zoom, swipe-down to dismiss
  * - Respects prefers-reduced-motion
@@ -958,6 +959,7 @@ Alpine.data('imageGallery', (images, productName) => ({
     _lbDragStartY: 0,
     _lbPanStartX: 0,
     _lbPanStartY: 0,
+    _scrollY: 0,
     // Touch tracking
     _touchStartX: 0,
     _touchStartY: 0,
@@ -1008,12 +1010,24 @@ Alpine.data('imageGallery', (images, productName) => ({
         this.lightboxIndex = index;
         this.lbZoomReset();
         this.lightboxOpen = true;
-        document.documentElement.style.overflow = 'hidden';
+        // iOS-safe scroll lock: fix the body in place at the current scroll position.
+        this._scrollY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${this._scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.overflow = 'hidden';
     },
 
     closeLightbox() {
         this.lightboxOpen = false;
-        document.documentElement.style.overflow = '';
+        // Restore scroll position precisely.
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, this._scrollY);
         this.$nextTick(() => {
             if (this._triggerEl) {
                 this._triggerEl.focus();
@@ -1048,14 +1062,6 @@ Alpine.data('imageGallery', (images, productName) => ({
         this.lbZoom = 1;
         this.lbPanX = 0;
         this.lbPanY = 0;
-    },
-
-    onLightboxWheel(e) {
-        if (e.deltaY < 0) {
-            this.lbZoomIn();
-        } else {
-            this.lbZoomOut();
-        }
     },
 
     // Drag to pan when zoomed

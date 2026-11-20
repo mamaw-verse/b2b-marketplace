@@ -28,7 +28,7 @@ sudo add-apt-repository -y ppa:ondrej/php
 
 # PostgreSQL 17 official repo
 curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-    | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+    | sudo gpg --batch --no-tty --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
 echo "deb [signed-by=/etc/apt/trusted.gpg.d/postgresql.gpg] \
 https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
     | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null

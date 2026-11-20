@@ -50,10 +50,10 @@
                     </p>
 
                     <div class="mt-7 lg:mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
-                        <a href="{{ route('register') }}" wire:navigate
+                        <a href="{{ route('login') }}" wire:navigate
                            class="inline-flex items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
                             <flux:icon.arrow-right class="size-4" />
-                            {{ __('Register Now') }}
+                            {{ __('Get Started') }}
                         </a>
                         <a href="#supply-chain"
                            class="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">

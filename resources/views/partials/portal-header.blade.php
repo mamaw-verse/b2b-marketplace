@@ -240,12 +240,8 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium text-[var(--hs-neutral-500)] hover:text-[var(--hs-neutral-900)] transition">
-                        {{ __('Log in') }}
-                    </a>
-                    <a href="{{ route('register') }}" wire:navigate
                        class="inline-flex items-center rounded-[var(--hs-radius-pill)] bg-[var(--hs-green-600)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--hs-green-700)] transition shadow-[var(--hs-shadow-sm)]">
-                        {{ __('Get Started') }}
+                        {{ __('Log in') }}
                     </a>
                 @endauth
 

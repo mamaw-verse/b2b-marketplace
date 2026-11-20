@@ -7,7 +7,6 @@
 /storage/*.key
 /storage/pail
 /storage/app/playwright
-/tests/Browser/Screenshots
 /tests/Browser/Traces
 /tests/Browser/fixtures
 /vendor
