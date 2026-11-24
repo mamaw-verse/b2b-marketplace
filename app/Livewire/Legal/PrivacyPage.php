@@ -19,6 +19,9 @@ final class PrivacyPage extends Component
     {
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: __('How :app collects, uses and protects personal data of buyers, merchants and partners.', ['app' => config('app.name')]),
+            crumb: __('Privacy Policy'),
+            crumbUrl: route('legal.privacy'),
+            dateModified: config('seo.content_modified.legal.privacy'),
         ));
 
         return view('livewire.legal.privacy-page');

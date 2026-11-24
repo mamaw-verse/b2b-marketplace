@@ -7,6 +7,7 @@ namespace App\Livewire\Storefront;
 use App\Models\Category;
 use App\Models\Shop;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Actions\Seo\BuildCompanySeoData;
 use App\Actions\Seo\BuildContentSeoData;
 use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
@@ -120,9 +121,17 @@ final class CompanyDirectory extends Component
             ? __('Find verified halal-certified :category businesses and suppliers on :app.', ['category' => $selectedCategory->name, 'app' => config('app.name')])
             : __('Discover verified halal-certified businesses, suppliers, and manufacturers on :app.', ['app' => config('app.name')]);
 
+        $shops = $this->shops;
+        $companySeo = app(BuildCompanySeoData::class);
+
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: $ogDescription,
             title: $ogTitle,
+            pageType: 'CollectionPage',
+            crumb: __('Companies'),
+            crumbUrl: route('storefront.companies'),
+            listItems: collect($shops->items())->filter(fn (mixed $shop): bool => $shop instanceof Shop)->map(fn (Shop $shop): array => $companySeo->listItem($shop))->values()->all(),
+            listOffset: ($shops->currentPage() - 1) * $shops->perPage(),
         ));
 
         return view('livewire.storefront.company-directory');

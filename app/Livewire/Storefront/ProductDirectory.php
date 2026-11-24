@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Actions\Seo\BuildContentSeoData;
+use App\Actions\Seo\BuildProductSeoData;
 use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -156,9 +157,17 @@ final class ProductDirectory extends Component
             ? __('Browse halal-certified :category products from verified suppliers on :app.', ['category' => $selectedCategory->name, 'app' => config('app.name')])
             : __('Discover thousands of halal-certified products from verified suppliers and manufacturers on :app.', ['app' => config('app.name')]);
 
+        $products = $this->products;
+        $productSeo = app(BuildProductSeoData::class);
+
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: $ogDescription,
             title: $ogTitle,
+            pageType: 'CollectionPage',
+            crumb: __('Products'),
+            crumbUrl: route('storefront.products'),
+            listItems: collect($products->items())->filter(fn (mixed $product): bool => $product instanceof Product)->map(fn (Product $product): array => $productSeo->listItem($product))->values()->all(),
+            listOffset: ($products->currentPage() - 1) * $products->perPage(),
         ));
 
         return view('livewire.storefront.product-directory');

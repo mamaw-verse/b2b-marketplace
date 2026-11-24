@@ -127,6 +127,7 @@ final class HeroSearch extends Component
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]),
             title: config('app.name').' — '.__('Discover Halal-Certified Companies & Products'),
+            isHome: true,
         ));
 
         return view('livewire.storefront.hero-search');

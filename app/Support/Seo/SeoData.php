@@ -12,6 +12,11 @@ namespace App\Support\Seo;
  */
 final readonly class SeoData
 {
+    /**
+     * @param  list<array{name: string, url: string}>  $breadcrumbs  Trail mirroring the page's breadcrumb; fewer than two entries emits none.
+     * @param  list<array<string, mixed>>  $schemaNodes  Extra top-level schema.org nodes (supplier, product, ...).
+     * @param  list<array<string, mixed>>  $listItems  `ListItem.item` stubs for the entities a listing page shows.
+     */
     public function __construct(
         public ?string $title = null,
         public ?string $description = null,
@@ -22,5 +27,13 @@ final readonly class SeoData
         public ?string $imageAlt = null,
         public ?int $imageWidth = null,
         public ?int $imageHeight = null,
+        public string $pageType = 'WebPage',
+        public array $breadcrumbs = [],
+        public array $schemaNodes = [],
+        public ?string $mainEntityId = null,
+        public bool $isHome = false,
+        public array $listItems = [],
+        public int $listOffset = 0,
+        public ?string $dateModified = null,
     ) {}
 }

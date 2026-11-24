@@ -16,6 +16,22 @@
     $imageAlt = $seo?->imageAlt ?? config('seo.site_name');
 
     $ogLocale = config('seo.og_locales.'.app()->getLocale());
+
+    // Structured data must never take a page down: on failure the page renders without it.
+    try {
+        $schemaJson = app(\App\Actions\Seo\BuildSchemaGraph::class)->handle(
+            seo: $seo,
+            title: $title,
+            description: $description,
+            canonical: $canonical,
+            imageUrl: $usesDefaultImage ? null : $image,
+            imageWidth: $usesDefaultImage ? null : $imageWidth,
+            imageHeight: $usesDefaultImage ? null : $imageHeight,
+        )->toJson();
+    } catch (\Throwable $e) {
+        report($e);
+        $schemaJson = null;
+    }
 @endphp
 <title>{{ $title }}</title>
 @if (filled($description))
@@ -50,3 +66,7 @@
 @endif
 <meta name="twitter:image" content="{{ $image }}">
 <meta name="twitter:image:alt" content="{{ $imageAlt }}">
+
+@if ($schemaJson)
+<script type="application/ld+json">{!! $schemaJson !!}</script>
+@endif

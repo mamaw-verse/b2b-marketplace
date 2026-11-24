@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: in progress.** Phases 0 and 1 implemented (T0.5 landed with the shared head in Phase 1). JSON-LD (Phase 2) and later phases are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phases 0, 1 and 2 implemented (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). Phases 3–6 are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -180,38 +180,43 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 
 ### Phase 2 — Schema graph
 
-**T2.1 (P0) — `SchemaGraph` + `SchemaId`**
+**✅ T2.1 (P0) — `SchemaGraph` + `SchemaId`**
 - `add()`, `ref()`, de-dupe by `@id`, recursive null/empty stripping, `toArray()` returning `@context` + `@graph`; hex-escaped encode.
 - Unit tests: de-dupe, null stripping, id stability, hostile strings (`</script><script>alert(1)</script>`).
 
-**T2.2 (P0) — Sitewide nodes**
+**✅ T2.2 (P0) — Sitewide nodes**
 - `Organization` (the marketplace operator): `@id`, `name`, `url`, square `logo` as `ImageObject`, `description`, `sameAs` (config; omit when empty), `contactPoint` only if a public support email is configured, `areaServed` from the **instance country** (not hard-coded), `knowsAbout` (halal supply chain, halal certification, B2B sourcing).
 - `WebSite`: `@id`, `publisher` → org, `inLanguage` from locale. Add a `SearchAction` only if the site search has a stable GET URL; **(verify)** whether `/products?search=` (actual param name) is a real, crawlable URL — otherwise omit it.
 - Full on home; other pages reference by `@id`.
+- *Done:* no `SearchAction` — search is Livewire state, not a stable GET URL. Config: `SEO_SOCIAL_PROFILES`, `SEO_CONTACT_EMAIL`.
 
-**T2.3 (P0) — `WebPage` + `BreadcrumbList` on every page**
+**✅ T2.3 (P0) — `WebPage` + `BreadcrumbList` on every page**
 - `WebPage`/`CollectionPage`/`AboutPage`/`FAQPage` wrapper with `isPartOf`, `breadcrumb`, `primaryImageOfPage`, `inLanguage`.
 - One shared `BuildBreadcrumbNode`, **mirrors the visible breadcrumb**. Note the product view currently shows only one category ancestor chain via `parent`; schema and UI must match (extend both to full ancestry when category pages exist).
+- *Done:* the product page links only the primary category chip (parent is plain text), so the trail is Products › primary category › product; the parent appears in `Product.category` text only.
 
-**T2.4 (P0) — Supplier (company) node**
+**✅ T2.4 (P0) — Supplier (company) node**
 - Type `Organization` (kept distinct from the marketplace org) on `/companies/{slug}`: `@id`, `url`, `name` (`storefront_name`), sanitised `description`, `image`/`logo` only if the company has a real uploaded logo (**verify** there is one; otherwise use none rather than the marketplace logo), `address` as `PostalAddress` with **only** `addressLocality`, `addressRegion`, `addressCountry`, `areaServed`, `knowsAbout` from `capabilities`/`value_chain_positions`, `memberOf` → marketplace org.
 - Halal certification: for each **active and `is_verified`** `ShopCertificate`, add `hasCertification` → `Certification` with `name` (the body), `issuedBy` (`Organization` named for the body; `certification_body_other` when "other"). Publish `registration_number` and expiry **only if the company page already shows them** to visitors (**decision D3**).
 - `aggregateRating` only when `reviews_enabled` **and** `total_reviews ≥ 1` **and** the page shows it.
 - **AC:** test proves no field from the B14 deny-list appears anywhere in head or JSON-LD; test proves expired/unverified certificates are omitted.
+- *Done:* built from the `PublicCompany`/`PublicCertification` DTOs; no logo/image (no company logo upload, D7); registration number and expiry are not published (D3).
 
-**T2.5 (P0) — Product node (B2B semantics)**
+**✅ T2.5 (P0) — Product node (B2B semantics)**
 - `Product`: `@id`, `url`, `name`, sanitised full `description`, absolute `image[]`, `brand`/`manufacturer`/`seller` → the supplier node `@id` (no separate brand field exists; do not invent one), `category` (breadcrumb path text), `sku` per variant.
 - Variants: `ProductGroup` + `hasVariant` when >1 variant (per-variant `sku`, `additionalProperty` for each `attributes` key/value, `variesBy` for real attribute names), otherwise plain `Product`.
 - Offers: emit `Offer` **only if a price is displayed publicly on the page**. Include `price`, `priceCurrency` (from the variant's `currency`, never hard-coded `PHP`), `eligibleQuantity` (`QuantitativeValue` with `minValue` = MOQ and `unitText` = unit). Tiered `quantity_breaks` → additional `UnitPriceSpecification` entries only if the tiers are shown. If prices are gated or "request quote", emit **no `offers`** and rely on `Product` description and the supplier link. Do not emit `shippingDetails`, `hasMerchantReturnPolicy`, `priceValidUntil` or `availability` unless real data backs them (`available_quantity` may justify `InStock`/`OutOfStock` — **decide D2**).
 - Halal signals: `additionalProperty` for halal status derived from the supplier's active certificate; no per-product certificate exists, so do not claim product-level certification.
 - Rating: `aggregateRating` from `products.average_rating/total_reviews` only when `reviews_enabled`, count ≥ 1, and visible on the page. No `Review` nodes until reviews are enabled and visible.
+- *Done (D2):* prices are shown publicly, so `Offer` is emitted per variant with a displayed price; no `availability`, shipping, returns or `priceValidUntil`; featured image only (gallery is under the disallowed `/media`).
 - **AC:** every emitted value equals what `product-detail` renders (test compares schema to the rendered page/model). Expected eligibility is **Product snippets**, not Merchant listings — do not chase merchant-listing errors for a non-checkout site.
 
-**T2.6 (P1) — Listings**
+**✅ T2.6 (P1) — Listings**
 - `/products`, `/companies`, category pages: `CollectionPage` + `ItemList` with `ListItem.item` stubs sharing the detail `@id`s (`url`, `name`, `image`). Page 1 only lists what the page shows; paginated pages self-canonical.
 
-**T2.7 (P1) — Content pages**
+**✅ T2.7 (P1) — Content pages**
 - `/about` → `AboutPage` linked to the org; `/faq` → `FAQPage` only after T5.4 makes the Q&A a shared data source; `/terms`, `/privacy` → plain `WebPage`. Add `dateModified` only from a real source (config/date constant per page), never "now".
+- *Done:* `dateModified` for `/terms` and `/privacy` comes from `config('seo.content_modified')` and matches the "Last Updated" date on the page; `/faq` stays a plain `WebPage` until T5.4.
 
 **T2.8 (P2, deferred) — Video**
 - Products can have a video (flagged `product_video_enabled`) but playback uses presigned S3 URLs valid 30 minutes. `VideoObject` needs a stable `contentUrl` and `thumbnailUrl`; revisit when a public stable URL and poster exist.

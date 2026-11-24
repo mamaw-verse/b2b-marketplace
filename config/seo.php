@@ -96,9 +96,32 @@ return [
     'ai_crawlers' => [],
 
     /*
-    | Public social profiles for Organization.sameAs (Phase 2/5).
+    | Public social profiles for Organization.sameAs. Comma-separated absolute
+    | URLs in SEO_SOCIAL_PROFILES; empty means no `sameAs` is emitted.
     */
-    'social_profiles' => [],
+    'social_profiles' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('SEO_SOCIAL_PROFILES', '')),
+    ))),
 
-    'contact' => [],
+    /*
+    | Public contact details for Organization.contactPoint. A `contactPoint` is
+    | only emitted when a public support email is configured.
+    */
+    'contact' => [
+        'email' => env('SEO_CONTACT_EMAIL'),
+    ],
+
+    /*
+    | Real "last modified" dates (YYYY-MM-DD) for static content pages, read as
+    | `seo.content_modified.legal.terms`. Must match the date the page itself
+    | shows to visitors; pages without a real date are omitted rather than
+    | stamped with "now".
+    */
+    'content_modified' => [
+        'legal' => [
+            'terms' => '2026-09-16',
+            'privacy' => '2026-09-16',
+        ],
+    ],
 ];

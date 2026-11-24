@@ -116,6 +116,8 @@ final class ProductSourcingForm extends Component
             app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
                 description: __('Can\'t find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.', ['app' => config('app.name')]),
                 title: __('Request a Product — :app', ['app' => config('app.name')]),
+                crumb: __('Request a Product'),
+                crumbUrl: route('sourcing-request.create'),
             ));
 
             return $view->layout('layouts.storefront');

@@ -19,6 +19,8 @@ final class FaqPage extends Component
     {
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: __('Answers to common questions from buyers, merchants, logistics partners and country operators on :app, the halal supply-chain marketplace.', ['app' => config('app.name')]),
+            crumb: __('Frequently Asked Questions'),
+            crumbUrl: route('help.faq'),
         ));
 
         return view('livewire.legal.faq-page');

@@ -19,6 +19,9 @@ final class TermsPage extends Component
     {
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: __('The terms of service for buyers, merchants and partners using :app, the halal supply-chain marketplace.', ['app' => config('app.name')]),
+            crumb: __('Terms of Service'),
+            crumbUrl: route('legal.terms'),
+            dateModified: config('seo.content_modified.legal.terms'),
         ));
 
         return view('livewire.legal.terms-page');

@@ -116,6 +116,8 @@ final class ApplyForCertificate extends Component
     {
         app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
             description: __('Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.', ['app' => config('app.name')]),
+            crumb: __('Apply for Certificate'),
+            crumbUrl: route('apply.certificate'),
         ));
 
         return view('livewire.storefront.apply-for-certificate');
