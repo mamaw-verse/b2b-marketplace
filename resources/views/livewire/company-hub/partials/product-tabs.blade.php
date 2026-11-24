@@ -1,4 +1,8 @@
 @if ($product)
+    <a href="{{ route('hub.products.index') }}" wire:navigate class="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] lg:hidden">
+        <flux:icon name="chevron-left" variant="mini" class="size-4" />
+        {{ __('Products') }}
+    </a>
     <div class="relative mb-6 border-b border-[var(--hs-neutral-200)]">
         <nav
             x-data

@@ -16,7 +16,7 @@ test('sourcing form, seller copy and interaction hints are translated in every l
         'Product Description & Specifications',
         'Tell us about the size, material, color, features, technical specifications, or any other requirements.',
         'Reference Image / File',
-        'Upload a product photo, specification sheet, catalog, or other reference. Max file size: 10MB',
+        'Upload a product photo, specification sheet, catalog, or other reference. Max file size: 10 MB',
         'Use my registered details',
         'We will use the contact details on your account:',
         'Email Address',

@@ -22,7 +22,7 @@
                 input-id="doc-manager-input"
                 wire-model="newDocuments"
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp"
-                hint="{{ __('PDF, DOC, XLS, JPG, PNG, WebP — up to 20MB each') }}"
+                hint="{{ __('PDF, DOC, XLS, JPG, PNG, WebP — up to 20 MB each') }}"
                 on-finish="$wire.uploadDocuments()"
                 loading-target="newDocuments,uploadDocuments"
                 class="mb-6"

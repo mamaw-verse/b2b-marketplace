@@ -52,7 +52,7 @@
                         accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"
                         :multiple="false"
                         loading-target="reference_file"
-                        hint="{{ __('Upload a product photo, specification sheet, catalog, or other reference. Max file size: 10MB') }}"
+                        hint="{{ __('Upload a product photo, specification sheet, catalog, or other reference. Max file size: 10 MB') }}"
                     >
                         @if ($reference_file)
                             <p class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--hs-green-700)]">

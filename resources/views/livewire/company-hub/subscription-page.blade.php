@@ -14,13 +14,13 @@
         <div class="p-6 space-y-6">
             {{-- Pending payment banner --}}
             @if ($this->pendingSubscription)
-                <div class="rounded-[var(--hs-radius-card)] border border-yellow-200 bg-yellow-50 p-5">
+                <div class="rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] p-5">
                     <div class="flex items-start justify-between gap-4">
                         <div class="flex gap-3">
-                            <flux:icon name="clock" class="size-5 mt-0.5 shrink-0 text-yellow-600" />
+                            <flux:icon name="clock" class="size-5 mt-0.5 shrink-0 text-[var(--hs-warning-700)]" />
                             <div>
-                                <p class="text-sm font-semibold text-yellow-900">{{ __('Payment in progress') }}</p>
-                                <p class="mt-0.5 text-sm text-yellow-700">
+                                <p class="text-sm font-semibold text-[var(--hs-warning-800)]">{{ __('Payment in progress') }}</p>
+                                <p class="mt-0.5 text-sm text-[var(--hs-warning-700)]">
                                     {{ __('You have an incomplete payment for :plan. Complete it or dismiss to start over.', ['plan' => $this->pendingSubscription->plan->name]) }}
                                 </p>
                             </div>
@@ -45,33 +45,33 @@
                 @endphp
                 <div @class([
                     'rounded-[var(--hs-radius-card)] border p-5',
-                    'border-red-200 bg-red-50' => $urgent,
-                    'border-yellow-200 bg-yellow-50' => $warning && ! $urgent,
-                    'border-blue-200 bg-blue-50' => ! $warning,
+                    'border-[var(--hs-danger-200)] bg-[var(--hs-danger-50)]' => $urgent,
+                    'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' => $warning && ! $urgent,
+                    'border-[var(--hs-info-200)] bg-[var(--hs-info-50)]' => ! $warning,
                 ])>
                     <div class="flex items-start gap-3">
                         <flux:icon
                             :name="$urgent ? 'exclamation-triangle' : 'information-circle'"
                             @class([
                                 'size-5 mt-0.5 shrink-0',
-                                'text-red-600' => $urgent,
-                                'text-yellow-600' => $warning && ! $urgent,
-                                'text-blue-600' => ! $warning,
+                                'text-[var(--hs-danger-700)]' => $urgent,
+                                'text-[var(--hs-warning-700)]' => $warning && ! $urgent,
+                                'text-[var(--hs-info-700)]' => ! $warning,
                             ])
                         />
                         <div>
                             @if ($this->trialDaysRemaining === 0)
-                                <p class="text-sm font-semibold text-red-900">{{ __('Your trial expires today') }}</p>
-                                <p class="mt-0.5 text-sm text-red-700">{{ __('Pay now to keep your products visible and avoid any interruption.') }}</p>
+                                <p class="text-sm font-semibold text-[var(--hs-danger-800)]">{{ __('Your trial expires today') }}</p>
+                                <p class="mt-0.5 text-sm text-[var(--hs-danger-700)]">{{ __('Pay now to keep your products visible and avoid any interruption.') }}</p>
                             @elseif ($urgent)
-                                <p class="text-sm font-semibold text-red-900">{{ __('Trial ends in :days days', ['days' => $this->trialDaysRemaining]) }}</p>
-                                <p class="mt-0.5 text-sm text-red-700">{{ __('Pay now to continue uninterrupted after your trial ends.') }}</p>
+                                <p class="text-sm font-semibold text-[var(--hs-danger-800)]">{{ __('Trial ends in :days days', ['days' => $this->trialDaysRemaining]) }}</p>
+                                <p class="mt-0.5 text-sm text-[var(--hs-danger-700)]">{{ __('Pay now to continue uninterrupted after your trial ends.') }}</p>
                             @elseif ($warning)
-                                <p class="text-sm font-semibold text-yellow-900">{{ __('Trial ends in :days days', ['days' => $this->trialDaysRemaining]) }}</p>
-                                <p class="mt-0.5 text-sm text-yellow-700">{{ __('Subscribe before your trial ends so there\'s no gap in your marketplace visibility.') }}</p>
+                                <p class="text-sm font-semibold text-[var(--hs-warning-800)]">{{ __('Trial ends in :days days', ['days' => $this->trialDaysRemaining]) }}</p>
+                                <p class="mt-0.5 text-sm text-[var(--hs-warning-700)]">{{ __('Subscribe before your trial ends so there\'s no gap in your marketplace visibility.') }}</p>
                             @else
-                                <p class="text-sm font-semibold text-blue-900">{{ __('Trial ends in :days days', ['days' => $this->trialDaysRemaining]) }}</p>
-                                <p class="mt-0.5 text-sm text-blue-700">{{ __('You can pay now to lock in your subscription — it will start when your trial ends.') }}</p>
+                                <p class="text-sm font-semibold text-[var(--hs-info-800)]">{{ __('Trial ends in :days days', ['days' => $this->trialDaysRemaining]) }}</p>
+                                <p class="mt-0.5 text-sm text-[var(--hs-info-700)]">{{ __('You can pay now to lock in your subscription — it will start when your trial ends.') }}</p>
                             @endif
                         </div>
                     </div>

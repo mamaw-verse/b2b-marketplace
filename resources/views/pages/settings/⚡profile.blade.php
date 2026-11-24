@@ -365,7 +365,7 @@ new #[Layout('layouts.portal', ['portal' => 'account'])] #[Title('Profile settin
                             wire-model="photo"
                             accept="image/*"
                             :multiple="false"
-                            hint="{{ __('JPEG, PNG, WebP — up to 5MB') }}"
+                            hint="{{ __('JPEG, PNG, WebP — up to 5 MB') }}"
                             loading-target="photo"
                         >
                             @error('photo') <p class="mt-2 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p> @enderror

@@ -418,7 +418,7 @@
                                                 {{ __('Drag & drop, or click to browse') }}
                                             </p>
                                             <p class="text-xs text-[var(--hs-neutral-500)]">
-                                                {{ __('Spec sheet, artwork or reference document — PDF, Word or image, up to 10MB') }}
+                                                {{ __('Spec sheet, artwork or reference document — PDF, Word or image, up to 10 MB') }}
                                             </p>
                                             <input
                                                 id="rfq-attachment"

@@ -18,7 +18,7 @@
                                     {{ trans_choice(':count order|:count orders', $customer->orders_count, ['count' => $customer->orders_count]) }}
                                 </p>
                             </div>
-                            <flux:button size="sm" variant="ghost" href="{{ route('hub.orders.create', ['buyerUserId' => $customer->id]) }}" wire:navigate>
+                            <flux:button size="sm" variant="outline" icon="plus" class="shrink-0" href="{{ route('hub.orders.create', ['buyerUserId' => $customer->id]) }}" wire:navigate>
                                 {{ __('New Order') }}
                             </flux:button>
                         </div>

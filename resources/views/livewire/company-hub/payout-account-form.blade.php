@@ -54,7 +54,7 @@
                 {{-- Bank Name --}}
                 <div>
                     <flux:select
-                        wire:model="bank_name"
+                        wire:model.live="bank_name"
                         label="{{ __('Bank Name') }}"
                         placeholder="{{ __('Select your bank') }}"
                         required
@@ -72,8 +72,12 @@
                         wire:model="bank_code"
                         label="{{ __('Bank Code') }}"
                         placeholder="{{ __('e.g. BDO, BPI, MBTC') }}"
+                        :readonly="isset(\App\Http\Requests\UpsertPayoutAccountRequest::bankCodes()[$bank_name])"
                         required
                     />
+                    @if (isset(\App\Http\Requests\UpsertPayoutAccountRequest::bankCodes()[$bank_name]))
+                        <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">{{ __('Filled in automatically from your bank.') }}</p>
+                    @endif
                     @error('bank_code') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
                 </div>
 
@@ -94,6 +98,8 @@
                         wire:model="account_number"
                         label="{{ __('Account Number') }}"
                         placeholder="{{ __('Enter your bank account number') }}"
+                        inputmode="numeric"
+                        autocomplete="off"
                         required
                     />
                     @error('account_number') <p class="mt-1 text-red-500 text-sm">{{ $message }}</p> @enderror
@@ -111,7 +117,7 @@
 
                 {{-- Submit --}}
                 <div class="flex items-center gap-3 pt-4 border-t border-[var(--hs-neutral-100)]">
-                    <flux:button type="submit" variant="primary">
+                    <flux:button type="submit" variant="primary" class="w-full sm:w-auto">
                         {{ $hasExistingAccount ? __('Update Account') : __('Save Account') }}
                     </flux:button>
 

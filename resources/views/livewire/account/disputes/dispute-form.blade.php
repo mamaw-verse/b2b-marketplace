@@ -84,7 +84,7 @@
                 <label class="block text-sm font-medium text-[var(--hs-neutral-700)] mb-1.5">
                     {{ __('Supporting Photos') }} <span class="text-red-500">*</span>
                 </label>
-                <p class="text-xs text-[var(--hs-neutral-500)] mb-2">{{ __('Attach photos of the issue. 1 to 5 files (JPG, PNG, PDF). Max 10MB each.') }}</p>
+                <p class="text-xs text-[var(--hs-neutral-500)] mb-2">{{ __('Attach photos of the issue. 1 to 5 files (JPG, PNG, PDF). Max 10 MB each.') }}</p>
                 <div class="rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] bg-[var(--hs-neutral-50)] px-4 py-4">
                     <input
                         type="file"

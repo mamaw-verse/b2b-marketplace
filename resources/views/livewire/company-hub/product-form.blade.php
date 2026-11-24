@@ -1,16 +1,18 @@
 <div>
     @include('livewire.company-hub.partials.product-tabs')
+    @unless ($product)
+        <a href="{{ route('hub.products.index') }}" wire:navigate class="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] lg:hidden">
+            <flux:icon name="chevron-left" variant="mini" class="size-4" />
+            {{ __('Products') }}
+        </a>
+    @endunless
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between gap-3">
-            <h1 class="min-w-0 text-xl font-semibold text-[var(--hs-neutral-900)]">
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
+            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">
                 {{ $product ? __('Edit Product') : __('Create Product') }}
             </h1>
-            {{-- Cancel lives in the header on mobile so the sticky action bar stays one row --}}
-            <flux:button variant="ghost" size="sm" icon="x-mark" href="{{ route('hub.products.index') }}" wire:navigate class="sm:hidden shrink-0">
-                <span class="sr-only">{{ __('Cancel') }}</span>
-            </flux:button>
         </div>
 
         <div class="p-6">
@@ -121,7 +123,7 @@
                             wire-model="featured_image"
                             accept="image/jpeg,image/png,image/webp"
                             :multiple="false"
-                            hint="{{ __('JPEG, PNG, WebP — up to 5MB') }}"
+                            hint="{{ __('JPEG, PNG, WebP — up to 5 MB') }}"
                             loading-target="featured_image"
                         >
                             @error('featured_image') <p class="mt-2 text-sm text-[var(--hs-danger-700)]">{{ $message }}</p> @enderror
@@ -369,7 +371,7 @@
         <div class="flex flex-col">
             <div class="px-4 sm:px-6 py-5">
                 <div class="flex items-start gap-4">
-                    <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-yellow-600 bg-yellow-50">
+                    <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-[var(--hs-warning-700)] bg-[var(--hs-warning-50)]">
                         <flux:icon name="exclamation-triangle" variant="mini" class="size-5" />
                     </div>
                     <div class="min-w-0">

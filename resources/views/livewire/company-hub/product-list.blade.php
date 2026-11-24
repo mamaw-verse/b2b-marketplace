@@ -19,17 +19,17 @@
 
         {{-- Subscription banner --}}
         @if (! $this->isSubscribed)
-            <div class="mx-6 mt-5 rounded-[var(--hs-radius-card)] border border-yellow-200 bg-yellow-50 p-4">
+            <div class="mx-6 mt-5 rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)] p-4">
                 <div class="flex items-start gap-3">
-                    <flux:icon name="exclamation-triangle" class="mt-0.5 size-5 shrink-0 text-yellow-600" />
+                    <flux:icon name="exclamation-triangle" class="mt-0.5 size-5 shrink-0 text-[var(--hs-warning-700)]" />
                     <div class="flex-1 text-sm">
-                        <p class="font-semibold text-yellow-900">{{ __('Your business profile and products are not visible on the marketplace') }}</p>
-                        <p class="mt-0.5 text-yellow-700">
+                        <p class="font-semibold text-[var(--hs-warning-800)]">{{ __('Your business profile and products are not visible on the marketplace') }}</p>
+                        <p class="mt-0.5 text-[var(--hs-warning-700)]">
                             {{ __('Subscribe to make your company profile and products discoverable to buyers.') }}
                             <a
                                 href="{{ route('hub.subscription') }}"
                                 wire:navigate
-                                class="font-medium underline hover:text-yellow-900"
+                                class="font-medium underline hover:text-[var(--hs-warning-800)]"
                             >{{ __('Go to Subscription') }}</a>
                         </p>
                     </div>
@@ -294,7 +294,7 @@
         <div class="flex flex-col">
             <div class="px-4 sm:px-6 py-5">
                 <div class="flex items-start gap-4">
-                    <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-yellow-600 bg-yellow-50">
+                    <div class="shrink-0 flex items-center justify-center size-10 rounded-full text-[var(--hs-warning-700)] bg-[var(--hs-warning-50)]">
                         <flux:icon name="exclamation-triangle" variant="mini" class="size-5" />
                     </div>
                     <div class="min-w-0">

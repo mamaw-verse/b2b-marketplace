@@ -24,7 +24,7 @@
                 input-id="gallery-photo-input"
                 wire-model="newPhotos"
                 accept="image/jpeg,image/png,image/webp"
-                hint="{{ __('JPEG, PNG, WebP — up to 5MB each') }}"
+                hint="{{ __('JPEG, PNG, WebP — up to 5 MB each') }}"
                 on-finish="$wire.uploadPhotos()"
                 loading-target="newPhotos,uploadPhotos"
                 class="mb-6"

@@ -38,6 +38,28 @@ final class UpsertPayoutAccountRequest extends FormRequest
         ];
     }
 
+    /**
+     * Short bank codes for the banks the platform already has an established code for.
+     * Banks not listed here keep a manually entered code.
+     *
+     * @return array<string, string>
+     */
+    public static function bankCodes(): array
+    {
+        return [
+            'BDO' => 'BDO',
+            'BPI' => 'BPI',
+            'Metrobank' => 'MBTC',
+            'Landbank' => 'LBP',
+            'PNB' => 'PNB',
+            'UnionBank' => 'UBP',
+            'RCBC' => 'RCBC',
+            'Security Bank' => 'SECB',
+            'China Banking Corporation' => 'CBC',
+            'EastWest Bank' => 'EWB',
+        ];
+    }
+
     public function authorize(): bool
     {
         $user = $this->user();

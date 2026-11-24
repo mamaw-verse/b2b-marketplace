@@ -58,6 +58,19 @@ final class PayoutAccountForm extends Component
         }
     }
 
+    /**
+     * Auto-fill the bank code when the seller picks a bank with an established code.
+     * For other banks the field stays editable and is left as the seller typed it.
+     */
+    public function updatedBankName(string $value): void
+    {
+        $code = UpsertPayoutAccountRequest::bankCodes()[$value] ?? null;
+
+        if ($code !== null) {
+            $this->bank_code = $code;
+        }
+    }
+
     public function save(): void
     {
         $this->validate([

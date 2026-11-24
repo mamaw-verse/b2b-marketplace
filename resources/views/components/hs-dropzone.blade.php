@@ -3,7 +3,7 @@
     'wireModel',                            // wire:model property name, e.g. "newPhotos"
     'accept'      => '*',                   // input accept attribute
     'multiple'    => true,                  // allow multiple file selection
-    'hint'        => null,                  // small text under the main label, e.g. "JPEG, PNG — up to 5MB"
+    'hint'        => null,                  // small text under the main label, e.g. "JPEG, PNG — up to 5 MB"
     'onFinish'    => null,                  // JS expression to call after Livewire finishes temp upload
                                             //   e.g. "$wire.uploadPhotos()"
     'loadingTarget' => null,                // wire:target for the uploading spinner, e.g. "newPhotos,uploadPhotos"
@@ -34,7 +34,7 @@
         <flux:icon name="cloud-arrow-up" class="size-10 text-[var(--hs-neutral-400)]" />
         <p class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ __('Drag & drop, or click to browse') }}</p>
         @if ($hint)
-            <p class="text-xs text-[var(--hs-neutral-500)]">{{ $hint }}</p>
+            <p class="text-[13px] text-[var(--hs-neutral-600)]">{{ $hint }}</p>
         @endif
         <input
             id="{{ $inputId }}"

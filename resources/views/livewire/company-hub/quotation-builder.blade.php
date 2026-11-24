@@ -30,9 +30,9 @@
                                 class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-4 space-y-3"
                             >
                                 @php
-                                    $fieldClasses = 'w-full border block appearance-none text-sm rounded-md py-1.5 h-8 leading-[1.125rem] ps-3 pe-3 bg-white text-zinc-700 placeholder-zinc-400 shadow-xs border-zinc-200 border-b-zinc-300/80 focus:outline-none focus:border-[var(--hs-green-400)] focus:ring-1 focus:ring-[var(--hs-green-400)] transition dark:bg-white/10 dark:text-zinc-300 dark:border-white/10 dark:placeholder-zinc-400';
+                                    $fieldClasses = 'w-full border block appearance-none text-sm rounded-md py-1.5 h-8 leading-[1.125rem] ps-3 pe-3 bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-700)] placeholder-[var(--hs-neutral-400)] shadow-xs border-[var(--hs-neutral-200)] border-b-[var(--hs-neutral-300)] focus:outline-none focus:border-[var(--hs-green-400)] focus:ring-1 focus:ring-[var(--hs-green-400)] transition';
                                     $invalidClasses = '!border-red-500 !ring-1 !ring-red-500 !shadow-none';
-                                    $labelStyle = 'block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1';
+                                    $labelStyle = 'block text-sm font-medium text-[var(--hs-neutral-700)] mb-1';
                                     // Selects keep the native dropdown arrow (override the shared appearance-none).
                                     $selectClasses = $fieldClasses.' [appearance:auto]';
                                 @endphp

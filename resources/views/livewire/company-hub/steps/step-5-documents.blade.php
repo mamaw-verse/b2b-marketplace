@@ -7,7 +7,7 @@
     <div class="flex items-start justify-between gap-4">
         <div>
             <flux:heading size="lg">{{ __('Document Upload Checklist') }}</flux:heading>
-            <flux:text class="mt-1">{{ __('Upload all required documents below. Accepted formats: PDF, JPG, PNG (max 20MB each).') }}</flux:text>
+            <flux:text class="mt-1">{{ __('Upload all required documents below. Accepted formats: PDF, JPG, PNG (max 20 MB each).') }}</flux:text>
         </div>
         {{-- Manual refresh as a fallback; auto-refresh handles the common case --}}
         <flux:button
@@ -132,7 +132,7 @@
                         <p class="text-sm font-medium {{ $errors->has("documentUploads.{$type}") ? 'text-[var(--hs-danger-700)]' : 'text-[var(--hs-neutral-900)]' }}">
                             {{ __('Drag & drop, or click to browse') }}
                         </p>
-                        <p class="text-xs {{ $errors->has("documentUploads.{$type}") ? 'text-[var(--hs-danger-500)]' : 'text-[var(--hs-neutral-500)]' }}">{{ __('PDF, JPG, PNG — max 20MB') }}</p>
+                        <p class="text-xs {{ $errors->has("documentUploads.{$type}") ? 'text-[var(--hs-danger-500)]' : 'text-[var(--hs-neutral-500)]' }}">{{ __('PDF, JPG, PNG — max 20 MB') }}</p>
                         <input
                             id="doc-input-{{ $type }}"
                             type="file"
@@ -237,7 +237,7 @@
             wire-model="supportingDocumentUploads"
             accept=".pdf,.jpg,.jpeg,.png"
             :multiple="true"
-            hint="{{ __('PDF, JPG, PNG — max 20MB each') }}"
+            hint="{{ __('PDF, JPG, PNG — max 20 MB each') }}"
             on-finish="$wire.uploadSupportingDocuments()"
             loading-target="supportingDocumentUploads,uploadSupportingDocuments"
             class="mt-3"

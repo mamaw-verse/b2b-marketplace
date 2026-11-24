@@ -69,7 +69,7 @@
                                     wire-model="document"
                                     accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.heic,.heif,image/*"
                                     :multiple="false"
-                                    hint="{{ __('Accepted file types: DOC, DOCX, PDF, or a clear photo/scan (JPG, PNG, HEIC) • Max file size: 10MB') }}"
+                                    hint="{{ __('Accepted file types: DOC, DOCX, PDF, or a clear photo/scan (JPG, PNG, HEIC) • Max file size: 10 MB') }}"
                                     class="mt-4"
                                 >
                                     @if ($document)
@@ -139,7 +139,7 @@
                         'The Letter of Intent is a required document for processing your certificate request.',
                         'Make sure to fill out all fields and sign the letter where indicated.',
                         'You can only upload one file per application.',
-                        'Accepted file types: DOC, DOCX, PDF, JPG, PNG, HEIC (Max size: 10MB).',
+                        'Accepted file types: DOC, DOCX, PDF, JPG, PNG, HEIC (Max size: 10 MB).',
                     ] as $note)
                         <li class="flex items-start gap-2.5 text-[0.85rem] leading-relaxed text-[var(--hs-neutral-700)]">
                             <flux:icon name="check-circle" class="mt-0.5 size-4 shrink-0 text-[var(--hs-green-700)]" />

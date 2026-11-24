@@ -143,7 +143,7 @@
                                 <p class="text-sm font-medium {{ $certFileError ? 'text-[var(--hs-danger-700)]' : 'text-[var(--hs-neutral-900)]' }}">
                                     {{ __('Drag & drop, or click to browse') }}
                                 </p>
-                                <p class="text-xs {{ $certFileError ? 'text-[var(--hs-danger-500)]' : 'text-[var(--hs-neutral-500)]' }}">{{ __('PDF, JPG, PNG — max 20MB') }}</p>
+                                <p class="text-xs {{ $certFileError ? 'text-[var(--hs-danger-500)]' : 'text-[var(--hs-neutral-500)]' }}">{{ __('PDF, JPG, PNG — max 20 MB') }}</p>
                                 <input
                                     id="cert-input-{{ $index }}"
                                     type="file"

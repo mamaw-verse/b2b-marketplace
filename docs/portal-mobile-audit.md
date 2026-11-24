@@ -7,7 +7,7 @@
 | 1 | Seller Critical: S1, S2, S3 | ✅ Done |
 | 2 | Seller High: S4–S8 (+S14) | ✅ Done |
 | 3 | Seller Medium: S9–S14 | ✅ Done |
-| 4 | Seller Low: S15–S20 + colour tokens | Pending |
+| 4 | Seller Low: S15–S20 + colour tokens | ✅ Done (S19 partial, see note) |
 | 5 | Admin Part 1: queue tables, filters, date picker, colour tokens | Pending |
 
 Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`/admin/*`); Part 2 is the seller portal (`/portal/*` and `/hub/*`).
@@ -15,7 +15,7 @@ Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`
 | Part | Portal | Method | Status |
 |------|--------|--------|--------|
 | 1 | Admin (`/admin/*`) | Source review of Blade views | Plan written, implementation pending |
-| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Groups 1–3 (S1–S14) done |
+| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Groups 1–4 (S1–S20 + seller colour tokens) done |
 
 ---
 
@@ -460,16 +460,16 @@ Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, or
 
 ## Low
 
-- **S15 — Dashboard is buyer-centric for sellers.** `portal/dashboard.blade.php` shows "Published Products", "My Request for Quotation", a Halal Certification tile with a bare "—", and Browse Businesses / Browse Products / Submit RFQ shortcuts. A seller does not see pending orders, new RFQs received, pending payout or unread messages. The layout itself is clean on mobile. Consider a seller KPI row and quick links to Orders, RFQs and Messages.
-- **S16 — Team page uses a different layout.** `team-manager.blade.php` has a bare page title and three separate cards at 32px side margin, while every other seller page uses one card with a header at 16px margin. Align it with the standard page card.
-- **S17 — Customers row can collide on long emails.** The email and the text-only "New Order" button share one row with no `min-w-0`/`truncate`. Make the email truncate and give the button an outline style so it reads as a button.
-- **S18 — Upload hint copy and size.** Dropzone hints are about 11px grey text. Size formatting is inconsistent: "5MB" and "20MB" appear without a space, "50 MB" with one. Standardise to one format and raise the hint to 12–13px.
-- **S19 — Payout account:** Bank Code is a free-text field alongside a Bank select. Auto-fill it from the selected bank (read-only) and make sure the account number field has `inputmode="numeric"`; verify, since this is not visible in the screenshot.
-- **S20 — No back navigation on detail pages.** Payout detail, order detail and the product sub-pages rely on the browser back button or the hamburger menu. Add a `← Payouts` / `← Orders` link above the card on mobile.
+- ✅ **S15 — Dashboard is buyer-centric for sellers.** `portal/dashboard.blade.php` shows "Published Products", "My Request for Quotation", a Halal Certification tile with a bare "—", and Browse Businesses / Browse Products / Submit RFQ shortcuts. A seller does not see pending orders, new RFQs received, pending payout or unread messages. The layout itself is clean on mobile. Consider a seller KPI row and quick links to Orders, RFQs and Messages. **Done:** a "needs attention" tile row (Orders to Fulfil, New RFQs, Unread Messages, Pending Payout), each tile linking to its page and highlighted when the count is above zero. Counts come from `ShopAnalyticsService::dashboardCounts()` / `pendingBalance()` and `User::unreadMessagesCount()`. Each tile is hidden when its feature flag (`orders_enabled`, `seller_rfq_queue_enabled`, `payouts_enabled`, `chat_enabled`) is off, so sellers never see a misleading zero or a link to a disabled page. The existing buyer-style tiles were left in place.
+- ✅ **S16 — Team page uses a different layout.** `team-manager.blade.php` has a bare page title and three separate cards at 32px side margin, while every other seller page uses one card with a header at 16px margin. Align it with the standard page card. **Done:** one page card with the standard header; seats/invite, active staff and pending invitations are divided sections inside it. Text and Livewire actions are unchanged.
+- ✅ **S17 — Customers row can collide on long emails.** The email and the text-only "New Order" button share one row with no `min-w-0`/`truncate`. Make the email truncate and give the button an outline style so it reads as a button. **Done:** the email and name already truncated inside a `min-w-0` block; the button is now `variant="outline"` with a plus icon and `shrink-0`.
+- ✅ **S18 — Upload hint copy and size.** Dropzone hints are about 11px grey text. Size formatting is inconsistent: "5MB" and "20MB" appear without a space, "50 MB" with one. Standardise to one format and raise the hint to 12–13px. **Done:** dropzone hints are `text-[13px]` in a darker neutral; every user-facing size string now reads "5 MB" (views, all five `lang/*.json` files and `StorefrontLocalizationTest`, since the strings are translation keys).
+- ◐ **S19 — Payout account (partial):** Bank Code is a free-text field alongside a Bank select. Auto-fill it from the selected bank (read-only) and make sure the account number field has `inputmode="numeric"`; verify, since this is not visible in the screenshot. **Done:** account number has `inputmode="numeric"` and `autocomplete="off"`; Bank Code is filled in automatically and made read-only for the ten banks that already have an established code (`UpsertPayoutAccountRequest::bankCodes()`, the same mapping the factory uses), with tests. **Not done:** the other ten banks in `philippineBanks()` (Landbank aside, e.g. PSBank, Robinsons, UCPB, DBP, AUB, PBCom, Chinabank Savings, Bank of Commerce, Maybank, CTBC) have no code anywhere in the repo, so their Bank Code stays a manual field rather than risk guessing a code on a payments form. Add their codes to `bankCodes()` to finish this item.
+- ✅ **S20 — No back navigation on detail pages.** Payout detail, order detail and the product sub-pages rely on the browser back button or the hamburger menu. Add a `← Payouts` / `← Orders` link above the card on mobile. **Done:** `← Payouts` (Group 2), `← Orders` on order detail, and `← Products` on every product page (shown below `lg` only; the tab partial covers variants, gallery, documents, video and edit, and the create form has its own).
 
-### Raw colour violations seen in the seller portal
+### Raw colour violations seen in the seller portal ✅ DONE
 
-Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.php` (`text-red-600` on fee amounts at lines ~18, 22, 46 and `text-green-700` on net amounts at lines ~26, 47) and `product-list.blade.php` (`text-yellow-600 bg-yellow-50` in the confirm modal, line ~297). Map with the table in Part 1: `text-red-600` becomes `text-[var(--hs-danger-700)]`, `text-green-700` becomes `text-[var(--hs-green-700)]`, `text-yellow-600` becomes `text-[var(--hs-warning-700)]`. A full `grep` of `company-hub/` and `portal/` is still needed.
+Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.php` (`text-red-600` on fee amounts at lines ~18, 22, 46 and `text-green-700` on net amounts at lines ~26, 47) and `product-list.blade.php` (`text-yellow-600 bg-yellow-50` in the confirm modal, line ~297). Map with the table in Part 1: `text-red-600` becomes `text-[var(--hs-danger-700)]`, `text-green-700` becomes `text-[var(--hs-green-700)]`, `text-yellow-600` becomes `text-[var(--hs-warning-700)]`. A full `grep` of `company-hub/` and `portal/` has now been done and fixed: `subscription-page`, `subscription-payment-page`, `product-list` (banner and modal), `product-form` (modal), `reviews/review-list` (stars), and the hand-built input classes in `fulfilment-panel` and `quotation-builder` (zinc/white/`dark:` classes replaced with tokens). Yellow/red/blue map to the `warning`/`danger`/`info` token scales (50, 200, 700 for text, 800 for the darkest). Deliberately kept: `text-red-500`/`!border-red-500` validation states, and `text-white` on dark scan overlays and solid brand fills. **Out of seller scope and still raw:** star ratings in `components/hs-product-card` and `hs-company-card`, `auth-session-status`, `passkey-registration`, `app-logo`.
 
 ---
 
@@ -486,7 +486,7 @@ Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.ph
 9. ✅ **S9 + S10** order queue filter pattern and order builder (sticky actions, same-as-billing)
 10. ✅ **S11 + S12** product form and shop profile (sticky actions, accordions, larger checkboxes)
 11. ✅ **S13** reports KPI grid
-12. **S15–S20** polish pass
+12. ✅ **S15–S20** polish pass (S19 partial)
 13. Pint, `npm run build`, rerun the browser test and compare screenshots
 
 ## Coverage Gaps

@@ -1,4 +1,8 @@
 <div>
+    <a href="{{ route('hub.orders.index') }}" wire:navigate class="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] lg:hidden">
+        <flux:icon name="chevron-left" variant="mini" class="size-4" />
+        {{ __('Orders') }}
+    </a>
     {{-- Single outer page card — the ONLY white/bordered/shadowed container --}}
     <div class="bg-[var(--hs-neutral-0)] rounded-[20px] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-md)] overflow-hidden">
 

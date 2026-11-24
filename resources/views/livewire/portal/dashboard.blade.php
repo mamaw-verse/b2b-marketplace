@@ -70,13 +70,41 @@
             @endif
         @endif
 
+        {{-- Seller "needs attention" row — each tile links to the page that clears it --}}
+        @php
+            $stats = $this->sellerStats;
+            $attentionTiles = array_filter([
+                $stats['orders_to_fulfil'] !== null ? ['label' => __('Orders to Fulfil'), 'value' => $stats['orders_to_fulfil'], 'url' => route('hub.orders.index'), 'hot' => $stats['orders_to_fulfil'] > 0] : null,
+                $stats['new_rfqs'] !== null ? ['label' => __('New RFQs'), 'value' => $stats['new_rfqs'], 'url' => route('hub.rfqs.index'), 'hot' => $stats['new_rfqs'] > 0] : null,
+                $stats['unread_messages'] !== null ? ['label' => __('Unread Messages'), 'value' => $stats['unread_messages'], 'url' => route('hub.messages'), 'hot' => $stats['unread_messages'] > 0] : null,
+                $stats['pending_balance'] !== null ? ['label' => __('Pending Payout'), 'money' => $stats['pending_balance'], 'url' => route('hub.payouts.index'), 'hot' => false] : null,
+            ]);
+        @endphp
+        @if ($attentionTiles !== [])
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                @foreach ($attentionTiles as $tile)
+                    <a href="{{ $tile['url'] }}" wire:navigate
+                       class="min-w-0 rounded-[var(--hs-radius-card)] border p-4 shadow-[var(--hs-shadow-sm)] transition hover:border-[var(--hs-green-300)] {{ $tile['hot'] ? 'border-[var(--hs-warning-200)] bg-[var(--hs-warning-50)]' : 'border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]' }}">
+                        <p class="truncate text-xl font-bold tabular-nums text-[var(--hs-neutral-900)]">
+                            @isset($tile['money'])
+                                <x-hs-money :amount="$tile['money']" />
+                            @else
+                                {{ $tile['value'] }}
+                            @endisset
+                        </p>
+                        <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ $tile['label'] }}</p>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
         {{-- Seller quick-stats --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
 
             {{-- Published products --}}
             <a href="{{ route('hub.products.index') }}" wire:navigate
                class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)] p-4 text-center hover:border-[var(--hs-green-300)] transition">
-                <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">{{ $this->sellerStats['published_products'] }}</p>
+                <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">{{ $stats['published_products'] }}</p>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Published Products') }}</p>
             </a>
 

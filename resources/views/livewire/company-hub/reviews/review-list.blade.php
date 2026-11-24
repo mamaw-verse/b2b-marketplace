@@ -43,7 +43,7 @@
                                         </div>
                                         <div class="flex items-center gap-1 mt-0.5">
                                             @for($i = 1; $i <= 5; $i++)
-                                                <span class="text-sm {{ $review->rating >= $i ? 'text-yellow-400' : 'text-[var(--hs-neutral-200)]' }}">★</span>
+                                                <span class="text-sm {{ $review->rating >= $i ? 'text-[var(--hs-warning-500)]' : 'text-[var(--hs-neutral-200)]' }}">★</span>
                                             @endfor
                                             <span class="text-xs text-[var(--hs-neutral-400)] ml-1">{{ $review->rating }}/5</span>
                                         </div>

@@ -9,6 +9,7 @@ use App\Models\Rfq;
 use App\Models\Shop;
 use App\Models\ShopCertificate;
 use App\Models\Subscription;
+use App\Services\ShopAnalyticsService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -129,19 +130,40 @@ final class Dashboard extends Component
      * Seller shop stats for the seller's quick-stats row.
      * Only computed when the user has an onboarded shop.
      *
-     * @return array{published_products: int}
+     * The action counts (new RFQs, orders to fulfil, pending payout, unread
+     * messages) are null when the feature behind them is switched off, so the
+     * view can hide the tile instead of showing a misleading zero.
+     *
+     * @return array{published_products: int, new_rfqs: ?int, orders_to_fulfil: ?int, pending_balance: ?float, unread_messages: ?int}
      */
     #[Computed]
     public function sellerStats(): array
     {
         if (! $this->isOnboarded) {
-            return ['published_products' => 0];
+            return [
+                'published_products' => 0,
+                'new_rfqs' => null,
+                'orders_to_fulfil' => null,
+                'pending_balance' => null,
+                'unread_messages' => null,
+            ];
+        }
+
+        $analytics = app(ShopAnalyticsService::class);
+        $counts = null;
+
+        if (config('marketplace.features.seller_rfq_queue_enabled') || config('marketplace.features.orders_enabled')) {
+            $counts = $analytics->dashboardCounts($this->shop);
         }
 
         return [
             'published_products' => $this->shop->products()
                 ->where('status', 'published')
                 ->count(),
+            'new_rfqs' => config('marketplace.features.seller_rfq_queue_enabled') ? $counts['new_rfqs'] : null,
+            'orders_to_fulfil' => config('marketplace.features.orders_enabled') ? $counts['orders_in_progress'] : null,
+            'pending_balance' => config('marketplace.features.payouts_enabled') ? $analytics->pendingBalance($this->shop) : null,
+            'unread_messages' => config('marketplace.features.chat_enabled') ? Auth::user()->unreadMessagesCount() : null,
         ];
     }
 

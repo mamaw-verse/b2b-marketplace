@@ -155,10 +155,10 @@
 
         {{-- Step: Sync Pending — unresolvable PENDING attempt detected (Gap 2 / job give-up) --}}
         @elseif ($step === 'sync_pending')
-            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-yellow-200 shadow-[var(--hs-shadow-sm)] p-6">
+            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] shadow-[var(--hs-shadow-sm)] p-6">
                 <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center">
-                        <flux:icon name="exclamation-triangle" class="size-6 text-yellow-600" />
+                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--hs-warning-50)] flex items-center justify-center">
+                        <flux:icon name="exclamation-triangle" class="size-6 text-[var(--hs-warning-700)]" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Payment Verification In Progress') }}</h2>
@@ -182,7 +182,7 @@
                                 <p>{{ __('Subscription ID:') }} <span class="text-[var(--hs-neutral-900)]">{{ $subscriptionId }}</span></p>
                                 <p>{{ __('Payment Attempt ID:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->id }}</span></p>
                                 <p>{{ __('Transaction Reference:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->dlt_merchant_transaction_id }}</span></p>
-                                <p>{{ __('Status:') }} <span class="text-yellow-700">{{ $stuckAttempt->dlt_payment_status ?? 'PENDING' }}</span></p>
+                                <p>{{ __('Status:') }} <span class="text-[var(--hs-warning-700)]">{{ $stuckAttempt->dlt_payment_status ?? 'PENDING' }}</span></p>
                                 <p>{{ __('Initiated:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->created_at?->format('Y-m-d H:i:s T') }}</span></p>
                                 <p>{{ __('Sync Attempts:') }} <span class="text-[var(--hs-neutral-900)]">{{ $stuckAttempt->sync_attempts }}</span></p>
                             @endif
@@ -212,9 +212,9 @@
 
         {{-- Step: Pending (payment not yet settled) --}}
         @elseif ($step === 'pending')
-            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-yellow-200 shadow-[var(--hs-shadow-sm)] p-8 text-center">
-                <div class="mx-auto w-16 h-16 rounded-full bg-yellow-50 flex items-center justify-center mb-4">
-                    <flux:icon name="clock" class="size-8 text-yellow-600" />
+            <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-warning-200)] shadow-[var(--hs-shadow-sm)] p-8 text-center">
+                <div class="mx-auto w-16 h-16 rounded-full bg-[var(--hs-warning-50)] flex items-center justify-center mb-4">
+                    <flux:icon name="clock" class="size-8 text-[var(--hs-warning-700)]" />
                 </div>
                 <h2 class="text-xl font-bold text-[var(--hs-neutral-900)]">{{ __('Payment Pending') }}</h2>
                 <p class="text-sm text-[var(--hs-neutral-600)] mt-2">{{ __('Your payment is still being processed. We\'ll update your subscription once it\'s confirmed.') }}</p>
