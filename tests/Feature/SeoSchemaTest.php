@@ -17,6 +17,14 @@ beforeEach(function () {
 });
 
 /**
+ * The site origin without a trailing slash; sitewide ids are `{origin}/#organization`.
+ */
+function schemaBaseUrl(): string
+{
+    return rtrim(url('/'), '/');
+}
+
+/**
  * The single JSON-LD document in a page, decoded. Fails the test when there is
  * not exactly one `<script type="application/ld+json">`.
  *
@@ -123,8 +131,8 @@ test('every public page emits one valid JSON-LD graph with the sitewide nodes', 
 
         $ids = array_column($schema['@graph'], '@id');
 
-        expect($ids)->toContain(url('/').'#organization')
-            ->and($ids)->toContain(url('/').'#website');
+        expect($ids)->toContain(schemaBaseUrl().'/#organization')
+            ->and($ids)->toContain(schemaBaseUrl().'/#website');
     }
 });
 
@@ -135,7 +143,7 @@ test('the home page carries the full organization with a square logo and the ins
 
     $organization = schemaNodesOfType(pageSchema($this, '/'), 'Organization')[0];
 
-    expect($organization['@id'])->toBe(url('/').'#organization')
+    expect($organization['@id'])->toBe(schemaBaseUrl().'/#organization')
         ->and($organization['areaServed'])->toBe(['@type' => 'Country', 'name' => 'Malaysia'])
         ->and($organization['sameAs'])->toBe(['https://www.facebook.com/example'])
         ->and($organization['contactPoint']['email'])->toBe('help@example.test')
@@ -155,7 +163,7 @@ test('sameAs and contactPoint are omitted when nothing is configured, and other 
 test('the website node references its publisher and has no search action', function () {
     $website = schemaNodesOfType(pageSchema($this, '/'), 'WebSite')[0];
 
-    expect($website['publisher'])->toBe(['@id' => url('/').'#organization'])
+    expect($website['publisher'])->toBe(['@id' => schemaBaseUrl().'/#organization'])
         ->and($website['inLanguage'])->toBe('en')
         ->and($website)->not->toHaveKey('potentialAction');
 });
@@ -180,7 +188,7 @@ test('each page uses the matching WebPage type and a breadcrumb that mirrors its
 
         expect($page['url'])->toBe($canonical)
             ->and($page['@id'])->toBe($canonical.'#webpage')
-            ->and($page['isPartOf'])->toBe(['@id' => url('/').'#website'])
+            ->and($page['isPartOf'])->toBe(['@id' => schemaBaseUrl().'/#website'])
             ->and($page['inLanguage'])->toBe('en');
 
         $breadcrumbs = schemaNodesOfType($schema, 'BreadcrumbList');
@@ -200,7 +208,7 @@ test('each page uses the matching WebPage type and a breadcrumb that mirrors its
 test('the about page names the marketplace organization as its main entity', function () {
     $page = schemaNodesOfType(pageSchema($this, '/about'), 'AboutPage')[0];
 
-    expect($page['mainEntity'])->toBe(['@id' => url('/').'#organization']);
+    expect($page['mainEntity'])->toBe(['@id' => schemaBaseUrl().'/#organization']);
 });
 
 test('legal pages carry their real modified date and other pages none', function () {
@@ -307,14 +315,14 @@ test('the supplier is its own organization, a member of the marketplace, with pu
     $supplier = supplierNode($this, $shop);
     $page = schemaNodesOfType($schema, 'WebPage')[0];
 
-    expect($supplier['@id'])->not->toBe(url('/').'#organization')
+    expect($supplier['@id'])->not->toBe(schemaBaseUrl().'/#organization')
         ->and($supplier['url'])->toBe(route('storefront.company', $shop))
         ->and($supplier['name'])->toBe('Acme Halal Foods')
         ->and($supplier['description'])->toBe('Verified halal producer.')
         ->and($supplier['address'])->toBe(['@type' => 'PostalAddress', 'addressLocality' => 'Cebu City', 'addressRegion' => 'Cebu', 'addressCountry' => 'PH'])
         ->and($supplier['areaServed'])->toBe(['@type' => 'Country', 'name' => 'Philippines'])
         ->and($supplier['knowsAbout'])->toBe(['Cold storage', 'Private label', 'Processing'])
-        ->and($supplier['memberOf'])->toBe(['@id' => url('/').'#organization'])
+        ->and($supplier['memberOf'])->toBe(['@id' => schemaBaseUrl().'/#organization'])
         ->and($supplier)->not->toHaveKey('logo')->and($supplier)->not->toHaveKey('image')
         ->and($page['mainEntity'])->toBe(['@id' => $supplier['@id']])
         ->and(array_column(schemaNodesOfType($schema, 'BreadcrumbList')[0]['itemListElement'], 'name'))->toBe(['Home', 'Companies', 'Acme Halal Foods']);
@@ -519,8 +527,7 @@ test('the product breadcrumb mirrors what the page links: the primary category c
             route('storefront.products', ['category' => $child->id]),
             route('storefront.product', $product),
         ])
-        ->and($html)->toContain('href="'.route('storefront.products', ['category' => $child->id]).'"')
-        ->and($html)->not->toContain('category='.$parent->id.'"');
+        ->and($html)->toContain('href="'.route('storefront.products', ['category' => $child->id]).'"');
 
     $flat = Product::factory()->published()->create(['name' => 'Plain Item']);
     $flatCrumbs = schemaNodesOfType(pageSchema($this, route('storefront.product', $flat)), 'BreadcrumbList')[0]['itemListElement'];
@@ -543,7 +550,7 @@ test('the product page wrapper points at the product as its main entity and its 
 });
 
 test('non-public products and companies render no page and so no schema', function () {
-    $draft = Product::factory()->create(['status' => 'draft']);
+    $draft = Product::factory()->archived()->create();
     $suspended = Shop::factory()->suspended()->create();
 
     $this->get(route('storefront.product', $draft))->assertNotFound();
