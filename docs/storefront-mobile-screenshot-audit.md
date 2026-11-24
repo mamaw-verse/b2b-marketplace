@@ -260,6 +260,8 @@ Random images and addresses make visual diffs meaningless and hide real layout i
 
 ## Fix tasks
 
+**Progress (2026-11-24, batch 4):** T-12 done (share buttons `size-11`), T-13 done on Terms and Privacy (floating back-to-top after 800px scroll, `scroll-margin-top` on `#section-*`, chevron on "On this page", tighter stacked padding, dates on separate lines at `text-sm`). T-02 resolved: 10 % commission stays visible; only enabled features are advertised.
+
 **Progress (2026-11-24, batch 3):** T-07 (optional free-text `quantity` + `target_budget`: migration `2026_11_24_100000_*`, model, Livewire form, admin detail, admin email, test — **run `php artisan migrate`**), T-09 (sticky "Request Quote" bar on mobile company profile reusing `account.rfqs.create?shop_id=`, "Never exported" now neutral, value-chain connectors hidden below `sm`, inactive step text `neutral-600`, compact chip 12px), T-11 (`1HALALSTORE.COM` → `1HalalStore.com` in FAQ/Terms/Privacy views, 5 lang files and `LegalPagesLocalizationTest`; revert the legal pages if counsel requires the all-caps form). New UI strings added only in English (Quantity, Target Budget, optional, e.g. …, Tap to enlarge, Free, …) — other languages fall back to English.
 
 **Progress (2026-11-24, batch 2):** T-06 (notes collapse on mobile + JPG/PNG/HEIC upload, tests added), T-10 (19 small `neutral-400` texts → `neutral-600`, 11 `text-[10/11px]` → `text-xs` in storefront views), T-14 (FAQ placeholder "Search FAQs", 5 lang files), T-15 (`trans_choice` stats strip), T-16 partial (hero CTA now "Create account" → register, full width on mobile; Popular row hidden when no categories; the single-pill row was a fixture artifact — categories render there when present; Coming-soon strip not done).
@@ -288,7 +290,7 @@ Ordered by impact ÷ effort. Check items off as they land.
 ### P2 — polish
 
 - [x] **T-12 (10)** Raise the hamburger (`portal-header.blade.php:33,43`) and share buttons to 44px.
-- [ ] **T-13 (11)** Back-to-top button and anchor offsets on Terms/Privacy; reduce stacked padding; unify the "On this page" disclosure style.
+- [x] **T-13 (11)** Back-to-top button and anchor offsets on Terms/Privacy; reduce stacked padding; unify the "On this page" disclosure style.
 - [x] **T-14 (12)** FAQ: shorter search placeholder, matching disclosure markers, one fewer card level on mobile.
 - [x] **T-15 (14)** Pluralise the product-directory stats strip (and the matching strings in every `lang/*.json`).
 - [x] **T-16 (15)** Condense the "Coming soon" portal cards, rename "Get Started", full-width hero CTAs, hide the single-pill "Popular" row.

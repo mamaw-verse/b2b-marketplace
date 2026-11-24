@@ -1,8 +1,9 @@
 <style>
     html { scroll-behavior: smooth; }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    [id^="section-"] { scroll-margin-top: 5rem; }
 </style>
-<div id="top" class="bg-[var(--hs-neutral-50)]">
+<div id="top" class="bg-[var(--hs-neutral-50)]" x-data="{ showTop: false }" x-on:scroll.window.passive="showTop = window.scrollY > 800">
     {{-- Hero band --}}
     <div class="bg-[var(--hs-green-950)]">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 pb-8 sm:pb-10">
@@ -15,14 +16,14 @@
             <p class="mt-2 max-w-2xl text-sm sm:text-base text-white/70 leading-relaxed">
                 {{ __('How 1HalalStore.com collects, uses, stores, discloses and protects personal information — aligned with the Philippine Data Privacy Act of 2012.') }}
             </p>
-            <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: September 16, 2026') }} &middot; {{ __('Last Updated: September 16, 2026') }}</p>
+            <p class="mt-3 text-sm text-white/70"><span class="block sm:inline">{{ __('Effective Date: September 16, 2026') }}</span><span class="hidden sm:inline"> &middot; </span><span class="block sm:inline">{{ __('Last Updated: September 16, 2026') }}</span></p>
         </div>
     </div>
 
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div class="mx-auto max-w-6xl px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
         {{-- Mobile contents --}}
         <details class="mb-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] lg:hidden">
-            <summary class="cursor-pointer px-5 py-3.5 text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('On this page') }}</summary>
+            <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-semibold text-[var(--hs-neutral-800)] [&::-webkit-details-marker]:hidden">{{ __('On this page') }}<flux:icon name="chevron-down" class="size-5 text-[var(--hs-neutral-600)] transition [details[open]_&]:rotate-180" /></summary>
             <ul class="max-h-72 space-y-0.5 overflow-y-auto border-t border-[var(--hs-neutral-100)] px-3 py-3 text-sm">
                 @foreach ([1 => __('Controller'), 2 => __('Data We Collect'), 3 => __('Purposes'), 4 => __('Legal Bases'), 5 => __('Sharing'), 6 => __('Merchant↔Buyer'), 7 => __('Halal Transparency'), 8 => __('Transfers'), 9 => __('Cookies'), 10 => __('Security'), 11 => __('Retention'), 12 => __('Your Rights'), 13 => __('Exercise Rights'), 14 => __('Children'), 15 => __('Third Parties'), 16 => __('Marketing'), 17 => __('Breaches'), 18 => __('Changes'), 19 => __('Contact')] as $n => $label)
                     <li>
@@ -66,7 +67,7 @@
             </aside>
 
             {{-- Main card --}}
-            <article class="min-w-0 rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-6 sm:p-8 shadow-[var(--hs-shadow-sm)]">
+            <article class="min-w-0 rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-4 sm:p-8 shadow-[var(--hs-shadow-sm)]">
                 @include('partials.legal.privacy-body')
 
                 {{-- Prev / Next + back to top --}}
@@ -92,4 +93,10 @@
             </article>
         </div>
     </div>
+    {{-- Floating back-to-top --}}
+    <a href="#top" x-show="showTop" x-cloak x-transition.opacity
+       class="fixed bottom-4 end-4 z-30 flex size-11 items-center justify-center rounded-full bg-[var(--hs-green-700)] text-white shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2"
+       aria-label="{{ __('Back to top') }}">
+        <flux:icon name="arrow-up" class="size-5" />
+    </a>
 </div>
