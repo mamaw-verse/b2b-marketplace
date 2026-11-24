@@ -260,6 +260,8 @@ Random images and addresses make visual diffs meaningless and hide real layout i
 
 ## Fix tasks
 
+**Progress (2026-11-24, batch 5):** T-16 finished (below `sm`, "Coming soon" portals collapse into a single chip strip; cards stay on `sm+`). T-17: both forms now have a full-width submit on phones (certificate was already full width). T-18 + T-20: `MobileAuditBrowserTest` fixtures are now fixed — `tests/Fixtures/product.png` stored on the `s3` disk, 3 Philippine companies (incl. a long name), 8 published products with real copy. **Screenshots must be re-captured** and the old ones in `tests/Browser/Screenshots/` replaced. Remaining: T-21 (extra capture states) and T-02 doc wording.
+
 **Progress (2026-11-24, batch 4):** T-12 done (share buttons `size-11`), T-13 done on Terms and Privacy (floating back-to-top after 800px scroll, `scroll-margin-top` on `#section-*`, chevron on "On this page", tighter stacked padding, dates on separate lines at `text-sm`). T-02 resolved: 10 % commission stays visible; only enabled features are advertised.
 
 **Progress (2026-11-24, batch 3):** T-07 (optional free-text `quantity` + `target_budget`: migration `2026_11_24_100000_*`, model, Livewire form, admin detail, admin email, test — **run `php artisan migrate`**), T-09 (sticky "Request Quote" bar on mobile company profile reusing `account.rfqs.create?shop_id=`, "Never exported" now neutral, value-chain connectors hidden below `sm`, inactive step text `neutral-600`, compact chip 12px), T-11 (`1HALALSTORE.COM` → `1HalalStore.com` in FAQ/Terms/Privacy views, 5 lang files and `LegalPagesLocalizationTest`; revert the legal pages if counsel requires the all-caps form). New UI strings added only in English (Quantity, Target Budget, optional, e.g. …, Tap to enlarge, Free, …) — other languages fall back to English.
@@ -294,11 +296,11 @@ Ordered by impact ÷ effort. Check items off as they land.
 - [x] **T-14 (12)** FAQ: shorter search placeholder, matching disclosure markers, one fewer card level on mobile.
 - [x] **T-15 (14)** Pluralise the product-directory stats strip (and the matching strings in every `lang/*.json`).
 - [x] **T-16 (15)** Condense the "Coming soon" portal cards, rename "Get Started", full-width hero CTAs, hide the single-pill "Popular" row.
-- [ ] **T-17 (04/12)** Visual-only: unify the submit button width across the sourcing and certificate forms once T-04 lands.
+- [x] **T-17 (04/12)** Visual-only: unify the submit button width across the sourcing and certificate forms once T-04 lands.
 
 ### Test-suite tasks
 
-- [ ] **T-18 (16)** Make the browser-test fixtures deterministic: attach a fixed product image from `tests/Fixtures/`, use Philippine addresses, and a short real product description.
+- [x] **T-18 (16)** Make the browser-test fixtures deterministic: attach a fixed product image from `tests/Fixtures/`, use Philippine addresses, and a short real product description.
 - [x] **T-19 (16)** Add a horizontal-overflow assertion to `MobileAuditBrowserTest.php` (e.g. `document.documentElement.scrollWidth <= window.innerWidth`) so a layout regression fails the test, not just changes a screenshot.
 - [ ] **T-20** Add a second fixture state with 8+ products and 3+ companies so grid density, pagination and long-name wrapping are exercised.
 - [ ] **T-21** Capture the missing states listed below.

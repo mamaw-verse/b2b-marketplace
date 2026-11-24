@@ -684,7 +684,7 @@
                         @endphp
 
                         <{{ $tag }} {{ $attrs }}
-                            class="relative group flex flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] min-h-[160px] sm:min-h-[220px] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
+                            class="relative group {{ $isActive ? 'flex' : 'hidden sm:flex' }} flex-col rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.16)] min-h-[160px] sm:min-h-[220px] {{ $isActive ? 'cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.26)]' : '' }}"
                         >
                             {{-- Full-bleed landmark photo --}}
                             @if (!empty($portal['landmark_image']))
@@ -720,6 +720,22 @@
                     @endforeach
 
                 </div>
+
+                {{-- Mobile: upcoming portals collapse into one compact strip --}}
+                @php $upcomingPortals = collect($this->otherPortals)->filter(fn ($portal) => empty($portal['url']))->values(); @endphp
+                @if ($upcomingPortals->isNotEmpty())
+                    <div class="mt-5 sm:hidden">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-[var(--hs-neutral-600)]">{{ __('Coming Soon') }}</p>
+                        <ul class="mt-2 flex flex-wrap gap-2">
+                            @foreach ($upcomingPortals as $portal)
+                                <li class="inline-flex items-center gap-1.5 rounded-full border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-1.5 text-xs font-medium text-[var(--hs-neutral-700)]">
+                                    <span aria-hidden="true">{{ $portal['flag'] }}</span>
+                                    {{ $portal['display_name'] }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
         </section>
 
