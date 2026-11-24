@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnforceSeoStandards;
 use App\Http\Middleware\EnsureCanonicalSlug;
 use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsureHumanPass;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->web(append: [
             SetLocale::class,
+            EnforceSeoStandards::class,
         ]);
         $middleware->alias([
             'role' => RoleMiddleware::class,

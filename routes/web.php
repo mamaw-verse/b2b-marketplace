@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisteredStaffUserController;
 use App\Http\Controllers\HumanCheckController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\OrderPaymentCallbackController;
 use App\Http\Controllers\SponsoredContentClickController;
 use App\Http\Controllers\SubscriptionPaymentCallbackController;
@@ -32,6 +33,8 @@ Route::post('/locale', function (Request $request) {
 
     return back();
 })->name('locale.switch');
+
+Route::get('/robots.txt', RobotsController::class)->name('robots');
 
 Route::post('/human-check', HumanCheckController::class)
     ->middleware('throttle:20,1')

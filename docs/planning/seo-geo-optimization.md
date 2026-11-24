@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: planning only. Nothing in this document is implemented yet.** Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phase 0 implemented (T0.1–T0.4; T0.5 moves to Phase 1 with the shared head). Later phases are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -137,28 +137,28 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 
 ### Phase 0 — Stabilise
 
-**T0.1 (P0) — Replace static `robots.txt` with a generated one** *(B2, B4)*
+**✅ T0.1 (P0) — Replace static `robots.txt` with a generated one** *(B2, B4)*
 - Delete `public/robots.txt`; add `/public/robots.txt`, `/public/sitemap*.xml`, `/public/llms*.txt` to `.gitignore` so a local dump can't shadow the routes.
 - New `RobotsController` + `BuildRobotsTxt` reading `config/seo.php`. Disallow: `/admin`, `/hub`, `/account`, `/portal`, `/api`, `/auth`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/two-factor*`, `/staff/invitations`, `/settings`, `/media`, `/users`, `/notifications`, `/rfqs`, `/orders`, `/messages`, `/payments`, `/onboarding`, `/profile`. (Confirm the exact prefixes against `routes/web.php` and `routes/settings.php` when implementing.)
 - Add `Sitemap:` line. Emit `Disallow: /` on any non-production environment (`APP_ENV !== production` or `SEO_FORCE_NOINDEX=true`).
 - **AC:** `GET /robots.txt` is dynamic; `git ls-files public | grep -E "robots|sitemap|llms"` is empty; a test proves staging returns `Disallow: /`.
 - **Note:** `Disallow` stops crawling, not indexing. Private pages also get T0.2.
 
-**T0.2 (P0) — `noindex` for everything non-public** *(B4)*
+**✅ T0.2 (P0) — `noindex` for everything non-public** *(B4)*
 - Middleware `EnforceSeoStandards`: add `X-Robots-Tag: noindex, nofollow` for the private prefixes in config (and for any response where `Seo` marks the page non-indexable). Add `<meta name="robots">` from `SeoData`.
 - Staff-invitation token pages and auth pages: `noindex`. Search/filter result states: `noindex, follow` (see T3.2).
 - **AC:** one config list drives robots.txt, meta robots and `X-Robots-Tag`; a parity test iterates the list.
 
-**T0.3 (P0) — Create `config/seo.php`**
+**✅ T0.3 (P0) — Create `config/seo.php`**
 - Keys: `force_noindex`, `site_name` (from `app.name`), `default_og_image`, `logo_path`, `private_path_patterns`, `noindex_follow_query_params` (`search`, `category`, `country`, `certification`, `sort`, … match the real Livewire `#[Url]` names), `ai_crawlers`, `social_profiles`, `contact`.
 - **AC:** no SEO list is duplicated in controller, middleware and view.
 
-**T0.4 (P0) — Fix favicon and brand image assets** *(B5, B6)*
+**✅ T0.4 (P0) — Fix favicon and brand image assets** *(B5, B6)*
 - Serve `favicon.svg` from `public/` root (move/copy) and **optimise the 1.8 MB SVG** or drop it in favour of PNG/ICO sizes.
 - Create assets: `og-default.jpg` (1200×630) and a square `logo-512.png` (≥112×112, recommend 512×512) for `Organization.logo`. Add `32×32` PNG icon.
 - **AC:** HEAD on every image URL in the home head returns 200; `Organization.logo` is square; default OG image is 1200×630.
 
-**T0.5 (P1) — Title and description sweep**
+**T0.5 (P1) — Title and description sweep** *(deferred to Phase 1: descriptions need the shared `<x-seo.head>` first)*
 - Every indexable page gets a unique `<title>` (≤ ~60 chars) and `<meta name="description">` (140–160 chars). Replace generic titles (`Business Directory`, `Product Directory`) with descriptive ones including country scope from `marketplace.instance_country`.
 - **AC:** a test visits every public route and asserts unique non-empty title and description.
 
