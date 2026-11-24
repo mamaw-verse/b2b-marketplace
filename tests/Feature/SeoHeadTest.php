@@ -131,3 +131,34 @@ test('hostile product names cannot break out of head attributes', function () {
 
     expect($head)->not->toContain('<script>alert(1)</script>');
 });
+
+test('a visible product shares its own photo, with its name as the image alt', function () {
+    Config::set('marketplace.features.subscriptions_enabled', false);
+    $product = Product::factory()->published()->create(['name' => 'Jasmine Rice', 'featured_image_path' => 'products/rice.jpg']);
+
+    $html = $this->get(route('storefront.product', $product))->assertOk()->getContent();
+
+    expect(seoMetaContent($html, 'property', 'og:image'))->toBe($product->featured_image_url)
+        ->and(seoMetaContent($html, 'name', 'twitter:image'))->toBe($product->featured_image_url)
+        ->and(seoMetaContent($html, 'property', 'og:image:alt'))->toBe('Jasmine Rice');
+});
+
+test('a product without a photo falls back to the default image and site alt text', function () {
+    Config::set('marketplace.features.subscriptions_enabled', false);
+    $product = Product::factory()->published()->create(['name' => 'No Photo', 'featured_image_path' => null]);
+
+    $html = $this->get(route('storefront.product', $product))->assertOk()->getContent();
+
+    expect(seoMetaContent($html, 'property', 'og:image'))->toBe(asset('og-default.jpg'))
+        ->and(seoMetaContent($html, 'property', 'og:image:alt'))->toBe(config('seo.site_name'));
+});
+
+test('company pages are plain websites and use the default image', function () {
+    $shop = Shop::factory()->create(['status' => 'active', 'storefront_name' => 'Acme Halal Foods']);
+
+    $html = $this->get(route('storefront.company', $shop))->assertOk()->getContent();
+
+    expect(seoMetaContent($html, 'property', 'og:type'))->toBe('website')
+        ->and(seoMetaContent($html, 'property', 'og:image'))->toBe(asset('og-default.jpg'))
+        ->and(seoMetaContent($html, 'property', 'og:image:alt'))->toBe(config('seo.site_name'));
+});

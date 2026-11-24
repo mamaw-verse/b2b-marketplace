@@ -13,7 +13,8 @@
     $image = $usesDefaultImage ? asset(config('seo.default_og_image')) : $seo->image;
     $imageWidth = $usesDefaultImage ? 1200 : $seo->imageWidth;
     $imageHeight = $usesDefaultImage ? 630 : $seo->imageHeight;
-    $imageAlt = $seo?->imageAlt ?? config('seo.site_name');
+    // The alt text must describe the image shown: a page's own image carries its name, the default one the site.
+    $imageAlt = $usesDefaultImage ? config('seo.site_name') : ($seo->imageAlt ?? config('seo.site_name'));
 
     $ogLocale = config('seo.og_locales.'.app()->getLocale());
 
@@ -54,6 +55,9 @@
 <meta property="og:description" content="{{ $description }}">
 @endif
 <meta property="og:image" content="{{ $image }}">
+@if (str_starts_with($image, 'https://'))
+<meta property="og:image:secure_url" content="{{ $image }}">
+@endif
 <meta property="og:image:alt" content="{{ $imageAlt }}">
 @if ($imageWidth && $imageHeight)
 <meta property="og:image:width" content="{{ $imageWidth }}">

@@ -18,6 +18,7 @@ use App\Models\ShopStaff;
 use App\Models\SourcingRequest;
 use App\Models\SponsoredContent;
 use App\Models\User;
+use App\Support\Seo\Visibility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -211,19 +212,16 @@ Route::get('media/{media}/view', function (Media $media) {
 /*
 | Product featured image.
 | featured_image_path is a raw S3 path (not a Media row), so it needs its own
-| proxy. Same visibility rule as gallery: public when the product is
-| marketplace-visible, otherwise owner/admin only.
+| proxy. Public when the product is marketplace-visible (the same rule the
+| sitemap and product page use, including moderation), otherwise owner/admin
+| only.
 */
 Route::get('products/{product}/featured-image', function (Product $product) {
     if (! $product->featured_image_path || ! Storage::disk('s3')->exists($product->featured_image_path)) {
         abort(404);
     }
 
-    $subscriptionsEnabled = (bool) config('marketplace.features.subscriptions_enabled', true);
-
-    $isPublic = $product->status === 'published'
-        && $product->shop?->status === 'active'
-        && (! $subscriptionsEnabled || $product->shop->hasActiveSubscription());
+    $isPublic = Visibility::isProductVisible($product);
 
     if (! $isPublic) {
         $user = auth()->user();
@@ -245,9 +243,21 @@ Route::get('products/{product}/featured-image', function (Product $product) {
         basename($product->featured_image_path)
     );
 
+    // Only a request carrying the current version token (`?v=`, see
+    // Product::featuredImageVersion()) may be cached for a year: the bare URL
+    // serves different bytes once the seller replaces the image, so it gets a
+    // short lifetime and a stale or missing token never becomes `immutable`.
+    $isVersioned = $isPublic
+        && $product->featuredImageVersion() !== null
+        && (string) request()->query('v') === $product->featuredImageVersion();
+
     $response->headers->set(
         'Cache-Control',
-        $isPublic ? 'public, max-age=31536000, immutable' : 'private, max-age=3600'
+        match (true) {
+            $isVersioned => 'public, max-age=31536000, immutable',
+            $isPublic => 'public, max-age=3600',
+            default => 'private, max-age=3600',
+        }
     );
 
     return $response;

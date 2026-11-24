@@ -115,7 +115,8 @@ test('image url accessors return proxied app routes instead of direct s3 urls', 
         'featured_image_path' => 'products/images/proxied.webp',
     ]);
 
-    expect($product->featured_image_url)->toBe(route('products.featured-image', $product));
+    expect($product->featured_image_url)->toBe(route('products.featured-image', ['product' => $product, 'v' => $product->featuredImageVersion()]))
+        ->and($product->featured_image_url)->toContain('?v=');
 
     $media = Media::factory()->create([
         'storage_path' => 'media/gallery-proxied.webp',
@@ -149,4 +150,39 @@ test('guests are redirected to login for profile photos', function () {
     $owner->update(['photo_path' => 'profile-photos/me.jpg']);
 
     $this->get(route('users.photo', $owner))->assertRedirect(route('login'));
+});
+
+test('only a request with the current version token is cached as immutable', function () {
+    $shop = createVisibleShop();
+    Storage::disk('s3')->put('products/images/versioned.webp', 'fake-image-bytes');
+    $product = Product::factory()->create([
+        'shop_id' => $shop->id,
+        'status' => 'published',
+        'featured_image_path' => 'products/images/versioned.webp',
+    ]);
+    $base = route('products.featured-image', $product);
+
+    expect($this->get($product->featured_image_url)->assertOk()->headers->get('Cache-Control'))
+        ->toContain('immutable')
+        ->and($this->get($base)->assertOk()->headers->get('Cache-Control'))
+        ->not->toContain('immutable')
+        ->and($this->get($base.'?v=stale')->assertOk()->headers->get('Cache-Control'))
+        ->not->toContain('immutable');
+});
+
+test('the featured image version changes when the product is saved', function () {
+    $product = Product::factory()->create(['featured_image_path' => 'products/images/a.webp']);
+    $before = $product->featured_image_url;
+
+    $this->travel(5)->minutes();
+    $product->update(['featured_image_path' => 'products/images/b.webp']);
+
+    expect($product->fresh()->featured_image_url)->not->toBe($before);
+});
+
+test('external featured image urls are left untouched', function () {
+    $product = Product::factory()->create(['featured_image_path' => 'https://cdn.example.test/p.jpg']);
+
+    expect($product->featured_image_url)->toBe('https://cdn.example.test/p.jpg')
+        ->and($product->featuredImageVersion())->toBeNull();
 });

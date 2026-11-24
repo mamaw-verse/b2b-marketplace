@@ -38,7 +38,7 @@ it('returns product models with featured image url accessor', function () {
     expect($result)->toBeInstanceOf(Product::class)
         ->and($result->id)->toBe($product->id)
         ->and($result->featured_image_url)->not->toBeNull()
-        ->and($result->featured_image_url)->toBe(route('products.featured-image', $product));
+        ->and($result->featured_image_url)->toBe(route('products.featured-image', ['product' => $product, 'v' => $product->featuredImageVersion()]));
 });
 
 it('returns product models with shop relation loaded', function () {

@@ -256,11 +256,13 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 **T4.1 (P0) — Complete OG/Twitter set**
 - All pages: `og:title/description/url/type/site_name/locale/image` + `image:width/height/alt/secure_url`, `twitter:card`, `twitter:title/description/image`. Correct `og:type`: `website` for home/lists, `article` is only for dated editorial content (none today), `product` for products. **Do not use `business.business` for companies without confirming it fits** — it requires place data (`business:contact_data:*`) that must not include private contact fields; prefer `website`/`profile` with the company name, or `og:type=website`. (**decide D5**)
 - Replace the wordmark default with the 1200×630 default image.
+- *Done (D5 = `website`):* companies are `og:type=website` (no place/contact data can leak); `og:image:secure_url` is emitted for https images; the image alt describes the image actually shown (the page's own name for its own image, the site name for the default).
 
 **T4.2 (P1) — Company and product images**
 - Product: keep `featured-image` when the product is publicly visible; otherwise default image. Fix the visibility check in the image route to use the same `marketplaceVisible()` rules (it currently checks status/shop/subscription but **not** `moderation_status`).
 - Make the image URL **versioned** (`?v={updated_at}`) and only send `immutable` for versioned requests (today it is `immutable` for one year on a stable URL, which leaves stale previews after an image change).
 - Companies: use a real company logo/cover if one exists; otherwise the default OG image. Do not use private media.
+- *Done:* the product image route uses `Visibility::isProductVisible()` (so moderation is enforced); `featured_image_url` carries `?v={updated_at}` and only a request with the current token is `immutable` (others get `public, max-age=3600`); product SEO data uses the product photo only while it is publicly visible, otherwise the default image. Companies have no logo/cover upload (D7), so they use the default image. *Still open:* the dimension/size check below and the generated-card decision.
 - **(verify)** actual dimensions/size of seller-uploaded images; OG images should be ≥1200×630 where possible and < ~5 MB; decide whether a generated card (as in B2C `GenerateSocialImage`) is worth it for B2B or if a default is enough.
 
 **T4.3 (P2) — Favicon/app signals**

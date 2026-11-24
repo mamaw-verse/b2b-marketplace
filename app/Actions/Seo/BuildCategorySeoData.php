@@ -40,7 +40,6 @@ final class BuildCategorySeoData
             description: $this->description($category),
             canonical: CanonicalUrl::withPage($url, $products->currentPage()),
             robots: $robots,
-            imageAlt: $category->name,
             pageType: 'CollectionPage',
             breadcrumbs: $this->breadcrumbs($category),
             listItems: collect($products->items())

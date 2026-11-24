@@ -260,10 +260,29 @@ final class Product extends Model
     }
 
     /**
+     * Cache-busting token for the proxied featured image.
+     *
+     * It changes whenever the product is saved, so a replaced image gets a new
+     * URL and neither browsers nor social scrapers keep serving the old one.
+     * Null when there is no image, or when it is an external URL that never
+     * goes through the proxy route.
+     */
+    public function featuredImageVersion(): ?string
+    {
+        if (! $this->featured_image_path || str_starts_with($this->featured_image_path, 'http')) {
+            return null;
+        }
+
+        return (string) ($this->updated_at?->getTimestamp() ?? crc32($this->featured_image_path));
+    }
+
+    /**
      * Get the proxied URL for the featured image.
      *
      * Streams through the app (not a direct S3 URL) so a private bucket
-     * keeps working — see the `products.featured-image` route.
+     * keeps working — see the `products.featured-image` route. The URL carries
+     * a `v` version token (see featuredImageVersion()) so it can be cached
+     * for a year without ever going stale.
      */
     protected function featuredImageUrl(): Attribute
     {
@@ -274,7 +293,7 @@ final class Product extends Model
 
             return str_starts_with($this->featured_image_path, 'http')
                 ? $this->featured_image_path
-                : route('products.featured-image', $this);
+                : route('products.featured-image', ['product' => $this, 'v' => $this->featuredImageVersion()]);
         });
     }
 }

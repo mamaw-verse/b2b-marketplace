@@ -442,7 +442,7 @@ test('a single-variant product is a Product whose offer equals the displayed pri
         ->and($node['description'])->toBe('Premium rice.')
         ->and($node['sku'])->toBe('RC-001')
         ->and($node['category'])->toBe('Foods > Rice')
-        ->and($node['image'])->toBe([route('products.featured-image', $product)])
+        ->and($node['image'])->toBe([$product->featured_image_url])
         ->and($node['brand'])->toBe(['@id' => route('storefront.company', $shop).'#organization'])
         ->and($node)->not->toHaveKey('manufacturer')
         ->and($node['offers']['price'])->toBe('100.00')
@@ -544,7 +544,7 @@ test('the product page wrapper points at the product as its main entity and its 
     $page = schemaNodesOfType($schema, 'WebPage')[0];
 
     expect($page['mainEntity'])->toBe(['@id' => route('storefront.product', $product).'#product'])
-        ->and($page['primaryImageOfPage']['url'])->toBe(route('products.featured-image', $product));
+        ->and($page['primaryImageOfPage']['url'])->toBe($product->featured_image_url);
 
     $withoutImage = Product::factory()->published()->create(['featured_image_path' => null]);
 

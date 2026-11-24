@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Support\Schema\SchemaId;
 use App\Support\Seo\ProductCategoryTrail;
 use App\Support\Seo\SeoData;
+use App\Support\Seo\Visibility;
 use App\ValueObjects\PublicCompany;
 use Illuminate\Support\Str;
 
@@ -36,17 +37,33 @@ final class BuildProductSeoData
             $mainEntityId = $productNode['@id'];
         }
 
+        $image = $this->socialImage($product);
+
         return new SeoData(
             title: $this->title($product),
             description: $description !== '' ? $description : null,
             canonical: route('storefront.product', $product),
             ogType: 'product',
-            image: $product->featured_image_path ? route('products.featured-image', $product) : null,
-            imageAlt: $product->name,
+            image: $image,
+            imageAlt: $image !== null ? $product->name : null,
             breadcrumbs: $this->breadcrumbs($product),
             schemaNodes: $nodes,
             mainEntityId: $mainEntityId,
         );
+    }
+
+    /**
+     * The product's own photo for social previews and `primaryImageOfPage`: the
+     * versioned featured-image URL, and only while the product is publicly
+     * visible. Null means "use the default social image".
+     */
+    private function socialImage(Product $product): ?string
+    {
+        if (! $product->featured_image_path || ! Visibility::isProductVisible($product)) {
+            return null;
+        }
+
+        return $product->featured_image_url;
     }
 
     public function title(Product $product): string

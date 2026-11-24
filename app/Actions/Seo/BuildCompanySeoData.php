@@ -33,9 +33,10 @@ final class BuildCompanySeoData
             title: $shop->storefront_name.' — '.config('app.name'),
             description: $description,
             canonical: route('storefront.company', $shop),
-            // Kept as-is from the previous markup; revisited in Phase 4 (decision D5).
-            ogType: 'business.business',
-            imageAlt: $shop->storefront_name,
+            // D5: `business.business` expects place and contact data, which must never
+            // be published here, so a company page is a plain `website`. Companies have
+            // no logo or cover upload (D7), so the default social image is used.
+            ogType: 'website',
             breadcrumbs: [
                 ['name' => __('Home'), 'url' => route('home')],
                 ['name' => __('Companies'), 'url' => route('storefront.companies')],
