@@ -752,6 +752,7 @@
                                 __('MHCB-verified badge builds buyer trust'),
                                 config('marketplace.features.orders_enabled') ? __('Built-in product & order management') : __('Showcase your products to verified buyers'),
                                 config('marketplace.features.payouts_enabled') ? __('Integrated payout support (GCash & bank)') : null,
+                                __('RFQs and orders are facilitated by our admin team — buyers never transact directly with sellers'),
                                 __('Dedicated seller dashboard & analytics'),
                             ])) as $point)
                                 <li class="flex items-start gap-2.5">
