@@ -5,7 +5,7 @@
 | Group | Scope | Status |
 |-------|-------|--------|
 | 1 | Seller Critical: S1, S2, S3 | ✅ Done |
-| 2 | Seller High: S4–S8 | Pending |
+| 2 | Seller High: S4–S8 (+S14) | ✅ Done |
 | 3 | Seller Medium: S9–S14 | Pending |
 | 4 | Seller Low: S15–S20 + colour tokens | Pending |
 | 5 | Admin Part 1: queue tables, filters, date picker, colour tokens | Pending |
@@ -15,7 +15,7 @@ Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`
 | Part | Portal | Method | Status |
 |------|--------|--------|--------|
 | 1 | Admin (`/admin/*`) | Source review of Blade views | Plan written, implementation pending |
-| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Group 1 (Critical S1–S3) done |
+| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Groups 1–2 (S1–S8, S14) done |
 
 ---
 
@@ -362,7 +362,7 @@ This component is in `shared/`, so the buyer inbox is affected too.
 
 ## High
 
-### S4 — Payout detail: order breakdown table is clipped
+### S4 — Payout detail: order breakdown table is clipped ✅ DONE
 
 `payouts/payout-detail.blade.php` (table at ~lines 33–51). The table has `min-w-[400px]` inside `overflow-x-auto`. At 390px minus card padding, only Order, Escrowed and part of Fee are visible; Net is off-screen with no scroll cue. Net per order is the column a seller cares about most. The page also has no back link to Payout History.
 
@@ -370,25 +370,25 @@ The summary grid (Gross, Transaction Fees, Commission Fees, Net) is fine.
 
 **Fix:** card list below `sm` using the pattern from Part 1 (order number + net amount on the first line, `<dl>` for escrowed and fees). Add a back link.
 
-### S5 — Order detail: items table is clipped
+### S5 — Order detail: items table is clipped ✅ DONE
 
 `orders/order-detail.blade.php` (table at ~lines 146–185, `min-w-[480px]`). Visible columns at 390px are #, Description, Qty, Unit, and the start of Unit Price. Line total is off-screen. Same fix as S4: card list below `sm`, one card per line item with description, qty × unit price and line total.
 
 Note: the screenshot shows "Items · 0" alongside a non-zero subtotal. That is a factory data mismatch in the browser test, not a UI bug, but it means the populated items table has **not been visually verified** on mobile (see Coverage gaps).
 
-### S6 — Product list: actions crush the product name
+### S6 — Product list: actions crush the product name ✅ DONE
 
 `product-list.blade.php` mobile card (~lines 84–113). Each card puts the name block and a row of three labelled actions (View, Edit, Archive) side by side. The actions are `shrink-0`, so the name is truncated to "Ver…" and the status badge, variants count and share count wrap into a narrow column underneath.
 
 **Fix:** move actions to their own row under the content (as the Part 1 pattern does), or collapse to icon buttons with a `flux:dropdown` for Archive. Let the name wrap to two lines (`line-clamp-2`) instead of truncating.
 
-### S7 — Earnings: native date inputs
+### S7 — Earnings: native date inputs ✅ DONE
 
 `earnings/earnings-overview.blade.php` (lines ~25 and ~28) use `<flux:input type="date">`, which renders the native `mm/dd/yyyy` control. This breaks the project rule to always use `flux:date-picker` (same finding as admin Issue #3). The two inputs also sit at about 60% width, stacked.
 
 **Fix:** `flux:date-picker`, in a `grid grid-cols-2 gap-3` so From and To sit side by side at full width.
 
-### S8 — Inconsistent currency formatting
+### S8 — Inconsistent currency formatting ✅ DONE
 
 Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, orders, order detail and the order builder format as `PHP 1,234.00` (hard-coded `PHP {{ number_format(...) }}` in `hub/reports.blade.php`). A seller moving between Earnings and Reports sees the same kind of value written two ways.
 
@@ -437,7 +437,7 @@ Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, or
 
 **Fix:** let the first tile in each group span both columns (`col-span-2`), reduce the value size on mobile (`text-lg sm:text-2xl`), add `truncate`/`tabular-nums`, and consider compact notation for values over 1M.
 
-### S14 — Earnings: KPI cards stack four high
+### S14 — Earnings: KPI cards stack four high ✅ DONE
 
 `earnings/earnings-overview.blade.php` line ~8 uses `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`, so four KPI cards take about 400px before any content. Use `grid-cols-2` from the start and reduce card padding, as Reports already does.
 
@@ -463,11 +463,11 @@ Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.ph
 1. ✅ **S1** `certificate-list.blade.php` — header stack/wrap (smallest change, fixes the only viewport overflow). Also applied `flex-wrap gap-3` to the same header pattern in document-manager, gallery-manager and product-list
 2. ✅ **S3** `partials/product-tabs.blade.php` — `aria-current` on active tab, auto scroll into view, right-edge fade cue (affects 5 pages)
 3. ✅ **S2** `shared/chat-inbox.blade.php` — master/detail below `lg`, back button (`closeConversation()` in `ChatInbox`), `100dvh` (also fixes the buyer inbox)
-4. **S6** `product-list.blade.php` — action row
-5. **S4** `payouts/payout-detail.blade.php` — card list, back link, token colours
-6. **S5** `orders/order-detail.blade.php` — card list for line items
-7. **S7 + S14** `earnings/earnings-overview.blade.php` — date picker and KPI grid
-8. **S8** shared currency formatter, then replace the hard-coded `PHP` prefixes
+4. ✅ **S6** `product-list.blade.php` — actions moved to their own row, name wraps to 2 lines
+5. ✅ **S4** `payouts/payout-detail.blade.php` — card list below `sm`, back link, token colours
+6. ✅ **S5** `orders/order-detail.blade.php` — card list for line items and fees below `sm`
+7. ✅ **S7 + S14** `earnings/earnings-overview.blade.php` — `flux:date-picker` in a 2-col grid, `grid-cols-2` KPI cards
+8. ✅ **S8** new `<x-hs-money>` component (`₱1,234.00` for PHP); replaced hard-coded `PHP` prefixes in seller reports, profit calculator, order queue and order-detail items. Remaining `PHP` prefixes in admin/buyer views (analytics-dashboard, dispute cards) are out of seller scope and tracked under Group 5
 9. **S9 + S10** order queue filter pattern and order builder (sticky actions, same-as-billing)
 10. **S11 + S12** product form and shop profile (sticky actions, accordions, larger checkboxes)
 11. **S13** reports KPI grid

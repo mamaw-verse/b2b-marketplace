@@ -1,7 +1,11 @@
 <div>
+    <a href="{{ route('hub.payouts.index') }}" wire:navigate class="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] lg:hidden">
+        <flux:icon name="chevron-left" variant="mini" class="size-4" />
+        {{ __('Payouts') }}
+    </a>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
-            <div>
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between gap-3">
+            <div class="min-w-0">
                 <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Payout #:id', ['id' => $payout->id]) }}</h1>
                 <p class="text-sm text-[var(--hs-neutral-500)]">{{ $payout->created_at->format('M d, Y h:i A') }}</p>
             </div>
@@ -15,22 +19,45 @@
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Transaction Fees') }}</p>
-                <p class="text-base sm:text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_transaction_fees, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-[var(--hs-danger-700)]">-₱{{ number_format((float) $payout->total_transaction_fees, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Commission Fees') }}</p>
-                <p class="text-base sm:text-lg font-semibold text-red-600">-₱{{ number_format((float) $payout->total_commission_fees, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-[var(--hs-danger-700)]">-₱{{ number_format((float) $payout->total_commission_fees, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs text-[var(--hs-neutral-500)]">{{ __('Net Amount') }}</p>
-                <p class="text-base sm:text-lg font-semibold text-green-700">₱{{ number_format((float) $payout->net_amount, 2) }}</p>
+                <p class="text-base sm:text-lg font-semibold text-[var(--hs-green-700)]">₱{{ number_format((float) $payout->net_amount, 2) }}</p>
             </div>
         </div>
 
         {{-- Order Breakdown --}}
         <div class="p-6">
             <h2 class="text-sm font-semibold text-[var(--hs-neutral-700)] mb-3">{{ __('Order Breakdown') }}</h2>
-            <div class="overflow-x-auto">
+            {{-- Mobile card list (hidden on sm+) --}}
+            <div class="sm:hidden divide-y divide-[var(--hs-neutral-100)]">
+                @foreach ($payout->items as $item)
+                    <div class="py-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="font-medium text-[var(--hs-neutral-900)]">#{{ $item->order_id }}</span>
+                            <span class="font-mono font-semibold text-[var(--hs-green-700)] tabular-nums">₱{{ number_format((float) $item->net_amount, 2) }}</span>
+                        </div>
+                        <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                            <div>
+                                <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Escrowed') }}</dt>
+                                <dd class="font-mono tabular-nums text-[var(--hs-neutral-900)]">₱{{ number_format((float) $item->escrowed_amount, 2) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Fees') }}</dt>
+                                <dd class="font-mono tabular-nums text-[var(--hs-danger-700)]">-₱{{ number_format((float) $item->transaction_fee + (float) $item->commission_fee, 2) }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Desktop/tablet table (hidden on mobile) --}}
+            <div class="hidden overflow-x-auto sm:block">
                 <table class="w-full text-sm min-w-[400px]">
                 <thead><tr class="border-b border-[var(--hs-neutral-100)]">
                     <th class="text-left py-2 px-2 text-[var(--hs-neutral-600)]">{{ __('Order') }}</th>
@@ -43,8 +70,8 @@
                         <tr class="border-b border-[var(--hs-neutral-50)]">
                             <td class="py-2 px-2 font-medium text-[var(--hs-neutral-900)]">#{{ $item->order_id }}</td>
                             <td class="py-2 px-2 text-right font-mono">₱{{ number_format((float) $item->escrowed_amount, 2) }}</td>
-                            <td class="py-2 px-2 text-right font-mono text-red-600">-₱{{ number_format((float) $item->transaction_fee + (float) $item->commission_fee, 2) }}</td>
-                            <td class="py-2 px-2 text-right font-mono text-green-700">₱{{ number_format((float) $item->net_amount, 2) }}</td>
+                            <td class="py-2 px-2 text-right font-mono text-[var(--hs-danger-700)]">-₱{{ number_format((float) $item->transaction_fee + (float) $item->commission_fee, 2) }}</td>
+                            <td class="py-2 px-2 text-right font-mono text-[var(--hs-green-700)]">₱{{ number_format((float) $item->net_amount, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

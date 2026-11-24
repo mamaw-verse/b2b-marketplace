@@ -10,15 +10,15 @@
             <div class="space-y-2">
                 <div class="flex justify-between text-sm">
                     <span class="text-[var(--hs-neutral-600)]">{{ __('Transaction Fee') }}</span>
-                    <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums">PHP {{ number_format($actualFees['transaction_fee'], 2) }}</span>
+                    <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums"><x-hs-money :amount="$actualFees['transaction_fee']" /></span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-[var(--hs-neutral-600)]">{{ __('Commission Fee') }}</span>
-                    <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums">PHP {{ number_format($actualFees['commission_fee'], 2) }}</span>
+                    <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums"><x-hs-money :amount="$actualFees['commission_fee']" /></span>
                 </div>
                 <div class="pt-2 border-t border-[var(--hs-neutral-100)] flex justify-between text-sm">
                     <span class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Net Amount') }}</span>
-                    <span class="font-bold text-[var(--hs-green-700)] tabular-nums">PHP {{ number_format($actualFees['net_amount'], 2) }}</span>
+                    <span class="font-bold text-[var(--hs-green-700)] tabular-nums"><x-hs-money :amount="$actualFees['net_amount']" /></span>
                 </div>
                 <p class="text-xs text-[var(--hs-neutral-500)] italic">{{ __('Actual fees from payout record.') }}</p>
             </div>
@@ -39,7 +39,7 @@
                     <span class="text-[var(--hs-neutral-600)]">{{ __('Transaction Fee (flat)') }}</span>
                     <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums">
                         @if ($this->calculatedNet !== null)
-                            PHP {{ number_format($this->transactionFeeAmount, 2) }}
+                            <x-hs-money :amount="$this->transactionFeeAmount" />
                         @else
                             —
                         @endif
@@ -49,7 +49,7 @@
                     <span class="text-[var(--hs-neutral-600)]">{{ __('Commission Fee (:rate%)', ['rate' => number_format($this->commissionFeeRate * 100, 1)]) }}</span>
                     <span class="font-medium text-[var(--hs-neutral-900)] tabular-nums">
                         @if ($this->calculatedCommissionFee !== null)
-                            PHP {{ number_format($this->calculatedCommissionFee, 2) }}
+                            <x-hs-money :amount="$this->calculatedCommissionFee" />
                         @else
                             —
                         @endif
@@ -59,7 +59,7 @@
                     <span class="font-semibold text-[var(--hs-neutral-900)]">{{ __('Net Amount') }}</span>
                     <span class="font-bold text-[var(--hs-green-700)] tabular-nums">
                         @if ($this->calculatedNet !== null)
-                            PHP {{ number_format($this->calculatedNet, 2) }}
+                            <x-hs-money :amount="$this->calculatedNet" />
                         @else
                             —
                         @endif

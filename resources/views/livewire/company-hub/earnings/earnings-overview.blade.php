@@ -5,28 +5,24 @@
         </div>
 
         {{-- Summary Cards --}}
-        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-4 sm:p-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             @foreach ([
                 ['label' => __('Total Earned'), 'value' => $this->summary['total_earned'], 'color' => 'green'],
                 ['label' => __('Pending Balance'), 'value' => $this->summary['pending_balance'], 'color' => 'warning'],
                 ['label' => __('Total Released'), 'value' => $this->summary['total_released'], 'color' => 'blue'],
                 ['label' => __('Total Fees Paid'), 'value' => $this->summary['total_fees_paid'], 'color' => 'neutral'],
             ] as $card)
-                <div class="p-4 rounded-lg border border-[var(--hs-neutral-200)]">
-                    <p class="text-sm text-[var(--hs-neutral-600)]">{{ $card['label'] }}</p>
-                    <p class="text-2xl font-bold text-[var(--hs-neutral-900)] mt-1">₱{{ number_format((float) $card['value'], 2) }}</p>
+                <div class="min-w-0 p-3 sm:p-4 rounded-lg border border-[var(--hs-neutral-200)]">
+                    <p class="text-xs sm:text-sm text-[var(--hs-neutral-600)]">{{ $card['label'] }}</p>
+                    <p class="truncate text-lg sm:text-2xl tabular-nums font-bold text-[var(--hs-neutral-900)] mt-1">₱{{ number_format((float) $card['value'], 2) }}</p>
                 </div>
             @endforeach
         </div>
 
         {{-- Filters --}}
-        <div class="px-6 flex flex-wrap items-end gap-4 border-t border-[var(--hs-neutral-100)] pt-5">
-            <div>
-                <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
-            </div>
-            <div>
-                <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
-            </div>
+        <div class="grid grid-cols-2 items-end gap-3 border-t border-[var(--hs-neutral-100)] px-6 pt-5 sm:flex sm:flex-wrap sm:gap-4">
+            <flux:date-picker wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
+            <flux:date-picker wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
         </div>
 
         {{-- Transaction List --}}

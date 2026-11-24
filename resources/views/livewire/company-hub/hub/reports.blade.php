@@ -18,7 +18,7 @@
             ] as $metric)
                 <div class="p-4 rounded-lg bg-[var(--hs-neutral-50)]">
                     <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
-                        @if ($metric['format'] === 'currency') PHP {{ number_format((float) $metric['value'], 2) }} @else {{ $metric['value'] }} @endif
+                        @if ($metric['format'] === 'currency') <x-hs-money :amount="$metric['value']" /> @else {{ $metric['value'] }} @endif
                     </p>
                     <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ $metric['label'] }}</p>
                 </div>
@@ -39,7 +39,7 @@
             ] as $metric)
                 <div class="p-4 rounded-lg bg-[var(--hs-neutral-50)]">
                     <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
-                        PHP {{ number_format((float) $metric['value'], 2) }}
+                        <x-hs-money :amount="$metric['value']" />
                     </p>
                     <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ $metric['label'] }}</p>
                 </div>

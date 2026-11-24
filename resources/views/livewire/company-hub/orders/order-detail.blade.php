@@ -143,7 +143,30 @@
                             <span class="text-[var(--hs-neutral-400)] font-normal normal-case tracking-normal">· {{ $order->items->count() }}</span>
                         </h2>
                     </div>
-                    <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-x-auto">
+                    {{-- Mobile card list (hidden on sm+) --}}
+                    <div class="sm:hidden rounded-lg border border-[var(--hs-neutral-200)] divide-y divide-[var(--hs-neutral-100)]">
+                        @foreach ($order->items as $item)
+                            <div class="px-4 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <p class="min-w-0 font-medium text-[var(--hs-neutral-900)]">{{ $item->description }}</p>
+                                    <x-hs-money :amount="$item->subtotal" :currency="$order->currency" class="shrink-0 font-semibold text-[var(--hs-neutral-900)]" />
+                                </div>
+                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] tabular-nums">
+                                    {{ (int) $item->quantity }} {{ $item->unit }} ×
+                                    <x-hs-money :amount="$item->unit_price" :currency="$order->currency" />
+                                </p>
+                            </div>
+                        @endforeach
+                        @foreach ($order->fees as $fee)
+                            <div class="flex items-center justify-between gap-3 bg-[var(--hs-neutral-50)] px-4 py-2.5 text-sm italic text-[var(--hs-neutral-500)]">
+                                <span class="min-w-0">{{ $fee->label }}</span>
+                                <x-hs-money :amount="$fee->amount" :currency="$order->currency" class="shrink-0 font-medium text-[var(--hs-neutral-600)]" />
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Desktop/tablet table (hidden on mobile) --}}
+                    <div class="hidden rounded-lg border border-[var(--hs-neutral-200)] overflow-x-auto sm:block">
                         <table class="w-full text-[13.5px] min-w-[480px]">
                             <thead>
                                 <tr class="bg-[var(--hs-neutral-50)]">
@@ -162,8 +185,8 @@
                                         <td class="px-4 py-3 text-[var(--hs-neutral-900)] font-medium">{{ $item->description }}</td>
                                         <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap">{{ (int) $item->quantity }}</td>
                                         <td class="px-4 py-3 text-[var(--hs-neutral-600)] whitespace-nowrap">{{ $item->unit }}</td>
-                                        <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap">{{ $order->currency }}&nbsp;{{ number_format((float) $item->unit_price, 2) }}</td>
-                                        <td class="px-4 py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums whitespace-nowrap">{{ $order->currency }}&nbsp;{{ number_format((float) $item->subtotal, 2) }}</td>
+                                        <td class="px-4 py-3 text-[var(--hs-neutral-600)] tabular-nums whitespace-nowrap"><x-hs-money :amount="$item->unit_price" :currency="$order->currency" /></td>
+                                        <td class="px-4 py-3 text-right text-[var(--hs-neutral-900)] font-semibold tabular-nums whitespace-nowrap"><x-hs-money :amount="$item->subtotal" :currency="$order->currency" /></td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -177,7 +200,7 @@
                                                     {{ $fee->label }}
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-2.5 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic whitespace-nowrap">{{ $order->currency }}&nbsp;{{ number_format((float) $fee->amount, 2) }}</td>
+                                            <td class="px-4 py-2.5 text-right text-[var(--hs-neutral-600)] font-medium tabular-nums italic whitespace-nowrap"><x-hs-money :amount="$fee->amount" :currency="$order->currency" /></td>
                                         </tr>
                                     @endforeach
                                 </tfoot>

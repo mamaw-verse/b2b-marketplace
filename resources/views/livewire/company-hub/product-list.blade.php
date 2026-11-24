@@ -83,9 +83,9 @@
             {{-- Mobile card list (hidden on sm+) --}}
             <div class="sm:hidden divide-y divide-[var(--hs-neutral-100)]">
                 @forelse ($this->products as $product)
-                    <div class="flex items-start justify-between gap-3 px-5 py-4">
-                        <div class="min-w-0 flex-1">
-                            <p class="font-semibold text-[var(--hs-neutral-900)] truncate">{{ $product->name }}</p>
+                    <div class="px-5 py-4">
+                        <div class="min-w-0">
+                            <p class="font-semibold text-[var(--hs-neutral-900)] line-clamp-2">{{ $product->name }}</p>
                             <div class="mt-1.5 flex flex-wrap items-center gap-2">
                                 <x-hs-status-pill :status="$product->status" />
                                 <span class="text-xs text-[var(--hs-neutral-500)]">
@@ -100,7 +100,7 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="flex shrink-0 items-center gap-1">
+                        <div class="mt-3 flex flex-wrap items-center gap-1">
                             @if ($product->status === 'published')
                                 <flux:button
                                     variant="ghost"

@@ -40,7 +40,7 @@
                                     <p class="text-xs text-[var(--hs-neutral-400)] mt-1">{{ $order->created_at->format('M d, Y') }}</p>
                                 </div>
                                 <div class="shrink-0 text-right">
-                                    <p class="font-semibold text-[var(--hs-neutral-900)]">{{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</p>
+                                    <p class="font-semibold text-[var(--hs-neutral-900)]"><x-hs-money :amount="$order->order_total" :currency="$order->currency" /></p>
                                     <div class="mt-1"><x-hs-status-pill :status="$order->status" /></div>
                                 </div>
                             </a>
@@ -66,7 +66,7 @@
                                 <tr class="border-b border-[var(--hs-neutral-50)] hover:bg-[var(--hs-neutral-50)]">
                                     <td class="py-3 px-2 font-medium text-[var(--hs-neutral-900)]">{{ $order->order_number }}</td>
                                     <td class="py-3 px-2 text-[var(--hs-neutral-700)]">{{ $order->customer_business_name ?? $order->buyer?->first_name }}</td>
-                                    <td class="py-3 px-2 text-[var(--hs-neutral-900)] font-medium">{{ $order->currency }} {{ number_format((float) $order->order_total, 2) }}</td>
+                                    <td class="py-3 px-2 text-[var(--hs-neutral-900)] font-medium"><x-hs-money :amount="$order->order_total" :currency="$order->currency" /></td>
                                     <td class="py-3 px-2"><x-hs-status-pill :status="$order->status" /></td>
                                     <td class="py-3 px-2 text-[var(--hs-neutral-500)]">{{ $order->created_at->format('M d, Y') }}</td>
                                     <td class="py-3 px-2 text-right">
@@ -101,7 +101,7 @@
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-[var(--hs-neutral-900)] truncate">{{ Str::limit($quotation->rfq->title ?? '—', 40) }}</p>
                                 <p class="text-xs text-[var(--hs-neutral-500)] mt-0.5">{{ $quotation->updated_at->diffForHumans() }}</p>
-                                <p class="text-sm font-semibold text-[var(--hs-neutral-900)] mt-1">{{ $quotation->currency }} {{ number_format((float) $quotation->total_amount, 2) }}</p>
+                                <p class="text-sm font-semibold text-[var(--hs-neutral-900)] mt-1"><x-hs-money :amount="$quotation->total_amount" :currency="$quotation->currency" /></p>
                             </div>
                             <flux:button
                                 size="sm"
@@ -134,7 +134,7 @@
                                         {{ Str::limit($quotation->rfq->title ?? '—', 40) }}
                                     </td>
                                     <td class="py-2.5 px-3 text-right font-medium text-[var(--hs-neutral-900)]">
-                                        {{ $quotation->currency }} {{ number_format((float) $quotation->total_amount, 2) }}
+                                        <x-hs-money :amount="$quotation->total_amount" :currency="$quotation->currency" />
                                     </td>
                                     <td class="py-2.5 px-3 text-[var(--hs-neutral-500)]">
                                         {{ $quotation->updated_at->diffForHumans() }}
