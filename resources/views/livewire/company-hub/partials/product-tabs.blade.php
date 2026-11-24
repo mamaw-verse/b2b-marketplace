@@ -1,7 +1,9 @@
 @if ($product)
-    <div class="mb-6 border-b border-[var(--hs-neutral-200)]">
+    <div class="relative mb-6 border-b border-[var(--hs-neutral-200)]">
         <nav
-            class="flex items-center gap-6 overflow-x-auto"
+            x-data
+            x-init="$nextTick(() => $el.querySelector('[aria-current=page]')?.scrollIntoView({ inline: 'center', block: 'nearest' }))"
+            class="flex items-center gap-6 overflow-x-auto scrollbar-hide pr-8"
             aria-label="{{ __('Product navigation') }}"
         >
 
@@ -9,6 +11,7 @@
             <a
                 href="{{ route('hub.products.edit', $product) }}"
                 wire:navigate
+                @if (request()->routeIs('hub.products.edit')) aria-current="page" @endif
                 @class([
                     'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
                     'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.edit'),
@@ -27,6 +30,7 @@
             <a
                 href="{{ route('hub.products.variants', $product) }}"
                 wire:navigate
+                @if (request()->routeIs('hub.products.variants')) aria-current="page" @endif
                 @class([
                     'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
                     'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.variants'),
@@ -45,6 +49,7 @@
             <a
                 href="{{ route('hub.products.gallery', $product) }}"
                 wire:navigate
+                @if (request()->routeIs('hub.products.gallery')) aria-current="page" @endif
                 @class([
                     'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
                     'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.gallery'),
@@ -63,6 +68,7 @@
             <a
                 href="{{ route('hub.products.documents', $product) }}"
                 wire:navigate
+                @if (request()->routeIs('hub.products.documents')) aria-current="page" @endif
                 @class([
                     'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
                     'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.documents'),
@@ -82,6 +88,7 @@
                 <a
                     href="{{ route('hub.products.video', $product) }}"
                     wire:navigate
+                    @if (request()->routeIs('hub.products.video')) aria-current="page" @endif
                     @class([
                         'relative flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors',
                         'border-[var(--hs-green-600)] text-[var(--hs-green-700)]' => request()->routeIs('hub.products.video'),
@@ -94,5 +101,8 @@
             @endif
 
         </nav>
+
+        {{-- Edge fade: hints that more tabs scroll off-screen on narrow viewports --}}
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[var(--hs-neutral-0)] to-transparent sm:hidden" aria-hidden="true"></div>
     </div>
 @endif

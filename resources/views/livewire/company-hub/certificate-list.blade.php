@@ -2,17 +2,17 @@
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
 
         {{-- Card Header --}}
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
-            <div>
+        <div class="flex flex-col gap-3 border-b border-[var(--hs-neutral-100)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
                 <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Certificates') }}</h1>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ __('Your halal certification records.') }}</p>
             </div>
 
-            <div class="flex items-center gap-2">
-                <flux:button variant="primary" icon="plus" wire:click="openAddModal">
+            <div class="flex flex-wrap items-center gap-2">
+                <flux:button variant="primary" icon="plus" class="flex-1 sm:flex-none" wire:click="openAddModal">
                     {{ __('Add Certificate') }}
                 </flux:button>
-                <flux:button variant="ghost" icon="check-badge" href="{{ route('apply.certificate') }}" wire:navigate>
+                <flux:button variant="ghost" icon="check-badge" class="flex-1 sm:flex-none" href="{{ route('apply.certificate') }}" wire:navigate>
                     {{ __('Apply for Certificate') }}
                 </flux:button>
             </div>

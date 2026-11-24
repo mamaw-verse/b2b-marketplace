@@ -7,7 +7,7 @@
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Gallery') }}</h1>
                 <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">{{ $product->name }}</p>

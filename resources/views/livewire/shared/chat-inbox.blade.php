@@ -1,8 +1,8 @@
 <div
-    class="flex h-[calc(100vh-9rem)] min-h-[560px] w-full overflow-hidden rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)]"
+    class="flex h-[calc(100dvh-9rem)] min-h-[560px] w-full overflow-hidden rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] shadow-[var(--hs-shadow-sm)]"
 >
     {{-- CONVERSATIONS SIDEBAR --}}
-    <aside class="flex w-[280px] shrink-0 min-h-0 flex-col border-r border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]">
+    <aside class="{{ $selectedConversationId ? 'hidden' : 'flex' }} w-full min-h-0 shrink-0 flex-col border-r border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] lg:flex lg:w-[280px]">
         <div class="shrink-0 px-4 pb-3 pt-4">
             <div class="flex items-center justify-between">
                 <div>
@@ -80,7 +80,7 @@
     </aside>
 
     {{-- CHAT AREA --}}
-    <section class="flex min-w-0 min-h-0 flex-1 flex-col bg-[var(--hs-neutral-50)]">
+    <section class="{{ $selectedConversationId ? 'flex' : 'hidden' }} min-w-0 min-h-0 flex-1 flex-col bg-[var(--hs-neutral-50)] lg:flex">
         @if ($selectedConversationId)
             @php
                 $selectedConversation = $this->conversations->firstWhere('id', $selectedConversationId);
@@ -95,8 +95,19 @@
 
             {{-- Chat Header --}}
             <header class="shrink-0 border-b border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)]">
-                <div class="flex h-14 items-center justify-between px-5">
-                    <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-14 items-center justify-between px-3 sm:px-5">
+                    <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+                        {{-- Back to conversation list (below lg only) --}}
+                        <button
+                            type="button"
+                            wire:click="closeConversation"
+                            class="-ml-1 flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] lg:hidden"
+                            aria-label="{{ __('Messages') }}"
+                        >
+                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
                         <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-[11px] font-bold text-white shadow-sm">
                             {{ $initials }}
                         </div>

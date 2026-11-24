@@ -1,11 +1,21 @@
 # Portal Mobile UI/UX Audit & Implementation Plan
 
+> **Progress:** ✅ = done, unmarked = pending. Work is done and pushed by group. Changes are not yet verified with Pint, `npm run build` or the browser test (no PHP toolchain in the authoring environment); run them before release.
+
+| Group | Scope | Status |
+|-------|-------|--------|
+| 1 | Seller Critical: S1, S2, S3 | ✅ Done |
+| 2 | Seller High: S4–S8 | Pending |
+| 3 | Seller Medium: S9–S14 | Pending |
+| 4 | Seller Low: S15–S20 + colour tokens | Pending |
+| 5 | Admin Part 1: queue tables, filters, date picker, colour tokens | Pending |
+
 Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`/admin/*`); Part 2 is the seller portal (`/portal/*` and `/hub/*`).
 
 | Part | Portal | Method | Status |
 |------|--------|--------|--------|
 | 1 | Admin (`/admin/*`) | Source review of Blade views | Plan written, implementation pending |
-| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Findings written, implementation pending |
+| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Group 1 (Critical S1–S3) done |
 
 ---
 
@@ -307,7 +317,7 @@ Overall the portal shell (header, hamburger nav, card layout, `--hs-*` tokens) h
 
 ## Critical
 
-### S1 — Certificates page overflows the viewport
+### S1 — Certificates page overflows the viewport ✅ DONE
 
 `certificate-list.blade.php` (header, lines ~5–17). The page renders 515px wide inside a 390px viewport. The header is a single `flex items-center justify-between` row holding the title block plus two buttons ("Add Certificate" and "Apply for Certificate"). Nothing can wrap, so "Apply for Certificate" is pushed outside the card and the whole page scrolls sideways.
 
@@ -325,7 +335,7 @@ Overall the portal shell (header, hamburger nav, card layout, `--hs-*` tokens) h
 
 Check other `px-6 py-5 ... flex items-center justify-between` page headers for the same pattern (product-list has it too, and only fits because it has one short button).
 
-### S2 — Messages two-pane layout does not collapse
+### S2 — Messages two-pane layout does not collapse ✅ DONE
 
 `resources/views/livewire/shared/chat-inbox.blade.php`. The conversation list is a fixed `w-[280px] shrink-0` sidebar and the thread pane is `flex-1`. At 390px the thread pane gets about 77px, so "Select a conversation" is clipped to "conversatio", the empty-state copy wraps one word per line, and the text refers to "the left" even though nothing is to the left. Once a conversation is open, the thread (header, thread tabs, composer) would be squeezed the same way. The container also uses `h-[calc(100vh-9rem)]`, which is wrong on mobile browsers with a collapsing URL bar.
 
@@ -339,7 +349,7 @@ This component is in `shared/`, so the buyer inbox is affected too.
 - Hide the "Select a conversation" empty state below `lg`.
 - Replace `100vh` with `100dvh`.
 
-### S3 — Product sub-tabs hide the active tab
+### S3 — Product sub-tabs hide the active tab ✅ DONE
 
 `partials/product-tabs.blade.php`. There are five tabs (Basic Info, Variants, Gallery, Documents, Video) in a `flex gap-6 overflow-x-auto` row. At 390px only three fit. On the Documents and Video pages the active tab is off-screen, so **no tab is highlighted** and the seller cannot tell where they are. There is no scroll hint (no fade, no cut-off label), so Documents and Video are easy to miss entirely.
 
@@ -450,9 +460,9 @@ Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.ph
 
 ## Implementation Order
 
-1. **S1** `certificate-list.blade.php` — header stack/wrap (smallest change, fixes the only viewport overflow)
-2. **S3** `partials/product-tabs.blade.php` — active-tab scroll and cue (affects 5 pages)
-3. **S2** `shared/chat-inbox.blade.php` — master/detail (largest change, also fixes the buyer inbox)
+1. ✅ **S1** `certificate-list.blade.php` — header stack/wrap (smallest change, fixes the only viewport overflow). Also applied `flex-wrap gap-3` to the same header pattern in document-manager, gallery-manager and product-list
+2. ✅ **S3** `partials/product-tabs.blade.php` — `aria-current` on active tab, auto scroll into view, right-edge fade cue (affects 5 pages)
+3. ✅ **S2** `shared/chat-inbox.blade.php` — master/detail below `lg`, back button (`closeConversation()` in `ChatInbox`), `100dvh` (also fixes the buyer inbox)
 4. **S6** `product-list.blade.php` — action row
 5. **S4** `payouts/payout-detail.blade.php` — card list, back link, token colours
 6. **S5** `orders/order-detail.blade.php` — card list for line items

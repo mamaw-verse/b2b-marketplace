@@ -72,6 +72,15 @@ abstract class ChatInbox extends Component
         $conversation->markAsReadFor(Auth::user());
     }
 
+    /**
+     * Return to the conversation list (mobile master/detail back navigation).
+     */
+    final public function closeConversation(): void
+    {
+        $this->selectedConversationId = null;
+        $this->selectedThreadId = null;
+    }
+
     final public function selectThread(int $id): void
     {
         $thread = ConversationThread::findOrFail($id);
