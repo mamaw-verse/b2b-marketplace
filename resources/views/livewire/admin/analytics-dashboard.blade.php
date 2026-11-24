@@ -38,7 +38,7 @@
             <flux:card>
                 <div class="flex flex-col">
                     <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('GMV') }}</span>
-                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['gmv'] ?? 0), 2) }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums"><x-hs-money :amount="$metrics['gmv'] ?? 0" /></span>
                 </div>
             </flux:card>
             <flux:card>
@@ -53,7 +53,7 @@
             <flux:card>
                 <div class="flex flex-col">
                     <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Payouts Disbursed') }}</span>
-                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_payouts_disbursed'] ?? 0), 2) }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums"><x-hs-money :amount="$metrics['total_payouts_disbursed'] ?? 0" /></span>
                 </div>
             </flux:card>
         @endif
@@ -173,13 +173,13 @@
             <flux:card>
                 <div class="flex flex-col">
                     <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Transaction Fees Collected') }}</span>
-                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_transaction_fees_collected'] ?? 0), 2) }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums"><x-hs-money :amount="$metrics['total_transaction_fees_collected'] ?? 0" /></span>
                 </div>
             </flux:card>
             <flux:card>
                 <div class="flex flex-col">
                     <span class="text-sm font-medium text-[var(--hs-neutral-500)]">{{ __('Commission Fees Collected') }}</span>
-                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums">PHP {{ number_format((float) ($metrics['total_commission_fees_collected'] ?? 0), 2) }}</span>
+                    <span class="text-2xl font-semibold text-[var(--hs-neutral-900)] mt-1 tabular-nums"><x-hs-money :amount="$metrics['total_commission_fees_collected'] ?? 0" /></span>
                 </div>
             </flux:card>
         </div>
@@ -216,14 +216,14 @@
                         <p class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-2">{{ __('Counts by Status') }}</p>
                         @forelse($metrics['subscriptions']['counts'] ?? [] as $count)
                             <div class="flex justify-between py-2 border-b border-[var(--hs-neutral-200)] last:border-0">
-                                <span class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)] capitalize">{{ $count['status'] ?? '' }}</span>
+                                <span class="text-sm text-[var(--hs-neutral-600)] capitalize">{{ $count['status'] ?? '' }}</span>
                                 <span class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ $count['count'] ?? 0 }}</span>
                             </div>
                         @empty
                             <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No subscription data.') }}</p>
                         @endforelse
                         <div class="mt-4 pt-4">
-                            <p class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)]">{{ __('Trial to Paid Conversion') }}</p>
+                            <p class="text-sm text-[var(--hs-neutral-600)]">{{ __('Trial to Paid Conversion') }}</p>
                             <p class="text-xl font-bold text-[var(--hs-neutral-900)] tabular-nums mt-1">{{ $metrics['subscriptions']['trial_to_paid_conversion'] ?? 0 }}%</p>
                         </div>
                     </div>
@@ -241,7 +241,7 @@
                     <div class="flex-1 min-w-[200px]">
                         @foreach(['under_review', 'active', 'expiring_soon', 'expired', 'rejected'] as $status)
                             <div class="flex justify-between py-2 border-b border-[var(--hs-neutral-200)] last:border-0">
-                                <span class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)] capitalize">{{ __(str_replace('_', ' ', $status)) }}</span>
+                                <span class="text-sm text-[var(--hs-neutral-600)] capitalize">{{ __(str_replace('_', ' ', $status)) }}</span>
                                 <span class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ $metrics['certifications'][$status] ?? 0 }}</span>
                             </div>
                         @endforeach
@@ -262,7 +262,7 @@
                 <div class="mt-6">
                     @forelse($metrics['sponsored_content'] ?? [] as $event)
                         <div class="flex justify-between py-2 border-b border-[var(--hs-neutral-200)] last:border-0">
-                            <span class="text-sm text-[var(--hs-neutral-600)] dark:text-[var(--hs-neutral-400)]">{{ $event['tier_name'] ?? '' }} — <span class="capitalize">{{ $event['event_type'] ?? '' }}</span></span>
+                            <span class="text-sm text-[var(--hs-neutral-600)]">{{ $event['tier_name'] ?? '' }} — <span class="capitalize">{{ $event['event_type'] ?? '' }}</span></span>
                             <span class="text-sm font-medium text-[var(--hs-neutral-900)]">{{ $event['count'] ?? 0 }}</span>
                         </div>
                     @empty

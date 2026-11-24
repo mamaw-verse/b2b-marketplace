@@ -81,7 +81,7 @@
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-[var(--hs-neutral-700)]">{{ str_replace('_', ' ', ucfirst($dispute->resolution_type)) }}</span>
                             @if ($dispute->resolution_amount)
-                                <span class="font-semibold text-[var(--hs-neutral-900)] tabular-nums">PHP {{ number_format((float) $dispute->resolution_amount, 2) }}</span>
+                                <span class="font-semibold text-[var(--hs-neutral-900)] tabular-nums"><x-hs-money :amount="$dispute->resolution_amount" /></span>
                             @endif
                         </div>
                         @if ($dispute->resolution_notes)

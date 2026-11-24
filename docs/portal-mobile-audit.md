@@ -8,22 +8,32 @@
 | 2 | Seller High: S4–S8 (+S14) | ✅ Done |
 | 3 | Seller Medium: S9–S14 | ✅ Done |
 | 4 | Seller Low: S15–S20 + colour tokens | ✅ Done (S19 partial, see note) |
-| 5 | Admin Part 1: queue tables, filters, date picker, colour tokens | Pending |
+| 5 | Admin Part 1: queue tables, filters, date picker, colour tokens | ✅ Done |
 
 Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`/admin/*`); Part 2 is the seller portal (`/portal/*` and `/hub/*`).
 
 | Part | Portal | Method | Status |
 |------|--------|--------|--------|
-| 1 | Admin (`/admin/*`) | Source review of Blade views | Plan written, implementation pending |
-| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Groups 1–4 (S1–S20 + seller colour tokens) done |
+| 1 | Admin (`/admin/*`) | Source review of Blade views | ✅ Implemented (source-verified; not yet checked in a browser) |
+| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | ✅ Groups 1–4 done (S1–S20 + seller colour tokens); S19 partial |
 
 ---
 
 # Part 1 — Admin Portal
 
+## Group 5 status
+
+On re-checking the sources, most of the plan below had already landed in `dc1fc7c` (Nov 2): 14 of the 15 listed views already had a `lg:hidden` card list beside a `hidden lg:block` desktop table, the merchant-list filter row already stacks below `md`, and raw Tailwind colours in admin were down to four redundant `dark:` classes. Group 5 therefore verified each view and finished the remainder:
+
+- ✅ `finance/financial-ledger.blade.php`: both `<flux:input type="date">` replaced with `<flux:date-picker>` (Issue #3); Type and Shop ID are full width on mobile and From/To sit side by side.
+- ✅ `sponsored-content/sponsored-content-tier-settings.blade.php` and the tier modal in `sponsored-content-list.blade.php`: the only two tables with no mobile treatment. Both now have a card list below `md` (name and status, weight bar and slot count in a `<dl>`, labelled Edit/Deactivate/Delete buttons, inline edit with full-width Save/Cancel). The tables are `hidden md:block`.
+- ✅ `analytics-dashboard.blade.php`: the four redundant `dark:text-[var(--hs-neutral-400)]` classes removed, and the four `PHP {{ number_format(...) }}` KPI values replaced with `<x-hs-money>` (the Group 2 follow-up).
+- ✅ `components/shared/dispute-card` and `account/disputes/dispute-detail`: the last hard-coded `PHP` prefixes replaced with `<x-hs-money>`.
+- Not changed: the chart tooltip prefix `__('PHP ')` in `analytics-dashboard` (JS-side string and translation key), and the native date range picker in `analytics-dashboard` (Issue #3 flagged it as a deliberate lower-priority exception).
+
 ## Summary
 
-All `/admin/*` list/queue views render tables that force horizontal scroll on mobile. This document catalogs every affected file, the specific issues, and the fix plan.
+All `/admin/*` list/queue views rendered tables that forced horizontal scroll on mobile. This document catalogs every affected file, the specific issues, and the fix plan.
 
 **Fix pattern:** For each table view:
 1. Wrap the existing table in `hidden lg:block` (desktop only)
@@ -33,7 +43,7 @@ All `/admin/*` list/queue views render tables that force horizontal scroll on mo
 
 ---
 
-## Issue #1 — Tables force horizontal scroll on mobile
+## Issue #1 — Tables force horizontal scroll on mobile ✅ DONE
 
 Flux's `<flux:table>` wraps in `<ui-table-scroll-area class="overflow-auto">` with `table-fixed` and `min-w-full` — wide tables overflow horizontally on narrow viewports. Raw HTML `<table>` elements have no wrapper at all and bleed past the viewport edge.
 
@@ -55,10 +65,10 @@ Flux's `<flux:table>` wraps in `<ui-table-scroll-area class="overflow-auto">` wi
 | 10 | `payouts/payout-queue.blade.php` | raw `<table>` | 7 | No overflow wrapper at all |
 | 11 | `payouts/eligible-payouts.blade.php` | raw `<table>` | 4 | No overflow wrapper at all |
 | 12 | `payout-accounts/payout-account-queue.blade.php` | flux:table | 6 | |
-| 13 | `sponsored-content/sponsored-content-list.blade.php` | flux:table | 6 | Also a table inside the tier-settings modal |
+| 13 | `sponsored-content/sponsored-content-list.blade.php` | flux:table | 6 | Also a table inside the tier-settings modal (✅ card list added in Group 5) |
 | 14 | `payouts/payout-detail.blade.php` | raw `<table>` ×2 | 5, 4 | Payout items + disbursements |
 | 15 | `category-manager.blade.php` | flux:table | 4 | Parent/child category tree rows |
-| — | `sponsored-content/sponsored-content-tier-settings.blade.php` | flux:table | 5 | Separate page; lower priority |
+| — | `sponsored-content/sponsored-content-tier-settings.blade.php` | flux:table | 5 | Separate page; ✅ card list added in Group 5 |
 | — | `reviews/review-report-queue.blade.php` | no table | — | Already uses stacked card list ✓ |
 
 ### Views that are already mobile-safe (no changes needed)
@@ -76,7 +86,7 @@ Flux's `<flux:table>` wraps in `<ui-table-scroll-area class="overflow-auto">` wi
 
 ---
 
-## Issue #2 — Raw HTML tables have no overflow wrapper
+## Issue #2 — Raw HTML tables have no overflow wrapper ✅ DONE
 
 These raw `<table>` elements have no `overflow-x-auto` wrapper, so they directly overflow the viewport:
 
@@ -90,7 +100,7 @@ These raw `<table>` elements have no `overflow-x-auto` wrapper, so they directly
 
 ---
 
-## Issue #3 — Native `<input type="date">` in financial-ledger
+## Issue #3 — Native `<input type="date">` in financial-ledger ✅ DONE
 
 `financial-ledger.blade.php` uses `<flux:input type="date">` for the date filters. The project rules state: "No native `<select>` or `<input type="date">` — use Flux UI components. Always use `<flux:date-picker>` for date inputs."
 
@@ -100,9 +110,9 @@ Also present in `analytics-dashboard.blade.php` (custom range picker) — but th
 
 ---
 
-## Issue #4 — Raw Tailwind color violations
+## Issue #4 — Raw Tailwind color violations ✅ DONE
 
-162 instances across 14 files. The views rules require `var(--hs-*)` design tokens instead of raw `text-zinc-*`, `text-red-*`, `text-green-*`, `text-blue-*`, `text-yellow-*`, `bg-zinc-*`, etc.
+162 instances across 14 files at the time of the audit (only the four `dark:` leftovers in `analytics-dashboard` remained by Group 5, now removed). The views rules require `var(--hs-*)` design tokens instead of raw `text-zinc-*`, `text-red-*`, `text-green-*`, `text-blue-*`, `text-yellow-*`, `bg-zinc-*`, etc.
 
 ### Files with violations (by count)
 
@@ -158,7 +168,7 @@ Also present in `analytics-dashboard.blade.php` (custom range picker) — but th
 
 ---
 
-## Issue #5 — Filter rows that wrap badly on mobile
+## Issue #5 — Filter rows that wrap badly on mobile ✅ DONE
 
 ### `merchants/merchant-list.blade.php`
 
@@ -192,23 +202,23 @@ The filter row uses `flex flex-wrap items-end gap-4` — this wraps but the date
 
 ## Implementation Order
 
-1. **subscription-queue.blade.php** — 2 tables, both flux:table
-2. **onboarding-queue.blade.php** — 1 flux:table
-3. **certification-queue.blade.php** — 2 flux:tables
-4. **sourcing-queue.blade.php** — 1 flux:table
-5. **merchant-list.blade.php** — 1 flux:table + filter row fix
-6. **product-moderation-list.blade.php** — 1 flux:table
-7. **financial-ledger.blade.php** — 1 raw table + date picker fix
-8. **rfq-list.blade.php** — 1 flux:table
-9. **dispute-queue.blade.php** — 1 raw table
-10. **payout-queue.blade.php** — 1 raw table
-11. **eligible-payouts.blade.php** — 1 raw table
-12. **payout-account-queue.blade.php** — 1 flux:table
-13. **sponsored-content-list.blade.php** — 1 flux:table
-14. **payout-detail.blade.php** — 2 raw tables
-15. **category-manager.blade.php** — 1 flux:table (tree structure)
-16. **Color token fixes** — all files with raw Tailwind colors
-17. **Pint + build verification**
+1. ✅ **subscription-queue.blade.php** — 2 tables, both flux:table
+2. ✅ **onboarding-queue.blade.php** — 1 flux:table
+3. ✅ **certification-queue.blade.php** — 2 flux:tables
+4. ✅ **sourcing-queue.blade.php** — 1 flux:table
+5. ✅ **merchant-list.blade.php** — 1 flux:table + filter row fix
+6. ✅ **product-moderation-list.blade.php** — 1 flux:table
+7. ✅ **financial-ledger.blade.php** — 1 raw table + date picker fix
+8. ✅ **rfq-list.blade.php** — 1 flux:table
+9. ✅ **dispute-queue.blade.php** — 1 raw table
+10. ✅ **payout-queue.blade.php** — 1 raw table
+11. ✅ **eligible-payouts.blade.php** — 1 raw table
+12. ✅ **payout-account-queue.blade.php** — 1 flux:table
+13. ✅ **sponsored-content-list.blade.php** — 1 flux:table
+14. ✅ **payout-detail.blade.php** — 2 raw tables
+15. ✅ **category-manager.blade.php** — 1 flux:table (tree structure)
+16. ✅ **Color token fixes** — all files with raw Tailwind colors
+17. **Pint + build verification** (still to do: no PHP/Node toolchain in the authoring environment, so nothing in Groups 1–5 has been linted, built or browser-tested)
 
 ---
 

@@ -243,82 +243,143 @@
                 </div>
             </div>
 
-            {{-- Tiers table --}}
-            <flux:table>
-                <flux:table.columns>
-                    <flux:table.column>{{ __('Name') }}</flux:table.column>
-                    <flux:table.column>{{ __('Weight') }}</flux:table.column>
-                    <flux:table.column>{{ __('Slots') }}</flux:table.column>
-                    <flux:table.column>{{ __('Status') }}</flux:table.column>
-                    <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
-                </flux:table.columns>
-
-                <flux:table.rows>
-                    @forelse ($this->allTiers as $tier)
+            {{-- Mobile: stacked card list (hidden on md+) --}}
+            <div class="md:hidden divide-y divide-[var(--hs-neutral-100)]">
+                @forelse ($this->allTiers as $tier)
+                    <div class="px-1 py-4" wire:key="tier-card-{{ $tier->id }}">
                         @if ($tierEditingId === $tier->id)
-                            <flux:table.row>
-                                <flux:table.cell>
-                                    <flux:input wire:model="tierEditName" size="sm" placeholder="{{ __('Tier name') }}" class="w-32" />
+                            <div class="space-y-3">
+                                <div>
+                                    <flux:input wire:model="tierEditName" size="sm" placeholder="{{ __('Tier name') }}" label="{{ __('Name') }}" />
                                     <flux:error name="tierEditName" />
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    <flux:input wire:model="tierEditWeight" type="number" min="1" max="10000" size="sm" class="w-20" />
+                                </div>
+                                <div>
+                                    <flux:input wire:model="tierEditWeight" type="number" min="1" max="10000" size="sm" label="{{ __('Priority Weight') }}" />
                                     <flux:error name="tierEditWeight" />
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    <span class="text-xs text-[var(--hs-neutral-500)]">{{ $tier->sponsoredContent()->count() }}</span>
-                                </flux:table.cell>
-                                <flux:table.cell>
+                                </div>
+                                <div class="flex items-center gap-2">
                                     <flux:switch wire:model="tierEditIsActive" />
-                                </flux:table.cell>
-                                <flux:table.cell class="text-right">
-                                    <div class="flex justify-end gap-1.5">
-                                        <flux:button wire:click="updateTier" size="sm" variant="primary">{{ __('Save') }}</flux:button>
-                                        <flux:button wire:click="cancelTierEdit" size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
-                                    </div>
-                                </flux:table.cell>
-                            </flux:table.row>
+                                    <span class="text-sm text-[var(--hs-neutral-600)]">{{ $tierEditIsActive ? __('Active') : __('Inactive') }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <flux:button wire:click="updateTier" size="sm" variant="primary" class="flex-1">{{ __('Save') }}</flux:button>
+                                    <flux:button wire:click="cancelTierEdit" size="sm" variant="ghost" class="flex-1">{{ __('Cancel') }}</flux:button>
+                                </div>
+                            </div>
                         @else
-                            <flux:table.row>
-                                <flux:table.cell>
-                                    <span class="font-medium text-[var(--hs-neutral-900)]">{{ $tier->name }}</span>
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-1.5 w-20 rounded-full bg-[var(--hs-green-100)] overflow-hidden">
-                                            <div class="h-full rounded-full bg-[var(--hs-green-500)]" style="width: {{ min(100, round($tier->priority_weight / 100 * 100)) }}%"></div>
+                            <div class="flex items-start justify-between gap-3">
+                                <p class="min-w-0 truncate font-medium text-[var(--hs-neutral-900)]">{{ $tier->name }}</p>
+                                @if ($tier->is_active)
+                                    <flux:badge color="green" size="sm">{{ __('Active') }}</flux:badge>
+                                @else
+                                    <flux:badge color="zinc" size="sm">{{ __('Inactive') }}</flux:badge>
+                                @endif
+                            </div>
+                            <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Priority Weight') }}</dt>
+                                    <dd class="mt-1 flex items-center gap-2">
+                                        <span class="h-1.5 w-16 overflow-hidden rounded-full bg-[var(--hs-green-100)]">
+                                            <span class="block h-full rounded-full bg-[var(--hs-green-500)]" style="width: {{ min(100, round($tier->priority_weight / 100 * 100)) }}%"></span>
+                                        </span>
+                                        <span class="tabular-nums text-[var(--hs-neutral-700)]">{{ $tier->priority_weight }}</span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-[var(--hs-neutral-500)]">{{ __('Ad Slots') }}</dt>
+                                    <dd class="mt-1 text-[var(--hs-neutral-700)]">{{ $tier->sponsoredContent()->count() }}</dd>
+                                </div>
+                            </dl>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <flux:button wire:click="startTierEdit({{ $tier->id }})" size="sm" variant="ghost" icon="pencil-square">{{ __('Edit') }}</flux:button>
+                                <flux:button wire:click="toggleTierActive({{ $tier->id }})" size="sm" variant="ghost" icon="{{ $tier->is_active ? 'eye-slash' : 'eye' }}">{{ $tier->is_active ? __('Deactivate') : __('Activate') }}</flux:button>
+                                <flux:button wire:click="confirmTierDelete({{ $tier->id }})" size="sm" variant="ghost" icon="trash" class="text-[var(--hs-danger-500)]">{{ __('Delete') }}</flux:button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="px-6 py-8 text-center text-sm text-[var(--hs-neutral-500)]">{{ __('No tiers yet.') }}</div>
+                @endforelse
+            </div>
+
+            {{-- Desktop: tiers table (hidden below md) --}}
+            <div class="hidden md:block">
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column>{{ __('Name') }}</flux:table.column>
+                        <flux:table.column>{{ __('Weight') }}</flux:table.column>
+                        <flux:table.column>{{ __('Slots') }}</flux:table.column>
+                        <flux:table.column>{{ __('Status') }}</flux:table.column>
+                        <flux:table.column class="text-right">{{ __('Actions') }}</flux:table.column>
+                    </flux:table.columns>
+
+                    <flux:table.rows>
+                        @forelse ($this->allTiers as $tier)
+                            @if ($tierEditingId === $tier->id)
+                                <flux:table.row>
+                                    <flux:table.cell>
+                                        <flux:input wire:model="tierEditName" size="sm" placeholder="{{ __('Tier name') }}" class="w-32" />
+                                        <flux:error name="tierEditName" />
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <flux:input wire:model="tierEditWeight" type="number" min="1" max="10000" size="sm" class="w-20" />
+                                        <flux:error name="tierEditWeight" />
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <span class="text-xs text-[var(--hs-neutral-500)]">{{ $tier->sponsoredContent()->count() }}</span>
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <flux:switch wire:model="tierEditIsActive" />
+                                    </flux:table.cell>
+                                    <flux:table.cell class="text-right">
+                                        <div class="flex justify-end gap-1.5">
+                                            <flux:button wire:click="updateTier" size="sm" variant="primary">{{ __('Save') }}</flux:button>
+                                            <flux:button wire:click="cancelTierEdit" size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
                                         </div>
-                                        <span class="text-sm tabular-nums text-[var(--hs-neutral-700)]">{{ $tier->priority_weight }}</span>
-                                    </div>
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    <span class="text-sm text-[var(--hs-neutral-600)]">{{ $tier->sponsoredContent()->count() }}</span>
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    @if ($tier->is_active)
-                                        <flux:badge color="green" size="sm">{{ __('Active') }}</flux:badge>
-                                    @else
-                                        <flux:badge color="zinc" size="sm">{{ __('Inactive') }}</flux:badge>
-                                    @endif
-                                </flux:table.cell>
-                                <flux:table.cell class="text-right">
-                                    <div class="flex justify-end gap-1.5">
-                                        <flux:button wire:click="startTierEdit({{ $tier->id }})" size="sm" variant="ghost" icon="pencil-square" />
-                                        <flux:button wire:click="toggleTierActive({{ $tier->id }})" size="sm" variant="ghost" icon="{{ $tier->is_active ? 'eye-slash' : 'eye' }}" />
-                                        <flux:button wire:click="confirmTierDelete({{ $tier->id }})" size="sm" variant="ghost" icon="trash" class="text-[var(--hs-danger-500)]" />
-                                    </div>
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @else
+                                <flux:table.row>
+                                    <flux:table.cell>
+                                        <span class="font-medium text-[var(--hs-neutral-900)]">{{ $tier->name }}</span>
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-1.5 w-20 rounded-full bg-[var(--hs-green-100)] overflow-hidden">
+                                                <div class="h-full rounded-full bg-[var(--hs-green-500)]" style="width: {{ min(100, round($tier->priority_weight / 100 * 100)) }}%"></div>
+                                            </div>
+                                            <span class="text-sm tabular-nums text-[var(--hs-neutral-700)]">{{ $tier->priority_weight }}</span>
+                                        </div>
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <span class="text-sm text-[var(--hs-neutral-600)]">{{ $tier->sponsoredContent()->count() }}</span>
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        @if ($tier->is_active)
+                                            <flux:badge color="green" size="sm">{{ __('Active') }}</flux:badge>
+                                        @else
+                                            <flux:badge color="zinc" size="sm">{{ __('Inactive') }}</flux:badge>
+                                        @endif
+                                    </flux:table.cell>
+                                    <flux:table.cell class="text-right">
+                                        <div class="flex justify-end gap-1.5">
+                                            <flux:button wire:click="startTierEdit({{ $tier->id }})" size="sm" variant="ghost" icon="pencil-square" />
+                                            <flux:button wire:click="toggleTierActive({{ $tier->id }})" size="sm" variant="ghost" icon="{{ $tier->is_active ? 'eye-slash' : 'eye' }}" />
+                                            <flux:button wire:click="confirmTierDelete({{ $tier->id }})" size="sm" variant="ghost" icon="trash" class="text-[var(--hs-danger-500)]" />
+                                        </div>
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @endif
+                        @empty
+                            <flux:table.row>
+                                <flux:table.cell colspan="5" class="text-center py-8 text-[var(--hs-neutral-500)]">
+                                    {{ __('No tiers yet.') }}
                                 </flux:table.cell>
                             </flux:table.row>
-                        @endif
-                    @empty
-                        <flux:table.row>
-                            <flux:table.cell colspan="5" class="text-center py-8 text-[var(--hs-neutral-500)]">
-                                {{ __('No tiers yet.') }}
-                            </flux:table.cell>
-                        </flux:table.row>
-                    @endforelse
-                </flux:table.rows>
-            </flux:table>
+                        @endforelse
+                    </flux:table.rows>
+                </flux:table>
+            </div>
 
             {{-- Add new tier --}}
             <div class="border-t border-[var(--hs-neutral-100)] pt-4">

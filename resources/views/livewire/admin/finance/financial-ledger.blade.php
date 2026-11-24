@@ -20,9 +20,9 @@
             </div>
         </div>
 
-        {{-- Filters --}}
-        <div class="px-6 pt-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-            <div class="w-full sm:w-40">
+        {{-- Filters: type + shop stack full width on mobile; From/To sit side by side --}}
+        <div class="px-6 pt-5 grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap sm:gap-4">
+            <div class="col-span-2 sm:w-40">
                 <flux:select wire:model.live="type" label="{{ __('Type') }}" size="sm" class="w-full sm:w-40">
                     <flux:select.option value="">{{ __('All Types') }}</flux:select.option>
                     <flux:select.option value="escrow_hold">{{ __('Escrow Hold') }}</flux:select.option>
@@ -30,15 +30,11 @@
                     <flux:select.option value="refund">{{ __('Refund') }}</flux:select.option>
                 </flux:select>
             </div>
-            <div class="w-full sm:w-32">
+            <div class="col-span-2 sm:w-32">
                 <flux:input wire:model.live.debounce.500ms="shopId" label="{{ __('Shop ID') }}" placeholder="{{ __('Filter by shop') }}" size="sm" class="w-full sm:w-32" />
             </div>
-            <div class="w-full sm:w-auto">
-                <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" class="w-full sm:w-auto" />
-            </div>
-            <div class="w-full sm:w-auto">
-                <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" class="w-full sm:w-auto" />
-            </div>
+            <flux:date-picker wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
+            <flux:date-picker wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
         </div>
 
         {{-- Mobile: stacked card list --}}

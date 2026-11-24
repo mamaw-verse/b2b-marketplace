@@ -21,7 +21,7 @@
             <p class="text-[10px] text-[var(--hs-neutral-600)]">
                 {{ __('Resolution') }}: <span class="font-medium">{{ str_replace('_', ' ', $dispute->resolution_type) }}</span>
                 @if ($dispute->resolution_amount)
-                    — PHP {{ number_format((float) $dispute->resolution_amount, 2) }}
+                    — <x-hs-money :amount="$dispute->resolution_amount" />
                 @endif
             </p>
         </div>
