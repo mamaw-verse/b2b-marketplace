@@ -3,10 +3,14 @@
 
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
         {{-- Card Header --}}
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between gap-3">
+            <h1 class="min-w-0 text-xl font-semibold text-[var(--hs-neutral-900)]">
                 {{ $product ? __('Edit Product') : __('Create Product') }}
             </h1>
+            {{-- Cancel lives in the header on mobile so the sticky action bar stays one row --}}
+            <flux:button variant="ghost" size="sm" icon="x-mark" href="{{ route('hub.products.index') }}" wire:navigate class="sm:hidden shrink-0">
+                <span class="sr-only">{{ __('Cancel') }}</span>
+            </flux:button>
         </div>
 
         <div class="p-6">
@@ -22,7 +26,7 @@
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
                 <div>
-                    <flux:input wire:model.live.debounce.500ms="slug" :label="__('Product URL slug')" placeholder="{{ __('Auto-generated from the product name') }}" />
+                    <flux:input wire:model.live.debounce.500ms="slug" :label="__('Product URL slug')" placeholder="{{ __('Auto-generated') }}" />
                     <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
                         {{ __('Public URL:') }} <span class="font-medium">{{ url('/products/'.($slug ?: Str::slug($name))) }}</span>
                         {{ __('Auto-generated from the product name. Edit it to customize; duplicates get a unique suffix.') }}
@@ -42,6 +46,11 @@
                 {{-- ── Categories (toggle pills via Livewire action) ─────────── --}}
                 <div>
                     <label class="block text-sm font-semibold text-[var(--hs-neutral-700)] mb-1.5">{{ __('Categories') }}</label>
+                    @if ($this->categoryGroups->isEmpty())
+                        <p class="rounded-[var(--hs-radius-card)] border border-dashed border-[var(--hs-neutral-300)] px-4 py-3 text-sm text-[var(--hs-neutral-500)]">
+                            {{ __('No categories are available yet. Please contact support if this persists.') }}
+                        </p>
+                    @endif
                     <div class="space-y-3">
                         @foreach ($this->categoryGroups as $group)
                             <div>
@@ -247,26 +256,36 @@
                 </div>
 
                 {{-- ── Form Actions ──────────────────────────────────────────── --}}
-                <div class="flex flex-wrap items-center gap-3 border-t border-[var(--hs-neutral-100)] pt-6">
-                    <flux:button type="submit" variant="primary">
+                {{-- Sticky on mobile: Update/Create is the only primary action; --}}
+                {{-- Archive/Publish sit in an overflow menu to avoid mis-taps.   --}}
+                <div class="sticky bottom-0 z-10 -mx-6 -mb-6 flex items-center gap-2 border-t border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)] px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:gap-3 sm:pt-6 sm:pb-6">
+                    <flux:button type="submit" variant="primary" class="flex-1 sm:flex-none">
                         {{ $product ? __('Update Product') : __('Create Product') }}
                     </flux:button>
 
-                    @if ($product)
-                        @if ($product->status === 'archived')
-                            <flux:button type="button" variant="filled" wire:click="publish" wire:loading.attr="disabled">
-                                {{ __('Publish') }}
-                            </flux:button>
-                        @else
-                            <flux:button type="button" variant="ghost" wire:click="archive" wire:loading.attr="disabled">
-                                {{ __('Archive') }}
-                            </flux:button>
-                        @endif
-                    @endif
-
-                    <flux:button variant="ghost" href="{{ route('hub.products.index') }}" wire:navigate>
+                    <flux:button variant="ghost" href="{{ route('hub.products.index') }}" wire:navigate class="hidden sm:inline-flex">
                         {{ __('Cancel') }}
                     </flux:button>
+
+                    @if ($product)
+                        <flux:dropdown position="top" align="end" class="sm:ml-auto">
+                            <flux:button type="button" variant="ghost" icon="ellipsis-horizontal">
+                                <span class="sr-only">{{ __('More actions') }}</span>
+                            </flux:button>
+
+                            <flux:menu>
+                                @if ($product->status === 'archived')
+                                    <flux:menu.item icon="arrow-up-tray" wire:click="publish" wire:loading.attr="disabled">
+                                        {{ __('Publish') }}
+                                    </flux:menu.item>
+                                @else
+                                    <flux:menu.item icon="archive-box" variant="danger" wire:click="archive" wire:loading.attr="disabled">
+                                        {{ __('Archive') }}
+                                    </flux:menu.item>
+                                @endif
+                            </flux:menu>
+                        </flux:dropdown>
+                    @endif
                 </div>
             </form>
         </div>
@@ -289,7 +308,7 @@
                     <h2 class="text-base font-semibold text-[var(--hs-neutral-900)]">{{ __('Sharing') }}</h2>
                     <p class="mt-0.5 text-xs text-[var(--hs-neutral-500)]">{{ __('Track how buyers share this product.') }}</p>
                 </div>
-                <div class="flex items-center gap-6 text-sm">
+                <div class="grid grid-cols-2 gap-4 text-sm sm:flex sm:items-center sm:gap-6">
                     <div>
                         <span class="text-xs text-[var(--hs-neutral-500)]">{{ __('Last 30 days') }}:</span>
                         <span class="font-semibold text-[var(--hs-neutral-900)]">{{ $stats['last_days'] ?? 0 }}</span>
@@ -303,11 +322,11 @@
 
             <div class="divide-y divide-[var(--hs-neutral-100)]">
                 @foreach ($stats['by_channel'] ?? [] as $channel => $counts)
-                    <div class="flex items-center justify-between px-6 py-3.5 text-sm">
+                    <div class="flex flex-col gap-1.5 px-6 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between">
                         <span class="font-medium text-[var(--hs-neutral-800)]">
                             {{ $channelLabels[$channel] ?? ucfirst($channel) }}
                         </span>
-                        <div class="flex items-center gap-6 text-xs text-[var(--hs-neutral-600)]">
+                        <div class="grid grid-cols-2 gap-4 text-xs text-[var(--hs-neutral-600)] sm:flex sm:items-center sm:gap-6">
                             <span>{{ __('Last 30 days:') }} <strong class="text-[var(--hs-neutral-900)]">{{ $counts['recent'] ?? 0 }}</strong></span>
                             <span>{{ __('All time:') }} <strong class="text-[var(--hs-neutral-900)]">{{ $counts['all'] ?? 0 }}</strong></span>
                         </div>

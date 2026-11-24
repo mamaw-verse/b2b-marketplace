@@ -6,7 +6,7 @@
 |-------|-------|--------|
 | 1 | Seller Critical: S1, S2, S3 | ✅ Done |
 | 2 | Seller High: S4–S8 (+S14) | ✅ Done |
-| 3 | Seller Medium: S9–S14 | Pending |
+| 3 | Seller Medium: S9–S14 | ✅ Done |
 | 4 | Seller Low: S15–S20 + colour tokens | Pending |
 | 5 | Admin Part 1: queue tables, filters, date picker, colour tokens | Pending |
 
@@ -15,7 +15,7 @@ Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`
 | Part | Portal | Method | Status |
 |------|--------|--------|--------|
 | 1 | Admin (`/admin/*`) | Source review of Blade views | Plan written, implementation pending |
-| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Groups 1–2 (S1–S8, S14) done |
+| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | Implementation in progress: Groups 1–3 (S1–S14) done |
 
 ---
 
@@ -398,13 +398,15 @@ Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, or
 
 ## Medium
 
-### S9 — Orders: status tabs clip without a cue, and the row is crowded
+### S9 — Orders: status tabs clip without a cue, and the row is crowded ✅ DONE
 
 `orders/order-queue.blade.php`. The status pill bar scrolls horizontally (`overflow-x-auto scrollbar-hide`), and "Pending Payment" is cut at the edge with no fade, so the remaining statuses are hidden. The RFQ queue uses wrapping chips for the same job, so the two list pages behave differently. In the row itself, the order number and amount sit on one line and nearly touch.
 
 **Fix:** pick one filter pattern for list pages. If keeping the scrolling bar, auto-scroll the active tab into view and add an edge fade. On `<sm`, put the amount on the second line next to the status badge.
 
-### S10 — Order builder: form length, tap targets, action layout
+**Done:** kept the scrolling pill bar (the RFQ queue chips were left alone). The active pill now scrolls into view on load and on tap, has `aria-current`/`role="tab"`, and a right-edge fade below `sm`. In the mobile row the amount and status badge share a second line, the order number and customer truncate, and a chevron shows the row is tappable.
+
+### S10 — Order builder: form length, tap targets, action layout ✅ DONE
 
 `orders/order-builder.blade.php`.
 - The create route shows "Edit ORD-202611-00002", which suggests the builder creates a draft order as soon as the page opens. Confirm this is intended, because every visit to `/hub/orders/create` may leave an empty draft behind.
@@ -414,7 +416,14 @@ Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, or
 
 **Fix:** add a "Shipping same as billing" `flux:checkbox` that hides the shipping block; turn the add links into `variant="subtle"` buttons; use a sticky bottom action bar (`sticky bottom-0`, safe-area padding) with Save Draft and Submit.
 
-### S11 — Product form: length, empty Categories, weak action row
+**Done:**
+- "Shipping same as billing" checkbox (`OrderBuilder::$shippingSameAsBilling`). It starts ticked when shipping already mirrors billing (or both are empty), copies billing into shipping on tick and again on save, and hides the shipping fields. Covered by three new tests in `OrderBuilderTest`.
+- Add Item / Add Fee are `flux:button variant="subtle"` with `min-h-11` below `sm`.
+- Sticky, safe-area-aware action bar with Save Draft and Submit sharing one row; Cancel moved to an `x-mark` button in the card header below `sm`.
+- **Draft-on-open confirmed, not changed.** `mount()` calls `CreateOrderAction` on every visit to `/hub/orders/create?buyerUserId=…`, so each visit, including a refresh, leaves a new empty draft. This is a backend/product decision, not mobile UI. Open question: reuse an existing empty draft for the same buyer, or create the draft lazily on first Save.
+- Not addressed: the read-only items table for quotation orders (`min-w-*` six columns) has the same clipping problem as S5; give it the card list treatment in a follow-up.
+
+### S11 — Product form: length, empty Categories, weak action row ✅ DONE
 
 `product-form.blade.php` (create at 1,667px tall, edit at 2,199px).
 - The **Categories** label renders with no visible control beneath it on both create and edit. This may just be missing seed data in the test, but a seller with no categories sees an empty field with no explanation. Verify, and add an empty-state message.
@@ -425,17 +434,23 @@ Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, or
 
 **Fix:** sticky action bar with Update as the only primary action and Archive moved into an overflow menu; shorter placeholder; sharing rows as a 2-col `<dl>` below `sm`.
 
-### S12 — Shop profile: very long form and small checkboxes
+**Done:** sticky action bar (Update/Create full width), Archive/Publish moved into a `flux:dropdown` overflow menu (all breakpoints), Cancel in the header below `sm`; slug placeholder shortened to "Auto-generated"; Categories shows an empty-state message when no categories exist (the missing control was most likely unseeded data in the browser test, not a rendering bug); Sharing header and channel rows use a 2-col grid below `sm`. Not changed: rich-text editor height/toolbar (the `x-hs-wysiwyg` component is shared) and the raw `text-yellow-600 bg-yellow-50` in the subscription modal, which stays with the Group 4 colour-token pass.
+
+### S12 — Shop profile: very long form and small checkboxes ✅ DONE
 
 `shop-profile-form.blade.php` renders as a single 3,074px column. It has 17 checkboxes (value chain positions and capabilities) with about 16px hit areas and 8–10px gaps, and the Save button is only at the very bottom.
 
 **Fix:** group sections into collapsible `flux:accordion` items (Identity, Contact, Operations, Capabilities), make each checkbox row a full-width label with `py-2.5` (44px minimum), and add a sticky Save bar.
 
-### S13 — Reports: orphan KPI tiles and overflow risk
+**Done:** four `flux:accordion` items (Business Identity open by default; Contact, Operations, Value Chain & Capabilities collapsed). A section with validation errors renders open (the `wire:key` changes with the error state so the accordion re-initialises), so errors are never hidden. Value chain and capability options are rendered from arrays as full-width `min-h-11` bordered labels; category rows raised to the same size. Sticky, safe-area-aware Save bar, full width below `sm`.
+
+### S13 — Reports: orphan KPI tiles and overflow risk ✅ DONE
 
 `hub/reports.blade.php`. KPI tiles use a 2-column grid. Five tiles leave "Net Sales" alone in the last row, and three tiles leave "Total Released" alone. Values are large (`PHP 0.00`), and with real figures such as `PHP 1,234,567.89` they will exceed the roughly 130px tile width and overflow or wrap.
 
 **Fix:** let the first tile in each group span both columns (`col-span-2`), reduce the value size on mobile (`text-lg sm:text-2xl`), add `truncate`/`tabular-nums`, and consider compact notation for values over 1M.
+
+**Done:** first tile of the sales and payout groups spans both columns below `sm` (no orphan tile), values are `text-lg sm:text-2xl` with `truncate tabular-nums`, tiles have `min-w-0` and `p-3 sm:p-4`, and the header wraps. Compact notation for values over 1M was not added; truncation is the fallback.
 
 ### S14 — Earnings: KPI cards stack four high ✅ DONE
 
@@ -468,9 +483,9 @@ Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.ph
 6. ✅ **S5** `orders/order-detail.blade.php` — card list for line items and fees below `sm`
 7. ✅ **S7 + S14** `earnings/earnings-overview.blade.php` — `flux:date-picker` in a 2-col grid, `grid-cols-2` KPI cards
 8. ✅ **S8** new `<x-hs-money>` component (`₱1,234.00` for PHP); replaced hard-coded `PHP` prefixes in seller reports, profit calculator, order queue and order-detail items. Remaining `PHP` prefixes in admin/buyer views (analytics-dashboard, dispute cards) are out of seller scope and tracked under Group 5
-9. **S9 + S10** order queue filter pattern and order builder (sticky actions, same-as-billing)
-10. **S11 + S12** product form and shop profile (sticky actions, accordions, larger checkboxes)
-11. **S13** reports KPI grid
+9. ✅ **S9 + S10** order queue filter pattern and order builder (sticky actions, same-as-billing)
+10. ✅ **S11 + S12** product form and shop profile (sticky actions, accordions, larger checkboxes)
+11. ✅ **S13** reports KPI grid
 12. **S15–S20** polish pass
 13. Pint, `npm run build`, rerun the browser test and compare screenshots
 

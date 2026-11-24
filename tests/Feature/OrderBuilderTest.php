@@ -144,3 +144,71 @@ test('OrderSubmittedForPayment event triggers mail and database notification cha
         'type' => OrderPendingPaymentNotification::class,
     ]);
 });
+
+test('shipping address starts as same-as-billing when both are empty or identical', function () {
+    $order = Order::factory()->create([
+        'shop_id' => $this->shop->id,
+        'buyer_user_id' => $this->seller->id,
+        'status' => 'draft',
+        'billing_address_1' => '1 Main St',
+        'billing_city' => 'Manila',
+        'billing_province' => 'Metro Manila',
+        'billing_zip_code' => '1000',
+        'shipping_address_1' => '1 Main St',
+        'shipping_city' => 'Manila',
+        'shipping_province' => 'Metro Manila',
+        'shipping_zip_code' => '1000',
+    ]);
+
+    Livewire::actingAs($this->seller)
+        ->test(OrderBuilder::class, ['order' => $order])
+        ->assertSet('shippingSameAsBilling', true);
+});
+
+test('shipping address is not same-as-billing when the addresses differ', function () {
+    $order = Order::factory()->create([
+        'shop_id' => $this->shop->id,
+        'buyer_user_id' => $this->seller->id,
+        'status' => 'draft',
+        'billing_address_1' => '1 Main St',
+        'billing_city' => 'Manila',
+        'billing_province' => 'Metro Manila',
+        'billing_zip_code' => '1000',
+        'shipping_address_1' => '99 Port Rd',
+        'shipping_city' => 'Cebu',
+        'shipping_province' => 'Cebu',
+        'shipping_zip_code' => '6000',
+    ]);
+
+    Livewire::actingAs($this->seller)
+        ->test(OrderBuilder::class, ['order' => $order])
+        ->assertSet('shippingSameAsBilling', false);
+});
+
+test('ticking same-as-billing copies billing into shipping and persists on save', function () {
+    $order = Order::factory()->create([
+        'shop_id' => $this->shop->id,
+        'buyer_user_id' => $this->seller->id,
+        'status' => 'draft',
+        'billing_address_1' => '1 Main St',
+        'billing_city' => 'Manila',
+        'billing_province' => 'Metro Manila',
+        'billing_zip_code' => '1000',
+        'shipping_address_1' => '99 Port Rd',
+        'shipping_city' => 'Cebu',
+        'shipping_province' => 'Cebu',
+        'shipping_zip_code' => '6000',
+    ]);
+
+    Livewire::actingAs($this->seller)
+        ->test(OrderBuilder::class, ['order' => $order])
+        ->set('shippingSameAsBilling', true)
+        ->assertSet('shippingAddress1', '1 Main St')
+        ->set('billingCity', 'Quezon City')
+        ->call('save');
+
+    expect($order->fresh())
+        ->shipping_address_1->toBe('1 Main St')
+        ->shipping_city->toBe('Quezon City')
+        ->shipping_zip_code->toBe('1000');
+});

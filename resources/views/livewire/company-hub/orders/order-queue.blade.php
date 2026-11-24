@@ -5,11 +5,20 @@
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Orders') }}</h1>
         </div>
 
-        <div class="px-4 sm:px-6 pt-5">
-            <div class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-full sm:w-fit overflow-x-auto scrollbar-hide">
+        <div class="relative px-4 sm:px-6 pt-5">
+            <div
+                x-data
+                x-init="$nextTick(() => $el.querySelector('[aria-current=true]')?.scrollIntoView({ inline: 'center', block: 'nearest' }))"
+                class="flex gap-1.5 bg-[var(--hs-neutral-100)] rounded-[var(--hs-radius-pill)] p-1 w-full sm:w-fit overflow-x-auto scrollbar-hide pr-8 sm:pr-1"
+                role="tablist"
+                aria-label="{{ __('Order status') }}"
+            >
                 @foreach (['all' => __('All'), 'draft' => __('Draft'), 'pending_payment' => __('Pending Payment'), 'to_fulfil' => __('To Fulfil'), 'disputed' => __('Disputed')] as $key => $label)
                     <button
                         wire:click="$set('tab', '{{ $key }}')"
+                        x-on:click="$el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })"
+                        role="tab"
+                        aria-current="{{ $tab === $key ? 'true' : 'false' }}"
                         @class([
                             'shrink-0 px-4 py-1.5 text-sm font-medium rounded-[var(--hs-radius-pill)] transition flex items-center gap-2',
                             'bg-[var(--hs-neutral-0)] text-[var(--hs-green-700)] shadow-sm' => $tab === $key,
@@ -23,6 +32,9 @@
                     </button>
                 @endforeach
             </div>
+
+            {{-- Edge fade: hints that more statuses scroll off-screen on narrow viewports --}}
+            <div class="pointer-events-none absolute top-5 bottom-0 right-4 w-10 rounded-r-[var(--hs-radius-pill)] bg-gradient-to-l from-[var(--hs-neutral-100)] to-transparent sm:hidden" aria-hidden="true"></div>
         </div>
 
         <div class="p-4 sm:p-6">
@@ -35,14 +47,16 @@
                         <div class="rounded-lg border border-[var(--hs-neutral-200)] overflow-hidden">
                             <a href="{{ route('hub.orders.show', $order) }}" wire:navigate class="flex items-start justify-between gap-3 p-4 hover:bg-[var(--hs-neutral-50)] transition">
                                 <div class="min-w-0 flex-1">
-                                    <p class="font-semibold text-[var(--hs-neutral-900)]">{{ $order->order_number }}</p>
-                                    <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5">{{ $order->customer_business_name ?? $order->buyer?->first_name }}</p>
+                                    <p class="font-semibold text-[var(--hs-neutral-900)] truncate">{{ $order->order_number }}</p>
+                                    <p class="text-sm text-[var(--hs-neutral-500)] mt-0.5 truncate">{{ $order->customer_business_name ?? $order->buyer?->first_name }}</p>
                                     <p class="text-xs text-[var(--hs-neutral-400)] mt-1">{{ $order->created_at->format('M d, Y') }}</p>
+                                    {{-- Second line on mobile: amount next to the status badge --}}
+                                    <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                        <p class="font-semibold text-[var(--hs-neutral-900)]"><x-hs-money :amount="$order->order_total" :currency="$order->currency" /></p>
+                                        <x-hs-status-pill :status="$order->status" />
+                                    </div>
                                 </div>
-                                <div class="shrink-0 text-right">
-                                    <p class="font-semibold text-[var(--hs-neutral-900)]"><x-hs-money :amount="$order->order_total" :currency="$order->currency" /></p>
-                                    <div class="mt-1"><x-hs-status-pill :status="$order->status" /></div>
-                                </div>
+                                <flux:icon name="chevron-right" variant="mini" class="mt-1 shrink-0 text-[var(--hs-neutral-400)]" />
                             </a>
                         </div>
                     @endforeach

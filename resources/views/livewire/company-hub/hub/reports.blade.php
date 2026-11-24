@@ -1,6 +1,6 @@
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between">
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex flex-wrap items-center justify-between gap-3">
             <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ __('Sales Reports') }}</h1>
             <flux:select wire:model.live="window" class="w-40">
                 <option value="7">{{ __('Last 7 days') }}</option>
@@ -16,8 +16,8 @@
                 ['label' => __('Commission'), 'value' => $metrics['platform_commission'] ?? 0, 'format' => 'currency'],
                 ['label' => __('Net Sales'), 'value' => $metrics['net_sales'] ?? 0, 'format' => 'currency'],
             ] as $metric)
-                <div class="p-4 rounded-lg bg-[var(--hs-neutral-50)]">
-                    <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
+                <div @class(['min-w-0 p-3 sm:p-4 rounded-lg bg-[var(--hs-neutral-50)]', 'col-span-2 sm:col-span-1' => $loop->first])>
+                    <p class="truncate text-lg sm:text-2xl font-bold tabular-nums text-[var(--hs-neutral-900)]">
                         @if ($metric['format'] === 'currency') <x-hs-money :amount="$metric['value']" /> @else {{ $metric['value'] }} @endif
                     </p>
                     <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ $metric['label'] }}</p>
@@ -37,8 +37,8 @@
                 ['label' => __('Pending Balance'), 'value' => $metrics['pending_balance'] ?? 0],
                 ['label' => __('Total Released'), 'value' => $metrics['total_released'] ?? 0],
             ] as $metric)
-                <div class="p-4 rounded-lg bg-[var(--hs-neutral-50)]">
-                    <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
+                <div @class(['min-w-0 p-3 sm:p-4 rounded-lg bg-[var(--hs-neutral-50)]', 'col-span-2 sm:col-span-1' => $loop->first])>
+                    <p class="truncate text-lg sm:text-2xl font-bold tabular-nums text-[var(--hs-neutral-900)]">
                         <x-hs-money :amount="$metric['value']" />
                     </p>
                     <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ $metric['label'] }}</p>
@@ -53,8 +53,8 @@
             <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)]">{{ __('Reviews') }}</h2>
         </div>
         <div class="p-6 grid grid-cols-2 gap-4">
-            <div class="p-4 rounded-lg bg-[var(--hs-neutral-50)]">
-                <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">
+            <div class="min-w-0 p-3 sm:p-4 rounded-lg bg-[var(--hs-neutral-50)]">
+                <p class="truncate text-lg sm:text-2xl font-bold tabular-nums text-[var(--hs-neutral-900)]">
                     @if (($metrics['total_reviews'] ?? 0) > 0)
                         {{ number_format((float) ($metrics['average_rating'] ?? 0), 2) }} <span class="text-base font-normal text-[var(--hs-neutral-500)]">/ 5.00</span>
                     @else
@@ -63,8 +63,8 @@
                 </p>
                 <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Average Rating') }}</p>
             </div>
-            <div class="p-4 rounded-lg bg-[var(--hs-neutral-50)]">
-                <p class="text-2xl font-bold text-[var(--hs-neutral-900)]">{{ $metrics['total_reviews'] ?? 0 }}</p>
+            <div class="min-w-0 p-3 sm:p-4 rounded-lg bg-[var(--hs-neutral-50)]">
+                <p class="truncate text-lg sm:text-2xl font-bold tabular-nums text-[var(--hs-neutral-900)]">{{ $metrics['total_reviews'] ?? 0 }}</p>
                 <p class="text-sm text-[var(--hs-neutral-600)] mt-1">{{ __('Total Reviews') }}</p>
             </div>
         </div>

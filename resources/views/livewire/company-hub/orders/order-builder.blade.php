@@ -9,8 +9,12 @@
 
 <div>
     <div class="bg-[var(--hs-neutral-0)] rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] shadow-[var(--hs-shadow-sm)]">
-        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)]">
-            <h1 class="text-xl font-semibold text-[var(--hs-neutral-900)]">{{ $orderId ? __('Edit :order', ['order' => $this->order?->order_number ?? __('Order')]) : __('New Order') }}</h1>
+        <div class="px-6 py-5 border-b border-[var(--hs-neutral-100)] flex items-center justify-between gap-3">
+            <h1 class="min-w-0 text-xl font-semibold text-[var(--hs-neutral-900)]">{{ $orderId ? __('Edit :order', ['order' => $this->order?->order_number ?? __('Order')]) : __('New Order') }}</h1>
+            {{-- Cancel lives in the header on mobile so the sticky action bar stays one row --}}
+            <flux:button variant="ghost" size="sm" icon="x-mark" href="{{ route('hub.orders.index') }}" wire:navigate class="sm:hidden shrink-0">
+                <span class="sr-only">{{ __('Cancel') }}</span>
+            </flux:button>
         </div>
 
         @if (session('error'))
@@ -47,12 +51,19 @@
             {{-- Shipping Address --}}
             <section class="py-6 border-b border-[var(--hs-neutral-100)]">
                 <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)] mb-4">{{ __('Shipping Address') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <flux:input wire:model="shippingAddress1" label="{{ __('Shipping Address') }}" class="md:col-span-3" />
-                    <flux:input wire:model="shippingCity" label="{{ __('City') }}" />
-                    <flux:input wire:model="shippingProvince" label="{{ __('Province') }}" />
-                    <flux:input wire:model="shippingZipCode" label="{{ __('Zip Code') }}" />
-                </div>
+                <flux:checkbox
+                    wire:model.live="shippingSameAsBilling"
+                    label="{{ __('Shipping same as billing') }}"
+                    class="py-2"
+                />
+                @unless ($shippingSameAsBilling)
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <flux:input wire:model="shippingAddress1" label="{{ __('Shipping Address') }}" class="md:col-span-3" />
+                        <flux:input wire:model="shippingCity" label="{{ __('City') }}" />
+                        <flux:input wire:model="shippingProvince" label="{{ __('Province') }}" />
+                        <flux:input wire:model="shippingZipCode" label="{{ __('Zip Code') }}" />
+                    </div>
+                @endunless
             </section>
 
             {{-- Items, Fees & Totals share one Alpine scope so the total (and the --}}
@@ -140,7 +151,7 @@
                             @endif
                         </div>
                         @if (! $this->fromQuotation)
-                            <button type="button" @click="items.push({description:'', quantity:1, unit:'pcs', unit_price:0, variant_id:null, variant_snapshot:null})" class="text-sm text-[var(--hs-green-700)] hover:underline">+ {{ __('Add Item') }}</button>
+                            <flux:button type="button" variant="subtle" size="sm" icon="plus" @click="items.push({description:'', quantity:1, unit:'pcs', unit_price:0, variant_id:null, variant_snapshot:null})" class="min-h-11 sm:min-h-0">{{ __('Add Item') }}</flux:button>
                         @endif
                     </div>
 
@@ -246,7 +257,7 @@
                 <section class="py-6 border-b border-[var(--hs-neutral-100)]">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-[13px] font-[650] uppercase tracking-[.05em] text-[var(--hs-neutral-500)]">{{ __('Fees') }}</h2>
-                        <button type="button" @click="fees.push({label:'', amount:0})" class="text-sm text-[var(--hs-green-700)] hover:underline">+ {{ __('Add Fee') }}</button>
+                        <flux:button type="button" variant="subtle" size="sm" icon="plus" @click="fees.push({label:'', amount:0})" class="min-h-11 sm:min-h-0">{{ __('Add Fee') }}</flux:button>
                     </div>
 
                     <template x-if="fees.length">
@@ -323,12 +334,12 @@
                 </section>
             </div>
 
-            {{-- Actions — right-aligned with the primary action last, matching --}}
-            {{-- the other hub forms (quotation builder, shop profile, payout). --}}
-            <div class="flex flex-wrap items-center gap-3 pt-6 mt-6 border-t border-[var(--hs-neutral-100)]">
-                <flux:button variant="ghost" href="{{ route('hub.orders.index') }}" wire:navigate>{{ __('Cancel') }}</flux:button>
-                <flux:button class="ml-auto" wire:click="save">{{ __('Save Draft') }}</flux:button>
-                <flux:button variant="primary" wire:click="confirmSubmit">{{ __('Submit for Payment') }}</flux:button>
+            {{-- Actions — sticky to the bottom of the viewport on mobile (safe-area aware) --}}
+            {{-- so Save Draft / Submit stay reachable on this long form. --}}
+            <div class="sticky bottom-0 z-10 -mx-6 -mb-6 mt-6 flex items-center gap-2 border-t border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)] px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:gap-3 sm:pt-6 sm:pb-6">
+                <flux:button variant="ghost" href="{{ route('hub.orders.index') }}" wire:navigate class="hidden sm:inline-flex">{{ __('Cancel') }}</flux:button>
+                <flux:button class="flex-1 sm:flex-none sm:ml-auto" wire:click="save">{{ __('Save Draft') }}</flux:button>
+                <flux:button variant="primary" class="flex-1 sm:flex-none" wire:click="confirmSubmit">{{ __('Submit for Payment') }}</flux:button>
             </div>
         </div>
     </div>

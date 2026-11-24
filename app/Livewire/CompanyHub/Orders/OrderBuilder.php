@@ -49,6 +49,9 @@ final class OrderBuilder extends Component
 
     public string $billingZipCode = '';
 
+    // When true the shipping block is hidden and shipping is copied from billing on save.
+    public bool $shippingSameAsBilling = false;
+
     public string $shippingAddress1 = '';
 
     public string $shippingCity = '';
@@ -156,6 +159,18 @@ final class OrderBuilder extends Component
         if ($this->orderId) {
             $this->fillFromOrder();
             $this->fillBillingFromBuyerProfile();
+            $this->shippingSameAsBilling = $this->addressesMatch();
+        }
+    }
+
+    /**
+     * Keep the (hidden) shipping fields in step with billing as soon as the
+     * seller ticks "Shipping same as billing".
+     */
+    public function updatedShippingSameAsBilling(bool $value): void
+    {
+        if ($value) {
+            $this->copyBillingToShipping();
         }
     }
 
@@ -199,6 +214,10 @@ final class OrderBuilder extends Component
 
         if (! $order || $order->status !== 'draft') {
             return;
+        }
+
+        if ($this->shippingSameAsBilling) {
+            $this->copyBillingToShipping();
         }
 
         $order->update([
@@ -312,6 +331,26 @@ final class OrderBuilder extends Component
     public function render()
     {
         return view('livewire.company-hub.orders.order-builder');
+    }
+
+    private function copyBillingToShipping(): void
+    {
+        $this->shippingAddress1 = $this->billingAddress1;
+        $this->shippingCity = $this->billingCity;
+        $this->shippingProvince = $this->billingProvince;
+        $this->shippingZipCode = $this->billingZipCode;
+    }
+
+    /**
+     * Whether shipping already mirrors billing (also true while both are empty,
+     * so a brand-new draft starts with the shorter form).
+     */
+    private function addressesMatch(): bool
+    {
+        return $this->shippingAddress1 === $this->billingAddress1
+            && $this->shippingCity === $this->billingCity
+            && $this->shippingProvince === $this->billingProvince
+            && $this->shippingZipCode === $this->billingZipCode;
     }
 
     private function fillFromOrder(): void
