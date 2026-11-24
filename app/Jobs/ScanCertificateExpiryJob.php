@@ -20,7 +20,7 @@ final class ScanCertificateExpiryJob implements ShouldQueue
      *
      * @var array<int, int>
      */
-    private const array THRESHOLDS = [60, 30, 7, 0];
+    public const array THRESHOLDS = [60, 30, 7, 0];
 
     /**
      * Scan all active/expiring_soon certificates and send alerts at threshold crossings.
