@@ -18,32 +18,32 @@
                         <div class="flex size-14 items-center justify-center rounded-full bg-[var(--hs-green-50)] text-[var(--hs-green-700)]">
                             <flux:icon.check-circle class="size-8" />
                         </div>
-                        <flux:heading size="xl" class="mt-5">Your application has been submitted.</flux:heading>
+                        <flux:heading size="xl" class="mt-5">{{ __('Your application has been submitted.') }}</flux:heading>
                         <flux:text class="mt-2 max-w-md">
-                            We have received your Letter of Intent and will review it shortly.
+                            {{ __('We have received your Letter of Intent and will review it shortly.') }}
                             @if ($submittedEmail)
-                                A confirmation email is on its way to <span class="font-semibold text-[var(--hs-neutral-900)]">{{ $submittedEmail }}</span>.
+                                {{ __('A confirmation email is on its way to') }} <span class="font-semibold text-[var(--hs-neutral-900)]">{{ $submittedEmail }}</span>.
                             @endif
                         </flux:text>
                     </div>
                 @else
                     <form wire:submit="submit" novalidate>
-                        <h1 class="text-2xl font-bold tracking-tight text-[var(--hs-neutral-900)]">Apply for Certificate</h1>
+                        <h1 class="text-2xl font-bold tracking-tight text-[var(--hs-neutral-900)]">{{ __('Apply for Certificate') }}</h1>
                         <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">
-                            To apply for a certificate, please download the Letter of Intent, fill it out, and upload it back here.
+                            {{ __('To apply for a certificate, please download the Letter of Intent, fill it out, and upload it back here.') }}
                         </p>
 
                         {{-- Step 1 — Download --}}
                         <div class="flex items-start gap-4 border-t border-[var(--hs-neutral-100)] py-5 first:border-t-0">
                             <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-sm font-semibold text-white">1</div>
                             <div class="flex-1">
-                                <h3 class="text-[0.95rem] font-semibold text-[var(--hs-neutral-900)]">Download the Letter of Intent</h3>
-                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] leading-relaxed">Click the button below to download the Letter of Intent.</p>
+                                <h3 class="text-[0.95rem] font-semibold text-[var(--hs-neutral-900)]">{{ __('Download the Letter of Intent') }}</h3>
+                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] leading-relaxed">{{ __('Click the button below to download the Letter of Intent.') }}</p>
                                 <a href="/docs/letter_of_intent_maslaha_halal_certification.docx"
                                    download
                                    class="mt-3 inline-flex items-center gap-2 rounded-md border border-[var(--hs-green-600)] bg-[var(--hs-neutral-0)] px-4 py-2.5 text-sm font-semibold text-[var(--hs-green-700)] transition hover:bg-[var(--hs-green-50)]">
                                     <flux:icon name="arrow-down-tray" class="size-4" />
-                                    Download Letter of Intent
+                                    {{ __('Download Letter of Intent') }}
                                 </a>
                             </div>
                         </div>
@@ -52,8 +52,8 @@
                         <div class="flex items-start gap-4 border-t border-[var(--hs-neutral-100)] py-5">
                             <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-sm font-semibold text-white">2</div>
                             <div class="flex-1">
-                                <h3 class="text-[0.95rem] font-semibold text-[var(--hs-neutral-900)]">Complete and Sign the Form</h3>
-                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] leading-relaxed">Open the downloaded letter, fill in the required information, and sign it where indicated.</p>
+                                <h3 class="text-[0.95rem] font-semibold text-[var(--hs-neutral-900)]">{{ __('Complete and Sign the Form') }}</h3>
+                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] leading-relaxed">{{ __('Open the downloaded letter, fill in the required information, and sign it where indicated.') }}</p>
                             </div>
                         </div>
 
@@ -61,15 +61,15 @@
                         <div class="flex items-start gap-4 border-t border-[var(--hs-neutral-100)] pt-5">
                             <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-600)] text-sm font-semibold text-white">3</div>
                             <div class="flex-1">
-                                <h3 class="text-[0.95rem] font-semibold text-[var(--hs-neutral-900)]">Upload the Completed Letter</h3>
-                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] leading-relaxed">Once you've filled out and signed the letter, upload it below. We'll review your submission and process it as soon as possible.</p>
+                                <h3 class="text-[0.95rem] font-semibold text-[var(--hs-neutral-900)]">{{ __('Upload the Completed Letter') }}</h3>
+                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)] leading-relaxed">{{ __("Once you've filled out and signed the letter, upload it below. We'll review your submission and process it as soon as possible.") }}</p>
 
                                 <x-hs-dropzone
                                     input-id="apply-certificate-document"
                                     wire-model="document"
                                     accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.heic,.heif,image/*"
                                     :multiple="false"
-                                    hint="Accepted file types: DOC, DOCX, PDF, or a clear photo/scan (JPG, PNG, HEIC) • Max file size: 10MB"
+                                    hint="{{ __('Accepted file types: DOC, DOCX, PDF, or a clear photo/scan (JPG, PNG, HEIC) • Max file size: 10MB') }}"
                                     class="mt-4"
                                 >
                                     @if ($document)
@@ -87,16 +87,16 @@
 
                         {{-- Applicant details --}}
                         <div class="mt-7 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
-                            <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">Your Details</h3>
+                            <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Your Details') }}</h3>
                             <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <flux:field>
-                                    <flux:label>Business Name</flux:label>
-                                    <flux:input type="text" wire:model="company_name" placeholder="Acme Foods Inc." />
+                                    <flux:label>{{ __('Business Name') }}</flux:label>
+                                    <flux:input type="text" wire:model="company_name" placeholder="{{ __('Acme Foods Inc.') }}" />
                                     <flux:error name="company_name" />
                                 </flux:field>
                                 <flux:field>
-                                    <flux:label>Email Address</flux:label>
-                                    <flux:input type="email" wire:model="email" placeholder="contact@example.com" />
+                                    <flux:label>{{ __('Email Address') }}</flux:label>
+                                    <flux:input type="email" wire:model="email" placeholder="{{ __('contact@example.com') }}" />
                                     <flux:error name="email" />
                                 </flux:field>
                             </div>
@@ -108,7 +108,7 @@
 
                         {{-- Honeypot — hidden from humans, tempting for bots --}}
                         <div class="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-                            <label for="apply-certificate-website">Leave this field empty</label>
+                            <label for="apply-certificate-website">{{ __('Leave this field empty') }}</label>
                             <input type="text" id="apply-certificate-website" tabindex="-1" autocomplete="off" wire:model="website" />
                         </div>
 
@@ -129,7 +129,7 @@
                 <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-base font-semibold text-[var(--hs-neutral-900)] lg:pointer-events-none [&::-webkit-details-marker]:hidden">
                     <span class="flex items-center gap-2">
                         <flux:icon name="information-circle" class="size-5 text-[var(--hs-green-700)]" />
-                        Important Notes
+                        {{ __('Important Notes') }}
                     </span>
                     <flux:icon name="chevron-down" class="size-5 text-[var(--hs-neutral-600)] transition group-open:rotate-180 lg:hidden" />
                 </summary>
@@ -143,7 +143,7 @@
                     ] as $note)
                         <li class="flex items-start gap-2.5 text-[0.85rem] leading-relaxed text-[var(--hs-neutral-700)]">
                             <flux:icon name="check-circle" class="mt-0.5 size-4 shrink-0 text-[var(--hs-green-700)]" />
-                            {{ $note }}
+                            {{ __($note) }}
                         </li>
                     @endforeach
                 </ul>
@@ -154,10 +154,10 @@
                 <div class="rounded-lg bg-[var(--hs-green-50)] p-4">
                     <h3 class="flex items-center gap-2 text-sm font-semibold text-[var(--hs-neutral-900)]">
                         <flux:icon name="lifebuoy" class="size-4 text-[var(--hs-green-700)]" />
-                        Need Help?
+                        {{ __('Need Help?') }}
                     </h3>
                     <p class="mt-2 text-[0.8rem] leading-relaxed text-[var(--hs-neutral-600)]">
-                        If you have any questions or need assistance with the form, please email us at:
+                        {{ __('If you have any questions or need assistance with the form, please email us at:') }}
                     </p>
                     <a href="mailto:{{ $this->adminEmail }}" class="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)]">
                         <flux:icon name="envelope" class="size-4" />

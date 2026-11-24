@@ -133,8 +133,8 @@ final class ApplyForCertificate extends Component
     protected function messages(): array
     {
         return [
-            'document.mimes' => 'Only DOC, DOCX, PDF, JPG, PNG and HEIC files are accepted.',
-            'document.max' => 'The Letter of Intent must not exceed 10 MB.',
+            'document.mimes' => __('Only DOC, DOCX, PDF, JPG, PNG and HEIC files are accepted.'),
+            'document.max' => __('The Letter of Intent must not exceed 10 MB.'),
         ];
     }
 

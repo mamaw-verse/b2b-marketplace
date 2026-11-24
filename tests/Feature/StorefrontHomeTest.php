@@ -24,7 +24,7 @@ test('hero section renders split-layout headline', function () {
 test('hero section renders CTA buttons', function () {
     $response = $this->get(route('home'));
 
-    $response->assertSee('Register Now');
+    $response->assertSee('Create account');
     $response->assertSee('See How It Works');
 });
 
@@ -70,7 +70,7 @@ test('navigation header contains primary storefront links', function () {
 test('homepage renders custom sourcing section', function () {
     $response = $this->get(route('home'));
 
-    $response->assertSee("Can't Find What You're Looking For?");
+    $response->assertSee('Can’t Find What You’re Looking For?');
     $response->assertSee('We can source it for you.');
     $response->assertSee('Request a Product');
     $response->assertSee(route('sourcing-request.create'));

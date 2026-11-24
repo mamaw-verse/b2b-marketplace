@@ -7,7 +7,7 @@
                     {{-- Main sourcing card --}}
                     <div class="rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] p-6 sm:p-8 shadow-[var(--hs-shadow-sm)]">
                         @if (! $submitted)
-                            <h1 class="text-2xl font-bold tracking-tight text-[var(--hs-neutral-900)]">{{ __('Can' . "\u{2019}" . 't Find What You' . "\u{2019}" . 're Looking For?') }}</h1>
+                            <h1 class="text-2xl font-bold tracking-tight text-[var(--hs-neutral-900)]">{{ __("Can't Find What You're Looking For?") }}</h1>
                             <p class="mt-1 text-sm text-[var(--hs-neutral-600)] mb-4">
                                 {{ __('We can source it for you. Tell us what you need, and our sourcing team will work with our supplier network to find suitable options based on your requirements, quantity, and target budget.') }}
                             </p>
