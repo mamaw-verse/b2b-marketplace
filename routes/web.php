@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisteredStaffUserController;
 use App\Http\Controllers\HumanCheckController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\WebManifestController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\OrderPaymentCallbackController;
 use App\Http\Controllers\SponsoredContentClickController;
@@ -37,6 +38,7 @@ Route::post('/locale', function (Request $request) {
 })->name('locale.switch');
 
 Route::get('/robots.txt', RobotsController::class)->name('robots');
+Route::get('/manifest.webmanifest', WebManifestController::class)->name('manifest');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');

@@ -267,6 +267,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 
 **T4.3 (P2) — Favicon/app signals**
 - 180×180 apple-touch-icon exists; add 32×32 and 192/512 PNG, `application-name`, optional `manifest.webmanifest`.
+- *Done:* all layouts (storefront, portal, auth, error pages) now share `<x-seo.icons />` instead of four copies: `.ico`, 32/192/512 PNG, 180 apple-touch-icon, `application-name`, `apple-mobile-web-app-title`, `theme-color` (`SEO_THEME_COLOR`, default `--hs-green-600`) and a `/manifest.webmanifest` route (`display: browser`, so no install prompt is implied). The 512 icon reuses `logo-512.png`; no maskable icon is declared because no safe-zone artwork exists.
 
 ### Phase 5 — GEO layer
 

@@ -6,10 +6,7 @@
 </title>
 
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
-<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<x-seo.icons />
 
 <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
 <link rel="dns-prefetch" href="https://challenges.cloudflare.com">

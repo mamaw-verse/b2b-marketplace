@@ -29,6 +29,12 @@ return [
     'logo_path' => 'logo-512.png',
 
     /*
+    | Browser chrome colour (<meta name="theme-color"> and the web manifest). Defaults to
+    | --hs-green-600 from resources/css/tokens.css.
+    */
+    'theme_color' => env('SEO_THEME_COLOR', '#00312B'),
+
+    /*
     | og:locale per application locale.
     */
     'og_locales' => [

@@ -7,10 +7,7 @@
 
     <title>{{ $statusCode ?? (isset($exception) ? $exception->getStatusCode() : 500) }} — {{ config('app.name', 'Laravel') }}</title>
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
-    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <x-seo.icons />
 
     @fonts
     @vite(['resources/css/app.css'])

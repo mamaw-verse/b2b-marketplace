@@ -162,3 +162,34 @@ test('company pages are plain websites and use the default image', function () {
         ->and(seoMetaContent($html, 'property', 'og:image'))->toBe(asset('og-default.jpg'))
         ->and(seoMetaContent($html, 'property', 'og:image:alt'))->toBe(config('seo.site_name'));
 });
+
+test('every public page links the favicons, manifest and app signals', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('rel="apple-touch-icon"')
+        ->and($html)->toContain('sizes="32x32"')
+        ->and($html)->toContain('sizes="192x192"')
+        ->and($html)->toContain('sizes="512x512"')
+        ->and($html)->toContain('<link rel="manifest" href="'.url('/manifest.webmanifest').'">')
+        ->and(seoMetaContent($html, 'name', 'application-name'))->toBe(config('seo.site_name'))
+        ->and(seoMetaContent($html, 'name', 'theme-color'))->toBe(config('seo.theme_color'));
+});
+
+test('the web manifest names the site and points at icons that exist', function () {
+    $response = $this->get('/manifest.webmanifest')->assertOk();
+    $manifest = $response->json();
+
+    expect($response->headers->get('Content-Type'))->toContain('application/manifest+json')
+        ->and($manifest['name'])->toBe(config('seo.site_name'))
+        ->and($manifest['display'])->toBe('browser')
+        ->and($manifest['theme_color'])->toBe(config('seo.theme_color'))
+        ->and(array_column($manifest['icons'], 'sizes'))->toBe(['192x192', '512x512']);
+
+    foreach ($manifest['icons'] as $icon) {
+        expect(public_path(basename($icon['src'])))->toBeFile();
+    }
+});
+
+test('the manifest is not blocked by robots.txt', function () {
+    expect($this->get('/robots.txt')->getContent())->not->toContain('manifest');
+});
