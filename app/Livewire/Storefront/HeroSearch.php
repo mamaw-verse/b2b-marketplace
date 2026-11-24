@@ -11,6 +11,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use App\Actions\Seo\BuildContentSeoData;
+use App\Support\Seo\SeoResolver;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -122,6 +124,11 @@ final class HeroSearch extends Component
 
     public function render(): View
     {
+        app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
+            description: __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]),
+            title: config('app.name').' — '.__('Discover Halal-Certified Companies & Products'),
+        ));
+
         return view('livewire.storefront.hero-search');
     }
 }

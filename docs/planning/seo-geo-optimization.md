@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: in progress.** Phase 0 implemented (T0.1–T0.4; T0.5 moves to Phase 1 with the shared head). Later phases are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phases 0 and 1 implemented (T0.5 landed with the shared head in Phase 1). JSON-LD (Phase 2) and later phases are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -158,23 +158,23 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 - Create assets: `og-default.jpg` (1200×630) and a square `logo-512.png` (≥112×112, recommend 512×512) for `Organization.logo`. Add `32×32` PNG icon.
 - **AC:** HEAD on every image URL in the home head returns 200; `Organization.logo` is square; default OG image is 1200×630.
 
-**T0.5 (P1) — Title and description sweep** *(deferred to Phase 1: descriptions need the shared `<x-seo.head>` first)*
+**✅ T0.5 (P1) — Title and description sweep** *(done in Phase 1 via the shared head; country-scoped titles and non-English descriptions for the new legal/FAQ/apply/request pages remain follow-ups)*
 - Every indexable page gets a unique `<title>` (≤ ~60 chars) and `<meta name="description">` (140–160 chars). Replace generic titles (`Business Directory`, `Product Directory`) with descriptive ones including country scope from `marketplace.instance_country`.
 - **AC:** a test visits every public route and asserts unique non-empty title and description.
 
 ### Phase 1 — Shared head layer
 
-**T1.1 (P0) — `SeoData`, `SeoResolver`, `<x-seo.head>`**
+**✅ T1.1 (P0) — `SeoData`, `SeoResolver`, `<x-seo.head>`**
 - Value object + request-scoped resolver; Blade component renders: title, description, canonical, robots, `og:*`, `twitter:*`, `og:locale`, hreflang slot, JSON-LD (via `SchemaGraph` once Phase 2 lands).
 - Layout `storefront.blade.php` (and `auth`/`portal` layouts for `noindex`) render the component in place of `@stack('meta')`. Keep `@stack('meta')` temporarily for unmigrated pages.
 - **AC:** pages that set nothing still get a safe fallback (site title, `noindex` where private).
 
-**T1.2 (P0) — Migrate pages**
+**✅ T1.2 (P0) — Migrate pages**
 - Home, `/companies`, `/companies/{slug}`, `/products`, `/products/{slug}`, `/about`, `/faq`, `/terms`, `/privacy`, `/certification/apply`, `/request-a-product`. Remove each view's `@push('meta')` as it moves; delete the stack when empty.
 - Canonical on **every** indexable page (query-stripped, absolute, `APP_URL` origin).
 - **AC:** `grep -rn "push('meta')" resources/views` is empty; every public page has one canonical.
 
-**T1.3 (P1) — Canonical and tracking-param hygiene**
+**✅ T1.3 (P1) — Canonical and tracking-param hygiene**
 - Canonical builder strips UTM, `fbclid`, `gclid`, `ref` and the share-button parameters. Confirm `hs-share-buttons` / `ProductShareStat` share the clean canonical URL.
 - **AC:** test with `?utm_source=x&fbclid=y` asserts canonical equals the clean URL.
 

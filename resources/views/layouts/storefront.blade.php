@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? '1Halal Store' }}</title>
-
-    {{-- Per-page SEO / Open Graph meta (pushed by individual views) --}}
-    @stack('meta')
+    {{-- Title, description, canonical, robots, Open Graph and Twitter tags.
+         Pages set their data via App\Support\Seo\SeoResolver (see Actions/Seo). --}}
+    <x-seo.head :fallback-title="$title ?? null" />
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">

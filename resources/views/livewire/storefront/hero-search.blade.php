@@ -1,19 +1,3 @@
-@push('meta')
-    <meta name="description" content="{{ __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]) }}">
-
-    <meta property="og:type"        content="website">
-    <meta property="og:url"         content="{{ url()->current() }}">
-    <meta property="og:title"       content="{{ config('app.name') }} — {{ __('Discover Halal-Certified Companies & Products') }}">
-    <meta property="og:description" content="{{ __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]) }}">
-    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
-    <meta property="og:site_name"   content="{{ config('app.name') }}">
-
-    <meta name="twitter:card"        content="summary">
-    <meta name="twitter:title"       content="{{ config('app.name') }} — {{ __('Discover Halal-Certified Companies & Products') }}">
-    <meta name="twitter:description" content="{{ __(':app — discover and connect with halal-certified suppliers, manufacturers, and products across the supply chain.', ['app' => config('app.name')]) }}">
-    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
-@endpush
-
 <div>
     {{-- ═══════════════════════════════════════════════════════════
          HERO SECTION

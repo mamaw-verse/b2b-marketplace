@@ -1,33 +1,3 @@
-@php
-    $ogTitle       = $shop->storefront_name . ' — ' . config('app.name');
-    $ogDescription = filled($shop->company_description)
-        ? Str::limit(strip_tags($shop->company_description), 160)
-        : __('Discover :name on :app — a verified halal-certified business on the marketplace.', ['name' => $shop->storefront_name, 'app' => config('app.name')]);
-    $ogUrl         = route('storefront.company', $shop);
-@endphp
-
-@push('meta')
-    <link rel="canonical" href="{{ $ogUrl }}">
-    {{-- Primary --}}
-    <meta name="description" content="{{ $ogDescription }}">
-
-    {{-- Open Graph --}}
-    <meta property="og:type"        content="business.business">
-    <meta property="og:url"         content="{{ $ogUrl }}">
-    <meta property="og:title"       content="{{ $ogTitle }}">
-    <meta property="og:description" content="{{ $ogDescription }}">
-    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
-    <meta property="og:image:alt"   content="{{ $shop->storefront_name }}">
-    <meta property="og:site_name"   content="{{ config('app.name') }}">
-
-    {{-- Twitter Card --}}
-    <meta name="twitter:card"        content="summary">
-    <meta name="twitter:title"       content="{{ $ogTitle }}">
-    <meta name="twitter:description" content="{{ $ogDescription }}">
-    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
-    <meta name="twitter:image:alt"   content="{{ $shop->storefront_name }}">
-@endpush
-
 <div>
     {{-- Dark Header Band --}}
     <section class="bg-[var(--hs-green-950)] py-12">

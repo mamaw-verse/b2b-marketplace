@@ -18,6 +18,7 @@ use App\Services\DltDisbursementService;
 use App\Services\DltPaymentService;
 use App\Services\MockDltDisbursementService;
 use App\Services\TurnstileVerifier;
+use App\Support\Seo\SeoResolver;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -49,6 +50,9 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(DltPaymentService::class);
+
+        // One SeoData per request (scoped so it resets between Octane requests).
+        $this->app->scoped(SeoResolver::class);
 
         // Route the notification "mail" channel through our channel that
         // prepends a shared Arabic salutation addressed to the recipient.

@@ -1,33 +1,7 @@
 @php
-    $ogTitle       = $product->name . ($product->shop ? ' — ' . $product->shop->storefront_name : '');
-    $ogDescription = Str::limit(strip_tags($product->description ?? ''), 160);
-    $ogImage       = $product->featured_image_path
-        ? route('products.featured-image', $product)
-        : asset('images/brand-logo.png');
-    $ogUrl         = route('storefront.product', $product);
+    $ogTitle = app(\App\Actions\Seo\BuildProductSeoData::class)->title($product);
+    $ogUrl   = route('storefront.product', $product);
 @endphp
-
-@push('meta')
-    <link rel="canonical" href="{{ $ogUrl }}">
-    {{-- Primary --}}
-    <meta name="description" content="{{ $ogDescription }}">
-
-    {{-- Open Graph --}}
-    <meta property="og:type"        content="product">
-    <meta property="og:url"         content="{{ $ogUrl }}">
-    <meta property="og:title"       content="{{ $ogTitle }}">
-    <meta property="og:description" content="{{ $ogDescription }}">
-    <meta property="og:image"       content="{{ $ogImage }}">
-    <meta property="og:image:alt"   content="{{ $product->name }}">
-    <meta property="og:site_name"   content="{{ config('app.name') }}">
-
-    {{-- Twitter Card --}}
-    <meta name="twitter:card"        content="summary_large_image">
-    <meta name="twitter:title"       content="{{ $ogTitle }}">
-    <meta name="twitter:description" content="{{ $ogDescription }}">
-    <meta name="twitter:image"       content="{{ $ogImage }}">
-    <meta name="twitter:image:alt"   content="{{ $product->name }}">
-@endpush
 
 <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     {{-- Breadcrumb — includes category level when available --}}

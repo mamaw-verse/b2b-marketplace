@@ -1,19 +1,3 @@
-@push('meta')
-    <meta name="description" content="{{ $ogDescription }}">
-
-    <meta property="og:type"        content="website">
-    <meta property="og:url"         content="{{ url()->current() }}">
-    <meta property="og:title"       content="{{ $ogTitle }}">
-    <meta property="og:description" content="{{ $ogDescription }}">
-    <meta property="og:image"       content="{{ asset('images/brand-logo.png') }}">
-    <meta property="og:site_name"   content="{{ config('app.name') }}">
-
-    <meta name="twitter:card"        content="summary">
-    <meta name="twitter:title"       content="{{ $ogTitle }}">
-    <meta name="twitter:description" content="{{ $ogDescription }}">
-    <meta name="twitter:image"       content="{{ asset('images/brand-logo.png') }}">
-@endpush
-
 <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-[var(--hs-neutral-900)] font-[var(--hs-font-display)]">{{ __('Business Directory') }}</h1>

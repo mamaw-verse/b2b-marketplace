@@ -9,6 +9,8 @@ use App\Mail\CertificationApplicationAcknowledgment;
 use App\Models\CertificationApplication;
 use App\Models\User;
 use App\Notifications\CertificationInterestNotification;
+use App\Actions\Seo\BuildContentSeoData;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -112,6 +114,10 @@ final class ApplyForCertificate extends Component
 
     public function render(): View
     {
+        app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
+            description: __('Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.', ['app' => config('app.name')]),
+        ));
+
         return view('livewire.storefront.apply-for-certificate');
     }
 

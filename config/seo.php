@@ -29,6 +29,17 @@ return [
     'logo_path' => 'logo-512.png',
 
     /*
+    | og:locale per application locale.
+    */
+    'og_locales' => [
+        'en' => 'en_US',
+        'ms' => 'ms_MY',
+        'ar' => 'ar_SA',
+        'id' => 'id_ID',
+        'tr' => 'tr_TR',
+    ],
+
+    /*
     | Path prefixes (no leading slash) that must never be indexed. A prefix also
     | matches everything beneath it (`admin` matches `admin` and `admin/...`).
     | Verified against routes/web.php, routes/settings.php, routes/api.php and Fortify.

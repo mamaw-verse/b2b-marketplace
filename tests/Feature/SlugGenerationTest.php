@@ -67,7 +67,7 @@ test('storefront slug URLs are canonical and legacy IDs preserve the query strin
     $this->get(route('storefront.product', $product))
         ->assertOk()
         ->assertSee('<link rel="canonical" href="'.route('storefront.product', $product).'">', false)
-        ->assertSee('<meta property="og:url"         content="'.route('storefront.product', $product).'">', false);
+        ->assertSee('<meta property="og:url" content="'.route('storefront.product', $product).'">', false);
 
     $this->get('/products/'.$product->id.'?campaign=legacy&source=email')
         ->assertStatus(301)
@@ -82,7 +82,7 @@ test('company slug URLs are canonical and legacy IDs redirect', function () {
     $this->get(route('storefront.company', $shop))
         ->assertOk()
         ->assertSee('<link rel="canonical" href="'.route('storefront.company', $shop).'">', false)
-        ->assertSee('<meta property="og:url"         content="'.route('storefront.company', $shop).'">', false);
+        ->assertSee('<meta property="og:url" content="'.route('storefront.company', $shop).'">', false);
 
     $oldSlug = $shop->slug;
     $shop->update(['slug' => 'renamed-canonical-company']);

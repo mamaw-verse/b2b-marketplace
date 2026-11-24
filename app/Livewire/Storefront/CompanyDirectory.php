@@ -7,6 +7,8 @@ namespace App\Livewire\Storefront;
 use App\Models\Category;
 use App\Models\Shop;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Actions\Seo\BuildContentSeoData;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -118,6 +120,11 @@ final class CompanyDirectory extends Component
             ? __('Find verified halal-certified :category businesses and suppliers on :app.', ['category' => $selectedCategory->name, 'app' => config('app.name')])
             : __('Discover verified halal-certified businesses, suppliers, and manufacturers on :app.', ['app' => config('app.name')]);
 
-        return view('livewire.storefront.company-directory', compact('ogTitle', 'ogDescription'));
+        app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
+            description: $ogDescription,
+            title: $ogTitle,
+        ));
+
+        return view('livewire.storefront.company-directory');
     }
 }

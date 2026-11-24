@@ -6,6 +6,8 @@ namespace App\Livewire\Storefront;
 
 use App\Actions\Storefront\RecordProductShareAction;
 use App\Models\Product;
+use App\Actions\Seo\BuildProductSeoData;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
@@ -48,6 +50,8 @@ final class ProductDetail extends Component
 
     public function render(): View
     {
+        app(SeoResolver::class)->set(app(BuildProductSeoData::class)->handle($this->product));
+
         return view('livewire.storefront.product-detail')
             ->title($this->product->name);
     }

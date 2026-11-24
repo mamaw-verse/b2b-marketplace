@@ -6,6 +6,8 @@ namespace App\Livewire\Storefront;
 
 use App\Models\Conversation;
 use App\Models\Shop;
+use App\Actions\Seo\BuildCompanySeoData;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -82,6 +84,10 @@ final class CompanyProfile extends Component
 
     public function render(): View
     {
+        if ($this->shop !== null) {
+            app(SeoResolver::class)->set(app(BuildCompanySeoData::class)->handle($this->shop));
+        }
+
         return view('livewire.storefront.company-profile')
             ->title($this->shop?->storefront_name ?? '');
     }

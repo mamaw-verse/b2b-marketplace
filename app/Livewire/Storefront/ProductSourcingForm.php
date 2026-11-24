@@ -9,6 +9,8 @@ use App\Mail\SourcingRequestAcknowledgment;
 use App\Models\SourcingRequest;
 use App\Models\User;
 use App\Notifications\SourcingRequestReceivedNotification;
+use App\Actions\Seo\BuildContentSeoData;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -111,6 +113,11 @@ final class ProductSourcingForm extends Component
         $view = view('livewire.storefront.product-sourcing-form');
 
         if ($this->fullPage) {
+            app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
+                description: __('Can\'t find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.', ['app' => config('app.name')]),
+                title: __('Request a Product — :app', ['app' => config('app.name')]),
+            ));
+
             return $view->layout('layouts.storefront');
         }
 

@@ -7,6 +7,8 @@ namespace App\Livewire\Storefront;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Actions\Seo\BuildContentSeoData;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -154,6 +156,11 @@ final class ProductDirectory extends Component
             ? __('Browse halal-certified :category products from verified suppliers on :app.', ['category' => $selectedCategory->name, 'app' => config('app.name')])
             : __('Discover thousands of halal-certified products from verified suppliers and manufacturers on :app.', ['app' => config('app.name')]);
 
-        return view('livewire.storefront.product-directory', compact('ogTitle', 'ogDescription'));
+        app(SeoResolver::class)->set(app(BuildContentSeoData::class)->handle(
+            description: $ogDescription,
+            title: $ogTitle,
+        ));
+
+        return view('livewire.storefront.product-directory');
     }
 }
