@@ -276,6 +276,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 - A named `User-agent` group replaces `*` for that bot, so **repeat the private `Disallow` lines inside every named group**.
 - Verify each vendor's current bot names before launch; they change.
 - **AC:** test asserts every named agent repeats all private disallows; toggle changes only training groups.
+- *Done (D1 taken at the recommended default, **please confirm**):* `config/seo.php` lists `ai_crawlers.search` (`OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`, `Perplexity-User`) and `ai_crawlers.training` (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`, `Applebot-Extended`, `Bytespider`). `BuildRobotsTxt` emits one named group per bot repeating every private `Disallow`; `SEO_BLOCK_AI_TRAINING` (default `true`) turns the training groups into `Disallow: /` and changes nothing else. Googlebot/Bingbot need no group (they follow `*`). Names were cross-checked against a third-party list (Search Engine Journal) because the vendor docs were not reachable from this environment; re-verify against vendor docs before launch (D10). Non-production and `force_noindex` still return a blanket block for everyone.
 
 **T5.2 (P1) — `/llms.txt`**
 - `LlmsTxtController` + `BuildLlmsTxt`, cached, production-only (404 on non-production/force-noindex, like robots).

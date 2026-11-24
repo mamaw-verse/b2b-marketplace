@@ -85,6 +85,39 @@ return [
     ],
 
     /*
+    | AI crawler policy (T5.1, decision D1). Vendors change these names: re-verify
+    | against each vendor's current documentation before launch.
+    |
+    | `search`  - answer-engine and user-triggered bots. Always allowed (subject to the
+    |             private paths), so the site can be cited.
+    | `training` - model-training bots. Blocked entirely while `block_ai_training` is true
+    |             (SEO_BLOCK_AI_TRAINING); otherwise treated like any other crawler.
+    |
+    | Each bot gets its own named group because a named group replaces `User-agent: *`,
+    | so the private Disallow lines must be repeated inside it.
+    */
+    'block_ai_training' => (bool) env('SEO_BLOCK_AI_TRAINING', true),
+
+    'ai_crawlers' => [
+        'search' => [
+            'OAI-SearchBot',
+            'ChatGPT-User',
+            'Claude-SearchBot',
+            'Claude-User',
+            'PerplexityBot',
+            'Perplexity-User',
+        ],
+        'training' => [
+            'GPTBot',
+            'ClaudeBot',
+            'Google-Extended',
+            'CCBot',
+            'Applebot-Extended',
+            'Bytespider',
+        ],
+    ],
+
+    /*
     | Query parameters whose presence marks a listing URL as `noindex, follow`
     | and canonicalises it to the clean listing URL (T3.2). `category` is the
     | live Livewire #[Url] binding on /products; the rest are the names a

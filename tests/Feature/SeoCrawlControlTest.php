@@ -26,7 +26,9 @@ test('production robots.txt disallows every configured private path', function (
 
     $body = $this->get('/robots.txt')->assertOk()->getContent();
 
-    expect($body)->toContain('User-agent: *')->not->toContain("Disallow: /\n");
+    // The wildcard group must never be a blanket block (AI training bots have their own groups).
+    expect($body)->toContain('User-agent: *')
+        ->and(seoRobotsGroups($body)['*'])->not->toContain('/');
 
     foreach (app(IndexingPolicy::class)->privatePathPatterns() as $pattern) {
         expect($body)->toContain('Disallow: /'.$pattern."\n");
@@ -116,4 +118,87 @@ test('layouts reference only icon files that exist', function () {
             expect(public_path(ltrim($href, '/')))->toBeFile();
         }
     }
+});
+
+/**
+ * Parses robots.txt into [agent => list of Disallow paths], one entry per User-agent line.
+ *
+ * @return array<string, list<string>>
+ */
+function seoRobotsGroups(string $body): array
+{
+    $groups = [];
+
+    foreach (preg_split('/\n\s*\n/', trim($body)) as $block) {
+        $agents = [];
+        $disallows = [];
+
+        foreach (explode("\n", $block) as $line) {
+            if (str_starts_with($line, 'User-agent: ')) {
+                $agents[] = substr($line, 12);
+            } elseif (str_starts_with($line, 'Disallow: ')) {
+                $disallows[] = substr($line, 10);
+            }
+        }
+
+        foreach ($agents as $agent) {
+            $groups[$agent] = $disallows;
+        }
+    }
+
+    return $groups;
+}
+
+test('every named AI crawler group repeats all private disallows', function () {
+    seoAsProduction();
+    Config::set('seo.block_ai_training', false);
+
+    $groups = seoRobotsGroups($this->get('/robots.txt')->assertOk()->getContent());
+    $private = array_map(
+        static fn (string $pattern): string => '/'.$pattern,
+        app(IndexingPolicy::class)->privatePathPatterns(),
+    );
+    $named = [...config('seo.ai_crawlers.search'), ...config('seo.ai_crawlers.training')];
+
+    expect($named)->not->toBeEmpty();
+
+    foreach ($named as $agent) {
+        expect($groups)->toHaveKey($agent)
+            ->and($groups[$agent])->toBe($private);
+    }
+});
+
+test('the training toggle changes only the training groups', function () {
+    seoAsProduction();
+
+    Config::set('seo.block_ai_training', false);
+    $open = seoRobotsGroups($this->get('/robots.txt')->getContent());
+
+    Config::set('seo.block_ai_training', true);
+    $blocked = seoRobotsGroups($this->get('/robots.txt')->getContent());
+
+    $training = config('seo.ai_crawlers.training');
+
+    foreach ($training as $agent) {
+        expect($blocked[$agent])->toBe(['/'])->and($open[$agent])->not->toBe(['/']);
+    }
+
+    expect(array_diff_key($blocked, array_flip($training)))->toBe(array_diff_key($open, array_flip($training)));
+});
+
+test('answer and user-triggered bots stay allowed even when training bots are blocked', function () {
+    seoAsProduction();
+    Config::set('seo.block_ai_training', true);
+
+    $groups = seoRobotsGroups($this->get('/robots.txt')->getContent());
+
+    foreach (config('seo.ai_crawlers.search') as $agent) {
+        expect($groups[$agent])->not->toContain('/');
+    }
+});
+
+test('a non-production deploy blocks every crawler including AI bots', function () {
+    Config::set('seo.force_noindex', true);
+
+    expect($this->get('/robots.txt')->getContent())->toBe("User-agent: *\nDisallow: /\n");
 });
