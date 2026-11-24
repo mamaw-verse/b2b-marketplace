@@ -8,11 +8,14 @@ test('every translation key used by the legal views exists in all locale diction
         'livewire/legal/terms-page.blade.php',
         'livewire/legal/privacy-page.blade.php',
         'livewire/legal/faq-page.blade.php',
+        // The FAQ text and the trust sentences it reuses live in PHP classes, not in the view.
+        'app/Support/Seo/FaqEntries.php',
+        'app/Support/Seo/TrustFacts.php',
     ];
 
     $keys = [];
     foreach ($files as $file) {
-        $contents = file_get_contents(resource_path('views/'.$file));
+        $contents = file_get_contents(str_starts_with($file, 'app/') ? base_path($file) : resource_path('views/'.$file));
         preg_match_all("/__\(\'((?:[^\'\\\\]|\\\\.)*)\'\)/u", $contents, $single);
         preg_match_all('/__\("((?:[^"\\\\]|\\\\.)*)"\)/u', $contents, $double);
         foreach (array_merge($single[1], $double[1]) as $key) {

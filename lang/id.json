@@ -2660,5 +2660,18 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Sertifikat halal Anda untuk **:shopName** telah ditinjau dan tidak dapat disetujui.",
   "You have a team invitation": "Anda memiliki undangan tim",
   ":category Products — :app": "Produk :category — :app",
-  "Subcategories": "Subkategori"
+  "Subcategories": "Subkategori",
+  "How are suppliers verified?": "Bagaimana pemasok diverifikasi?",
+  "How are halal certificates tracked?": "Bagaimana sertifikat halal dilacak?",
+  "Can buyers ask suppliers for quotations or message them?": "Bisakah pembeli meminta penawaran harga dari pemasok atau mengirim pesan kepada mereka?",
+  "What protections apply to orders?": "Perlindungan apa yang berlaku untuk pesanan?",
+  "Suppliers are reviewed and approved by an administrator before they appear in the directory.": "Pemasok ditinjau dan disetujui oleh administrator sebelum muncul di direktori.",
+  "Halal certificates uploaded by suppliers are tracked as active, expiring soon or expired, and suppliers are alerted :days days before expiry and when a certificate expires.": "Sertifikat halal yang diunggah pemasok dilacak sebagai aktif, segera berakhir, atau kedaluwarsa, dan pemasok diberi peringatan :days hari sebelum masa berlaku berakhir serta saat sertifikat kedaluwarsa.",
+  "Uploaded documents are scanned for malware.": "Dokumen yang diunggah dipindai untuk mendeteksi malware.",
+  "Suppliers can respond to buyer requests with formal quotations.": "Pemasok dapat menanggapi permintaan pembeli dengan penawaran harga resmi.",
+  "Buyers and suppliers can message each other on the platform.": "Pembeli dan pemasok dapat saling mengirim pesan di platform.",
+  "Buyers can place and track orders with suppliers on the platform.": "Pembeli dapat membuat dan melacak pesanan dengan pemasok di platform.",
+  "Order payments are protected by escrow.": "Pembayaran pesanan dilindungi oleh escrow.",
+  "Buyers can raise a dispute on an order.": "Pembeli dapat mengajukan sengketa atas pesanan.",
+  "Buyers can leave ratings and reviews on products.": "Pembeli dapat memberikan peringkat dan ulasan pada produk."
 }

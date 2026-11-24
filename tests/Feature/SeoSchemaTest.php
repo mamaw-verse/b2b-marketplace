@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shop;
 use App\Models\ShopCertificate;
+use App\Support\Seo\FaqEntries;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\Config;
 
@@ -172,7 +173,7 @@ test('each page uses the matching WebPage type and a breadcrumb that mirrors its
     $expectations = [
         '/' => ['WebPage', null],
         '/about' => ['AboutPage', ['Home', 'About Us']],
-        '/faq' => ['WebPage', ['Home', 'Frequently Asked Questions']],
+        '/faq' => ['FAQPage', ['Home', 'Frequently Asked Questions']],
         '/terms' => ['WebPage', ['Home', 'Terms of Service']],
         '/privacy' => ['WebPage', ['Home', 'Privacy Policy']],
         '/companies' => ['CollectionPage', ['Home', 'Companies']],
@@ -214,12 +215,85 @@ test('the about page names the marketplace organization as its main entity', fun
 test('legal pages carry their real modified date and other pages none', function () {
     expect(schemaNodesOfType(pageSchema($this, '/terms'), 'WebPage')[0]['dateModified'])->toBe('2026-09-16')
         ->and(schemaNodesOfType(pageSchema($this, '/privacy'), 'WebPage')[0]['dateModified'])->toBe('2026-09-16')
-        ->and(schemaNodesOfType(pageSchema($this, '/faq'), 'WebPage')[0])->not->toHaveKey('dateModified')
+        ->and(schemaNodesOfType(pageSchema($this, '/faq'), 'FAQPage')[0])->not->toHaveKey('dateModified')
         ->and(schemaNodesOfType(pageSchema($this, '/about'), 'AboutPage')[0])->not->toHaveKey('dateModified');
 });
 
-test('the faq page is a plain WebPage until its Q&A is a shared data source', function () {
-    expect(schemaNodesOfType(pageSchema($this, '/faq'), 'FAQPage'))->toBeEmpty();
+/**
+ * The FAQ's Question nodes keyed by question text, resolved through the FAQPage's mainEntity references.
+ *
+ * @return array<string, string> question => answer
+ */
+function faqQuestionsFromSchema(array $schema): array
+{
+    $byId = [];
+
+    foreach ($schema['@graph'] as $node) {
+        if (isset($node['@id'])) {
+            $byId[$node['@id']] = $node;
+        }
+    }
+
+    $page = schemaNodesOfType($schema, 'FAQPage')[0];
+    $questions = [];
+
+    foreach ($page['mainEntity'] as $reference) {
+        $node = $byId[$reference['@id']];
+        expect($node['@type'])->toBe('Question');
+        $questions[$node['name']] = $node['acceptedAnswer']['text'];
+    }
+
+    return $questions;
+}
+
+test('the faq page emits a FAQPage whose questions match the visible Q&A exactly', function () {
+    $html = $this->get('/faq')->assertOk()->getContent();
+    $questions = faqQuestionsFromSchema(schemaFromHtml($html));
+    $entries = app(FaqEntries::class)->flat();
+
+    expect($questions)->toHaveCount(count($entries))->and($entries)->not->toBeEmpty();
+
+    foreach ($entries as $entry) {
+        // Same text in the JSON-LD and in the server-rendered DOM (not only revealed by Alpine).
+        expect($questions)->toHaveKey($entry['q'])
+            ->and($questions[$entry['q']])->toBe($entry['a'])
+            ->and($html)->toContain('>'.e($entry['q']).'</span>')
+            ->and($html)->toContain('>'.e($entry['a']).'</p>');
+    }
+});
+
+test('order questions appear on the faq page only while orders are enabled', function () {
+    $orderQuestions = ['What if I receive the wrong product?', 'What if my order is damaged?', 'Can I cancel an order?'];
+
+    Config::set('marketplace.features.orders_enabled', false);
+    $off = $this->get('/faq')->assertOk()->getContent();
+
+    Config::set('marketplace.features.orders_enabled', true);
+    $on = $this->get('/faq')->assertOk()->getContent();
+
+    foreach ($orderQuestions as $question) {
+        expect($off)->not->toContain(e($question))
+            ->and(faqQuestionsFromSchema(schemaFromHtml($off)))->not->toHaveKey($question)
+            ->and($on)->toContain(e($question))
+            ->and(faqQuestionsFromSchema(schemaFromHtml($on)))->toHaveKey($question);
+    }
+});
+
+test('faq trust answers come from TrustFacts and vanish with their flag', function () {
+    Config::set('marketplace.features.escrow_payments_enabled', false);
+    Config::set('marketplace.features.disputes_enabled', false);
+    Config::set('marketplace.features.reviews_enabled', false);
+
+    $off = faqQuestionsFromSchema(pageSchema($this, '/faq'));
+
+    expect($off)->toHaveKey('How are suppliers verified?')
+        ->and($off['How are halal certificates tracked?'])->toContain('60, 30 and 7 days')
+        ->and($off)->not->toHaveKey('What protections apply to orders?');
+
+    Config::set('marketplace.features.escrow_payments_enabled', true);
+
+    expect(faqQuestionsFromSchema(pageSchema($this, '/faq'))['What protections apply to orders?'])
+        ->toBe('Order payments are protected by escrow.');
 });
 
 test('the terms and privacy pages match the date they display', function () {

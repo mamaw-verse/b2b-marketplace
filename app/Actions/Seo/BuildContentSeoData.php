@@ -18,6 +18,7 @@ final class BuildContentSeoData
      * @param  list<array<string, mixed>>  $listItems  Stubs for the entities a listing page shows.
      * @param  string|null  $canonical  Overrides the request-derived canonical (e.g. a category facet pointing at its category page).
      * @param  string|null  $robots  Overrides the indexing policy's directive; null keeps it.
+     * @param  list<array{q: string, a: string}>  $faqEntries  Visible questions and answers, emitted as FAQPage data.
      */
     public function handle(
         string $description,
@@ -32,6 +33,7 @@ final class BuildContentSeoData
         int $listOffset = 0,
         ?string $canonical = null,
         ?string $robots = null,
+        array $faqEntries = [],
     ): SeoData {
         return new SeoData(
             title: $title,
@@ -47,6 +49,7 @@ final class BuildContentSeoData
             listItems: $listItems,
             listOffset: $listOffset,
             dateModified: $dateModified,
+            faqEntries: $faqEntries,
         );
     }
 }

@@ -2660,5 +2660,18 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "تمت مراجعة شهادة الحلال الخاصة بك لـ **:shopName** ولم يمكن الموافقة عليها.",
   "You have a team invitation": "لديك دعوة فريق",
   ":category Products — :app": "منتجات :category — :app",
-  "Subcategories": "الفئات الفرعية"
+  "Subcategories": "الفئات الفرعية",
+  "How are suppliers verified?": "كيف يتم التحقق من الموردين؟",
+  "How are halal certificates tracked?": "كيف يتم تتبع شهادات الحلال؟",
+  "Can buyers ask suppliers for quotations or message them?": "هل يمكن للمشترين طلب عروض أسعار من الموردين أو مراسلتهم؟",
+  "What protections apply to orders?": "ما الحمايات المتاحة للطلبات؟",
+  "Suppliers are reviewed and approved by an administrator before they appear in the directory.": "تتم مراجعة الموردين والموافقة عليهم من قِبل مسؤول قبل ظهورهم في الدليل.",
+  "Halal certificates uploaded by suppliers are tracked as active, expiring soon or expired, and suppliers are alerted :days days before expiry and when a certificate expires.": "يتم تتبع شهادات الحلال التي يرفعها الموردون بوصفها سارية أو قاربت على الانتهاء أو منتهية، ويُنبَّه الموردون قبل :days أيام من انتهاء الصلاحية وعند انتهاء الشهادة.",
+  "Uploaded documents are scanned for malware.": "يتم فحص المستندات المرفوعة بحثًا عن البرمجيات الخبيثة.",
+  "Suppliers can respond to buyer requests with formal quotations.": "يمكن للموردين الرد على طلبات المشترين بعروض أسعار رسمية.",
+  "Buyers and suppliers can message each other on the platform.": "يمكن للمشترين والموردين تبادل الرسائل على المنصة.",
+  "Buyers can place and track orders with suppliers on the platform.": "يمكن للمشترين تقديم الطلبات مع الموردين وتتبعها على المنصة.",
+  "Order payments are protected by escrow.": "مدفوعات الطلبات محمية بنظام الضمان (إسكرو).",
+  "Buyers can raise a dispute on an order.": "يمكن للمشترين رفع نزاع بشأن الطلب.",
+  "Buyers can leave ratings and reviews on products.": "يمكن للمشترين ترك تقييمات ومراجعات للمنتجات."
 }

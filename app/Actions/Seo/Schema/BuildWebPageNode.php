@@ -9,6 +9,8 @@ use App\Support\Schema\SchemaId;
 
 /**
  * The page wrapper: WebPage, CollectionPage, AboutPage or FAQPage.
+ *
+ * `mainEntity` is one reference, or a list of references (a FAQPage's questions).
  */
 final class BuildWebPageNode
 {
@@ -26,7 +28,7 @@ final class BuildWebPageNode
         ?int $imageWidth = null,
         ?int $imageHeight = null,
         bool $hasBreadcrumb = false,
-        ?string $mainEntityId = null,
+        string|array|null $mainEntityId = null,
         ?string $dateModified = null,
     ): array {
         return [
@@ -45,7 +47,11 @@ final class BuildWebPageNode
                 'width' => $imageWidth,
                 'height' => $imageHeight,
             ],
-            'mainEntity' => $mainEntityId === null ? null : SchemaGraph::ref($mainEntityId),
+            'mainEntity' => match (true) {
+                $mainEntityId === null, $mainEntityId === [] => null,
+                is_array($mainEntityId) => array_map(SchemaGraph::ref(...), $mainEntityId),
+                default => SchemaGraph::ref($mainEntityId),
+            },
             'dateModified' => $dateModified,
         ];
     }

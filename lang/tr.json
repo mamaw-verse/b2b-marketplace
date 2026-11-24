@@ -2660,5 +2660,18 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "**:shopName** için helal sertifikanız incelendi ancak onaylanamadı.",
   "You have a team invitation": "Bir ekip davetiniz var",
   ":category Products — :app": ":category Ürünleri — :app",
-  "Subcategories": "Alt kategoriler"
+  "Subcategories": "Alt kategoriler",
+  "How are suppliers verified?": "Tedarikçiler nasıl doğrulanır?",
+  "How are halal certificates tracked?": "Helal sertifikaları nasıl takip edilir?",
+  "Can buyers ask suppliers for quotations or message them?": "Alıcılar tedarikçilerden teklif isteyebilir veya onlara mesaj gönderebilir mi?",
+  "What protections apply to orders?": "Siparişler için hangi korumalar geçerlidir?",
+  "Suppliers are reviewed and approved by an administrator before they appear in the directory.": "Tedarikçiler, dizinde görünmeden önce bir yönetici tarafından incelenir ve onaylanır.",
+  "Halal certificates uploaded by suppliers are tracked as active, expiring soon or expired, and suppliers are alerted :days days before expiry and when a certificate expires.": "Tedarikçilerin yüklediği helal sertifikaları etkin, süresi dolmak üzere veya süresi dolmuş olarak takip edilir; tedarikçilere son kullanma tarihinden :days gün önce ve sertifikanın süresi dolduğunda bildirim gönderilir.",
+  "Uploaded documents are scanned for malware.": "Yüklenen belgeler kötü amaçlı yazılım için taranır.",
+  "Suppliers can respond to buyer requests with formal quotations.": "Tedarikçiler, alıcı taleplerine resmi tekliflerle yanıt verebilir.",
+  "Buyers and suppliers can message each other on the platform.": "Alıcılar ve tedarikçiler platform üzerinden birbirlerine mesaj gönderebilir.",
+  "Buyers can place and track orders with suppliers on the platform.": "Alıcılar platform üzerinde tedarikçilerle sipariş verebilir ve siparişleri takip edebilir.",
+  "Order payments are protected by escrow.": "Sipariş ödemeleri emanet (escrow) ile korunur.",
+  "Buyers can raise a dispute on an order.": "Alıcılar bir sipariş için anlaşmazlık bildirebilir.",
+  "Buyers can leave ratings and reviews on products.": "Alıcılar ürünler için puan verebilir ve yorum yazabilir."
 }

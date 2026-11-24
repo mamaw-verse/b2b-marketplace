@@ -55,6 +55,22 @@ final class BuildSchemaGraph
 
         $mainEntityId = $seo?->mainEntityId;
 
+        // A FAQ page's main entities are its questions, built from the same list the page renders.
+        if (($seo?->faqEntries ?? []) !== []) {
+            $mainEntityId = [];
+
+            foreach (array_values($seo->faqEntries) as $index => $entry) {
+                $id = $canonical.'#faq-'.($index + 1);
+                $graph->add([
+                    '@type' => 'Question',
+                    '@id' => $id,
+                    'name' => $entry['q'],
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => $entry['a']],
+                ]);
+                $mainEntityId[] = $id;
+            }
+        }
+
         if ($mainEntityId === null && $graph->has(SchemaId::itemList($canonical))) {
             $mainEntityId = SchemaId::itemList($canonical);
         }

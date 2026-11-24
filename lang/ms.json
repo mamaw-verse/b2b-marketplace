@@ -2660,5 +2660,18 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Sijil halal anda untuk **:shopName** telah disemak dan tidak dapat diluluskan.",
   "You have a team invitation": "Anda mempunyai jemputan pasukan",
   ":category Products — :app": "Produk :category — :app",
-  "Subcategories": "Subkategori"
+  "Subcategories": "Subkategori",
+  "How are suppliers verified?": "Bagaimanakah pembekal disahkan?",
+  "How are halal certificates tracked?": "Bagaimanakah sijil halal dijejaki?",
+  "Can buyers ask suppliers for quotations or message them?": "Bolehkah pembeli meminta sebut harga daripada pembekal atau menghantar mesej kepada mereka?",
+  "What protections apply to orders?": "Apakah perlindungan yang terpakai untuk pesanan?",
+  "Suppliers are reviewed and approved by an administrator before they appear in the directory.": "Pembekal disemak dan diluluskan oleh pentadbir sebelum muncul dalam direktori.",
+  "Halal certificates uploaded by suppliers are tracked as active, expiring soon or expired, and suppliers are alerted :days days before expiry and when a certificate expires.": "Sijil halal yang dimuat naik oleh pembekal dijejaki sebagai aktif, hampir tamat tempoh atau telah tamat tempoh, dan pembekal dimaklumkan :days hari sebelum tamat tempoh serta apabila sijil tamat tempoh.",
+  "Uploaded documents are scanned for malware.": "Dokumen yang dimuat naik diimbas untuk perisian hasad.",
+  "Suppliers can respond to buyer requests with formal quotations.": "Pembekal boleh membalas permintaan pembeli dengan sebut harga rasmi.",
+  "Buyers and suppliers can message each other on the platform.": "Pembeli dan pembekal boleh menghantar mesej antara satu sama lain di platform.",
+  "Buyers can place and track orders with suppliers on the platform.": "Pembeli boleh membuat dan menjejaki pesanan dengan pembekal di platform.",
+  "Order payments are protected by escrow.": "Pembayaran pesanan dilindungi oleh escrow.",
+  "Buyers can raise a dispute on an order.": "Pembeli boleh membangkitkan pertikaian ke atas pesanan.",
+  "Buyers can leave ratings and reviews on products.": "Pembeli boleh memberi penilaian dan ulasan pada produk."
 }
