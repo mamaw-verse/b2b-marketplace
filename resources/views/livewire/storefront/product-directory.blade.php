@@ -46,21 +46,21 @@
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalProductCount }}
                     </b>
-                    {{ __('products') }}
+                    {{ __(Str::plural('product', $this->totalProductCount)) }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalSupplierCount }}
                     </b>
-                    {{ __('suppliers') }}
+                    {{ __(Str::plural('supplier', $this->totalSupplierCount)) }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalCategoryCount }}
                     </b>
-                    {{ __('categories') }}
+                    {{ __(Str::plural('category', $this->totalCategoryCount)) }}
                 </span>
             </div>
 
@@ -148,7 +148,7 @@
                             <span class="mr-2 flex size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]" aria-hidden="true"></span>
                         @endif
                         <span class="truncate">{{ __('All Categories') }}</span>
-                        <span class="ml-auto pl-2 text-[10px] tabular-nums text-[var(--hs-neutral-400)]">{{ $this->totalProductCount }}</span>
+                        <span class="ml-auto pl-2 text-xs tabular-nums text-[var(--hs-neutral-500)]">{{ $this->totalProductCount }}</span>
                     </button>
 
                     @foreach ($this->categoryGroups as $group)
@@ -167,9 +167,9 @@
                                 <span class="truncate">{{ $group->name }}</span>
                                 <span
                                     @class([
-                                        'ml-auto pl-2 text-[10px] tabular-nums',
+                                        'ml-auto pl-2 text-xs tabular-nums',
                                         'text-[var(--hs-green-600)]' => $categoryId === $group->id,
-                                        'text-[var(--hs-neutral-400)]' => $categoryId !== $group->id,
+                                        'text-[var(--hs-neutral-500)]' => $categoryId !== $group->id,
                                     ])
                                 >{{ $group->published_products_count }}</span>
                             </button>
@@ -189,9 +189,9 @@
                                             <span class="truncate">{{ $category->name }}</span>
                                             <span
                                                 @class([
-                                                    'ml-auto pl-2 text-[10px] tabular-nums',
+                                                    'ml-auto pl-2 text-xs tabular-nums',
                                                     'text-[var(--hs-green-600)]' => $categoryId === $category->id,
-                                                    'text-[var(--hs-neutral-400)]' => $categoryId !== $category->id,
+                                                    'text-[var(--hs-neutral-500)]' => $categoryId !== $category->id,
                                                 ])
                                             >{{ $category->published_products_count }}</span>
                                         </button>
@@ -239,7 +239,7 @@
                             </p>
                         </div>
 
-                        <div class="hidden sm:block shrink-0 pl-4 text-xs text-[var(--hs-neutral-400)]">
+                        <div class="hidden sm:block shrink-0 pl-4 text-xs text-[var(--hs-neutral-500)]">
                             {{ $this->products->total() }}
                             {{ Str::plural('product', $this->products->total()) }}
                         </div>
@@ -248,7 +248,7 @@
 
 
                     {{-- Product Cards --}}
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
 
                         @foreach ($this->products as $product)
                             <x-hs-product-card :product="$product" />

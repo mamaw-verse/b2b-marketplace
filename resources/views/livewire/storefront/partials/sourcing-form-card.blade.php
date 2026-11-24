@@ -14,19 +14,19 @@
 @else
     <form wire:submit="submit" novalidate>
         {{-- Product details --}}
-        <div class="rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
+        <div class="sm:rounded-xl sm:border sm:border-[var(--hs-neutral-200)] sm:bg-[var(--hs-neutral-50)] sm:p-6">
             <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Product Details') }}</h3>
             <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div class="space-y-4">
                     <flux:field>
                         <flux:label>{{ __('Product Name / Type') }}</flux:label>
-                        <flux:input type="text" wire:model="product_name" placeholder="{{ __('What product are you looking for?') }}" />
+                        <flux:input type="text" wire:model="product_name" placeholder="{{ __('Product Name') }}" />
                         <flux:error name="product_name" />
                     </flux:field>
 
                     <flux:field>
                         <flux:label>{{ __('Product Description & Specifications') }}</flux:label>
-                        <flux:textarea wire:model="product_description" rows="4" placeholder="{{ __('Tell us about the size, material, color, features, technical specifications, or any other requirements. How many units are you looking to purchase?') }}" />
+                        <flux:textarea wire:model="product_description" rows="5" placeholder="{{ __('Tell us about the size, material, color, features, technical specifications, or any other requirements. How many units are you looking to purchase?') }}" />
                         <flux:error name="product_description" />
                     </flux:field>
                 </div>
@@ -56,7 +56,7 @@
         </div>
 
         {{-- Contact details --}}
-        <div class="mt-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
+        <div class="mt-6 sm:rounded-xl sm:border sm:border-[var(--hs-neutral-200)] sm:bg-[var(--hs-neutral-50)] sm:p-6">
             <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--hs-neutral-500)]">{{ __('Your Details') }}</h3>
                 @auth
@@ -103,8 +103,8 @@
             <input type="text" id="sourcing-honeypot" tabindex="-1" autocomplete="off" wire:model="honeypot" />
         </div>
 
-        <div class="mt-6 flex justify-end">
-            <flux:button type="submit" variant="primary" icon="paper-airplane" wire:loading.attr="disabled">
+        <div class="mt-6 flex sm:justify-end">
+            <flux:button type="submit" variant="primary" icon="paper-airplane" class="w-full sm:w-auto" wire:loading.attr="disabled">
                 {{ __('Submit Sourcing Request') }}
             </flux:button>
         </div>

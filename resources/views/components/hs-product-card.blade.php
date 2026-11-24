@@ -22,7 +22,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
     </div>
 
     {{-- Content --}}
-    <div class="p-4">
+    <div class="p-3 sm:p-4">
         @if($shopName)
             <p class="text-xs text-[var(--hs-neutral-500)] mb-1 truncate">{{ $shopName }}</p>
         @endif
@@ -32,7 +32,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
 
         {{-- Price & MOQ --}}
         @if($cheapestVariant)
-            <div class="mt-2 flex items-baseline justify-between">
+            <div class="mt-2 flex flex-wrap items-baseline justify-between gap-x-2">
                 <span class="text-sm font-bold text-[var(--hs-green-700)]">
                     {{ $cheapestVariant->currency ?? 'PHP' }} {{ number_format((float)$cheapestVariant->price, 2) }}
                 </span>
@@ -51,7 +51,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
                     @endfor
                 </div>
                 <span class="text-xs text-[var(--hs-neutral-500)]">{{ number_format((float)$product->average_rating, 1) }}</span>
-                <span class="text-xs text-[var(--hs-neutral-400)]">({{ $product->total_reviews }})</span>
+                <span class="text-xs text-[var(--hs-neutral-500)]">({{ $product->total_reviews }})</span>
             </div>
         @endif
     </div>

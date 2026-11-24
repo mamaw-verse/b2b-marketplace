@@ -51,12 +51,12 @@
 
                     <div class="mt-7 lg:mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
                         <a href="{{ route('login') }}" wire:navigate
-                           class="inline-flex items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
+                           class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
                             <flux:icon.arrow-right class="size-4" />
                             {{ __('Get Started') }}
                         </a>
                         <a href="#supply-chain"
-                           class="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
+                           class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
                             <flux:icon.play class="size-4" />
                             {{ __('See How It Works') }}
                         </a>
@@ -153,7 +153,7 @@
 
                                         {{-- Top badge --}}
                                         <div class="absolute top-4 left-4 z-10">
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[var(--hs-gold-500)] text-[var(--hs-green-950)]">
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[var(--hs-gold-500)] text-[var(--hs-green-950)]">
                                                 {{ __('Featured Voice') }}
                                             </span>
                                         </div>
@@ -162,7 +162,7 @@
                                         <div class="absolute bottom-0 inset-x-0 z-10 px-5 pb-6">
                                             <div class="flex items-center gap-1.5 mb-2">
                                                 <span class="size-2 rounded-full bg-[var(--hs-green-400)]"></span>
-                                                <span class="text-[10px] font-semibold text-[var(--hs-green-300)]">{{ __('Verified Halal Auditor') }}</span>
+                                                <span class="text-xs font-semibold text-[var(--hs-green-300)]">{{ __('Verified Halal Auditor') }}</span>
                                             </div>
                                             <h3 class="text-xl font-bold text-white leading-tight">{{ __('Ismail Abaya, PhD') }}</h3>
                                             <p class="text-xs font-semibold text-[var(--hs-gold-400)] mt-0.5">{{ __('Halal Business & Supply Chain Authority') }}</p>
@@ -203,7 +203,7 @@
                                                 <div class="text-center">
                                                     <p class="text-base font-extrabold text-[var(--hs-green-800)] leading-tight">{{ __('Maslaha Halal') }}</p>
                                                     <p class="text-base font-extrabold text-[var(--hs-green-800)] leading-tight">{{ __('Certification Board') }}</p>
-                                                    <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-[var(--hs-gold-700)]">{{ __('Philippines') }}</p>
+                                                    <p class="mt-1 text-xs font-bold uppercase tracking-widest text-[var(--hs-gold-700)]">{{ __('Philippines') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -212,7 +212,7 @@
                                         <div class="relative z-10 px-5 pb-6 pt-8"
                                              style="background: linear-gradient(to top, rgba(0,19,11,0.92) 0%, rgba(0,19,11,0.50) 60%, transparent 100%);">
                                             <div class="absolute top-2 left-5">
-                                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white"
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-white"
                                                       style="background: rgba(34,114,73,0.85);">
                                                     <flux:icon.shield-check class="inline size-3 mr-0.5" />
                                                     {{ __('Verified') }}
@@ -255,7 +255,7 @@
 
                                                 {{-- Top sponsored badge --}}
                                                 <div class="absolute top-4 left-4 z-10 pointer-events-none">
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white"
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-white"
                                                           style="background: rgba(255,255,255,0.16); backdrop-filter: blur(4px);">
                                                         <flux:icon.megaphone class="size-3" />
                                                         {{ __('Sponsored') }}
@@ -344,7 +344,7 @@
                 {{-- Right-fade to indicate scrollability on mobile --}}
                 <div class="pointer-events-none absolute right-0 top-3 bottom-0.5 w-12 bg-gradient-to-l from-[var(--hs-neutral-0)] to-transparent z-10 sm:hidden"></div>
                 <div class="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
-                    <span class="text-xs text-[var(--hs-neutral-400)] font-medium whitespace-nowrap mr-1 shrink-0">{{ __('Popular:') }}</span>
+                    <span class="text-xs text-[var(--hs-neutral-500)] font-medium whitespace-nowrap mr-1 shrink-0">{{ __('Popular:') }}</span>
                 <a href="{{ route('storefront.companies') }}" wire:navigate
                    class="shrink-0 px-3 py-1.5 rounded-lg bg-[var(--hs-green-800)] text-white text-xs font-semibold whitespace-nowrap">
                     {{ __('All Businesses') }}
@@ -722,10 +722,17 @@
         </section>
 
         {{-- ── Seller Commission & Escrow ──────────────────────── --}}
+        {{-- Claims here must match enabled features (mobile audit #01). --}}
+        @php
+            $ordersLive = (bool) config('marketplace.features.orders_enabled');
+            $payoutsLive = (bool) config('marketplace.features.payouts_enabled');
+            $escrowLive = (bool) config('marketplace.features.escrow_payments_enabled');
+            $adsLive = (bool) config('marketplace.features.sponsored_content_enabled');
+        @endphp
         <section id="for-sellers" class="bg-[var(--hs-neutral-0)] border-t border-[var(--hs-neutral-200)]">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
 
-                <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 items-center">
+                <div class="grid grid-cols-1 gap-8 {{ $ordersLive ? 'lg:grid-cols-2' : '' }} lg:gap-14 items-center">
 
                     {{-- Left: Copy --}}
                     <div>
@@ -740,18 +747,22 @@
                         </h2>
 
                         <p class="mt-3 text-base text-[var(--hs-neutral-500)] leading-relaxed max-w-lg">
-                            {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
+                            @if ($ordersLive)
+                                {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
+                            @else
+                                {{ __('Join verified halal sellers across the Philippines. List your products for free and connect with buyers.') }}
+                            @endif
                         </p>
 
                         <ul class="mt-6 space-y-3">
-                            @foreach ([
+                            @foreach (array_filter([
                                 __('Free store registration — no upfront fees'),
-                                __('Only 10% commission when you make a sale'),
+                                $ordersLive ? __('Only 10% commission when you make a sale') : null,
                                 __('MHCB-verified badge builds buyer trust'),
-                                __('Built-in product & order management'),
-                                __('Integrated payout support (GCash & bank)'),
+                                $ordersLive ? __('Built-in product & order management') : null,
+                                $payoutsLive ? __('Integrated payout support (GCash & bank)') : null,
                                 __('Dedicated seller dashboard & analytics'),
-                            ] as $point)
+                            ]) as $point)
                                 <li class="flex items-start gap-2.5">
                                     <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-100)] text-[var(--hs-green-700)]">
                                         <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
@@ -772,7 +783,8 @@
                         </div>
                     </div>
 
-                    {{-- Right: Commission card --}}
+                    {{-- Right: Commission card (only when selling is live) --}}
+                    @if ($ordersLive)
                     <div class="flex justify-center lg:justify-end">
                         <div class="w-full max-w-sm rounded-2xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-7 sm:p-8 shadow-[var(--hs-shadow-md)]">
 
@@ -780,18 +792,18 @@
                             <div class="text-center border-b border-[var(--hs-neutral-200)] pb-6 mb-6">
                                 <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
                                 <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
-                                <p class="mt-1 text-xs text-[var(--hs-neutral-400)]">{{ __('No hidden fees. No monthly charges.') }}</p>
+                                <p class="mt-1 text-xs text-[var(--hs-neutral-600)]">{{ __('No hidden fees. No monthly charges.') }}</p>
                             </div>
 
                             {{-- Feature list --}}
                             <ul class="space-y-3.5">
-                                @foreach ([
+                                @foreach (array_filter([
                                     __('Free store setup & MHCB verification'),
                                     __('Built-in product & order management'),
-                                    __('Integrated GCash & bank payouts'),
-                                    __('Ad campaigns to reach more buyers'),
+                                    $payoutsLive ? __('Integrated GCash & bank payouts') : null,
+                                    $adsLive ? __('Ad campaigns to reach more buyers') : null,
                                     __('Real-time analytics dashboard'),
-                                ] as $feature)
+                                ]) as $feature)
                                     <li class="flex items-center gap-3">
                                         <span class="size-2 shrink-0 rounded-full bg-[var(--hs-green-500)]"></span>
                                         <span class="text-[0.88rem] text-[var(--hs-neutral-700)]">{{ $feature }}</span>
@@ -800,20 +812,23 @@
                             </ul>
 
                             {{-- Escrow note --}}
+                            @if ($escrowLive)
                             <div class="mt-6 rounded-xl border border-[var(--hs-info-200)] bg-[var(--hs-info-50)] px-4 py-3">
                                 <div class="flex items-start gap-2.5">
                                     <flux:icon.lock-closed class="size-4 shrink-0 mt-0.5 text-[var(--hs-info-500)]" />
                                     <div>
                                         <p class="text-[0.78rem] font-bold text-[var(--hs-info-700)]">{{ __('Escrow Payment Protection') }}</p>
-                                        <p class="mt-0.5 text-[0.75rem] text-[var(--hs-info-500)] leading-snug">
+                                        <p class="mt-0.5 text-xs text-[var(--hs-info-700)] leading-snug">
                                             {{ __('Buyer funds are held in escrow and released to you only after delivery is confirmed — protecting both parties on every transaction.') }}
                                         </p>
                                     </div>
                                 </div>
                             </div>
+                            @endif
 
                         </div>
                     </div>
+                    @endif
 
                 </div>
             </div>

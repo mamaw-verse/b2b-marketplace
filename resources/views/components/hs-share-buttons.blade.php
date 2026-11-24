@@ -7,7 +7,7 @@
 
 @if (config('marketplace.features.product_share_enabled'))
     @php
-        $btnClass = 'size-10 inline-flex items-center justify-center rounded-[var(--hs-radius-md)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] hover:bg-[var(--hs-neutral-50)] hover:border-[var(--hs-neutral-300)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] transition shrink-0';
+        $btnClass = 'size-11 inline-flex items-center justify-center rounded-[var(--hs-radius-md)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-600)] hover:text-[var(--hs-neutral-900)] hover:bg-[var(--hs-neutral-50)] hover:border-[var(--hs-neutral-300)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] transition shrink-0';
         $publicMin = (int) config('marketplace.share.public_min', 5);
         $encodedUrl = urlencode($url);
         $encodedText = urlencode($text);

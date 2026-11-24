@@ -126,7 +126,7 @@
     @endphp
 
     <div
-        class="grid grid-cols-1 gap-6 lg:gap-10 lg:grid-cols-2 lg:items-start"
+        class="grid grid-cols-1 gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 md:items-start"
         @if ($product->variants->count() > 0)
             x-data="{
                 variants: {{ \Illuminate\Support\Js::from($variantsForJs) }},
@@ -170,7 +170,7 @@
         @endif
     >
         {{-- ============ GALLERY (sticky) ============ --}}
-        <div class="lg:sticky lg:top-6 space-y-3"
+        <div class="md:sticky md:top-6 space-y-3"
              x-data="imageGallery({{ \Illuminate\Support\Js::from($galleryImages) }}, '{{ $product->name }}')"
         >
             @if ($galleryImages->count() > 0)
@@ -210,18 +210,21 @@
 
                         {{-- Hover hint — fades after first interaction --}}
                         <div
-                            class="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-[var(--hs-radius-pill)] bg-black/50 text-white text-[11px] font-medium pointer-events-none transition-opacity duration-300"
+                            class="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-[var(--hs-radius-pill)] bg-black/50 text-white text-xs font-medium pointer-events-none transition-opacity duration-300"
                             x-show="showHint && images[active].type !== 'video'"
                             x-transition:leave="transition ease-in duration-500"
                             x-transition:leave-start="opacity-100"
                             x-transition:leave-end="opacity-0"
                             aria-hidden="true"
-                        >{{ __('Hover to zoom · Click to enlarge') }}</div>
+                        >
+                            <span class="hidden [@media(hover:hover)]:inline">{{ __('Hover to zoom · Click to enlarge') }}</span>
+                            <span class="[@media(hover:hover)]:hidden">{{ __('Tap to enlarge') }}</span>
+                        </div>
 
                         {{-- Expand button (always-visible affordance) --}}
                         <button
                             type="button"
-                            class="absolute bottom-2 end-2 size-10 flex items-center justify-center rounded-[var(--hs-radius-md)] bg-black/40 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                            class="absolute bottom-2 end-2 size-11 flex items-center justify-center rounded-[var(--hs-radius-md)] bg-black/40 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                             x-show="images[active].type !== 'video'"
                             @click.stop="openLightbox(active)"
                             aria-label="{{ __('Enlarge image') }}"
@@ -266,7 +269,7 @@
             @else
                 <div class="flex flex-col items-center justify-center gap-2 rounded-[var(--hs-radius-card)] bg-[var(--hs-neutral-50)] aspect-square border border-[var(--hs-neutral-200)]">
                     <flux:icon name="photo" class="size-16 text-[var(--hs-neutral-300)]" aria-hidden="true" />
-                    <p class="text-sm text-[var(--hs-neutral-400)]">{{ __('No images available') }}</p>
+                    <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No images available') }}</p>
                 </div>
             @endif
 
@@ -545,7 +548,7 @@
                         :title="'{{ addslashes($primaryCategory->parent?->name) }} › {{ addslashes($primaryCategory->name) }}'"
                     >
                         @if ($primaryCategory->parent)
-                            <span class="text-[var(--hs-neutral-400)] truncate min-w-0">{{ $primaryCategory->parent->name }}</span>
+                            <span class="text-[var(--hs-neutral-500)] truncate min-w-0">{{ $primaryCategory->parent->name }}</span>
                             <svg class="size-3 shrink-0 text-[var(--hs-neutral-400)]" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                             </svg>
@@ -597,7 +600,7 @@
                                         class="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-100)] focus-visible:outline-none focus-visible:bg-[var(--hs-neutral-100)] transition"
                                     >
                                         @if ($cat->parent)
-                                            <span class="text-xs text-[var(--hs-neutral-400)]">{{ $cat->parent->name }} ›</span>
+                                            <span class="text-xs text-[var(--hs-neutral-500)]">{{ $cat->parent->name }} ›</span>
                                         @endif
                                         {{ $cat->name }}
                                     </a>
@@ -651,8 +654,8 @@
 
                     {{-- Header --}}
                     <div class="flex items-baseline justify-between px-3 sm:px-5 pt-3 pb-1">
-                        <span class="text-[10px] font-semibold uppercase tracking-widest text-[var(--hs-neutral-500)]">{{ __('Volume Pricing') }}</span>
-                        <span class="text-xs text-[var(--hs-neutral-400)] tabular-nums" x-text="currentVariant.currency + ' / ' + currentVariant.unit"></span>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-[var(--hs-neutral-500)]">{{ __('Volume Pricing') }}</span>
+                        <span class="text-xs text-[var(--hs-neutral-500)] tabular-nums" x-text="currentVariant.currency + ' / ' + currentVariant.unit"></span>
                     </div>
 
                     {{-- Tier rows --}}
@@ -685,7 +688,7 @@
                                 <span
                                     x-show="discountFor(tier.price)"
                                     x-text="discountFor(tier.price) + '% OFF'"
-                                    class="text-[10px] font-bold uppercase tracking-wide bg-[var(--hs-green-600)] text-white px-1.5 py-0.5 rounded-[var(--hs-radius-pill)] whitespace-nowrap"
+                                    class="text-xs font-bold uppercase tracking-wide bg-[var(--hs-green-600)] text-white px-1.5 py-0.5 rounded-[var(--hs-radius-pill)] whitespace-nowrap"
                                 ></span>
                             </div>
                         </template>
@@ -721,7 +724,7 @@
                         </div>
                     @endforeach
 
-                    <p class="text-xs text-[var(--hs-neutral-400)] tabular-nums" x-text="'SKU: ' + currentVariant.sku"></p>
+                    <p class="text-xs text-[var(--hs-neutral-500)] tabular-nums" x-text="'SKU: ' + currentVariant.sku"></p>
                 </div>
             @endif
 
@@ -822,7 +825,7 @@
                     <div class="rounded-[var(--hs-radius-card)] bg-[var(--hs-green-900)] p-5 flex flex-col gap-4">
                         <div>
                             <p class="text-sm font-semibold text-white">{{ __('Interested in this product?') }}</p>
-                            <p class="text-xs text-[var(--hs-green-300)] mt-0.5">{{ __('Send a Request for Quotation to get a price from the supplier. Suppliers typically reply within 24–48 hrs.') }}</p>
+                            <p class="text-xs text-[var(--hs-green-300)] mt-0.5">{{ __('Send a Request for Quotation to get a price from the supplier.') }}</p>
                         </div>
                         <div class="flex items-center gap-3 flex-wrap">
                             {{-- Primary CTA: high-contrast gold accent for visibility on dark panel --}}

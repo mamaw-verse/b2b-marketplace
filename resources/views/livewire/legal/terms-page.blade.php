@@ -15,14 +15,14 @@
             <p class="mt-2 max-w-2xl text-sm sm:text-base text-white/70 leading-relaxed">
                 {{ __('Halal Supply-Chain Marketplace — the rules for using 1HALALSTORE.COM as a buyer, merchant, or supply-chain partner.') }}
             </p>
-            <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: September 16, 2026') }} &middot; {{ __('Last Updated: September 16, 2026') }}</p>
+            <p class="mt-3 text-sm text-white/70">{{ __('Effective Date: September 16, 2026') }}<span class="hidden sm:inline"> &middot; </span><br class="sm:hidden">{{ __('Last Updated: September 16, 2026') }}</p>
         </div>
     </div>
 
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {{-- Mobile contents --}}
-        <details class="mb-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] lg:hidden">
-            <summary class="cursor-pointer px-5 py-3.5 text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('On this page') }}</summary>
+        <details class="group mb-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] lg:hidden">
+            <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between px-5 py-3 text-sm font-semibold text-[var(--hs-neutral-800)] [&::-webkit-details-marker]:hidden">{{ __('On this page') }}<flux:icon name="chevron-down" class="size-4 transition group-open:rotate-180" /></summary>
             <ul class="max-h-72 space-y-0.5 overflow-y-auto border-t border-[var(--hs-neutral-100)] px-3 py-3 text-sm">
                 @foreach ([1 => __('About'), 2 => __('Definitions'), 3 => __('Eligibility'), 4 => __('Registration'), 5 => __('Merchants'), 6 => __('Halal Integrity'), 7 => __('Listings'), 8 => __('Prices & Payments'), 9 => __('Orders'), 10 => __('Shipping & Delivery'), 11 => __('Returns & Refunds'), 12 => __('Prohibited'), 13 => __('IP'), 14 => __('User Content'), 15 => __('Reviews'), 16 => __('Marketplace Role'), 17 => __('B2B'), 18 => __('International'), 19 => __('Suspension'), 20 => __('Disclaimers'), 21 => __('Liability'), 22 => __('Indemnification'), 23 => __('Privacy'), 24 => __('Changes'), 25 => __('Governing Law'), 26 => __('Disputes'), 27 => __('Contact')] as $n => $label)
                     <li>
@@ -86,4 +86,5 @@
             </article>
         </div>
     </div>
+    <x-hs-back-to-top />
 </div>

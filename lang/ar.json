@@ -1514,7 +1514,7 @@
   "Selling": "بيع",
   "Send": "إرسال",
   "Send RFQ": "إرسال طلب عرض سعر",
-  "Send a Request for Quotation to get a price from the supplier.": "أرسل طلب عرض أسعار للحصول على سعر من المورّد.",
+  "Send a Request for Quotation to get a price from the supplier.": "أرسل طلب عرض سعر للحصول على السعر من المورّد.",
   "Send a message to start the conversation.": "أرسل رسالة لبدء المحادثة.",
   "Send an invitation to join this team.": "إرسال دعوة للانضمام إلى هذا الفريق.",
   "Send invitation": "إرسال الدعوة",
@@ -2524,5 +2524,11 @@
   "All time": "كل الأوقات",
   "Track how buyers share this product.": "تتبع كيفية مشاركة المشترين لهذا المنتج.",
   "Last 30 days:": "آخر 30 يومًا:",
-  "All time:": "كل الأوقات:"
+  "All time:": "كل الأوقات:",
+  "Join verified halal sellers across the Philippines. List your products for free and connect with buyers.": "انضم إلى البائعين المعتمدين للمنتجات الحلال في أنحاء الفلبين. اعرض منتجاتك مجانًا وتواصل مع المشترين.",
+  "Tap to enlarge": "اضغط للتكبير",
+  "product": "منتج",
+  "supplier": "مورّد",
+  "category": "تصنيف",
+  "Search FAQs": "ابحث في الأسئلة"
 }

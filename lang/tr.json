@@ -1514,7 +1514,7 @@
   "Selling": "Satış",
   "Send": "Göndermek",
   "Send RFQ": "RFQ Gönder",
-  "Send a Request for Quotation to get a price from the supplier.": "Tedarikçiden fiyat almak için bir Teklif Talebi gönderin.",
+  "Send a Request for Quotation to get a price from the supplier.": "Tedarikçiden fiyat almak için Fiyat Teklifi Talebi gönderin.",
   "Send a message to start the conversation.": "Sohbeti başlatmak için bir mesaj gönderin.",
   "Send an invitation to join this team.": "Gönder bir davet katılmak içiçinde bu ekip.",
   "Send invitation": "Davet gönder",
@@ -2524,5 +2524,11 @@
   "All time": "Tüm zamanlar",
   "Track how buyers share this product.": "Alıcıların bu ürünü nasıl paylaştığını takip edin.",
   "Last 30 days:": "Son 30 gün:",
-  "All time:": "Tüm zamanlar:"
+  "All time:": "Tüm zamanlar:",
+  "Join verified halal sellers across the Philippines. List your products for free and connect with buyers.": "Filipinler genelindeki doğrulanmış helal satıcılara katılın. Ürünlerinizi ücretsiz listeleyin ve alıcılarla buluşun.",
+  "Tap to enlarge": "Büyütmek için dokunun",
+  "product": "ürün",
+  "supplier": "tedarikçi",
+  "category": "kategori",
+  "Search FAQs": "SSS'de ara"
 }

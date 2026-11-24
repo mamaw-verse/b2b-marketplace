@@ -123,7 +123,7 @@ final class ApplyForCertificate extends Component
         return [
             'email' => ['required', 'email', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
-            'document' => ['required', 'file', 'max:10240', 'mimes:doc,docx,pdf'],
+            'document' => ['required', 'file', 'max:10240', 'mimes:doc,docx,pdf,jpg,jpeg,png'],
         ];
     }
 
@@ -133,7 +133,7 @@ final class ApplyForCertificate extends Component
     protected function messages(): array
     {
         return [
-            'document.mimes' => 'Only DOC, DOCX and PDF files are accepted.',
+            'document.mimes' => 'Only DOC, DOCX, PDF, JPG and PNG files are accepted.',
             'document.max' => 'The Letter of Intent must not exceed 10 MB.',
         ];
     }

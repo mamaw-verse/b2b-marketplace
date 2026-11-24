@@ -46,7 +46,7 @@
                         @endif
                     </div>
                     <p class="mt-1 text-[var(--hs-neutral-300)]">{{ $shop->registered_business_name }}</p>
-                    <p class="mt-1 text-sm text-[var(--hs-neutral-400)]">
+                    <p class="mt-1 text-sm text-[var(--hs-neutral-500)]">
                         {{ $shop->city }}{{ $shop->city && $shop->province ? ', ' : '' }}{{ $shop->province }}
                     </p>
                     @if($shop->average_rating)
@@ -57,7 +57,7 @@
                                 @endfor
                             </div>
                             <span class="text-sm text-[var(--hs-neutral-200)]">{{ number_format((float)$shop->average_rating, 1) }}</span>
-                            <span class="text-sm text-[var(--hs-neutral-400)]">({{ $shop->total_reviews }} {{ Str::plural('review', $shop->total_reviews) }})</span>
+                            <span class="text-sm text-[var(--hs-neutral-500)]">({{ $shop->total_reviews }} {{ Str::plural('review', $shop->total_reviews) }})</span>
                         </div>
                     @endif
                 </div>
@@ -152,7 +152,8 @@
                     {{-- Export Readiness --}}
                     <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
                         <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Export Readiness') }}</h3>
-                        <x-hs-badge variant="gold" :label="ucfirst(str_replace('_', ' ', $shop->export_readiness_status))" />
+                        {{-- Neutral styling for the default state so it doesn't read as a warning (mobile audit #08) --}}
+                        <x-hs-badge :variant="$shop->export_readiness_status === 'never_exported' ? 'neutral' : 'gold'" :label="ucfirst(str_replace('_', ' ', $shop->export_readiness_status))" />
                     </section>
 
                     {{-- Lead Time --}}
@@ -190,7 +191,7 @@
                     @if ($shop->products->count() > 0)
                         <section>
                             <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Products') }}</h2>
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="grid grid-cols-2 gap-3 sm:gap-4">
                                 @foreach ($shop->products as $product)
                                     <x-hs-product-card :product="$product" />
                                 @endforeach

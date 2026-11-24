@@ -3,7 +3,7 @@
 $allSteps = ['Farm', 'Processing', 'Manufacturing', 'Distribution', 'Retail', 'Food Service'];
 $normalizedActive = array_map(fn($s) => strtolower(str_replace(' ', '_', $s)), $steps);
 @endphp
-<div {{ $attributes->merge(['class' => 'flex flex-wrap items-center gap-1']) }}>
+<div {{ $attributes->merge(['class' => 'flex flex-wrap items-center gap-x-1 gap-y-2']) }}>
     @foreach($allSteps as $index => $step)
         @php
             $isActive = in_array(strtolower(str_replace(' ', '_', $step)), $normalizedActive)
@@ -20,8 +20,9 @@ $normalizedActive = array_map(fn($s) => strtolower(str_replace(' ', '_', $s)), $
             {{ $step }}
         </span>
         @if(!$loop->last)
+            {{-- Connectors hidden on phones: wrapped rows left dangling dashes at line edges (mobile audit #08) --}}
             <div @class([
-                'bg-[var(--hs-neutral-300)]',
+                'hidden sm:block bg-[var(--hs-neutral-300)]',
                 'w-4 h-px' => !$compact,
                 'w-2 h-px' => $compact,
             ])></div>

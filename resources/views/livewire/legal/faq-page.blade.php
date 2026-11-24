@@ -21,7 +21,7 @@
                 <input
                     x-model="query"
                     type="search"
-                    placeholder="{{ __('Search questions — e.g. Halal, logistics, merchant…') }}"
+                    placeholder="{{ __('Search FAQs') }}"
                     class="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder:text-white/40 focus:bg-white/15 focus:border-[var(--hs-gold-400)] focus:ring-2 focus:ring-[var(--hs-gold-400)]/20 outline-none transition"
                 />
             </div>
@@ -84,8 +84,8 @@
         @endphp
 
         {{-- Mobile topics --}}
-        <details class="mb-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] lg:hidden">
-            <summary class="cursor-pointer px-5 py-3.5 text-sm font-semibold text-[var(--hs-neutral-800)]">{{ __('Browse topics') }}</summary>
+        <details class="group mb-6 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] lg:hidden">
+            <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between px-5 py-3 text-sm font-semibold text-[var(--hs-neutral-800)] [&::-webkit-details-marker]:hidden">{{ __('Browse topics') }}<flux:icon name="chevron-down" class="size-4 transition group-open:rotate-180" /></summary>
             <ul class="space-y-0.5 border-t border-[var(--hs-neutral-100)] px-3 py-3 text-sm">
                 @foreach ($groups as $group)
                     <li>

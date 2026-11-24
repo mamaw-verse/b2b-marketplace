@@ -260,33 +260,35 @@ Random images and addresses make visual diffs meaningless and hide real layout i
 
 ## Fix tasks
 
+**Status (branch `fix/mobile-audit-findings`):** `[x]` = code change made, `[~]` = partly done, `[ ]` = open. **None of it has been run** — all changes are static edits made without a dev environment, so each still needs the manual checks in [Verification checklist](#verification-checklist).
+
 Ordered by impact ÷ effort. Check items off as they land.
 
 ### P0 — this week
 
-- [ ] **T-01 (01)** Gate the seller-section bullets and escrow note in `hero-search.blade.php` (:751–809) behind `config('marketplace.features.*')`; replace with Phase 1-accurate copy when off. Update the translations in `lang/{en,id,ms,tr,ar}.json`.
+- [x] **T-01 (01)** Gate the seller-section bullets and escrow note in `hero-search.blade.php` (:751–809) behind `config('marketplace.features.*')`; replace with Phase 1-accurate copy when off. Update the translations in `lang/{en,id,ms,tr,ar}.json`.
 - [ ] **T-02 (01)** Confirm the 10 % commission statement with the business owner; remove it from the public page until it is collectable.
-- [ ] **T-03 (02)** Remove or make configurable the "24–48 hrs" reply promise on the product-detail CTA.
-- [ ] **T-04 (04)** `sourcing-form-card.blade.php`: flatten padding below `sm`, `w-full sm:w-auto` on the submit button, shorten the placeholder, raise the textarea to `rows="5"` or let it auto-grow.
-- [ ] **T-05 (06)** Replace the hover hint with a `(hover: none)`-aware "Tap to enlarge" and bump it to ≥ 12px.
+- [x] **T-03 (02)** Remove or make configurable the "24–48 hrs" reply promise on the product-detail CTA.
+- [x] **T-04 (04)** `sourcing-form-card.blade.php`: flatten padding below `sm`, `w-full sm:w-auto` on the submit button, shorten the placeholder, raise the textarea to `rows="5"` or let it auto-grow.
+- [x] **T-05 (06)** Replace the hover hint with a `(hover: none)`-aware "Tap to enlarge" and bump it to ≥ 12px.
 
 ### P1 — next sprint
 
-- [ ] **T-06 (03)** `apply-for-certificate.blade.php`: collapse "Important Notes" into a closed `<details>` on mobile; accept `jpg/png/heic` for the signed letter; update audit item #14.
+- [x] **T-06 (03)** `apply-for-certificate.blade.php`: collapse "Important Notes" into a closed `<details>` on mobile; accept `jpg/png/heic` for the signed letter; update audit item #14.
 - [ ] **T-07 (05)** Add optional quantity (+ unit) and target-budget fields to the sourcing form and `SourcingRequest`, or remove the words from the copy.
-- [ ] **T-08 (07)** `grid-cols-2` from the smallest breakpoint on `product-directory.blade.php:251` and `company-profile.blade.php:193`; use a 2-col product-detail layout from `md`.
-- [ ] **T-09 (08)** Add a sticky Request quote / Contact bar to the company profile on mobile; neutral style for "Never exported"; value chain without wrap-prone connectors.
-- [ ] **T-10 (09)** Swap `--hs-neutral-400` text under 14px for `--hs-neutral-600`; `--hs-info-500` body text for `--hs-info-700`; set a 12px floor for badges and captions.
+- [x] **T-08 (07)** `grid-cols-2` from the smallest breakpoint on `product-directory.blade.php:251` and `company-profile.blade.php:193`; use a 2-col product-detail layout from `md`.
+- [~] **T-09 (08)** Add a sticky Request quote / Contact bar to the company profile on mobile; neutral style for "Never exported"; value chain without wrap-prone connectors.
+- [x] **T-10 (09)** Swap `--hs-neutral-400` text under 14px for `--hs-neutral-600`; `--hs-info-500` body text for `--hs-info-700`; set a 12px floor for badges and captions.
 - [ ] **T-11 (13)** Choose one written form of the brand name and normalise FAQ, Terms, Privacy and email copy.
 
 ### P2 — polish
 
-- [ ] **T-12 (10)** Raise the hamburger (`portal-header.blade.php:33,43`) and share buttons to 44px.
-- [ ] **T-13 (11)** Back-to-top button and anchor offsets on Terms/Privacy; reduce stacked padding; unify the "On this page" disclosure style.
-- [ ] **T-14 (12)** FAQ: shorter search placeholder, matching disclosure markers, one fewer card level on mobile.
-- [ ] **T-15 (14)** Pluralise the product-directory stats strip (and the matching strings in every `lang/*.json`).
-- [ ] **T-16 (15)** Condense the "Coming soon" portal cards, rename "Get Started", full-width hero CTAs, hide the single-pill "Popular" row.
-- [ ] **T-17 (04/12)** Visual-only: unify the submit button width across the sourcing and certificate forms once T-04 lands.
+- [x] **T-12 (10)** Raise the hamburger (`portal-header.blade.php:33,43`) and share buttons to 44px.
+- [~] **T-13 (11)** Back-to-top button and anchor offsets on Terms/Privacy; reduce stacked padding; unify the "On this page" disclosure style.
+- [~] **T-14 (12)** FAQ: shorter search placeholder, matching disclosure markers, one fewer card level on mobile.
+- [x] **T-15 (14)** Pluralise the product-directory stats strip (and the matching strings in every `lang/*.json`).
+- [~] **T-16 (15)** Condense the "Coming soon" portal cards, rename "Get Started", full-width hero CTAs, hide the single-pill "Popular" row.
+- [x] **T-17 (04/12)** Visual-only: unify the submit button width across the sourcing and certificate forms once T-04 lands.
 
 ### Test-suite tasks
 
@@ -314,3 +316,28 @@ The test captures only the logged-out, English, closed-drawer state. Add capture
 - Real tap-target hit areas — only visible sizes were measured.
 - Focus order, keyboard behaviour, hover/disabled states, and the drawer.
 - Whether the product-detail page omits price/MOQ by design or only in the fixture (see Coverage gaps).
+
+## Verification checklist
+
+Everything below needs a local environment and was deliberately left for manual verification.
+
+- [ ] `php artisan test` (feature + `phpunit.browser.xml`) — in particular `ProductSourcingFormTest`, any certificate-application test, and the lang/translation tests.
+- [ ] Re-run `MobileAuditBrowserTest` and diff the new screenshots against the originals for: home seller section (flags off), sourcing form, certificate page, `/products`, company profile, product detail at 375 / 390 / 768.
+- [ ] Flip `MARKETPLACE_ORDERS_ENABLED`, `MARKETPLACE_PAYOUTS_ENABLED`, `MARKETPLACE_ESCROW_PAYMENTS_ENABLED` to `true` and confirm the seller section renders the full original card (the `@if` nesting in `hero-search.blade.php` was edited by hand).
+- [ ] Certificate upload: submit a `.jpg` and `.png` and confirm the admin `CertificationQueue` previews/downloads them.
+- [ ] On a real iPhone/Android: hover-hint text switches to "Tap to enlarge"; back-to-top button appears after ~800px on Terms/Privacy and does not collide with the footer.
+- [ ] Product card at 2-col / 375px with a variant that has a long price + MOQ (wrapping of the price row).
+- [ ] Native review of the new translations (id, ms, tr, ar): `Tap to enlarge`, `Back to top`, `Search FAQs`, the singular `product/supplier/category` keys, and the two sentences added for the seller section and the product-detail CTA. Arabic dual form ("2 منتجات") is not handled by `Str::plural`.
+- [ ] Run Pint / Prettier if the repo's CI enforces them.
+
+## Still open (needs a decision or a migration)
+
+- **T-13 / T-14 (remaining)** Anchor `scroll-margin-top` on legal headings, reduced stacked padding on Terms/Privacy, and flattening one card level in the FAQ — done: back-to-top, chevron disclosures, metadata line, FAQ placeholder.
+- **T-12** done for the hamburger and share buttons; the language switcher and other header icon buttons were not audited for size.
+
+- **T-02** Confirm the "10 % commission" claim with the business owner (it is now only shown when `orders_enabled` is on).
+- **T-07** Quantity / target-budget fields need a migration, model and Livewire property changes; or remove the words from the copy and every `lang/*.json` string.
+- **T-09** Sticky "Request quote / Contact" bar on the company profile.
+- **T-11** Brand-name normalisation (`1HalalStore.com` vs `1HALALSTORE.COM`) across FAQ and legal copy in every language file.
+- **T-16** "Get Started" label, condensing the "Coming soon" portal cards.
+- **T-18 – T-21** Test-suite work (deterministic fixtures, overflow assertion, extra states).
