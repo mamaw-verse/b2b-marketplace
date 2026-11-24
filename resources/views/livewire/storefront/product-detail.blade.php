@@ -81,6 +81,10 @@
         }
         $galleryImages = $galleryImages->values();
 
+        // First-response fallback for the main image: Alpine binds src/alt on load, but crawlers
+        // that do not run JavaScript only see what is rendered here. Null when a video leads.
+        $ssrMainImage = ($galleryImages->first()['type'] ?? null) === 'image' ? $galleryImages->first() : null;
+
         // RFQ CTA
         $ctaHref = auth()->check()
             ? route('account.rfqs.create', [
@@ -165,6 +169,10 @@
                         <img
                             x-show="images[active].type !== 'video'"
                             x-ref="mainImg"
+                            @if ($ssrMainImage)
+                                src="{{ $ssrMainImage['src'] }}"
+                                alt="{{ $ssrMainImage['alt'] }}"
+                            @endif
                             :src="images[active].type === 'image' ? images[active].src : ''"
                             :alt="images[active].alt"
                             x-effect="$el.style.opacity = '0'; requestAnimationFrame(() => { $el.style.opacity = '1'; })"
