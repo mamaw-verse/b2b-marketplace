@@ -742,17 +742,13 @@
                         </h2>
 
                         <p class="mt-3 text-base text-[var(--hs-neutral-500)] leading-relaxed max-w-lg">
-                            @if (config('marketplace.features.orders_enabled'))
-                                {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
-                            @else
-                                {{ __('Join verified halal sellers across the Philippines. List your products for free and get discovered by buyers. No monthly charges, no hidden fees.') }}
-                            @endif
+                            {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
                         </p>
 
                         <ul class="mt-6 space-y-3">
                             @foreach (array_values(array_filter([
                                 __('Free store registration — no upfront fees'),
-                                config('marketplace.features.orders_enabled') ? __('Only 10% commission when you make a sale') : null,
+                                __('Only 10% commission when you make a sale'),
                                 __('MHCB-verified badge builds buyer trust'),
                                 config('marketplace.features.orders_enabled') ? __('Built-in product & order management') : __('Showcase your products to verified buyers'),
                                 config('marketplace.features.payouts_enabled') ? __('Integrated payout support (GCash & bank)') : null,
@@ -784,13 +780,8 @@
 
                             {{-- Big 10% --}}
                             <div class="text-center border-b border-[var(--hs-neutral-200)] pb-6 mb-6">
-                                @if (config('marketplace.features.orders_enabled'))
-                                    <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
-                                    <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
-                                @else
-                                    <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">{{ __('Free') }}</p>
-                                    <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('To list your business and products') }}</p>
-                                @endif
+                                <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
+                                <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
                                 <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('No hidden fees. No monthly charges.') }}</p>
                             </div>
 

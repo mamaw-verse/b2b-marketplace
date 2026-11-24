@@ -264,14 +264,14 @@ Random images and addresses make visual diffs meaningless and hide real layout i
 
 **Progress (2026-11-24, batch 2):** T-06 (notes collapse on mobile + JPG/PNG/HEIC upload, tests added), T-10 (19 small `neutral-400` texts → `neutral-600`, 11 `text-[10/11px]` → `text-xs` in storefront views), T-14 (FAQ placeholder "Search FAQs", 5 lang files), T-15 (`trans_choice` stats strip), T-16 partial (hero CTA now "Create account" → register, full width on mobile; Popular row hidden when no categories; the single-pill row was a fixture artifact — categories render there when present; Coming-soon strip not done).
 
-**Progress (batch 1):** T-01, T-03, T-04, T-05, T-08 (partial: grids + PDP `md` split), T-12 (hamburgers; share buttons still to do), T-19 done in code but **not run** (no PHP in the authoring environment). T-02 is `[~]`: the 10 % figure is now hidden unless `orders_enabled`, but the business-owner confirmation is still open. Also closed from `storefront-mobile-audit.md`: A4 (login row `flex-wrap`), A9 (sticky register CTA). A7 not applicable: register shows a single hint line plus a 4-segment strength meter, not a 5-item list.
+**Progress (batch 1):** T-01, T-03, T-04, T-05, T-08 (partial: grids + PDP `md` split), T-12 (hamburgers; share buttons still to do), T-19 done in code but **not run** (no PHP in the authoring environment). T-02: 10 % commission confirmed (admin-fulfilled transactions) and kept visible. Also closed from `storefront-mobile-audit.md`: A4 (login row `flex-wrap`), A9 (sticky register CTA). A7 not applicable: register shows a single hint line plus a 4-segment strength meter, not a 5-item list.
 
 Ordered by impact ÷ effort. Check items off as they land.
 
 ### P0 — this week
 
 - [x] **T-01 (01)** Gate the seller-section bullets and escrow note in `hero-search.blade.php` (:751–809) behind `config('marketplace.features.*')`; replace with Phase 1-accurate copy when off. Update the translations in `lang/{en,id,ms,tr,ar}.json`.
-- [~] **T-02 (01)** Confirm the 10 % commission statement with the business owner; remove it from the public page until it is collectable.
+- [x] **T-02 (01)** ~~Confirm the 10 % commission~~ Resolved: transactions are fulfilled by admin and the 10 % commission applies, so the claim stays on the public page unconditionally. Only features that are actually enabled (orders, payouts, escrow, ads) are advertised.
 - [x] **T-03 (02)** Remove or make configurable the "24–48 hrs" reply promise on the product-detail CTA.
 - [x] **T-04 (04)** `sourcing-form-card.blade.php`: flatten padding below `sm`, `w-full sm:w-auto` on the submit button, shorten the placeholder, raise the textarea to `rows="5"` or let it auto-grow.
 - [x] **T-05 (06)** Replace the hover hint with a `(hover: none)`-aware "Tap to enlarge" and bump it to ≥ 12px.
