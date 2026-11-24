@@ -33,8 +33,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->web(append: [
             SetLocale::class,
-            EnforceSeoStandards::class,
         ]);
+        // Global, not in the `web` group: route middleware is priority-sorted, which
+        // runs `Authenticate` first, so a guest redirect would skip this header.
+        $middleware->append(EnforceSeoStandards::class);
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
