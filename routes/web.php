@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisteredStaffUserController;
 use App\Http\Controllers\HumanCheckController;
+use App\Http\Controllers\LlmsTxtController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\WebManifestController;
 use App\Http\Controllers\SitemapController;
@@ -38,6 +39,7 @@ Route::post('/locale', function (Request $request) {
 })->name('locale.switch');
 
 Route::get('/robots.txt', RobotsController::class)->name('robots');
+Route::get('/llms.txt', LlmsTxtController::class)->name('llms');
 Route::get('/manifest.webmanifest', WebManifestController::class)->name('manifest');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');

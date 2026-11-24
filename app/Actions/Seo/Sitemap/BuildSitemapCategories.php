@@ -30,7 +30,21 @@ final class BuildSitemapCategories
     }
 
     /**
-     * @return Collection<int, array{loc: string, lastmod: CarbonInterface}>
+     * Top-level categories that are in the sitemap, for other crawler-facing files (llms.txt).
+     *
+     * @return Collection<int, array{name: string, loc: string}>
+     */
+    public function topLevel(): Collection
+    {
+        return $this->entries()
+            ->filter(fn (array $entry): bool => $entry['parent_id'] === null)
+            ->map(fn (array $entry): array => ['name' => $entry['name'], 'loc' => $entry['loc']])
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+    }
+
+    /**
+     * @return Collection<int, array{loc: string, lastmod: CarbonInterface, name: string, parent_id: int|null}>
      */
     private function entries(): Collection
     {
@@ -41,7 +55,7 @@ final class BuildSitemapCategories
             ->selectRaw('product_categories.category_id as category_id, MAX(products.updated_at) as latest')
             ->pluck('latest', 'category_id');
 
-        $categories = Category::query()->orderBy('id')->get(['id', 'parent_id', 'slug', 'updated_at']);
+        $categories = Category::query()->orderBy('id')->get(['id', 'parent_id', 'slug', 'name', 'updated_at']);
 
         // A group's products are its own plus its subcategories'.
         $latestByCategory = [];
@@ -63,6 +77,8 @@ final class BuildSitemapCategories
             ->map(fn (Category $category): array => [
                 'loc' => SitemapXml::url(route('storefront.category', $category, absolute: false)),
                 'lastmod' => max($category->updated_at, Carbon::parse($latestByCategory[$category->id])),
+                'name' => (string) $category->name,
+                'parent_id' => $category->parent_id,
             ])
             ->values();
     }

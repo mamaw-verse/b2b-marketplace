@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Subscription;
+use App\Support\Seo\IndexingPolicy;
+use App\Support\Seo\SitemapCache;
 use App\Support\Seo\SitemapXml;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\Config;
@@ -478,4 +480,85 @@ test('the html language and og locale follow the effective locale, not a cross-c
 
     expect($html)->toContain('<html lang="'.str_replace('_', '-', app()->getLocale()).'"')
         ->and($html)->toContain('property="og:locale"');
+});
+
+// ─── T5.2 llms.txt ─────────────────────────────────────────────────────
+
+test('llms.txt only exists where indexing is allowed', function () {
+    $this->get('/llms.txt')->assertNotFound();
+
+    discoveryAsProduction();
+    Config::set('seo.force_noindex', true);
+    $this->get('/llms.txt')->assertNotFound();
+
+    Config::set('seo.force_noindex', false);
+    $this->get('/llms.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
+
+    expect(glob(public_path('llms*.txt')))->toBeEmpty();
+});
+
+test('llms.txt is a markdown guide that links only public pages under the configured origin', function () {
+    discoveryAsProduction();
+    discoveryProduct(discoveryCategory('Noodles'));
+    Shop::factory()->create(['status' => 'active', 'email' => 'private@acme.test', 'phone' => '+639171234567']);
+
+    $body = $this->get('/llms.txt')->assertOk()->getContent();
+
+    preg_match_all('/\]\((https?:[^)]+)\)/', $body, $links);
+
+    expect($body)->toStartWith('# '.config('seo.site_name')."\n\n> ")
+        ->and($body)->toContain('## Key pages')->toContain('## Directories')
+        ->and($links[1])->not->toBeEmpty()
+        ->and($body)->not->toContain('private@acme.test')->not->toContain('+639171234567');
+
+    foreach ($links[1] as $link) {
+        expect($link)->toStartWith('https://seo.example.test/');
+    }
+
+    // Every link is a public, indexable route, never a private area.
+    foreach (app(IndexingPolicy::class)->privatePathPatterns() as $pattern) {
+        expect($body)->not->toContain('https://seo.example.test/'.$pattern);
+    }
+});
+
+test('llms.txt lists only top-level categories that have visible products', function () {
+    discoveryAsProduction();
+    $snacks = discoveryCategory('Snacks');
+    $chips = discoveryCategory('Chips', $snacks);
+    discoveryCategory('Candy');
+    discoveryProduct($chips);
+
+    $body = $this->get('/llms.txt')->getContent();
+
+    expect($body)->toContain('- [Snacks]('.discoveryUrl(route('storefront.category', $snacks, absolute: false)).')')
+        ->not->toContain('[Chips]')
+        ->not->toContain('[Candy]');
+});
+
+test('llms.txt states a capability only while its flag is on', function () {
+    discoveryAsProduction();
+
+    Config::set('marketplace.features.escrow_payments_enabled', false);
+    expect($this->get('/llms.txt')->getContent())->not->toContain('escrow');
+
+    app(SitemapCache::class)->flush();
+    Config::set('marketplace.features.escrow_payments_enabled', true);
+    expect($this->get('/llms.txt')->getContent())->toContain('Order payments are protected by escrow.');
+});
+
+test('llms.txt is served from the sitemap cache and refreshed when it is flushed', function () {
+    discoveryAsProduction();
+    $category = discoveryCategory('Oils');
+    $product = Product::factory()->published()->create();
+
+    // Built and cached while the category has no product.
+    expect($this->get('/llms.txt')->getContent())->not->toContain('[Oils]');
+
+    // A pivot write fires no model event, so the cached copy is still served...
+    $product->categories()->attach($category);
+    expect($this->get('/llms.txt')->getContent())->not->toContain('[Oils]');
+
+    // ...until the sitemap cache is flushed.
+    app(SitemapCache::class)->flush();
+    expect($this->get('/llms.txt')->getContent())->toContain('[Oils]');
 });
