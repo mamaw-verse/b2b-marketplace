@@ -53,7 +53,7 @@ CLAUDE.md → Phase 1 Constraints: "No RFQ, chat, quoting, orders, or payments"
 
 The same strings are translated in `lang/{id,ms,tr,ar}.json`, so the claim ships in five languages. `/terms` also states the Platform "may facilitate … ordering, payment".
 
-**Fix:** render each bullet and the escrow note only when its feature flag is on; otherwise show copy that matches Phase 1 (free listing, MHCB verification, supplier directory). Confirm the "10 % commission" figure with the business owner before it stays on a public page — nothing in the code collects commission while orders are disabled.
+**Fix:** render each bullet and the escrow note only when its feature flag is on; otherwise show copy that matches Phase 1 (free listing, MHCB verification, supplier directory). The "10 % commission" claim is confirmed by the business owner: transactions are fulfilled by admin (not sellers) and the platform takes 10 %, so it stays visible. Advertise only features that are actually enabled.
 
 ### 02 · Major · Product detail `/products/{slug}` — response-time promise and RFQ gating are unverified
 
@@ -260,6 +260,8 @@ Random images and addresses make visual diffs meaningless and hide real layout i
 
 ## Fix tasks
 
+**Progress (2026-11-24, batch 6):** T-02 wording closed (finding 01 now states the confirmed 10 % admin-fulfilled commission). T-20 checked off. T-21 partly done: new `tests/Browser/Feature/MobileAuditStatesBrowserTest.php` covers drawer, Arabic/RTL and auth pages — **run it and re-capture all screenshots**. Translations: new UI strings stay English-only by decision; the owner will handle `lang/*.json`. T-11 (`1HalalStore.com`) is final.
+
 **Progress (2026-11-24, batch 5):** T-16 finished (below `sm`, "Coming soon" portals collapse into a single chip strip; cards stay on `sm+`). T-17: both forms now have a full-width submit on phones (certificate was already full width). T-18 + T-20: `MobileAuditBrowserTest` fixtures are now fixed — `tests/Fixtures/product.png` stored on the `s3` disk, 3 Philippine companies (incl. a long name), 8 published products with real copy. **Screenshots must be re-captured** and the old ones in `tests/Browser/Screenshots/` replaced. Remaining: T-21 (extra capture states) and T-02 doc wording.
 
 **Progress (2026-11-24, batch 4):** T-12 done (share buttons `size-11`), T-13 done on Terms and Privacy (floating back-to-top after 800px scroll, `scroll-margin-top` on `#section-*`, chevron on "On this page", tighter stacked padding, dates on separate lines at `text-sm`). T-02 resolved: 10 % commission stays visible; only enabled features are advertised.
@@ -302,8 +304,8 @@ Ordered by impact ÷ effort. Check items off as they land.
 
 - [x] **T-18 (16)** Make the browser-test fixtures deterministic: attach a fixed product image from `tests/Fixtures/`, use Philippine addresses, and a short real product description.
 - [x] **T-19 (16)** Add a horizontal-overflow assertion to `MobileAuditBrowserTest.php` (e.g. `document.documentElement.scrollWidth <= window.innerWidth`) so a layout regression fails the test, not just changes a screenshot.
-- [ ] **T-20** Add a second fixture state with 8+ products and 3+ companies so grid density, pagination and long-name wrapping are exercised.
-- [ ] **T-21** Capture the missing states listed below.
+- [x] **T-20** Add a second fixture state with 8+ products and 3+ companies so grid density, pagination and long-name wrapping are exercised.
+- [~] **T-21** Capture the missing states listed below. Added `MobileAuditStatesBrowserTest.php` (open drawer, Arabic/RTL home, `/login`, `/register`); **not run** (no PHP in the authoring environment). Still open: logged-in buyer, form error/success states, fully populated product, 1728px video captures.
 
 ---
 
