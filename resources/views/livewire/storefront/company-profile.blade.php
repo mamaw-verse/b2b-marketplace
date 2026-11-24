@@ -152,7 +152,7 @@
                     {{-- Export Readiness --}}
                     <section class="rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] p-4">
                         <h3 class="text-sm font-semibold text-[var(--hs-neutral-900)] mb-3">{{ __('Export Readiness') }}</h3>
-                        <x-hs-badge variant="gold" :label="ucfirst(str_replace('_', ' ', $shop->export_readiness_status))" />
+                        <x-hs-badge :variant="$shop->export_readiness_status === 'never_exported' ? 'neutral' : 'gold'" :label="ucfirst(str_replace('_', ' ', $shop->export_readiness_status))" />
                     </section>
 
                     {{-- Lead Time --}}
@@ -210,4 +210,18 @@
             </div>
         </div>
     </div>
+    {{-- Mobile sticky action bar --}}
+    @php
+        $profileCtaHref = auth()->check()
+            ? route('account.rfqs.create', ['shop_id' => $shop->id])
+            : route('login');
+        $profileCtaLabel = auth()->check() ? __('Request Quote') : __('Log in to Request Quote');
+    @endphp
+    <div class="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--hs-neutral-200)] bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+        <a href="{{ $profileCtaHref }}" @if (auth()->check()) wire:navigate @endif
+           class="flex min-h-12 w-full items-center justify-center rounded-[var(--hs-radius-sm)] bg-[var(--hs-green-600)] px-4 text-base font-semibold text-white hover:bg-[var(--hs-green-700)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:ring-offset-2">
+            {{ $profileCtaLabel }}
+        </a>
+    </div>
+    <div class="h-20 lg:hidden" aria-hidden="true"></div>
 </div>

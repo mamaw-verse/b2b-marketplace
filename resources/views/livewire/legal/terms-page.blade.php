@@ -13,7 +13,7 @@
             </nav>
             <h1 class="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-white">{{ __('Terms of Service') }}</h1>
             <p class="mt-2 max-w-2xl text-sm sm:text-base text-white/70 leading-relaxed">
-                {{ __('Halal Supply-Chain Marketplace — the rules for using 1HALALSTORE.COM as a buyer, merchant, or supply-chain partner.') }}
+                {{ __('Halal Supply-Chain Marketplace — the rules for using 1HalalStore.com as a buyer, merchant, or supply-chain partner.') }}
             </p>
             <p class="mt-3 text-xs text-white/40">{{ __('Effective Date: September 16, 2026') }} &middot; {{ __('Last Updated: September 16, 2026') }}</p>
         </div>

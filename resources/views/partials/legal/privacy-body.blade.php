@@ -1,7 +1,7 @@
 {{-- Shared Privacy Policy body. Rendered on /privacy and inside the registration consent modal. --}}
 {{-- $adminPhone is shared via view composer; the line below stays hidden until a phone is set. --}}
 <p class="text-sm leading-relaxed text-[var(--hs-neutral-700)]">
-    {{ __('1HALALSTORE.COM (“1HALALSTORE,” “we,” “our,” or “us”) respects your privacy. This Privacy Policy explains how we collect, use, store, disclose and protect personal information when you use our website, marketplace, applications, merchant portal, customer-support channels and related services.') }}
+    {{ __('1HalalStore.com (“1HALALSTORE,” “we,” “our,” or “us”) respects your privacy. This Privacy Policy explains how we collect, use, store, disclose and protect personal information when you use our website, marketplace, applications, merchant portal, customer-support channels and related services.') }}
 </p>
 <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">
     {{ __('We aim to process personal information according to applicable data-protection laws, including Republic Act No. 10173, the Philippine Data Privacy Act of 2012, its implementing rules and regulations, and applicable National Privacy Commission issuances, where applicable.') }}
@@ -63,7 +63,7 @@
 
     <section id="section-6" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('6. Merchant-to-Buyer Information Sharing') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Because 1HALALSTORE.COM is a supply-chain marketplace, certain information may need to be shared between transaction participants — for example, a merchant may need the buyer’s name, delivery address, contact number, order details and delivery instructions to fulfill an order. A logistics provider may likewise receive information necessary to deliver the order. Only information reasonably necessary for the transaction should be shared.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Because 1HalalStore.com is a supply-chain marketplace, certain information may need to be shared between transaction participants — for example, a merchant may need the buyer’s name, delivery address, contact number, order details and delivery instructions to fulfill an order. A logistics provider may likewise receive information necessary to deliver the order. Only information reasonably necessary for the transaction should be shared.') }}</p>
     </section>
 
     <section id="section-7" class="py-6 scroll-mt-24">
@@ -73,7 +73,7 @@
 
     <section id="section-8" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('8. International Data Transfers') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HALALSTORE.COM may operate internationally, so personal information may be processed or stored in countries outside the Philippines. Where cross-border transfers occur, we will seek to implement safeguards required by applicable privacy laws. Privacy laws may differ between countries.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HalalStore.com may operate internationally, so personal information may be processed or stored in countries outside the Philippines. Where cross-border transfers occur, we will seek to implement safeguards required by applicable privacy laws. Privacy laws may differ between countries.') }}</p>
     </section>
 
     <section id="section-9" class="py-6 scroll-mt-24">
@@ -130,13 +130,13 @@
 
     <section id="section-18" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('18. Changes to This Privacy Policy') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('We may update this Privacy Policy from time to time. Material changes may be communicated through the Platform or other reasonable means, and the latest version will always be posted on 1HALALSTORE.COM.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('We may update this Privacy Policy from time to time. Material changes may be communicated through the Platform or other reasonable means, and the latest version will always be posted on 1HalalStore.com.') }}</p>
     </section>
 
     <section id="section-19" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('19. Contact Us') }}</h2>
         <div class="mt-3 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
-            <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">1HALALSTORE.COM</p>
+            <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">1HalalStore.com</p>
             <ul class="mt-2 space-y-1 text-sm text-[var(--hs-neutral-600)]">
                 <li>{{ __('Operator: Ismail Abaya') }}</li>
                 <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
@@ -144,6 +144,6 @@
                 <li>{{ __('DPO: Ismail Abaya') }}</li>
             </ul>
         </div>
-        <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('For privacy concerns, please use the subject “1HALALSTORE.COM – Privacy Request”.') }}</p>
+        <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('For privacy concerns, please use the subject “1HalalStore.com – Privacy Request”.') }}</p>
     </section>
 </div>

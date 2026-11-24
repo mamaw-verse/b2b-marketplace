@@ -29,9 +29,19 @@ final class SourcingRequestReceivedNotification extends Notification implements 
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject(__('New product sourcing request from :name', ['name' => $this->sourcingRequest->name]))
-            ->line(__(':name is looking for: :productName', ['name' => $this->sourcingRequest->name, 'productName' => $this->sourcingRequest->product_name]))
+            ->line(__(':name is looking for: :productName', ['name' => $this->sourcingRequest->name, 'productName' => $this->sourcingRequest->product_name]));
+
+        if ($this->sourcingRequest->quantity !== null) {
+            $mail->line(__('Quantity: :quantity', ['quantity' => $this->sourcingRequest->quantity]));
+        }
+
+        if ($this->sourcingRequest->target_budget !== null) {
+            $mail->line(__('Target budget: :budget', ['budget' => $this->sourcingRequest->target_budget]));
+        }
+
+        return $mail
             ->action(__('View Sourcing Requests'), route('admin.sourcing-requests.index'));
     }
 

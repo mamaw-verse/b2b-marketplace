@@ -24,9 +24,22 @@
                         <flux:error name="product_name" />
                     </flux:field>
 
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <flux:field>
+                            <flux:label>{{ __('Quantity') }} <span class="font-normal text-[var(--hs-neutral-600)]">({{ __('optional') }})</span></flux:label>
+                            <flux:input type="text" wire:model="quantity" placeholder="{{ __('e.g. 500 kg') }}" />
+                            <flux:error name="quantity" />
+                        </flux:field>
+                        <flux:field>
+                            <flux:label>{{ __('Target Budget') }} <span class="font-normal text-[var(--hs-neutral-600)]">({{ __('optional') }})</span></flux:label>
+                            <flux:input type="text" wire:model="target_budget" placeholder="{{ __('e.g. PHP 50,000') }}" />
+                            <flux:error name="target_budget" />
+                        </flux:field>
+                    </div>
+
                     <flux:field>
                         <flux:label>{{ __('Product Description & Specifications') }}</flux:label>
-                        <flux:textarea wire:model="product_description" rows="5" placeholder="{{ __('Tell us about the size, material, color, features, technical specifications, or any other requirements. How many units are you looking to purchase?') }}" />
+                        <flux:textarea wire:model="product_description" rows="5" placeholder="{{ __('Tell us about the size, material, color, features, technical specifications, or any other requirements.') }}" />
                         <flux:error name="product_description" />
                     </flux:field>
                 </div>

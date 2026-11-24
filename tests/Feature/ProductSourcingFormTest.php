@@ -184,3 +184,29 @@ test('success state is shown after submission', function () {
         ->assertSee('Request Submitted')
         ->assertDontSee('Can\'t find the product you need');
 });
+
+test('quantity and target budget are optional and saved when provided', function () {
+    Livewire::test(ProductSourcingForm::class)
+        ->set('name', 'John Smith')
+        ->set('email', 'john@example.com')
+        ->set('product_name', 'Bulk turmeric powder')
+        ->set('quantity', '500 kg')
+        ->set('target_budget', 'PHP 50,000')
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    expect(SourcingRequest::latest()->first())
+        ->quantity->toBe('500 kg')
+        ->target_budget->toBe('PHP 50,000');
+
+    Livewire::test(ProductSourcingForm::class)
+        ->set('name', 'Jane Doe')
+        ->set('email', 'jane@example.com')
+        ->set('product_name', 'Dates')
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    expect(SourcingRequest::latest('id')->first())
+        ->quantity->toBeNull()
+        ->target_budget->toBeNull();
+});

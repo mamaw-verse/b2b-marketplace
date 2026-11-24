@@ -30,6 +30,10 @@ final class ProductSourcingForm extends Component
 
     public string $product_description = '';
 
+    public string $quantity = '';
+
+    public string $target_budget = '';
+
     /** @var TemporaryUploadedFile|null */
     public $reference_file = null;
 
@@ -88,6 +92,8 @@ final class ProductSourcingForm extends Component
             'email' => $this->email,
             'product_name' => $this->product_name,
             'product_description' => $this->product_description !== '' ? $this->product_description : null,
+            'quantity' => $this->quantity !== '' ? $this->quantity : null,
+            'target_budget' => $this->target_budget !== '' ? $this->target_budget : null,
             'reference_file_path' => $referenceFilePath,
         ]);
 
@@ -121,6 +127,8 @@ final class ProductSourcingForm extends Component
             'email' => ['required', 'email', 'max:255'],
             'product_name' => ['required', 'string', 'max:255'],
             'product_description' => ['nullable', 'string', 'max:5000'],
+            'quantity' => ['nullable', 'string', 'max:100'],
+            'target_budget' => ['nullable', 'string', 'max:100'],
             'reference_file' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx'],
         ];
     }
@@ -152,7 +160,7 @@ final class ProductSourcingForm extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['name', 'email', 'product_name', 'product_description', 'reference_file', 'honeypot']);
+        $this->reset(['name', 'email', 'product_name', 'product_description', 'quantity', 'target_budget', 'reference_file', 'honeypot']);
         $this->prefillContactDetails();
         $this->resetErrorBag();
     }

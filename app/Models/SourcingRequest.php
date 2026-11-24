@@ -17,6 +17,8 @@ use Illuminate\Support\Carbon;
  * @property string $email
  * @property string $product_name
  * @property string|null $product_description
+ * @property string|null $quantity
+ * @property string|null $target_budget
  * @property string|null $reference_file_path
  * @property string $status
  * @property string|null $notes
@@ -34,6 +36,8 @@ final class SourcingRequest extends Model
         'email',
         'product_name',
         'product_description',
+        'quantity',
+        'target_budget',
         'reference_file_path',
         'status',
         'notes',

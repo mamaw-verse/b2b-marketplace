@@ -1,15 +1,15 @@
 {{-- Shared Terms of Service body. Rendered on /terms and inside the registration consent modal. --}}
 <p class="text-sm leading-relaxed text-[var(--hs-neutral-700)]">
-    {{ __('Welcome to 1HALALSTORE.COM, a Halal Supply-Chain Marketplace designed to connect Halal-certified and Halal-compliant businesses, farmers, manufacturers, suppliers, distributors, logistics providers, merchants, service providers and consumers across the Philippines and international markets.') }}
+    {{ __('Welcome to 1HalalStore.com, a Halal Supply-Chain Marketplace designed to connect Halal-certified and Halal-compliant businesses, farmers, manufacturers, suppliers, distributors, logistics providers, merchants, service providers and consumers across the Philippines and international markets.') }}
 </p>
 <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">
-    {{ __('These Terms of Service (“Terms”) govern your access to and use of the 1HALALSTORE.COM website, marketplace, mobile applications, digital services, merchant portals and related services (collectively, the “Platform”). By accessing, registering with, purchasing through, selling through, or otherwise using the Platform, you agree to these Terms. If you do not agree with these Terms, please do not use the Platform.') }}
+    {{ __('These Terms of Service (“Terms”) govern your access to and use of the 1HalalStore.com website, marketplace, mobile applications, digital services, merchant portals and related services (collectively, the “Platform”). By accessing, registering with, purchasing through, selling through, or otherwise using the Platform, you agree to these Terms. If you do not agree with these Terms, please do not use the Platform.') }}
 </p>
 
 <div class="mt-6 space-y-0 divide-y divide-[var(--hs-neutral-100)] border-t border-[var(--hs-neutral-100)]">
     <section id="section-1" class="py-6 scroll-mt-24">
-        <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('1. About 1HALALSTORE.COM') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HALALSTORE.COM is intended to operate as a Halal Supply-Chain Marketplace, connecting participants throughout the Halal value chain:') }}</p>
+        <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('1. About 1HalalStore.com') }}</h2>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HalalStore.com is intended to operate as a Halal Supply-Chain Marketplace, connecting participants throughout the Halal value chain:') }}</p>
         <ul class="mt-3 space-y-2">
             @foreach ([__('Farmers and producers'), __('Food and non-food manufacturers'), __('Halal-certified suppliers'), __('Importers and exporters'), __('Wholesalers and distributors'), __('Logistics and warehousing providers'), __('Retailers and merchants'), __('Restaurants and food-service businesses'), __('Halal service providers'), __('Business-to-business buyers'), __('Consumers'), __('Other approved ecosystem partners')] as $item)
                 <li class="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--hs-neutral-700)]">
@@ -18,13 +18,13 @@
                 </li>
             @endforeach
         </ul>
-        <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('The Platform may facilitate product discovery, business matching, ordering, payment, logistics coordination, merchant services, supply-chain information and other digital marketplace functions. Unless expressly stated otherwise, 1HALALSTORE.COM is not the manufacturer, seller, importer, exporter, owner, warehouse operator or logistics provider of products listed by independent merchants.') }}</p>
+        <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('The Platform may facilitate product discovery, business matching, ordering, payment, logistics coordination, merchant services, supply-chain information and other digital marketplace functions. Unless expressly stated otherwise, 1HalalStore.com is not the manufacturer, seller, importer, exporter, owner, warehouse operator or logistics provider of products listed by independent merchants.') }}</p>
     </section>
 
     <section id="section-2" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('2. Definitions') }}</h2>
         <dl class="mt-3 space-y-3">
-            @foreach ([[__('Platform'), __('1HALALSTORE.COM and its related websites, applications, systems and services.')], [__('Operator'), __('The legal entity authorized to own, manage or operate the Platform.')], [__('Merchant'), __('An approved seller, supplier, manufacturer, farmer, distributor, service provider or business listing products or services through the Platform.')], [__('Buyer'), __('An individual or business purchasing or attempting to purchase products or services through the Platform.')], [__('Supply-Chain Partner'), __('An approved logistics provider, warehouse, distributor, fulfillment provider, importer, exporter or other supply-chain participant.')], [__('Halal Certification'), __('Certification issued by a competent Halal certification body recognized or accepted under applicable laws, regulations or industry requirements.')], [__('Halal-Certified Product'), __('A product represented as certified by an identified Halal certification body and whose certification is valid for the applicable product, facility or scope.')], [__('Transaction'), __('An order, sale, purchase, service engagement, payment, delivery or other commercial transaction facilitated through the Platform.')]] as [$term, $def])
+            @foreach ([[__('Platform'), __('1HalalStore.com and its related websites, applications, systems and services.')], [__('Operator'), __('The legal entity authorized to own, manage or operate the Platform.')], [__('Merchant'), __('An approved seller, supplier, manufacturer, farmer, distributor, service provider or business listing products or services through the Platform.')], [__('Buyer'), __('An individual or business purchasing or attempting to purchase products or services through the Platform.')], [__('Supply-Chain Partner'), __('An approved logistics provider, warehouse, distributor, fulfillment provider, importer, exporter or other supply-chain participant.')], [__('Halal Certification'), __('Certification issued by a competent Halal certification body recognized or accepted under applicable laws, regulations or industry requirements.')], [__('Halal-Certified Product'), __('A product represented as certified by an identified Halal certification body and whose certification is valid for the applicable product, facility or scope.')], [__('Transaction'), __('An order, sale, purchase, service engagement, payment, delivery or other commercial transaction facilitated through the Platform.')]] as [$term, $def])
                 <div class="rounded-xl bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-100)] p-4">
                     <dt class="text-sm font-semibold text-[var(--hs-neutral-900)]">{{ $term }}</dt>
                     <dd class="mt-1 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ $def }}</dd>
@@ -60,7 +60,7 @@
 
     <section id="section-6" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('6. Halal Integrity') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HALALSTORE.COM is designed to support the Halal ecosystem and promote transparency across the Halal supply chain. Where applicable, merchants may be required to provide Halal certificates, certification numbers and validity dates, product and ingredient lists, facility and traceability information, supplier and manufacturing information, relevant permits, and other supporting documents.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HalalStore.com is designed to support the Halal ecosystem and promote transparency across the Halal supply chain. Where applicable, merchants may be required to provide Halal certificates, certification numbers and validity dates, product and ingredient lists, facility and traceability information, supplier and manufacturing information, relevant permits, and other supporting documents.') }}</p>
         <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('The Platform may verify, display, suspend or remove Halal-related information. A marketplace listing, badge, label or reference to “Halal” does not replace a formal Halal certification where certification is legally or commercially required. Users must not falsely represent a product, facility, ingredient, service or business as Halal-certified. The Platform may suspend listings or accounts where Halal integrity is reasonably questioned.') }}</p>
     </section>
 
@@ -71,7 +71,7 @@
 
     <section id="section-8" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('8. Prices and Payments') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Prices are established by merchants unless otherwise indicated, and may be displayed in Philippine Pesos, US Dollars or other supported currencies. The final transaction amount may include product price, taxes, shipping, handling and marketplace fees, payment processing charges, customs duties, import charges, or other applicable charges. Payment providers have their own terms and privacy policies. 1HALALSTORE.COM may use third-party payment providers and is not responsible for interruptions caused by payment networks outside its reasonable control.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Prices are established by merchants unless otherwise indicated, and may be displayed in Philippine Pesos, US Dollars or other supported currencies. The final transaction amount may include product price, taxes, shipping, handling and marketplace fees, payment processing charges, customs duties, import charges, or other applicable charges. Payment providers have their own terms and privacy policies. 1HalalStore.com may use third-party payment providers and is not responsible for interruptions caused by payment networks outside its reasonable control.') }}</p>
     </section>
 
     <section id="section-9" class="py-6 scroll-mt-24">
@@ -81,7 +81,7 @@
 
     <section id="section-10" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('10. Shipping, Logistics and Delivery') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HALALSTORE.COM may connect buyers and merchants with logistics, warehousing and fulfillment providers. Delivery times are estimates unless expressly guaranteed. Responsibility for shipment may depend on the selected Incoterm, delivery arrangement, merchant agreement or applicable law. International transactions may involve customs clearance, import/export permits, duties and taxes, product registration, quarantine and food-safety requirements. The party responsible for importation must ensure compliance with the laws of the destination country.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HalalStore.com may connect buyers and merchants with logistics, warehousing and fulfillment providers. Delivery times are estimates unless expressly guaranteed. Responsibility for shipment may depend on the selected Incoterm, delivery arrangement, merchant agreement or applicable law. International transactions may involve customs clearance, import/export permits, duties and taxes, product registration, quarantine and food-safety requirements. The party responsible for importation must ensure compliance with the laws of the destination country.') }}</p>
     </section>
 
     <section id="section-11" class="py-6 scroll-mt-24">
@@ -96,7 +96,7 @@
 
     <section id="section-13" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('13. Intellectual Property') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('All Platform software, designs, logos, trademarks, graphics, text, databases, systems and other proprietary materials belong to the Operator or its licensors unless otherwise stated. Merchants retain ownership of their product photographs, trademarks and materials, subject to a non-exclusive, worldwide, royalty-free license granted to 1HALALSTORE.COM to use, reproduce, display, format, distribute and promote that content solely for operating, marketing and improving the Platform.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('All Platform software, designs, logos, trademarks, graphics, text, databases, systems and other proprietary materials belong to the Operator or its licensors unless otherwise stated. Merchants retain ownership of their product photographs, trademarks and materials, subject to a non-exclusive, worldwide, royalty-free license granted to 1HalalStore.com to use, reproduce, display, format, distribute and promote that content solely for operating, marketing and improving the Platform.') }}</p>
     </section>
 
     <section id="section-14" class="py-6 scroll-mt-24">
@@ -116,7 +116,7 @@
 
     <section id="section-17" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('17. Business-to-Business Transactions') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HALALSTORE.COM may facilitate wholesale and B2B transactions. B2B buyers and sellers may enter separate commercial agreements covering minimum order quantities, pricing, credit terms, Incoterms, shipping, warehousing, specifications, quality, Halal certification, inspection, payment, dispute resolution, and other commercial terms. Where a separate agreement exists, its terms may supplement these Terms.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('1HalalStore.com may facilitate wholesale and B2B transactions. B2B buyers and sellers may enter separate commercial agreements covering minimum order quantities, pricing, credit terms, Incoterms, shipping, warehousing, specifications, quality, Halal certification, inspection, payment, dispute resolution, and other commercial terms. Where a separate agreement exists, its terms may supplement these Terms.') }}</p>
     </section>
 
     <section id="section-18" class="py-6 scroll-mt-24">
@@ -146,7 +146,7 @@
 
     <section id="section-23" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('23. Privacy') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Personal information is processed according to the 1HALALSTORE.COM Privacy Policy. The Platform intends to process personal information in accordance with applicable privacy laws, including the Philippine Data Privacy Act of 2012 where applicable.') }} <a href="{{ route('legal.privacy') }}" wire:navigate class="font-semibold text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)]">{{ __('Read the Privacy Policy.') }}</a></p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Personal information is processed according to the 1HalalStore.com Privacy Policy. The Platform intends to process personal information in accordance with applicable privacy laws, including the Philippine Data Privacy Act of 2012 where applicable.') }} <a href="{{ route('legal.privacy') }}" wire:navigate class="font-semibold text-[var(--hs-green-700)] hover:text-[var(--hs-green-800)]">{{ __('Read the Privacy Policy.') }}</a></p>
     </section>
 
     <section id="section-24" class="py-6 scroll-mt-24">
@@ -167,7 +167,7 @@
     <section id="section-27" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('27. Contact') }}</h2>
         <div class="mt-3 rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5">
-            <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">1HALALSTORE.COM</p>
+            <p class="text-sm font-semibold text-[var(--hs-neutral-900)]">1HalalStore.com</p>
             <ul class="mt-2 space-y-1 text-sm text-[var(--hs-neutral-600)]">
                 <li>{{ __('Operator: Ismail Abaya') }}</li>
                 <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>

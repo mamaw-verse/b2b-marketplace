@@ -32,10 +32,10 @@ test('every translation key used by the legal views exists in all locale diction
 
 test('legal pages render translated content in every supported locale', function () {
     $cases = [
-        'ar' => ['terms' => 'شروط الخدمة', 'privacy' => 'سياسة الخصوصية', 'faq' => 'الأسئلة الشائعة', 'section' => '1. نبذة عن 1HALALSTORE.COM'],
-        'id' => ['terms' => 'Syarat Layanan', 'privacy' => 'Kebijakan Privasi', 'faq' => 'Pertanyaan yang Sering Diajukan', 'section' => '1. Tentang 1HALALSTORE.COM'],
-        'ms' => ['terms' => 'Terma Perkhidmatan', 'privacy' => 'Dasar Privasi', 'faq' => 'Soalan-soalan Lazim', 'section' => '1. Tentang 1HALALSTORE.COM'],
-        'tr' => ['terms' => 'Hizmet Koşulları', 'privacy' => 'Gizlilik Politikası', 'faq' => 'Sık Sorulan Sorular', 'section' => '1. 1HALALSTORE.COM Hakkında'],
+        'ar' => ['terms' => 'شروط الخدمة', 'privacy' => 'سياسة الخصوصية', 'faq' => 'الأسئلة الشائعة', 'section' => '1. نبذة عن 1HalalStore.com'],
+        'id' => ['terms' => 'Syarat Layanan', 'privacy' => 'Kebijakan Privasi', 'faq' => 'Pertanyaan yang Sering Diajukan', 'section' => '1. Tentang 1HalalStore.com'],
+        'ms' => ['terms' => 'Terma Perkhidmatan', 'privacy' => 'Dasar Privasi', 'faq' => 'Soalan-soalan Lazim', 'section' => '1. Tentang 1HalalStore.com'],
+        'tr' => ['terms' => 'Hizmet Koşulları', 'privacy' => 'Gizlilik Politikası', 'faq' => 'Sık Sorulan Sorular', 'section' => '1. 1HalalStore.com Hakkında'],
     ];
 
     foreach ($cases as $locale => $expected) {
@@ -45,7 +45,7 @@ test('legal pages render translated content in every supported locale', function
             ->assertOk()
             ->assertSee($expected['terms'], false)
             ->assertSee($expected['section'], false)
-            ->assertDontSee('1. About 1HALALSTORE.COM', false);
+            ->assertDontSee('1. About 1HalalStore.com', false);
 
         $this->get(route('legal.privacy'))
             ->assertOk()

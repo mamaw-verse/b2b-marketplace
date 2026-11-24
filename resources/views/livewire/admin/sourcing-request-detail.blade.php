@@ -23,6 +23,16 @@
                         <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Description & Specifications') }}</p>
                         <p class="mt-1 text-sm text-[var(--hs-neutral-900)] whitespace-pre-wrap">{{ $sourcingRequest->product_description ?: '—' }}</p>
                     </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Quantity') }}</p>
+                            <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $sourcingRequest->quantity ?: '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-[var(--hs-neutral-500)] tracking-wider">{{ __('Target Budget') }}</p>
+                            <p class="mt-1 text-sm text-[var(--hs-neutral-900)]">{{ $sourcingRequest->target_budget ?: '—' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
