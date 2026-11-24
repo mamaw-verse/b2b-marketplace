@@ -51,7 +51,7 @@ $bgColor = $bgColors[$product->id % count($bgColors)];
                     @endfor
                 </div>
                 <span class="text-xs text-[var(--hs-neutral-500)]">{{ number_format((float)$product->average_rating, 1) }}</span>
-                <span class="text-xs text-[var(--hs-neutral-400)]">({{ $product->total_reviews }})</span>
+                <span class="text-xs text-[var(--hs-neutral-600)]">({{ $product->total_reviews }})</span>
             </div>
         @endif
     </div>

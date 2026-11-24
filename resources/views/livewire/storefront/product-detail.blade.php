@@ -266,7 +266,7 @@
             @else
                 <div class="flex flex-col items-center justify-center gap-2 rounded-[var(--hs-radius-card)] bg-[var(--hs-neutral-50)] aspect-square border border-[var(--hs-neutral-200)]">
                     <flux:icon name="photo" class="size-16 text-[var(--hs-neutral-300)]" aria-hidden="true" />
-                    <p class="text-sm text-[var(--hs-neutral-400)]">{{ __('No images available') }}</p>
+                    <p class="text-sm text-[var(--hs-neutral-600)]">{{ __('No images available') }}</p>
                 </div>
             @endif
 
@@ -597,7 +597,7 @@
                                         class="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-100)] focus-visible:outline-none focus-visible:bg-[var(--hs-neutral-100)] transition"
                                     >
                                         @if ($cat->parent)
-                                            <span class="text-xs text-[var(--hs-neutral-400)]">{{ $cat->parent->name }} ›</span>
+                                            <span class="text-xs text-[var(--hs-neutral-600)]">{{ $cat->parent->name }} ›</span>
                                         @endif
                                         {{ $cat->name }}
                                     </a>
@@ -651,8 +651,8 @@
 
                     {{-- Header --}}
                     <div class="flex items-baseline justify-between px-3 sm:px-5 pt-3 pb-1">
-                        <span class="text-[10px] font-semibold uppercase tracking-widest text-[var(--hs-neutral-500)]">{{ __('Volume Pricing') }}</span>
-                        <span class="text-xs text-[var(--hs-neutral-400)] tabular-nums" x-text="currentVariant.currency + ' / ' + currentVariant.unit"></span>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-[var(--hs-neutral-500)]">{{ __('Volume Pricing') }}</span>
+                        <span class="text-xs text-[var(--hs-neutral-600)] tabular-nums" x-text="currentVariant.currency + ' / ' + currentVariant.unit"></span>
                     </div>
 
                     {{-- Tier rows --}}
@@ -673,7 +673,7 @@
                                     <span
                                         x-show="discountFor(tier.price)"
                                         x-text="'₱' + basePrice.toFixed(2)"
-                                        class="text-xs text-[var(--hs-neutral-400)] line-through tabular-nums"
+                                        class="text-xs text-[var(--hs-neutral-600)] line-through tabular-nums"
                                     ></span>
                                     <span
                                         x-text="'₱' + tier.price.toFixed(2)"
@@ -685,7 +685,7 @@
                                 <span
                                     x-show="discountFor(tier.price)"
                                     x-text="discountFor(tier.price) + '% OFF'"
-                                    class="text-[10px] font-bold uppercase tracking-wide bg-[var(--hs-green-600)] text-white px-1.5 py-0.5 rounded-[var(--hs-radius-pill)] whitespace-nowrap"
+                                    class="text-xs font-bold uppercase tracking-wide bg-[var(--hs-green-600)] text-white px-1.5 py-0.5 rounded-[var(--hs-radius-pill)] whitespace-nowrap"
                                 ></span>
                             </div>
                         </template>
@@ -721,7 +721,7 @@
                         </div>
                     @endforeach
 
-                    <p class="text-xs text-[var(--hs-neutral-400)] tabular-nums" x-text="'SKU: ' + currentVariant.sku"></p>
+                    <p class="text-xs text-[var(--hs-neutral-600)] tabular-nums" x-text="'SKU: ' + currentVariant.sku"></p>
                 </div>
             @endif
 

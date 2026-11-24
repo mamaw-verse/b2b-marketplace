@@ -260,7 +260,9 @@ Random images and addresses make visual diffs meaningless and hide real layout i
 
 ## Fix tasks
 
-**Progress (2026-11-24):** T-01, T-03, T-04, T-05, T-08 (partial: grids + PDP `md` split), T-12 (hamburgers; share buttons still to do), T-19 done in code but **not run** (no PHP in the authoring environment). T-02 is `[~]`: the 10 % figure is now hidden unless `orders_enabled`, but the business-owner confirmation is still open. Also closed from `storefront-mobile-audit.md`: A4 (login row `flex-wrap`), A9 (sticky register CTA). A7 not applicable: register shows a single hint line plus a 4-segment strength meter, not a 5-item list.
+**Progress (2026-11-24, batch 2):** T-06 (notes collapse on mobile + JPG/PNG/HEIC upload, tests added), T-10 (19 small `neutral-400` texts → `neutral-600`, 11 `text-[10/11px]` → `text-xs` in storefront views), T-14 (FAQ placeholder "Search FAQs", 5 lang files), T-15 (`trans_choice` stats strip), T-16 partial (hero CTA now "Create account" → register, full width on mobile; Popular row hidden when no categories; the single-pill row was a fixture artifact — categories render there when present; Coming-soon strip not done).
+
+**Progress (batch 1):** T-01, T-03, T-04, T-05, T-08 (partial: grids + PDP `md` split), T-12 (hamburgers; share buttons still to do), T-19 done in code but **not run** (no PHP in the authoring environment). T-02 is `[~]`: the 10 % figure is now hidden unless `orders_enabled`, but the business-owner confirmation is still open. Also closed from `storefront-mobile-audit.md`: A4 (login row `flex-wrap`), A9 (sticky register CTA). A7 not applicable: register shows a single hint line plus a 4-segment strength meter, not a 5-item list.
 
 Ordered by impact ÷ effort. Check items off as they land.
 
@@ -274,20 +276,20 @@ Ordered by impact ÷ effort. Check items off as they land.
 
 ### P1 — next sprint
 
-- [ ] **T-06 (03)** `apply-for-certificate.blade.php`: collapse "Important Notes" into a closed `<details>` on mobile; accept `jpg/png/heic` for the signed letter; update audit item #14.
+- [x] **T-06 (03)** `apply-for-certificate.blade.php`: collapse "Important Notes" into a closed `<details>` on mobile; accept `jpg/png/heic` for the signed letter; update audit item #14.
 - [ ] **T-07 (05)** Add optional quantity (+ unit) and target-budget fields to the sourcing form and `SourcingRequest`, or remove the words from the copy.
 - [x] **T-08 (07)** `grid-cols-2` from the smallest breakpoint on `product-directory.blade.php:251` and `company-profile.blade.php:193`; use a 2-col product-detail layout from `md`.
 - [ ] **T-09 (08)** Add a sticky Request quote / Contact bar to the company profile on mobile; neutral style for "Never exported"; value chain without wrap-prone connectors.
-- [ ] **T-10 (09)** Swap `--hs-neutral-400` text under 14px for `--hs-neutral-600`; `--hs-info-500` body text for `--hs-info-700`; set a 12px floor for badges and captions.
+- [x] **T-10 (09)** Swap `--hs-neutral-400` text under 14px for `--hs-neutral-600`; `--hs-info-500` body text for `--hs-info-700`; set a 12px floor for badges and captions.
 - [ ] **T-11 (13)** Choose one written form of the brand name and normalise FAQ, Terms, Privacy and email copy.
 
 ### P2 — polish
 
 - [x] **T-12 (10)** Raise the hamburger (`portal-header.blade.php:33,43`) and share buttons to 44px.
 - [ ] **T-13 (11)** Back-to-top button and anchor offsets on Terms/Privacy; reduce stacked padding; unify the "On this page" disclosure style.
-- [ ] **T-14 (12)** FAQ: shorter search placeholder, matching disclosure markers, one fewer card level on mobile.
-- [ ] **T-15 (14)** Pluralise the product-directory stats strip (and the matching strings in every `lang/*.json`).
-- [ ] **T-16 (15)** Condense the "Coming soon" portal cards, rename "Get Started", full-width hero CTAs, hide the single-pill "Popular" row.
+- [x] **T-14 (12)** FAQ: shorter search placeholder, matching disclosure markers, one fewer card level on mobile.
+- [x] **T-15 (14)** Pluralise the product-directory stats strip (and the matching strings in every `lang/*.json`).
+- [x] **T-16 (15)** Condense the "Coming soon" portal cards, rename "Get Started", full-width hero CTAs, hide the single-pill "Popular" row.
 - [ ] **T-17 (04/12)** Visual-only: unify the submit button width across the sourcing and certificate forms once T-04 lands.
 
 ### Test-suite tasks

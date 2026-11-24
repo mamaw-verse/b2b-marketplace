@@ -21,7 +21,7 @@
                 <input
                     x-model="query"
                     type="search"
-                    placeholder="{{ __('Search questions — e.g. Halal, logistics, merchant…') }}"
+                    placeholder="{{ __('Search FAQs') }}"
                     class="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder:text-white/40 focus:bg-white/15 focus:border-[var(--hs-gold-400)] focus:ring-2 focus:ring-[var(--hs-gold-400)]/20 outline-none transition"
                 />
             </div>

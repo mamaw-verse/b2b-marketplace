@@ -120,3 +120,24 @@ it('creates a certification application and sends notifications', function () {
         }
     );
 });
+
+it('accepts a photographed signed letter as a JPG or PNG', function (string $name, string $mime) {
+    Livewire::test(ApplyForCertificate::class)
+        ->set('company_name', 'Test Corp')
+        ->set('email', 'test@test.com')
+        ->set('document', UploadedFile::fake()->create($name, 100, $mime))
+        ->call('submit')
+        ->assertHasNoErrors(['document']);
+})->with([
+    'jpg' => ['loi.jpg', 'image/jpeg'],
+    'png' => ['loi.png', 'image/png'],
+]);
+
+it('rejects unsupported file types for the signed letter', function () {
+    Livewire::test(ApplyForCertificate::class)
+        ->set('company_name', 'Test Corp')
+        ->set('email', 'test@test.com')
+        ->set('document', UploadedFile::fake()->create('loi.exe', 100, 'application/octet-stream'))
+        ->call('submit')
+        ->assertHasErrors(['document']);
+});

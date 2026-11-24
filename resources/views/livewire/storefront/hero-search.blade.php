@@ -49,14 +49,14 @@
                         {{ __('1HalalStore.com is a B2B marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.') }}
                     </p>
 
-                    <div class="mt-7 lg:mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
-                        <a href="{{ route('login') }}" wire:navigate
-                           class="inline-flex items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
+                    <div class="mt-7 lg:mt-8 flex flex-col sm:flex-row sm:flex-wrap justify-center lg:justify-start gap-3">
+                        <a href="{{ route('register') }}" wire:navigate
+                           class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
                             <flux:icon.arrow-right class="size-4" />
-                            {{ __('Get Started') }}
+                            {{ __('Create account') }}
                         </a>
                         <a href="#supply-chain"
-                           class="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
+                           class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
                             <flux:icon.play class="size-4" />
                             {{ __('See How It Works') }}
                         </a>
@@ -153,7 +153,7 @@
 
                                         {{-- Top badge --}}
                                         <div class="absolute top-4 left-4 z-10">
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[var(--hs-gold-500)] text-[var(--hs-green-950)]">
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[var(--hs-gold-500)] text-[var(--hs-green-950)]">
                                                 {{ __('Featured Voice') }}
                                             </span>
                                         </div>
@@ -162,7 +162,7 @@
                                         <div class="absolute bottom-0 inset-x-0 z-10 px-5 pb-6">
                                             <div class="flex items-center gap-1.5 mb-2">
                                                 <span class="size-2 rounded-full bg-[var(--hs-green-400)]"></span>
-                                                <span class="text-[10px] font-semibold text-[var(--hs-green-300)]">{{ __('Verified Halal Auditor') }}</span>
+                                                <span class="text-xs font-semibold text-[var(--hs-green-300)]">{{ __('Verified Halal Auditor') }}</span>
                                             </div>
                                             <h3 class="text-xl font-bold text-white leading-tight">{{ __('Ismail Abaya, PhD') }}</h3>
                                             <p class="text-xs font-semibold text-[var(--hs-gold-400)] mt-0.5">{{ __('Halal Business & Supply Chain Authority') }}</p>
@@ -203,7 +203,7 @@
                                                 <div class="text-center">
                                                     <p class="text-base font-extrabold text-[var(--hs-green-800)] leading-tight">{{ __('Maslaha Halal') }}</p>
                                                     <p class="text-base font-extrabold text-[var(--hs-green-800)] leading-tight">{{ __('Certification Board') }}</p>
-                                                    <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-[var(--hs-gold-700)]">{{ __('Philippines') }}</p>
+                                                    <p class="mt-1 text-xs font-bold uppercase tracking-widest text-[var(--hs-gold-700)]">{{ __('Philippines') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -212,7 +212,7 @@
                                         <div class="relative z-10 px-5 pb-6 pt-8"
                                              style="background: linear-gradient(to top, rgba(0,19,11,0.92) 0%, rgba(0,19,11,0.50) 60%, transparent 100%);">
                                             <div class="absolute top-2 left-5">
-                                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white"
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-white"
                                                       style="background: rgba(34,114,73,0.85);">
                                                     <flux:icon.shield-check class="inline size-3 mr-0.5" />
                                                     {{ __('Verified') }}
@@ -255,7 +255,7 @@
 
                                                 {{-- Top sponsored badge --}}
                                                 <div class="absolute top-4 left-4 z-10 pointer-events-none">
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white"
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider text-white"
                                                           style="background: rgba(255,255,255,0.16); backdrop-filter: blur(4px);">
                                                         <flux:icon.megaphone class="size-3" />
                                                         {{ __('Sponsored') }}
@@ -327,7 +327,7 @@
                         wire:model.live.debounce.300ms="query"
                         type="search"
                         placeholder="{{ __('Search halal products') }}"
-                        class="w-full pl-12 pr-4 py-3.5 bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-200)] rounded-xl text-sm text-[var(--hs-neutral-800)] placeholder:text-[var(--hs-neutral-400)] focus:bg-[var(--hs-neutral-0)] focus:border-[var(--hs-green-600)] focus:ring-2 focus:ring-[var(--hs-green-600)]/20 outline-none transition"
+                        class="w-full pl-12 pr-4 py-3.5 bg-[var(--hs-neutral-50)] border border-[var(--hs-neutral-200)] rounded-xl text-sm text-[var(--hs-neutral-800)] placeholder:text-[var(--hs-neutral-600)] focus:bg-[var(--hs-neutral-0)] focus:border-[var(--hs-green-600)] focus:ring-2 focus:ring-[var(--hs-green-600)]/20 outline-none transition"
                     />
                 </div>
                 <button
@@ -339,12 +339,13 @@
                 </button>
             </div>
 
-            {{-- Category pills --}}
+            {{-- Category pills (hidden until categories exist) --}}
+            @if ($this->categories->isNotEmpty())
             <div class="mt-4 pt-3 relative">
                 {{-- Right-fade to indicate scrollability on mobile --}}
                 <div class="pointer-events-none absolute right-0 top-3 bottom-0.5 w-12 bg-gradient-to-l from-[var(--hs-neutral-0)] to-transparent z-10 sm:hidden"></div>
                 <div class="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
-                    <span class="text-xs text-[var(--hs-neutral-400)] font-medium whitespace-nowrap mr-1 shrink-0">{{ __('Popular:') }}</span>
+                    <span class="text-xs text-[var(--hs-neutral-600)] font-medium whitespace-nowrap mr-1 shrink-0">{{ __('Popular:') }}</span>
                 <a href="{{ route('storefront.companies') }}" wire:navigate
                    class="shrink-0 px-3 py-1.5 rounded-lg bg-[var(--hs-green-800)] text-white text-xs font-semibold whitespace-nowrap">
                     {{ __('All Businesses') }}
@@ -357,6 +358,7 @@
                 @endforeach
                 </div>{{-- /pills scroll row --}}
             </div>{{-- /relative wrapper --}}
+            @endif
 
         </div>
     </section>

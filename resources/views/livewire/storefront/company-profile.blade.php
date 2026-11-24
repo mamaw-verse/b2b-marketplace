@@ -46,7 +46,7 @@
                         @endif
                     </div>
                     <p class="mt-1 text-[var(--hs-neutral-300)]">{{ $shop->registered_business_name }}</p>
-                    <p class="mt-1 text-sm text-[var(--hs-neutral-400)]">
+                    <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">
                         {{ $shop->city }}{{ $shop->city && $shop->province ? ', ' : '' }}{{ $shop->province }}
                     </p>
                     @if($shop->average_rating)
@@ -57,7 +57,7 @@
                                 @endfor
                             </div>
                             <span class="text-sm text-[var(--hs-neutral-200)]">{{ number_format((float)$shop->average_rating, 1) }}</span>
-                            <span class="text-sm text-[var(--hs-neutral-400)]">({{ $shop->total_reviews }} {{ Str::plural('review', $shop->total_reviews) }})</span>
+                            <span class="text-sm text-[var(--hs-neutral-600)]">({{ $shop->total_reviews }} {{ Str::plural('review', $shop->total_reviews) }})</span>
                         </div>
                     @endif
                 </div>

@@ -67,9 +67,9 @@
                                 <x-hs-dropzone
                                     input-id="apply-certificate-document"
                                     wire-model="document"
-                                    accept=".doc,.docx,.pdf,.DOC,.DOCX,.PDF"
+                                    accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.heic,.heif,image/*"
                                     :multiple="false"
-                                    hint="Accepted file types: DOC, DOCX, PDF • Max file size: 10MB"
+                                    hint="Accepted file types: DOC, DOCX, PDF, or a clear photo/scan (JPG, PNG, HEIC) • Max file size: 10MB"
                                     class="mt-4"
                                 >
                                     @if ($document)
@@ -124,18 +124,22 @@
             {{-- ═══════════════════════════════════════════════════════
                  RIGHT: Important notes panel
             ═══════════════════════════════════════════════════════ --}}
-            <aside class="order-first lg:order-last rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-5 sm:p-6">
-                <h2 class="flex items-center gap-2 text-base font-semibold text-[var(--hs-neutral-900)]">
-                    <flux:icon name="information-circle" class="size-5 text-[var(--hs-green-700)]" />
-                    Important Notes
-                </h2>
+            <aside class="order-first lg:order-last rounded-xl border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-50)] p-4 sm:p-6">
+                <details x-data x-init="$el.open = window.matchMedia('(min-width: 1024px)').matches" class="group">
+                <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-base font-semibold text-[var(--hs-neutral-900)] lg:pointer-events-none [&::-webkit-details-marker]:hidden">
+                    <span class="flex items-center gap-2">
+                        <flux:icon name="information-circle" class="size-5 text-[var(--hs-green-700)]" />
+                        Important Notes
+                    </span>
+                    <flux:icon name="chevron-down" class="size-5 text-[var(--hs-neutral-600)] transition group-open:rotate-180 lg:hidden" />
+                </summary>
 
                 <ul class="mt-4 space-y-3.5">
                     @foreach ([
                         'The Letter of Intent is a required document for processing your certificate request.',
                         'Make sure to fill out all fields and sign the letter where indicated.',
                         'You can only upload one file per application.',
-                        'Accepted file types: DOC, DOCX, PDF (Max size: 10MB).',
+                        'Accepted file types: DOC, DOCX, PDF, JPG, PNG, HEIC (Max size: 10MB).',
                     ] as $note)
                         <li class="flex items-start gap-2.5 text-[0.85rem] leading-relaxed text-[var(--hs-neutral-700)]">
                             <flux:icon name="check-circle" class="mt-0.5 size-4 shrink-0 text-[var(--hs-green-700)]" />
@@ -143,6 +147,7 @@
                         </li>
                     @endforeach
                 </ul>
+                </details>
 
                 <hr class="my-5 border-[var(--hs-neutral-200)]">
 

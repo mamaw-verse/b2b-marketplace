@@ -41,7 +41,7 @@ $categories = $shop->relationLoaded('categories') ? $shop->categories->take(3) :
                 @endfor
             </div>
             <span class="text-xs text-[var(--hs-neutral-500)]">{{ number_format((float)$shop->average_rating, 1) }}</span>
-            <span class="text-xs text-[var(--hs-neutral-400)]">({{ $shop->total_reviews }})</span>
+            <span class="text-xs text-[var(--hs-neutral-600)]">({{ $shop->total_reviews }})</span>
         </div>
     @endif
 

@@ -26,7 +26,7 @@
             <div class="hidden sm:flex items-center gap-3 mb-4">
                 <span class="w-6 h-px bg-[var(--hs-gold-500)]"></span>
 
-                <span class="font-sans text-[11px] tracking-[2.2px] uppercase text-[var(--hs-gold-600)]">
+                <span class="font-sans text-xs tracking-[2.2px] uppercase text-[var(--hs-gold-600)]">
                     {{ __('Verified Supplier Catalog — Philippines') }}
                 </span>
             </div>
@@ -46,21 +46,21 @@
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalProductCount }}
                     </b>
-                    {{ __('products') }}
+                    {{ trans_choice('product|products', $this->totalProductCount) }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalSupplierCount }}
                     </b>
-                    {{ __('suppliers') }}
+                    {{ trans_choice('supplier|suppliers', $this->totalSupplierCount) }}
                 </span>
 
                 <span class="font-sans text-xs text-[var(--hs-neutral-800)] border-l-2 border-[var(--hs-neutral-300)] pl-3">
                     <b class="text-[var(--hs-green-700)] font-semibold">
                         {{ $this->totalCategoryCount }}
                     </b>
-                    {{ __('categories') }}
+                    {{ trans_choice('category|categories', $this->totalCategoryCount) }}
                 </span>
             </div>
 
@@ -90,7 +90,7 @@
                         wire:model.live.debounce.300ms="query"
                         type="search"
                         placeholder="{{ __('Search products...') }}"
-                        class="w-full rounded-[var(--hs-radius-pill)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] pl-10 pr-4 py-2.5 text-sm text-[var(--hs-neutral-900)] placeholder:text-[var(--hs-neutral-400)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent shadow-[var(--hs-shadow-sm)] transition"
+                        class="w-full rounded-[var(--hs-radius-pill)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] pl-10 pr-4 py-2.5 text-sm text-[var(--hs-neutral-900)] placeholder:text-[var(--hs-neutral-600)] focus:outline-none focus:ring-2 focus:ring-[var(--hs-green-600)] focus:border-transparent shadow-[var(--hs-shadow-sm)] transition"
                     />
 
                 </div>
@@ -148,7 +148,7 @@
                             <span class="mr-2 flex size-1.5 shrink-0 rounded-full bg-[var(--hs-green-500)]" aria-hidden="true"></span>
                         @endif
                         <span class="truncate">{{ __('All Categories') }}</span>
-                        <span class="ml-auto pl-2 text-[10px] tabular-nums text-[var(--hs-neutral-400)]">{{ $this->totalProductCount }}</span>
+                        <span class="ml-auto pl-2 text-xs tabular-nums text-[var(--hs-neutral-600)]">{{ $this->totalProductCount }}</span>
                     </button>
 
                     @foreach ($this->categoryGroups as $group)
@@ -167,7 +167,7 @@
                                 <span class="truncate">{{ $group->name }}</span>
                                 <span
                                     @class([
-                                        'ml-auto pl-2 text-[10px] tabular-nums',
+                                        'ml-auto pl-2 text-xs tabular-nums',
                                         'text-[var(--hs-green-600)]' => $categoryId === $group->id,
                                         'text-[var(--hs-neutral-400)]' => $categoryId !== $group->id,
                                     ])
@@ -189,7 +189,7 @@
                                             <span class="truncate">{{ $category->name }}</span>
                                             <span
                                                 @class([
-                                                    'ml-auto pl-2 text-[10px] tabular-nums',
+                                                    'ml-auto pl-2 text-xs tabular-nums',
                                                     'text-[var(--hs-green-600)]' => $categoryId === $category->id,
                                                     'text-[var(--hs-neutral-400)]' => $categoryId !== $category->id,
                                                 ])
@@ -239,7 +239,7 @@
                             </p>
                         </div>
 
-                        <div class="hidden sm:block shrink-0 pl-4 text-xs text-[var(--hs-neutral-400)]">
+                        <div class="hidden sm:block shrink-0 pl-4 text-xs text-[var(--hs-neutral-600)]">
                             {{ $this->products->total() }}
                             {{ Str::plural('product', $this->products->total()) }}
                         </div>
