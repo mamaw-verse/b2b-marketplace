@@ -243,6 +243,7 @@
                 @error('terms')<p class="text-sm text-[var(--hs-danger-700)]">{{ $message }}</p>@enderror
             </div>
 
+            <div class="sticky bottom-0 z-10 -mx-4 border-t border-[var(--hs-neutral-200)] bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
             <button
                 type="submit"
                 x-bind:disabled="! isValid || loading"
@@ -257,6 +258,7 @@
                 <span x-show="! loading">{{ __('Create account') }}</span>
                 <span x-show="loading" x-cloak>{{ __('Creating account...') }}</span>
             </button>
+            </div>
         </form>
     </div>
 </x-layouts::auth>

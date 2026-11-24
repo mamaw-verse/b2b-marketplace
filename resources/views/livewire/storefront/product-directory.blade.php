@@ -248,7 +248,7 @@
 
 
                     {{-- Product Cards --}}
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
 
                         @foreach ($this->products as $product)
                             <x-hs-product-card :product="$product" />

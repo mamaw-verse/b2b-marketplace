@@ -30,7 +30,7 @@
                     <button
                         x-data
                         @click="window.dispatchEvent(new CustomEvent('toggle-portal-nav'))"
-                        class="lg:hidden flex size-9 items-center justify-center rounded-lg text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] transition"
+                        class="lg:hidden flex size-11 items-center justify-center rounded-lg text-[var(--hs-neutral-600)] hover:bg-[var(--hs-neutral-100)] transition"
                         aria-label="{{ __('Open navigation menu') }}"
                     >
                         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
@@ -40,7 +40,7 @@
                     {{-- Storefront mobile hamburger — opens the drawer defined in storefront.blade.php --}}
                     <button
                         @click="sfNav = true"
-                        class="sm:hidden flex size-9 items-center justify-center rounded-lg text-[var(--hs-neutral-600)] transition"
+                        class="sm:hidden flex size-11 items-center justify-center rounded-lg text-[var(--hs-neutral-600)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hs-green-600)]"
                         aria-label="{{ __('Open menu') }}"
                     >
                         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>

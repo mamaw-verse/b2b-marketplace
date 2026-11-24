@@ -740,18 +740,22 @@
                         </h2>
 
                         <p class="mt-3 text-base text-[var(--hs-neutral-500)] leading-relaxed max-w-lg">
-                            {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
+                            @if (config('marketplace.features.orders_enabled'))
+                                {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
+                            @else
+                                {{ __('Join verified halal sellers across the Philippines. List your products for free and get discovered by buyers. No monthly charges, no hidden fees.') }}
+                            @endif
                         </p>
 
                         <ul class="mt-6 space-y-3">
-                            @foreach ([
+                            @foreach (array_values(array_filter([
                                 __('Free store registration — no upfront fees'),
-                                __('Only 10% commission when you make a sale'),
+                                config('marketplace.features.orders_enabled') ? __('Only 10% commission when you make a sale') : null,
                                 __('MHCB-verified badge builds buyer trust'),
-                                __('Built-in product & order management'),
-                                __('Integrated payout support (GCash & bank)'),
+                                config('marketplace.features.orders_enabled') ? __('Built-in product & order management') : __('Showcase your products to verified buyers'),
+                                config('marketplace.features.payouts_enabled') ? __('Integrated payout support (GCash & bank)') : null,
                                 __('Dedicated seller dashboard & analytics'),
-                            ] as $point)
+                            ])) as $point)
                                 <li class="flex items-start gap-2.5">
                                     <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--hs-green-100)] text-[var(--hs-green-700)]">
                                         <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
@@ -778,20 +782,25 @@
 
                             {{-- Big 10% --}}
                             <div class="text-center border-b border-[var(--hs-neutral-200)] pb-6 mb-6">
-                                <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
-                                <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
-                                <p class="mt-1 text-xs text-[var(--hs-neutral-400)]">{{ __('No hidden fees. No monthly charges.') }}</p>
+                                @if (config('marketplace.features.orders_enabled'))
+                                    <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
+                                    <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
+                                @else
+                                    <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">{{ __('Free') }}</p>
+                                    <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('To list your business and products') }}</p>
+                                @endif
+                                <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('No hidden fees. No monthly charges.') }}</p>
                             </div>
 
                             {{-- Feature list --}}
                             <ul class="space-y-3.5">
-                                @foreach ([
+                                @foreach (array_values(array_filter([
                                     __('Free store setup & MHCB verification'),
-                                    __('Built-in product & order management'),
-                                    __('Integrated GCash & bank payouts'),
-                                    __('Ad campaigns to reach more buyers'),
+                                    config('marketplace.features.orders_enabled') ? __('Built-in product & order management') : __('Supplier directory listing'),
+                                    config('marketplace.features.payouts_enabled') ? __('Integrated GCash & bank payouts') : null,
+                                    config('marketplace.features.sponsored_content_enabled') ? __('Ad campaigns to reach more buyers') : null,
                                     __('Real-time analytics dashboard'),
-                                ] as $feature)
+                                ])) as $feature)
                                     <li class="flex items-center gap-3">
                                         <span class="size-2 shrink-0 rounded-full bg-[var(--hs-green-500)]"></span>
                                         <span class="text-[0.88rem] text-[var(--hs-neutral-700)]">{{ $feature }}</span>
@@ -800,17 +809,19 @@
                             </ul>
 
                             {{-- Escrow note --}}
+                            @if (config('marketplace.features.escrow_payments_enabled'))
                             <div class="mt-6 rounded-xl border border-[var(--hs-info-200)] bg-[var(--hs-info-50)] px-4 py-3">
                                 <div class="flex items-start gap-2.5">
                                     <flux:icon.lock-closed class="size-4 shrink-0 mt-0.5 text-[var(--hs-info-500)]" />
                                     <div>
                                         <p class="text-[0.78rem] font-bold text-[var(--hs-info-700)]">{{ __('Escrow Payment Protection') }}</p>
-                                        <p class="mt-0.5 text-[0.75rem] text-[var(--hs-info-500)] leading-snug">
+                                        <p class="mt-0.5 text-xs text-[var(--hs-info-700)] leading-snug">
                                             {{ __('Buyer funds are held in escrow and released to you only after delivery is confirmed — protecting both parties on every transaction.') }}
                                         </p>
                                     </div>
                                 </div>
                             </div>
+                            @endif
 
                         </div>
                     </div>

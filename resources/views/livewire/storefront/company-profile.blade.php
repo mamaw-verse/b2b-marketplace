@@ -190,7 +190,7 @@
                     @if ($shop->products->count() > 0)
                         <section>
                             <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('Products') }}</h2>
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="grid grid-cols-2 gap-3 sm:gap-4">
                                 @foreach ($shop->products as $product)
                                     <x-hs-product-card :product="$product" />
                                 @endforeach

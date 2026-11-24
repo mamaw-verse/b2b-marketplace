@@ -126,7 +126,7 @@
     @endphp
 
     <div
-        class="grid grid-cols-1 gap-6 lg:gap-10 lg:grid-cols-2 lg:items-start"
+        class="grid grid-cols-1 gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 md:items-start"
         @if ($product->variants->count() > 0)
             x-data="{
                 variants: {{ \Illuminate\Support\Js::from($variantsForJs) }},
@@ -210,18 +210,18 @@
 
                         {{-- Hover hint — fades after first interaction --}}
                         <div
-                            class="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-[var(--hs-radius-pill)] bg-black/50 text-white text-[11px] font-medium pointer-events-none transition-opacity duration-300"
+                            class="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-[var(--hs-radius-pill)] bg-black/50 text-white text-xs font-medium pointer-events-none transition-opacity duration-300"
                             x-show="showHint && images[active].type !== 'video'"
                             x-transition:leave="transition ease-in duration-500"
                             x-transition:leave-start="opacity-100"
                             x-transition:leave-end="opacity-0"
                             aria-hidden="true"
-                        >{{ __('Hover to zoom · Click to enlarge') }}</div>
+                        ><span class="[@media(hover:none)]:hidden">{{ __('Hover to zoom · Click to enlarge') }}</span><span class="hidden [@media(hover:none)]:inline">{{ __('Tap to enlarge') }}</span></div>
 
                         {{-- Expand button (always-visible affordance) --}}
                         <button
                             type="button"
-                            class="absolute bottom-2 end-2 size-10 flex items-center justify-center rounded-[var(--hs-radius-md)] bg-black/40 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                            class="absolute bottom-2 end-2 size-11 flex items-center justify-center rounded-[var(--hs-radius-md)] bg-black/40 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 focus-visible:opacity-100 transition-opacity"
                             x-show="images[active].type !== 'video'"
                             @click.stop="openLightbox(active)"
                             aria-label="{{ __('Enlarge image') }}"
@@ -822,7 +822,7 @@
                     <div class="rounded-[var(--hs-radius-card)] bg-[var(--hs-green-900)] p-5 flex flex-col gap-4">
                         <div>
                             <p class="text-sm font-semibold text-white">{{ __('Interested in this product?') }}</p>
-                            <p class="text-xs text-[var(--hs-green-300)] mt-0.5">{{ __('Send a Request for Quotation to get a price from the supplier. Suppliers typically reply within 24–48 hrs.') }}</p>
+                            <p class="text-xs text-[var(--hs-green-300)] mt-0.5">{{ __('Send a Request for Quotation to get a price from the supplier.') }}</p>
                         </div>
                         <div class="flex items-center gap-3 flex-wrap">
                             {{-- Primary CTA: high-contrast gold accent for visibility on dark panel --}}

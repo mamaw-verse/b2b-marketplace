@@ -138,7 +138,7 @@
                 <p id="login-caps-lock" x-show="capsLock" x-cloak class="text-sm text-[var(--hs-warning-700)]">{{ __('Caps Lock is on.') }}</p>
             </div>
 
-            <div class="flex min-h-11 items-center justify-between gap-3 text-sm">
+            <div class="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-2 text-sm">
                 <label class="flex min-h-11 cursor-pointer items-center gap-2 text-[var(--hs-neutral-800)]">
                     <input
                         name="remember"

@@ -64,5 +64,6 @@ test('mobile audit captures a screenshot of every public page', function (string
     }
 
     $page->assertPathIs($path)
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth', true)
         ->screenshot(filename: "mobile-audit-{$deviceMethod}-{$pageKey}");
 })->with($mobileAuditCases);
