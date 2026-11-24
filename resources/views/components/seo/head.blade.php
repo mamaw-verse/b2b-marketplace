@@ -41,6 +41,11 @@
 @if ($robots)
 <meta name="robots" content="{{ $robots }}">
 @endif
+@if ($seo?->isHome)
+@foreach (app(\App\Support\Seo\Hreflang::class)->alternates() as $alternate)
+<link rel="alternate" hreflang="{{ $alternate['hreflang'] }}" href="{{ $alternate['href'] }}">
+@endforeach
+@endif
 
 <meta property="og:type" content="{{ $ogType }}">
 <meta property="og:url" content="{{ $canonical }}">

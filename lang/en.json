@@ -2675,5 +2675,7 @@
   "Product Directory — :app": "Product Directory — :app",
   "Quantity: :quantity": "Quantity: :quantity",
   "Target budget: :budget": "Target budget: :budget",
-  "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Your halal certificate for **:shopName** has been reviewed and could not be approved."
+  "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Your halal certificate for **:shopName** has been reviewed and could not be approved.",
+  ":category Products — :app": ":category Products — :app",
+  "Subcategories": "Subcategories"
 }

@@ -168,6 +168,9 @@ final class ProductDirectory extends Component
             crumbUrl: route('storefront.products'),
             listItems: collect($products->items())->filter(fn (mixed $product): bool => $product instanceof Product)->map(fn (Product $product): array => $productSeo->listItem($product))->values()->all(),
             listOffset: ($products->currentPage() - 1) * $products->perPage(),
+            // `/products?category=ID` is a facet of the category's own landing page (T3.1/T3.2):
+            // it is `noindex, follow` (IndexingPolicy) and canonicalises to that page.
+            canonical: $selectedCategory ? route('storefront.category', $selectedCategory) : null,
         ));
 
         return view('livewire.storefront.product-directory');

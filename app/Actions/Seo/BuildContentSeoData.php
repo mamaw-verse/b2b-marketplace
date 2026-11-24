@@ -16,6 +16,8 @@ final class BuildContentSeoData
      * @param  string  $pageType  WebPage, CollectionPage, AboutPage, ...
      * @param  string|null  $crumb  Name of this page in a Home › {crumb} trail; with $crumbUrl.
      * @param  list<array<string, mixed>>  $listItems  Stubs for the entities a listing page shows.
+     * @param  string|null  $canonical  Overrides the request-derived canonical (e.g. a category facet pointing at its category page).
+     * @param  string|null  $robots  Overrides the indexing policy's directive; null keeps it.
      */
     public function handle(
         string $description,
@@ -28,10 +30,14 @@ final class BuildContentSeoData
         ?string $dateModified = null,
         array $listItems = [],
         int $listOffset = 0,
+        ?string $canonical = null,
+        ?string $robots = null,
     ): SeoData {
         return new SeoData(
             title: $title,
             description: $description,
+            canonical: $canonical,
+            robots: $robots,
             pageType: $pageType,
             breadcrumbs: $crumb !== null && $crumbUrl !== null
                 ? [['name' => __('Home'), 'url' => route('home')], ['name' => $crumb, 'url' => $crumbUrl]]

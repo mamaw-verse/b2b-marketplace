@@ -15,11 +15,11 @@
         <a href="{{ route('storefront.products') }}" class="hover:text-[var(--hs-green-700)] transition shrink-0" wire:navigate>{{ __('Products') }}</a>
         @if ($breadcrumbParent)
             <flux:icon name="chevron-right" variant="mini" class="size-4 text-[var(--hs-neutral-300)] shrink-0" aria-hidden="true" />
-            <a href="{{ route('storefront.products', ['category' => $breadcrumbParent->id]) }}" class="hover:text-[var(--hs-green-700)] transition shrink-0" wire:navigate>{{ $breadcrumbParent->name }}</a>
+            <a href="{{ route('storefront.category', $breadcrumbParent) }}" class="hover:text-[var(--hs-green-700)] transition shrink-0" wire:navigate>{{ $breadcrumbParent->name }}</a>
         @endif
         @if ($breadcrumbCategory)
             <flux:icon name="chevron-right" variant="mini" class="size-4 text-[var(--hs-neutral-300)] shrink-0" aria-hidden="true" />
-            <a href="{{ route('storefront.products', ['category' => $breadcrumbCategory->id]) }}" class="hover:text-[var(--hs-green-700)] transition truncate min-w-0" wire:navigate>{{ $breadcrumbCategory->name }}</a>
+            <a href="{{ route('storefront.category', $breadcrumbCategory) }}" class="hover:text-[var(--hs-green-700)] transition truncate min-w-0" wire:navigate>{{ $breadcrumbCategory->name }}</a>
         @endif
         <flux:icon name="chevron-right" variant="mini" class="size-4 text-[var(--hs-neutral-300)] shrink-0" aria-hidden="true" />
         <span class="text-[var(--hs-neutral-700)] font-medium truncate min-w-0" aria-current="page">{{ $product->name }}</span>
@@ -513,7 +513,7 @@
                 {{-- Primary category chip: parent › child as breadcrumb-style --}}
                 @if ($primaryCategory)
                     <a
-                        href="{{ route('storefront.products', ['category' => $primaryCategory->id]) }}"
+                        href="{{ route('storefront.category', $primaryCategory) }}"
                         wire:navigate
                         class="inline-flex items-center gap-1 h-8 px-3 rounded-[var(--hs-radius-pill)] bg-[var(--hs-neutral-0)] text-[var(--hs-neutral-700)] border border-[var(--hs-neutral-200)] text-xs font-medium whitespace-nowrap shrink-0 hover:bg-[var(--hs-neutral-50)] hover:border-[var(--hs-neutral-300)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hs-green-600)] transition max-w-[220px] truncate"
                         :title="'{{ addslashes($primaryCategory->parent?->name) }} › {{ addslashes($primaryCategory->name) }}'"
@@ -565,7 +565,7 @@
                             >
                                 @foreach ($overflowCategories as $cat)
                                     <a
-                                        href="{{ route('storefront.products', ['category' => $cat->id]) }}"
+                                        href="{{ route('storefront.category', $cat) }}"
                                         wire:navigate
                                         role="menuitem"
                                         class="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-[var(--hs-neutral-700)] hover:bg-[var(--hs-neutral-100)] focus-visible:outline-none focus-visible:bg-[var(--hs-neutral-100)] transition"

@@ -11,8 +11,14 @@ use App\Listeners\NotifyBuyerOrderReturned;
 use App\Listeners\PostDisputeStatusMessage;
 use App\Listeners\PostOrderStatusMessage;
 use App\Listeners\ReindexProductsForSubscriptionChange;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Shop;
+use App\Models\ShopCertificate;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Notifications\Channels\ArabicGreetingMailChannel;
+use App\Observers\SitemapInvalidationObserver;
 use App\Search\PostgresSearchEngine;
 use App\Services\DltDisbursementService;
 use App\Services\DltPaymentService;
@@ -98,10 +104,21 @@ final class AppServiceProvider extends ServiceProvider
                 && $user->shop->deleted_at === null;
         });
 
+        $this->observeSitemapSources();
         $this->configureDefaults();
         $this->configureRateLimiting();
         $this->registerSearchEngines();
         $this->shareLegalContactDetails();
+    }
+
+    /**
+     * Keep the cached sitemaps in step with the data they list (T3.3).
+     */
+    protected function observeSitemapSources(): void
+    {
+        foreach ([Product::class, Shop::class, Category::class, ShopCertificate::class, Subscription::class] as $model) {
+            $model::observe(SitemapInvalidationObserver::class);
+        }
     }
 
     /**

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Support\Seo\Visibility;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -43,19 +45,14 @@ final class EnsureCanonicalSlug
     private function isVisible(Model $model): bool
     {
         if ($model instanceof Product) {
-            return Product::marketplaceVisible()->whereKey($model->getKey())->exists();
+            return Visibility::isProductVisible($model);
         }
 
         if ($model instanceof Shop) {
-            $visible = $model->status === 'active';
-
-            if ($visible && config('marketplace.features.subscriptions_enabled')) {
-                $visible = $model->hasActiveSubscription();
-            }
-
-            return $visible;
+            return Visibility::isShopVisible($model);
         }
 
-        return false;
+        // Category pages are public for every category; the slug is the only identity.
+        return $model instanceof Category;
     }
 }

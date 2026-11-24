@@ -2657,5 +2657,7 @@
   "Quantity: :quantity": "Kuantitas: :quantity",
   "Target budget: :budget": "Anggaran target: :budget",
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Sertifikat halal Anda untuk **:shopName** telah ditinjau dan tidak dapat disetujui.",
-  "You have a team invitation": "Anda memiliki undangan tim"
+  "You have a team invitation": "Anda memiliki undangan tim",
+  ":category Products — :app": "Produk :category — :app",
+  "Subcategories": "Subkategori"
 }

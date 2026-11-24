@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: in progress.** Phases 0, 1 and 2 implemented (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). Phases 3–6 are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phases 0, 1, 2 and 3 implemented (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). Phases 4–6 are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -193,7 +193,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 **✅ T2.3 (P0) — `WebPage` + `BreadcrumbList` on every page**
 - `WebPage`/`CollectionPage`/`AboutPage`/`FAQPage` wrapper with `isPartOf`, `breadcrumb`, `primaryImageOfPage`, `inLanguage`.
 - One shared `BuildBreadcrumbNode`, **mirrors the visible breadcrumb**. Note the product view currently shows only one category ancestor chain via `parent`; schema and UI must match (extend both to full ancestry when category pages exist).
-- *Done:* the product page links only the primary category chip (parent is plain text), so the trail is Products › primary category › product; the parent appears in `Product.category` text only.
+- *Done:* the trail mirrors the visible breadcrumb. Since Phase 3 each category links to its landing page, so the product trail is Products › parent group › primary category › product (a product with no sub-category has Products › product).
 
 **✅ T2.4 (P0) — Supplier (company) node**
 - Type `Organization` (kept distinct from the marketplace org) on `/companies/{slug}`: `@id`, `url`, `name` (`storefront_name`), sanitised `description`, `image`/`logo` only if the company has a real uploaded logo (**verify** there is one; otherwise use none rather than the marketplace logo), `address` as `PostalAddress` with **only** `addressLocality`, `addressRegion`, `addressCountry`, `areaServed`, `knowsAbout` from `capabilities`/`value_chain_positions`, `memberOf` → marketplace org.
@@ -223,29 +223,33 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 
 ### Phase 3 — Discovery
 
-**T3.1 (P0) — Public category pages** *(B7)*
+**✅ T3.1 (P0) — Public category pages** *(B7)*
 - New route `GET /categories/{category:slug}` (+ index `/categories` optional). Add `categories` to `marketplace.slugs.reserved` if slugs are ever served at root. Reuse the `canonical.slug` pattern (redirect to the canonical slug).
 - Content: `h1`, unique intro (from `Category.description`, otherwise built from real counts of visible products/companies and real subcategory names), product list using `Product::marketplaceVisible()`, breadcrumb to parent.
 - Make `/products?category={id}` canonical to the category page (301 for legacy `?category=` links is optional; decide after checking inbound links).
 - **AC:** every category with ≥1 visible product has a 200 page with unique title, description and canonical; empty categories are `noindex` (or 404).
+- *Done:* `GET /categories/{category:slug}` (`storefront.category`, `CategoryPage` + `BuildCategorySeoData`); no `/categories` index. A group lists its subcategories' products; subcategory chips link only children that have visible products. Empty categories and pages past the last one return 200 with `noindex, follow`. Legacy `/products?category=ID` links are **not** 301'd (the directory sidebar still filters in place); they are `noindex, follow` and canonical to the category page (T3.2). The home category pills, the product breadcrumb and category chips now link to category pages, and the product `BreadcrumbList` carries the full ancestry (Products › group › category › product). Title is `{Category} Products — {app}`; the description is the category's own or a generated sentence naming the category. Not added to `marketplace.slugs.reserved`: category slugs are not served at the root.
 
-**T3.2 (P0) — Facet and search URL policy** *(B8)*
+**✅ T3.2 (P0) — Facet and search URL policy** *(B8)*
 - Any request carrying search/filter/sort params → `noindex, follow`, canonical to the clean listing URL. `?page=N` self-canonical and indexable up to a reasonable depth.
 - **AC:** parity test over `config('seo.noindex_follow_query_params')`.
+- *Done:* `IndexingPolicy::hasFacetParams()` drives the meta robots tag **and** `X-Robots-Tag` (`noindex, follow`), and `CanonicalUrl` drops `page` for facet requests. The list (`seo.noindex_follow_query_params`) holds the live `category` binding plus the usual search/sort/filter names; tracking parameters stay indexable and only change the canonical. `/companies` has no URL-bound filters today, so only the generic rule applies there.
 
-**T3.3 (P0) — Sitemaps** *(B3)*
+**✅ T3.3 (P0) — Sitemaps** *(B3)*
 - Index `/sitemap.xml` + children: `sitemap-pages.xml`, `sitemap-categories.xml`, `sitemap-companies.xml`, `sitemap-products-{n}.xml` (≤ 50 000 URLs / 50 MB each).
 - Sources: static public routes; categories with visible products; **active shops** (apply the same rules as `EnsureCanonicalSlug::isVisible`, including subscription gating); `Product::marketplaceVisible()`. Slug URLs only.
 - `lastmod` = real `max(updated_at)`; static pages omit it.
 - Cache (Redis) and invalidate on Product/Shop/Category/ShopCertificate changes and on subscription status change (visibility depends on it).
 - Generated dynamically; **no** scheduled write into `public/`.
 - **AC:** no `localhost`; two requests without data changes give identical `lastmod`; a suspended shop or unpublished product is absent.
+- *Done:* `SitemapController` + `BuildSitemap{Index,Pages,Categories,Companies,Products}` (`Support/Seo/Visibility` is now the shared visibility rule, also used by `EnsureCanonicalSlug`). URLs are built from `APP_URL`, never the request host, so a cached file cannot carry an internal hostname. Children with nothing to list are omitted and 404. `lastmod`: product/shop = `updated_at` (shop also its newest certificate), category = newest of itself and its visible products; static pages send none. Cache: version-keyed (`SitemapCache`), flushed by `SitemapInvalidationObserver` (after commit) on Product, Shop, Category, ShopCertificate and Subscription saves/deletes, with a one-hour TTL as a net for mass updates that skip model events. `SEO_SITEMAP_ENABLED` now defaults to **true**; it gates the routes and the `Sitemap:` line in `robots.txt`. Sitemaps are served in every environment (non-production responses still carry `X-Robots-Tag: noindex`), which keeps staging validation (T6.2) possible.
 
-**T3.4 (P1) — hreflang / locale strategy** *(B9, decision D4)*
+**✅ T3.4 (P1) — hreflang / locale strategy** *(B9, decision D4)*
 - Today locale is session-based, so crawlers always see the instance default locale. Recommended minimum: set `html lang`, `og:locale`, JSON-LD `inLanguage` from the **effective** locale; **do not** emit hreflang between locales of one URL.
 - Cross-country hreflang: when `marketplace.portals[*].url` values are configured, emit `<link rel="alternate" hreflang="{locale}-{CC}">` + `x-default` pointing at the equivalent home URLs only (page-level equivalents don't exist across independent deployments).
 - Crawlers must not receive a locale chosen by a cookie/session set via a language switcher on a shared URL; confirm the switcher doesn't change the indexed page (**verify**).
 - **AC:** no hreflang is emitted unless target URLs are configured; emitted hreflang is reciprocal.
+- *Done (D4 = session locale, no cross-locale hreflang):* `Support/Seo/Hreflang` emits `{locale}-{CC}` alternates on the **home page only**, from `marketplace.portals[*].url`, and only when this instance's own portal and at least one other have a URL, so every deployment publishes the same set including a self-reference. `x-default` is emitted only when `SEO_HREFLANG_X_DEFAULT_COUNTRY` names a configured portal (never assumed). `<html lang>`, `og:locale` and JSON-LD `inLanguage` already follow the effective locale. *Verified from source:* the language switcher is `POST /locale` (a private, disallowed path) that only writes the session, and crawlers send no session, so they always receive the instance default locale at the canonical URL.
 
 ### Phase 4 — Social and AI previews
 

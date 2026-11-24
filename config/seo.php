@@ -80,15 +80,64 @@ return [
 
     /*
     | Query parameters whose presence marks a listing URL as `noindex, follow`
-    | and canonicalises it to the clean listing URL (applied in Phase 3, T3.2).
+    | and canonicalises it to the clean listing URL (T3.2). `category` is the
+    | live Livewire #[Url] binding on /products; the rest are the names a
+    | search, filter or sort link would use, so an inbound link carrying one
+    | never creates an indexable duplicate. Tracking parameters (utm_*, fbclid,
+    | gclid, ref) are not facets: they are stripped from the canonical only.
     */
-    'noindex_follow_query_params' => [],
+    'noindex_follow_query_params' => [
+        'search',
+        'q',
+        'query',
+        'category',
+        'categoryId',
+        'sort',
+        'sortBy',
+        'order',
+        'country',
+        'certification',
+    ],
 
     /*
-    | Advertise the sitemap in robots.txt. Flipped to true when the sitemap
-    | routes ship (Phase 3, T3.3) so robots.txt never points at a 404.
+    | XML sitemaps (T3.3): /sitemap.xml plus child files, generated on demand
+    | and cached; also advertised in robots.txt. `SEO_SITEMAP_ENABLED=false`
+    | turns the routes into 404s and drops the robots.txt line.
     */
-    'sitemap_enabled' => (bool) env('SEO_SITEMAP_ENABLED', false),
+    'sitemap_enabled' => (bool) env('SEO_SITEMAP_ENABLED', true),
+
+    'sitemap' => [
+        // Sitemap protocol limit is 50 000 URLs / 50 MB per file.
+        'max_urls_per_file' => 50000,
+
+        // Safety net for mass updates that bypass model events (seconds).
+        'cache_ttl' => (int) env('SEO_SITEMAP_CACHE_TTL', 3600),
+
+        // Public, indexable, non-entity routes (no meaningful lastmod, so none is sent).
+        'static_routes' => [
+            'home',
+            'storefront.companies',
+            'storefront.products',
+            'about',
+            'help.faq',
+            'legal.terms',
+            'legal.privacy',
+            'apply.certificate',
+            'sourcing-request.create',
+        ],
+    ],
+
+    /*
+    | Cross-country hreflang (T3.4). Alternates come from the portals registry
+    | in config/marketplace.php and are only emitted on the home page, and only
+    | when this instance and at least one other portal have a URL configured
+    | (PORTAL_xx_URL), so the set is reciprocal across deployments.
+    | `x_default_country` (SEO_HREFLANG_X_DEFAULT_COUNTRY, e.g. PH) names the
+    | portal used for `x-default`; leave empty to omit it.
+    */
+    'hreflang' => [
+        'x_default_country' => env('SEO_HREFLANG_X_DEFAULT_COUNTRY'),
+    ],
 
     /*
     | AI crawler policy (Phase 5, T5.1).

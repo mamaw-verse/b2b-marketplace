@@ -335,7 +335,7 @@
                     {{ __('All Businesses') }}
                 </a>
                 @foreach ($this->categories as $category)
-                    <a href="{{ route('storefront.products', ['category' => $category->id]) }}" wire:navigate
+                    <a href="{{ route('storefront.category', $category) }}" wire:navigate
                        class="shrink-0 px-3 py-1.5 rounded-lg bg-[var(--hs-neutral-100)] hover:bg-[var(--hs-neutral-200)] text-[var(--hs-neutral-700)] text-xs font-medium whitespace-nowrap transition">
                         {{ $category->name }}
                     </a>

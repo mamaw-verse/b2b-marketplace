@@ -2657,5 +2657,7 @@
   "Quantity: :quantity": "الكمية: :quantity",
   "Target budget: :budget": "الميزانية المستهدفة: :budget",
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "تمت مراجعة شهادة الحلال الخاصة بك لـ **:shopName** ولم يمكن الموافقة عليها.",
-  "You have a team invitation": "لديك دعوة فريق"
+  "You have a team invitation": "لديك دعوة فريق",
+  ":category Products — :app": "منتجات :category — :app",
+  "Subcategories": "الفئات الفرعية"
 }

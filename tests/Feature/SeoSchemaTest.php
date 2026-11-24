@@ -512,7 +512,7 @@ test('product halal signal comes only from the supplier certificate, never a pro
         ->and($plainNode['additionalProperty'] ?? [])->not->toContain(['@type' => 'PropertyValue', 'name' => 'Supplier halal certification', 'value' => 'Active']);
 });
 
-test('the product breadcrumb mirrors what the page links: the primary category chip, with the parent as text only', function () {
+test('the product breadcrumb mirrors the page: parent group and primary category, each linking to its category page', function () {
     $parent = Category::factory()->create(['name' => 'Foods']);
     $child = Category::factory()->childOf($parent)->create(['name' => 'Rice']);
     $product = Product::factory()->published()->create(['name' => 'Jasmine Rice']);
@@ -521,13 +521,15 @@ test('the product breadcrumb mirrors what the page links: the primary category c
     $html = $this->get(route('storefront.product', $product))->assertOk()->getContent();
     $crumbs = schemaNodesOfType(schemaFromHtml($html), 'BreadcrumbList')[0]['itemListElement'];
 
-    expect(array_column($crumbs, 'name'))->toBe(['Products', 'Rice', 'Jasmine Rice'])
+    expect(array_column($crumbs, 'name'))->toBe(['Products', 'Foods', 'Rice', 'Jasmine Rice'])
         ->and(array_column($crumbs, 'item'))->toBe([
             route('storefront.products'),
-            route('storefront.products', ['category' => $child->id]),
+            route('storefront.category', $parent),
+            route('storefront.category', $child),
             route('storefront.product', $product),
         ])
-        ->and($html)->toContain('href="'.route('storefront.products', ['category' => $child->id]).'"');
+        ->and($html)->toContain('href="'.route('storefront.category', $parent).'"')
+        ->and($html)->toContain('href="'.route('storefront.category', $child).'"');
 
     $flat = Product::factory()->published()->create(['name' => 'Plain Item']);
     $flatCrumbs = schemaNodesOfType(pageSchema($this, route('storefront.product', $flat)), 'BreadcrumbList')[0]['itemListElement'];

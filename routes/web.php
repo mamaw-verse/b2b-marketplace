@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisteredStaffUserController;
 use App\Http\Controllers\HumanCheckController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\OrderPaymentCallbackController;
 use App\Http\Controllers\SponsoredContentClickController;
 use App\Http\Controllers\SubscriptionPaymentCallbackController;
@@ -36,6 +37,14 @@ Route::post('/locale', function (Request $request) {
 
 Route::get('/robots.txt', RobotsController::class)->name('robots');
 
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
+Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
+Route::get('/sitemap-companies.xml', [SitemapController::class, 'companies'])->name('sitemap.companies');
+Route::get('/sitemap-products-{page}.xml', [SitemapController::class, 'products'])
+    ->whereNumber('page')
+    ->name('sitemap.products');
+
 Route::post('/human-check', HumanCheckController::class)
     ->middleware('throttle:20,1')
     ->name('human-check');
@@ -46,6 +55,9 @@ Route::livewire('/companies/{shop:slug}', 'storefront.company-profile')
     ->middleware('canonical.slug:shop,storefront.company')
     ->name('storefront.company');
 Route::livewire('/products', 'storefront.product-directory')->name('storefront.products');
+Route::livewire('/categories/{category:slug}', 'storefront.category-page')
+    ->middleware('canonical.slug:category,storefront.category')
+    ->name('storefront.category');
 Route::livewire('/products/{product:slug}', 'storefront.product-detail')
     ->middleware('canonical.slug:product,storefront.product')
     ->name('storefront.product');

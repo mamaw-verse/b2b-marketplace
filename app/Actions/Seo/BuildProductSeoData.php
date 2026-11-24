@@ -55,7 +55,8 @@ final class BuildProductSeoData
     }
 
     /**
-     * Mirrors what the product page links: Products › primary category › product.
+     * Mirrors the breadcrumb the product page shows: Products › parent group ›
+     * primary category › product, each category linking to its landing page.
      *
      * @return list<array{name: string, url: string}>
      */
@@ -66,7 +67,11 @@ final class BuildProductSeoData
         $category = ProductCategoryTrail::primary($product);
 
         if ($category !== null) {
-            $trail[] = ['name' => $category->name, 'url' => route('storefront.products', ['category' => $category->id])];
+            if ($category->parent !== null) {
+                $trail[] = ['name' => $category->parent->name, 'url' => route('storefront.category', $category->parent)];
+            }
+
+            $trail[] = ['name' => $category->name, 'url' => route('storefront.category', $category)];
         }
 
         $trail[] = ['name' => $product->name, 'url' => route('storefront.product', $product)];
