@@ -28,3 +28,9 @@ Schedule::job(new QuotationExpiryJob)->dailyAt('03:30')->timezone('UTC')->withou
 Schedule::job(new PruneStaleOnboardingDraftsJob)->weeklyOn(0, '03:00')->timezone('UTC');
 Schedule::job(new ReconcileMediaOrphansJob)->weeklyOn(0, '04:00')->timezone('UTC');
 Schedule::job(new OrderAutoAcceptJob)->dailyAt('04:00')->timezone('UTC')->withoutOverlapping();
+
+Schedule::command('seo:audit')
+    ->weeklyOn(1, '05:00')
+    ->timezone('UTC')
+    ->environments(['production'])
+    ->withoutOverlapping();
