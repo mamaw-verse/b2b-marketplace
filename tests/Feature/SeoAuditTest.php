@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Seo\AuditSeo;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 
@@ -164,7 +165,7 @@ it('exits non-zero when the audit finds a problem', function () {
 });
 
 it('is scheduled weekly on Mondays at 05:00 UTC, in production only', function () {
-    $event = collect(app(Illuminate\Console\Scheduling\Schedule::class)->events())
+    $event = collect(app(Schedule::class)->events())
         ->first(fn ($event): bool => str_contains((string) $event->command, 'seo:audit'));
 
     expect($event)->not->toBeNull()
