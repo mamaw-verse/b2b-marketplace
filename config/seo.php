@@ -179,13 +179,16 @@ return [
     ],
 
     /*
-    | AI crawler policy (Phase 5, T5.1).
+    | One-sentence description of the marketplace (T5.6), used verbatim by the
+    | Organization and WebSite JSON-LD, /llms.txt and the web manifest. Leave empty
+    | to use the translated default. Paste the same text into the bio of every
+    | profile listed in `social_profiles` so the entity reads the same everywhere.
     */
-    'ai_crawlers' => [],
+    'entity_description' => env('SEO_ENTITY_DESCRIPTION'),
 
     /*
     | Public social profiles for Organization.sameAs. Comma-separated absolute
-    | URLs in SEO_SOCIAL_PROFILES; empty means no `sameAs` is emitted.
+    | http(s) URLs in SEO_SOCIAL_PROFILES; empty means no `sameAs` is emitted.
     */
     'social_profiles' => array_values(array_filter(array_map(
         'trim',

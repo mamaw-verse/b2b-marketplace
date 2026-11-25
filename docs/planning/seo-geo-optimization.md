@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: in progress.** Phases 0, 1, 2 and 3 implemented (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). Phases 4–6 are planning only. Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phases 0, 1, 2, 3 and 5 implemented, and Phase 4 except the open image checks in T4.2 (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). Phase 6 is planning only; **T6.1 (JSON-LD validation in CI) is the next task.** Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -304,8 +304,9 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 - **AC:** `Http::get` with `Googlebot` UA returns body text for home, a category, a product and a company.
 - *Done (audit + fixes):* no `#[Lazy]`, `wire:init` or deferred Livewire component exists, every public page has exactly one `h1`, and the sponsored/hero banners and product cards are server-rendered loops. Accordion/popover content that uses `x-show` (FAQ, the Halal certificate popover) is in the first response, only hidden. Two real gaps were fixed: (1) the product page's main image got `src`/`alt` only from an Alpine binding, so a non-JS crawler saw an empty `<img>`; it now renders them server-side when the gallery leads with an image (Alpine still takes over), and (2) the company page never showed `company_description` although the Organization JSON-LD carries it, so it now has a visible **About** section built from the same `PlainText` the schema uses (markup matches visible content). `tests/Feature/SeoCrawlableContentTest` fetches home, a category, a product and a company with a `Googlebot` UA and asserts the name, description, certificate status, breadcrumbs, products and one `h1` in the raw body. *Known remaining gaps (not changed, UI decisions):* the volume-pricing tiers and variant selector are Alpine-rendered (`x-text`), so non-JS crawlers get the price only from the Product JSON-LD offers; thumbnails and the lightbox are Alpine `x-for` (the main image is covered); the product page has no `<dl>` of specifications because variant attributes are only shown through the Alpine selector. Written without a PHP runtime available, so run `php artisan test --filter=SeoCrawlableContentTest` before merging.
 
-**T5.6 (P2) — Entity consistency**
+**✅ T5.6 (P2) — Entity consistency**
 - `sameAs` from configured social profiles; keep name/description identical to those profiles; document all new env vars in `.env.example`.
+- *Done:* `Support/Seo/EntityProfile` is the single source for the marketplace's name, one-sentence description, `sameAs` and support email. The Organization and WebSite JSON-LD, `/llms.txt` and the web manifest all read it, so they can no longer drift (WebSite and the manifest gained the same `description`). `SEO_ENTITY_DESCRIPTION` overrides the translated default; paste the same text into each social profile bio so the profiles match. `sameAs` now accepts only absolute `http(s)` URLs, trimmed and de-duplicated (previously any scheme `FILTER_VALIDATE_URL` allowed). Every `SEO_*` variable read by `config/seo.php` is documented in `.env.example` (added `SEO_THEME_COLOR`, `SEO_SITEMAP_CACHE_TTL`, `SEO_ENTITY_DESCRIPTION`), and a test fails if one is missing. **Bug fixed along the way:** `config/seo.php` had a second, empty `'ai_crawlers' => []` key (left from Phase 0) that overrode the real search/training lists, so the T5.1 per-bot robots.txt groups were never emitted; the stray key is removed and tests now assert the lists are populated and that no top-level config key is defined twice. *Not automatable:* making the actual profile bios match (and confirming each profile links back to the site) is an operational step. Written without a Composer install available, so run `php artisan test --compact --filter=SeoEntityConsistencyTest` (and `SeoCrawlControlTest`) before merging.
 
 ### Phase 6 — Validation, monitoring, rollout
 
@@ -389,5 +390,5 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 1. **Day 1:** T0.1, T0.2, T0.3, T0.4 (hotfix PR; ship alone).
 2. **Days 2–4:** T0.5, T1.1–T1.3, T2.1.
 3. **Days 5–9:** T2.2–T2.7 in parallel with T3.1–T3.3 and T4.1–T4.2; T5.1–T5.3.
-4. **Days 10–12:** T3.4, T5.4–T5.6, T6.1.
+4. **Days 10–12:** T3.4, T5.4–T5.6, T6.1. *(T3.4 and T5.4–T5.6 done; **T6.1 is next**.)*
 5. **Days 13–14:** T6.2–T6.5 and per-country rollout.

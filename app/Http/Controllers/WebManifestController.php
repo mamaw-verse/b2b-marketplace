@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Support\Seo\EntityProfile;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -12,13 +13,14 @@ use Illuminate\Http\JsonResponse;
  */
 final class WebManifestController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function __invoke(EntityProfile $profile): JsonResponse
     {
-        $name = (string) config('seo.site_name');
+        $name = $profile->name();
 
         return response()->json([
             'name' => $name,
             'short_name' => $name,
+            'description' => $profile->description(),
             'start_url' => '/',
             'scope' => '/',
             'display' => 'browser',

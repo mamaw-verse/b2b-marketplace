@@ -6,6 +6,7 @@ namespace App\Actions\Seo\Schema;
 
 use App\Support\Schema\SchemaGraph;
 use App\Support\Schema\SchemaId;
+use App\Support\Seo\EntityProfile;
 
 /**
  * No SearchAction: marketplace search is not a stable GET URL (the `/products`
@@ -14,6 +15,8 @@ use App\Support\Schema\SchemaId;
  */
 final class BuildWebSiteNode
 {
+    public function __construct(private readonly EntityProfile $profile) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -23,7 +26,8 @@ final class BuildWebSiteNode
             '@type' => 'WebSite',
             '@id' => SchemaId::website(),
             'url' => SchemaId::base().'/',
-            'name' => config('seo.site_name'),
+            'name' => $this->profile->name(),
+            'description' => $this->profile->description(),
             'publisher' => SchemaGraph::ref(SchemaId::organization()),
             'inLanguage' => str_replace('_', '-', app()->getLocale()),
         ];

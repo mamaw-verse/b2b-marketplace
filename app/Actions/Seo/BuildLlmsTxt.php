@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Seo;
 
 use App\Actions\Seo\Sitemap\BuildSitemapCategories;
+use App\Support\Seo\EntityProfile;
 use App\Support\Seo\SitemapXml;
 use App\Support\Seo\TrustFacts;
 use Illuminate\Support\Facades\Route;
@@ -39,16 +40,15 @@ final class BuildLlmsTxt
     public function __construct(
         private readonly TrustFacts $facts,
         private readonly BuildSitemapCategories $categories,
+        private readonly EntityProfile $profile,
     ) {}
 
     public function handle(): string
     {
-        $name = $this->text((string) config('seo.site_name'));
-
         $lines = [
-            '# '.$name,
+            '# '.$this->text($this->profile->name()),
             '',
-            '> '.__(':app is a B2B marketplace that connects buyers with verified halal-certified suppliers, manufacturers and products across the halal supply chain.', ['app' => $name]),
+            '> '.$this->text($this->profile->description()),
         ];
 
         $sentences = $this->facts->sentences();

@@ -6,6 +6,7 @@ namespace App\Actions\Seo\Schema;
 
 use App\Support\Schema\Places;
 use App\Support\Schema\SchemaId;
+use App\Support\Seo\EntityProfile;
 
 /**
  * The marketplace operator (not a supplier company).
@@ -15,6 +16,8 @@ use App\Support\Schema\SchemaId;
  */
 final class BuildOrganizationNode
 {
+    public function __construct(private readonly EntityProfile $profile) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -23,7 +26,7 @@ final class BuildOrganizationNode
         $node = [
             '@type' => 'Organization',
             '@id' => SchemaId::organization(),
-            'name' => config('seo.site_name'),
+            'name' => $this->profile->name(),
             'url' => SchemaId::base().'/',
             'logo' => $this->logo(),
         ];
@@ -33,8 +36,8 @@ final class BuildOrganizationNode
         }
 
         return $node + [
-            'description' => __(':app is a B2B marketplace that connects buyers with verified halal-certified suppliers, manufacturers and products across the halal supply chain.', ['app' => config('seo.site_name')]),
-            'sameAs' => $this->sameAs(),
+            'description' => $this->profile->description(),
+            'sameAs' => $this->profile->sameAs(),
             'contactPoint' => $this->contactPoint(),
             'areaServed' => Places::instanceCountry(),
             'knowsAbout' => ['Halal supply chain', 'Halal certification', 'B2B sourcing'],
@@ -69,24 +72,13 @@ final class BuildOrganizationNode
     }
 
     /**
-     * @return list<string>
-     */
-    private function sameAs(): array
-    {
-        return array_values(array_filter(
-            (array) config('seo.social_profiles', []),
-            static fn (mixed $url): bool => is_string($url) && filter_var($url, FILTER_VALIDATE_URL) !== false,
-        ));
-    }
-
-    /**
      * @return array<string, mixed>|null
      */
     private function contactPoint(): ?array
     {
-        $email = config('seo.contact.email');
+        $email = $this->profile->contactEmail();
 
-        if (! is_string($email) || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        if ($email === null) {
             return null;
         }
 
