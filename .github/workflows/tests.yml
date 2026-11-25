@@ -12,6 +12,41 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # The schema needs PostgreSQL with PostGIS (pg_trgm and pgcrypto ship with the contrib
+    # packages in this image). Everything else the tests touch is faked or in-memory.
+    services:
+      pgsql:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d testing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # Process environment wins over the .env copied from .env.example, so these point the
+    # app at the service above and swap the Sail-only services (redis, minio, reverb) for
+    # in-process drivers.
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: testing
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
+      BROADCAST_CONNECTION: 'null'
+      FILESYSTEM_DISK: local
+      SCOUT_DRIVER: pgsql
 
     steps:
       - name: Checkout code
@@ -22,7 +57,9 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.3'
+          # composer.json requires ^8.4.27 and local development runs 8.5 (Sail).
+          php-version: '8.5'
+          extensions: bcmath, exif, gd, intl, mbstring, pdo_pgsql, pgsql, sodium, zip
           tools: composer:v2
           coverage: none
 
