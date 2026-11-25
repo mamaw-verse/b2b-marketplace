@@ -137,7 +137,9 @@
                 {{-- Main Content (2/3) --}}
                 <div class="lg:col-span-2 space-y-8">
                     {{-- About — the same plain text the Organization JSON-LD carries, so markup matches visible content --}}
-                    @php($aboutText = \App\Support\Schema\PlainText::from($shop->company_description))
+                    @php
+                        $aboutText = \App\Support\Schema\PlainText::from($shop->company_description);
+                    @endphp
                     @if ($aboutText)
                         <section>
                             <h2 class="text-lg font-semibold text-[var(--hs-neutral-900)] mb-4">{{ __('About') }}</h2>
