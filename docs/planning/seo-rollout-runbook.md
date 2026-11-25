@@ -36,8 +36,9 @@ Then check these by hand and note the result:
 Known expectations: eligibility is **Product snippets**, not Merchant listings; no
 `aggregateRating` while `reviews_enabled` is off; FAQ rich results are restricted by Google.
 
-Still open from T4.2: check the dimensions and size of real seller-uploaded product images
-(OG images should be ≥1200×630 and under ~5 MB) and decide whether a generated card is worth it.
+`seo:audit` now rejects social images that are unreadable, over 5 MB or under 600×315, so
+findings on real seller-uploaded product images show up in its output. Still open: decide
+whether a generated card is worth it for B2B.
 
 ## 2. Search Console and Bing Webmaster (T6.3)
 

@@ -24,6 +24,12 @@ use Throwable;
  */
 final class AuditSeo
 {
+    private const int MAX_IMAGE_BYTES = 5 * 1_048_576;
+
+    private const int MIN_IMAGE_WIDTH = 600;
+
+    private const int MIN_IMAGE_HEIGHT = 315;
+
     public function __construct(
         private readonly IndexingPolicy $policy,
         private readonly JsonLdValidator $validator,
@@ -256,20 +262,39 @@ final class AuditSeo
     }
 
     /**
+     * Fetches one advertised social image and checks it the way a link-preview
+     * crawler would (T4.2): HTTP 200, a readable raster image, under the size
+     * cap and at least the minimum large-card dimensions. 1200x630 is the
+     * recommendation, so anything smaller than the floor is an error and
+     * anything between the floor and 1200 wide is accepted.
+     *
      * @param  list<string>  $errors
      */
     private function auditImage(string $url, array &$errors): void
     {
-        try {
-            $response = $this->client()->head($url);
-        } catch (Throwable $exception) {
-            $errors[] = 'Image '.$url.' could not be fetched: '.$exception->getMessage();
+        $response = $this->get($url, $errors, 'Image '.$url);
+
+        if ($response === null) {
+            return;
+        }
+
+        $body = $response->body();
+
+        if (strlen($body) > self::MAX_IMAGE_BYTES) {
+            $errors[] = 'Image '.$url.' is '.round(strlen($body) / 1_048_576, 1).' MB; keep social images under 5 MB.';
+        }
+
+        $size = @getimagesizefromstring($body);
+
+        if ($size === false) {
+            $errors[] = 'Image '.$url.' is not a readable raster image.';
 
             return;
         }
 
-        if ($response->status() !== 200) {
-            $errors[] = 'Image '.$url.' returned HTTP '.$response->status().'.';
+        if ($size[0] < self::MIN_IMAGE_WIDTH || $size[1] < self::MIN_IMAGE_HEIGHT) {
+            $errors[] = 'Image '.$url.' is '.$size[0].'x'.$size[1].'; social previews need at least '
+                .self::MIN_IMAGE_WIDTH.'x'.self::MIN_IMAGE_HEIGHT.' (1200x630 recommended).';
         }
     }
 

@@ -16,6 +16,15 @@ function auditPrivateDisallows(): string
     ));
 }
 
+function auditJpeg(int $width = 1200, int $height = 630): string
+{
+    $image = imagecreatetruecolor($width, $height);
+    ob_start();
+    imagejpeg($image);
+
+    return (string) ob_get_clean();
+}
+
 function auditPage(string $canonical = AUDIT_ORIGIN.'/about', bool $valid = true): string
 {
     $graph = $valid
@@ -38,7 +47,7 @@ function fakeHealthySite(bool $validPage = true, string $canonical = AUDIT_ORIGI
         AUDIT_ORIGIN.'/llms.txt' => Http::response("# 1Halal Store\n\n> Marketplace.\n"),
         AUDIT_ORIGIN.'/sitemap.xml' => Http::response('<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>'.AUDIT_ORIGIN.'/sitemap-pages.xml</loc></sitemap></sitemapindex>'),
         AUDIT_ORIGIN.'/sitemap-pages.xml' => Http::response('<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>'.AUDIT_ORIGIN.'/about</loc></url></urlset>'),
-        AUDIT_ORIGIN.'/og-default.jpg' => Http::response('', 200),
+        AUDIT_ORIGIN.'/og-default.jpg' => Http::response(auditJpeg()),
         AUDIT_ORIGIN.'/*' => Http::response(auditPage($canonical, $validPage)),
     ]);
 }
@@ -104,6 +113,38 @@ it('flags a sitemap that lists an internal host and a broken image', function ()
     $errors = implode("\n", app(AuditSeo::class)->handle(AUDIT_ORIGIN)['errors']);
 
     expect($errors)->toContain('lists an internal URL')->toContain('returned HTTP 404');
+});
+
+it('flags a social image that is too small or not an image', function () {
+    fakeHealthySite();
+    Http::fake([AUDIT_ORIGIN.'/og-default.jpg' => Http::response(auditJpeg(300, 200))]);
+    // The healthy stub registered first wins, so build this scenario from scratch.
+    Http::swap(app(Illuminate\Http\Client\Factory::class));
+    Http::fake([
+        AUDIT_ORIGIN.'/robots.txt' => Http::response("User-agent: *\n".auditPrivateDisallows()."\n\nSitemap: ".AUDIT_ORIGIN."/sitemap.xml\n"),
+        AUDIT_ORIGIN.'/llms.txt' => Http::response("# x\n"),
+        AUDIT_ORIGIN.'/sitemap.xml' => Http::response('<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>'),
+        AUDIT_ORIGIN.'/og-default.jpg' => Http::response(auditJpeg(300, 200)),
+        AUDIT_ORIGIN.'/*' => Http::response(auditPage()),
+    ]);
+
+    $errors = implode("\n", app(AuditSeo::class)->handle(AUDIT_ORIGIN)['errors']);
+
+    expect($errors)->toContain('300x200');
+});
+
+it('flags a social image that is not a readable image', function () {
+    Http::fake([
+        AUDIT_ORIGIN.'/robots.txt' => Http::response("User-agent: *\n".auditPrivateDisallows()."\n\nSitemap: ".AUDIT_ORIGIN."/sitemap.xml\n"),
+        AUDIT_ORIGIN.'/llms.txt' => Http::response("# x\n"),
+        AUDIT_ORIGIN.'/sitemap.xml' => Http::response('<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>'),
+        AUDIT_ORIGIN.'/og-default.jpg' => Http::response('<html>not an image</html>'),
+        AUDIT_ORIGIN.'/*' => Http::response(auditPage()),
+    ]);
+
+    $errors = implode("\n", app(AuditSeo::class)->handle(AUDIT_ORIGIN)['errors']);
+
+    expect($errors)->toContain('not a readable raster image');
 });
 
 it('refuses to audit a noindex deployment unless allowed', function () {
