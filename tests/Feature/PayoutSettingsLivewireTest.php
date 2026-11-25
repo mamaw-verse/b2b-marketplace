@@ -23,7 +23,7 @@ test('component mounts with current setting values from database', function () {
     $component->assertSet('dispute_hold_days', '7')
         ->assertSet('minimum_payout_threshold', '500.00')
         ->assertSet('transaction_fee_amount', '15.00')
-        ->assertSet('commission_fee_rate', '0.03');
+        ->assertSet('commission_fee_rate', '0.10');
 });
 
 test('admin can update dispute hold days', function () {

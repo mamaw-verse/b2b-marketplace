@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Events\OrderCompleted;
 use App\Models\LedgerEntry;
 use App\Models\Order;
+use App\Models\PayoutSetting;
 use Illuminate\Support\Facades\DB;
 
 final class ConfirmReceiptAction
@@ -65,7 +66,7 @@ final class ConfirmReceiptAction
             ]);
 
             // Calculate payout (order total minus platform commission)
-            $commissionRate = (float) config('marketplace.commission_rate', 0.01);
+            $commissionRate = PayoutSetting::getCommissionFeeRate();
             $orderTotal = (float) $locked->order_total;
             $commission = round($orderTotal * $commissionRate, 2);
             $payoutAmount = round($orderTotal - $commission, 2);

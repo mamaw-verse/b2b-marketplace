@@ -31,7 +31,7 @@ test('admin can view all payout settings', function () {
                 'dispute_hold_days' => '7',
                 'minimum_payout_threshold' => '500.00',
                 'transaction_fee_amount' => '15.00',
-                'commission_fee_rate' => '0.03',
+                'commission_fee_rate' => '0.10',
             ],
         ]);
 });
@@ -155,7 +155,7 @@ test('seller with active shop can access fee-rates endpoint', function () {
         ->assertJson([
             'data' => [
                 'transaction_fee_amount' => '15.00',
-                'commission_fee_rate' => '0.03',
+                'commission_fee_rate' => '0.10',
             ],
         ])
         ->assertJsonMissing(['dispute_hold_days'])
@@ -176,7 +176,7 @@ test('seeder produces correct default values', function () {
     expect(PayoutSetting::getDisputeHoldDays())->toBe(7)
         ->and(PayoutSetting::getMinimumPayoutThreshold())->toBe(500.0)
         ->and(PayoutSetting::getTransactionFeeAmount())->toBe(15.0)
-        ->and(PayoutSetting::getCommissionFeeRate())->toBe(0.03);
+        ->and(PayoutSetting::getCommissionFeeRate())->toBe(0.10);
 });
 
 test('update records the user who made the change', function () {

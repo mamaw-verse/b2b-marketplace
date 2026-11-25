@@ -2694,5 +2694,14 @@
   "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.",
   "Request a Product — :app": "Request a Product — :app",
   "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.",
-  "Subcategories": "Subcategories"
+  "Subcategories": "Subcategories",
+  "Suppliers pay a :rate% commission on completed sales.": "Suppliers pay a :rate% commission on completed sales.",
+  "Suppliers pay an annual membership of :amount per year.": "Suppliers pay an annual membership of :amount per year.",
+  "Suppliers pay an annual membership of :amount per year, and the first :months months are free.": "Suppliers pay an annual membership of :amount per year, and the first :months months are free.",
+  "What does it cost to sell on the marketplace?": "What does it cost to sell on the marketplace?",
+  "Join verified halal sellers across the Philippines. Pay a simple annual membership plus a commission when you make a sale. No monthly charges, no hidden fees.": "Join verified halal sellers across the Philippines. Pay a simple annual membership plus a commission when you make a sale. No monthly charges, no hidden fees.",
+  ":months months free, then :amount a year": ":months months free, then :amount a year",
+  "Annual membership of :amount a year": "Annual membership of :amount a year",
+  "Only :rate% commission when you make a sale": "Only :rate% commission when you make a sale",
+  "Commission when you sell": "Commission when you sell"
 }

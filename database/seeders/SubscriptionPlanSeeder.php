@@ -19,7 +19,8 @@ final class SubscriptionPlanSeeder extends Seeder
                 'price' => '600.00',
                 'currency' => 'PHP',
                 'billing_period' => 'yearly',
-                'trial_days' => 180,
+                // Approved: the first six months are waived in the Philippines only.
+                'trial_days' => config('marketplace.instance_country') === 'PH' ? 180 : null,
                 'is_active' => true,
             ]
         );

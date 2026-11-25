@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\PayoutSetting;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
@@ -110,7 +111,7 @@ final class ShopAnalyticsService
             ->where('ledger_entries.type', 'refund')
             ->sum('ledger_entries.amount');
 
-        $commissionRate = (float) config('marketplace.commission_rate', 0.01);
+        $commissionRate = PayoutSetting::getCommissionFeeRate();
         $platformCommission = round($grossSales * $commissionRate, 2);
         $netSales = round($grossSales - $totalRefunds - $platformCommission, 2);
 

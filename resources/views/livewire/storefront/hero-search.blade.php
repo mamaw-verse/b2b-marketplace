@@ -725,6 +725,11 @@
 
         {{-- ── Seller Commission & Escrow ──────────────────────── --}}
         <section id="for-sellers" class="bg-[var(--hs-neutral-0)] border-t border-[var(--hs-neutral-200)]">
+            @php
+                $sellerFees = app(\App\Support\Seo\TrustFacts::class);
+                $sellerMembership = $sellerFees->membership();
+                $sellerCommission = $sellerFees->commissionPercent();
+            @endphp
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
 
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 items-center">
@@ -742,13 +747,19 @@
                         </h2>
 
                         <p class="mt-3 text-base text-[var(--hs-neutral-500)] leading-relaxed max-w-lg">
-                            {{ __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
+                            {{ $sellerMembership
+                                ? __('Join verified halal sellers across the Philippines. Pay a simple annual membership plus a commission when you make a sale. No monthly charges, no hidden fees.')
+                                : __('Join verified halal sellers across the Philippines. Start listing for free — only pay a commission when you make a sale. No monthly charges, no hidden fees.') }}
                         </p>
 
                         <ul class="mt-6 space-y-3">
                             @foreach (array_values(array_filter([
-                                __('Free store registration — no upfront fees'),
-                                __('Only 10% commission when you make a sale'),
+                                $sellerMembership === null
+                                    ? __('Free store registration — no upfront fees')
+                                    : ($sellerMembership['trial_months'] !== null
+                                        ? __(':months months free, then :amount a year', ['months' => $sellerMembership['trial_months'], 'amount' => $sellerMembership['amount']])
+                                        : __('Annual membership of :amount a year', ['amount' => $sellerMembership['amount']])),
+                                __('Only :rate% commission when you make a sale', ['rate' => $sellerCommission]),
                                 __('MHCB-verified badge builds buyer trust'),
                                 config('marketplace.features.orders_enabled') ? __('Built-in product & order management') : __('Showcase your products to verified buyers'),
                                 config('marketplace.features.payouts_enabled') ? __('Integrated payout support (GCash & bank)') : null,
@@ -781,8 +792,8 @@
 
                             {{-- Big 10% --}}
                             <div class="text-center border-b border-[var(--hs-neutral-200)] pb-6 mb-6">
-                                <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">10%</p>
-                                <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ __('Commission only when you sell') }}</p>
+                                <p class="text-7xl font-black text-[var(--hs-green-600)] leading-none tracking-tight">{{ $sellerCommission }}%</p>
+                                <p class="mt-2 text-[0.95rem] font-semibold text-[var(--hs-neutral-800)]">{{ $sellerMembership ? __('Commission when you sell') : __('Commission only when you sell') }}</p>
                                 <p class="mt-1 text-sm text-[var(--hs-neutral-600)]">{{ __('No hidden fees. No monthly charges.') }}</p>
                             </div>
 

@@ -18,7 +18,7 @@ final class PayoutSettingsSeeder extends Seeder
             'dispute_hold_days' => '7',
             'minimum_payout_threshold' => '500.00',
             'transaction_fee_amount' => '15.00',
-            'commission_fee_rate' => '0.03',
+            'commission_fee_rate' => '0.10',
         ];
 
         foreach ($defaults as $key => $value) {

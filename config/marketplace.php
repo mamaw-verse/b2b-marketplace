@@ -48,10 +48,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | Flat commission rate applied to completed orders for platform revenue.
-    | 0.01 = 1%. Used in payout calculations and reports.
+    | 0.10 = 10% (approved rate). This is only the fallback: the admin-editable
+    | `commission_fee_rate` payout setting wins when it exists, and every
+    | calculation, report and public statement reads it through
+    | PayoutSetting::getCommissionFeeRate().
     |
     */
-    'commission_rate' => (float) env('MARKETPLACE_COMMISSION_RATE', 0.01),
+    'commission_rate' => (float) env('MARKETPLACE_COMMISSION_RATE', 0.10),
 
     /*
     |--------------------------------------------------------------------------

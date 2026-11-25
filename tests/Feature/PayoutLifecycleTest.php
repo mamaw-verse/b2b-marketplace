@@ -179,11 +179,11 @@ test('fee calculation applies transaction fee flat and commission fee percentage
     // transaction_fee = 15.00 (flat)
     expect($item->transaction_fee)->toBe('15.00');
 
-    // commission_fee = 1000.00 * 0.03 = 30.00
-    expect($item->commission_fee)->toBe('30.00');
+    // commission_fee = 1000.00 * 0.10 = 100.00
+    expect($item->commission_fee)->toBe('100.00');
 
-    // net_amount = 1000.00 - 15.00 - 30.00 = 955.00
-    expect($item->net_amount)->toBe('955.00');
+    // net_amount = 1000.00 - 15.00 - 100.00 = 885.00
+    expect($item->net_amount)->toBe('885.00');
 });
 
 test('net amount equals gross minus fees', function () {
@@ -192,7 +192,7 @@ test('net amount equals gross minus fees', function () {
     $payout = (new CreatePayoutBatchAction)->execute($setup['shop']->id);
 
     $expectedTxFee = 15.00;
-    $expectedCommission = round(5000.00 * 0.03, 2);
+    $expectedCommission = round(5000.00 * 0.10, 2);
     $expectedNet = round(5000.00 - $expectedTxFee - $expectedCommission, 2);
 
     expect((float) $payout->net_amount)->toBe($expectedNet);
@@ -318,10 +318,10 @@ test('seller cannot see another sellers payouts', function () {
 test('balance endpoint returns correct net releasable amount', function () {
     $setup = createEligibleSetup(2000.00);
 
-    // Net = escrowed 2000.00 - transaction fee 15.00 - commission (2000 * 0.03 = 60.00) = 1925.00
+    // Net = escrowed 2000.00 - transaction fee 15.00 - commission (2000 * 0.10 = 200.00) = 1785.00
     $this->actingAs($setup['seller'])
         ->getJson('/api/v1/hub/payouts/balance')
         ->assertOk()
-        ->assertJsonPath('data.releasable_amount', '1925.00')
+        ->assertJsonPath('data.releasable_amount', '1785.00')
         ->assertJsonPath('data.eligible_orders_count', 1);
 });

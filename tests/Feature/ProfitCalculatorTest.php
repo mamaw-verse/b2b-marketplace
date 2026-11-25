@@ -22,12 +22,12 @@ test('calculator computes correct net for a given sale price', function () {
 
     $this->actingAs($seller);
 
-    // Transaction fee: 15.00, Commission rate: 0.03
-    // For sale_price of 1000: net = 1000 - 15 - (1000 * 0.03) = 1000 - 15 - 30 = 955.00
+    // Transaction fee: 15.00, Commission rate: 0.10
+    // For sale_price of 1000: net = 1000 - 15 - (1000 * 0.10) = 1000 - 15 - 100 = 885.00
     Livewire::test(ProfitCalculator::class)
         ->set('sale_price', '1000')
         ->assertSet('sale_price', '1000')
-        ->assertSee('955.00');
+        ->assertSee('885.00');
 });
 
 test('calculator uses current payout_settings values', function () {
@@ -66,10 +66,10 @@ test('calculator accepts prefill amount prop', function () {
 
     $this->actingAs($seller);
 
-    // prefillAmount of 5000: net = 5000 - 15 - (5000 * 0.03) = 5000 - 15 - 150 = 4835.00
+    // prefillAmount of 5000: net = 5000 - 15 - (5000 * 0.10) = 5000 - 15 - 500 = 4485.00
     Livewire::test(ProfitCalculator::class, ['prefillAmount' => 5000.00])
         ->assertSet('sale_price', '5000.00')
-        ->assertSee('4,835.00');
+        ->assertSee('4,485.00');
 });
 
 test('fee-rates API endpoint returns correct values for authenticated seller', function () {
@@ -82,7 +82,7 @@ test('fee-rates API endpoint returns correct values for authenticated seller', f
 
     $response->assertOk()
         ->assertJsonPath('data.transaction_fee_amount', '15.00')
-        ->assertJsonPath('data.commission_fee_rate', '0.03');
+        ->assertJsonPath('data.commission_fee_rate', '0.10');
 });
 
 test('fee-rates endpoint rejects unauthenticated request', function () {

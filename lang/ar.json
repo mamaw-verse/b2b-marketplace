@@ -2676,5 +2676,14 @@
   "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "لا تجد المنتج الحلال الذي تحتاجه؟ أخبر :app بما تبحث عنه وسيبحث فريق التوريد لدينا في شبكة الموردين المعتمدين لأجلك.",
   "Request a Product — :app": "اطلب منتجًا — :app",
   "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": "تقدم بطلب دعم شهادة الحلال عبر :app: قم بتنزيل خطاب النية، وارفعه مكتملًا وسيتابع فريقنا معك.",
-  "Subcategories": "الفئات الفرعية"
+  "Subcategories": "الفئات الفرعية",
+  "Suppliers pay a :rate% commission on completed sales.": "يدفع الموردون عمولة :rate% على المبيعات المكتملة.",
+  "Suppliers pay an annual membership of :amount per year.": "يدفع الموردون رسوم عضوية سنوية قدرها :amount في السنة.",
+  "Suppliers pay an annual membership of :amount per year, and the first :months months are free.": "يدفع الموردون رسوم عضوية سنوية قدرها :amount في السنة، وتكون الأشهر الـ:months الأولى مجانية.",
+  "What does it cost to sell on the marketplace?": "كم تبلغ تكلفة البيع في السوق؟",
+  "Join verified halal sellers across the Philippines. Pay a simple annual membership plus a commission when you make a sale. No monthly charges, no hidden fees.": "انضم إلى البائعين الحلال الموثّقين في جميع أنحاء الفلبين. ادفع رسوم عضوية سنوية بسيطة بالإضافة إلى عمولة عند إتمام البيع. لا رسوم شهرية ولا رسوم خفية.",
+  ":months months free, then :amount a year": ":months أشهر مجانًا، ثم :amount في السنة",
+  "Annual membership of :amount a year": "عضوية سنوية بقيمة :amount في السنة",
+  "Only :rate% commission when you make a sale": "عمولة :rate% فقط عند إتمام البيع",
+  "Commission when you sell": "عمولة عند البيع"
 }

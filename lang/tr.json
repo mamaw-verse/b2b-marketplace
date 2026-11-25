@@ -2676,5 +2676,14 @@
   "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "İhtiyacınız olan helal ürünü bulamıyor musunuz? :app'e ne aradığınızı söyleyin ve tedarik ekibimiz doğrulanmış tedarikçi ağında sizin için arasın.",
   "Request a Product — :app": "Talep bir Ürün — :app",
   "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": ":app üzerinden helal sertifikasyon desteği için başvurun: Niyet Mektubunu indirin, doldurulduktan sonra yükleyin ve ekibimiz takip etsin.",
-  "Subcategories": "Alt kategoriler"
+  "Subcategories": "Alt kategoriler",
+  "Suppliers pay a :rate% commission on completed sales.": "Tedarikçiler tamamlanan satışlar için %:rate komisyon öder.",
+  "Suppliers pay an annual membership of :amount per year.": "Tedarikçiler yılda :amount tutarında yıllık üyelik ücreti öder.",
+  "Suppliers pay an annual membership of :amount per year, and the first :months months are free.": "Tedarikçiler yılda :amount tutarında yıllık üyelik ücreti öder; ilk :months ay ücretsizdir.",
+  "What does it cost to sell on the marketplace?": "Pazaryerinde satış yapmanın maliyeti nedir?",
+  "Join verified halal sellers across the Philippines. Pay a simple annual membership plus a commission when you make a sale. No monthly charges, no hidden fees.": "Filipinler genelindeki doğrulanmış helal satıcılara katılın. Basit bir yıllık üyelik ücreti ve satış yaptığınızda komisyon ödeyin. Aylık ücret yok, gizli ücret yok.",
+  ":months months free, then :amount a year": ":months ay ücretsiz, sonra yılda :amount",
+  "Annual membership of :amount a year": "Yılda :amount yıllık üyelik",
+  "Only :rate% commission when you make a sale": "Satış yaptığınızda yalnızca %:rate komisyon",
+  "Commission when you sell": "Satış yaptığınızda komisyon"
 }

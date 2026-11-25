@@ -49,7 +49,11 @@ final class PayoutSetting extends Model
 
     public static function getCommissionFeeRate(): float
     {
-        return (float) self::get('commission_fee_rate');
+        $value = self::get('commission_fee_rate');
+
+        // The admin-editable setting wins; the config rate is only the fallback
+        // for an instance whose payout settings have not been seeded yet.
+        return $value === '' ? (float) config('marketplace.commission_rate') : (float) $value;
     }
 
     /**

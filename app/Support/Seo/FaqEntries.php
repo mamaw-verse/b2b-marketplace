@@ -107,6 +107,7 @@ final class FaqEntries
                 ['id' => 'faq-39', 'q' => __('How are halal certificates tracked?'), 'a' => $this->answer(['certificate_tracking'])],
             ],
             'selling' => [
+                ['id' => 'faq-42', 'q' => __('What does it cost to sell on the marketplace?'), 'a' => $this->answer(['membership', 'commission'])],
                 ['id' => 'faq-41', 'q' => __('Can buyers ask suppliers for quotations or message them?'), 'a' => $this->answer(['quotations', 'chat'])],
             ],
             'orders' => [

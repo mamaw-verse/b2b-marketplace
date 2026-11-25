@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\CompanyHub\Hub;
 
 use App\Models\Order;
+use App\Models\PayoutSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -59,7 +60,7 @@ final class Reports extends Component
             ->where('ledger_entries.type', 'refund')
             ->sum('ledger_entries.amount');
 
-        $commissionRate = (float) config('marketplace.commission_rate', 0.01);
+        $commissionRate = PayoutSetting::getCommissionFeeRate();
 
         // Payout metrics (graceful fallback)
         $totalEarned = 0.0;
