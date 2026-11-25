@@ -115,11 +115,7 @@ it('flags a sitemap that lists an internal host and a broken image', function ()
     expect($errors)->toContain('lists an internal URL')->toContain('returned HTTP 404');
 });
 
-it('flags a social image that is too small or not an image', function () {
-    fakeHealthySite();
-    Http::fake([AUDIT_ORIGIN.'/og-default.jpg' => Http::response(auditJpeg(300, 200))]);
-    // The healthy stub registered first wins, so build this scenario from scratch.
-    Http::swap(app(Illuminate\Http\Client\Factory::class));
+it('flags a social image that is too small', function () {
     Http::fake([
         AUDIT_ORIGIN.'/robots.txt' => Http::response("User-agent: *\n".auditPrivateDisallows()."\n\nSitemap: ".AUDIT_ORIGIN."/sitemap.xml\n"),
         AUDIT_ORIGIN.'/llms.txt' => Http::response("# x\n"),
