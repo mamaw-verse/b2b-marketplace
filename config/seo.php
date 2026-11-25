@@ -92,11 +92,18 @@ return [
     |             private paths), so the site can be cited.
     | `training` - model-training bots. Blocked entirely while `block_ai_training` is true
     |             (SEO_BLOCK_AI_TRAINING); otherwise treated like any other crawler.
+    | `grounding` - tokens that gate training AND answer grounding together, so they are
+    |             decided separately (Google-Extended governs Gemini training and Gemini
+    |             Apps/Vertex grounding, and does not affect Google Search). Allowed by
+    |             default so Gemini answers can cite the site; set SEO_BLOCK_AI_GROUNDING=true
+    |             to opt out of both.
     |
     | Each bot gets its own named group because a named group replaces `User-agent: *`,
     | so the private Disallow lines must be repeated inside it.
     */
     'block_ai_training' => (bool) env('SEO_BLOCK_AI_TRAINING', true),
+
+    'block_ai_grounding' => (bool) env('SEO_BLOCK_AI_GROUNDING', false),
 
     'ai_crawlers' => [
         'search' => [
@@ -110,10 +117,12 @@ return [
         'training' => [
             'GPTBot',
             'ClaudeBot',
-            'Google-Extended',
             'CCBot',
             'Applebot-Extended',
             'Bytespider',
+        ],
+        'grounding' => [
+            'Google-Extended',
         ],
     ],
 

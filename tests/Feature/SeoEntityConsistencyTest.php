@@ -136,7 +136,8 @@ test('config/seo.php defines every top-level key once', function () {
 
 test('the AI crawler lists are populated', function () {
     expect(config('seo.ai_crawlers.search'))->not->toBeEmpty()
-        ->and(config('seo.ai_crawlers.training'))->not->toBeEmpty();
+        ->and(config('seo.ai_crawlers.training'))->not->toBeEmpty()
+        ->and(config('seo.ai_crawlers.grounding'))->not->toBeEmpty();
 });
 
 test('every SEO_ environment variable read by config/seo.php is documented in .env.example', function () {

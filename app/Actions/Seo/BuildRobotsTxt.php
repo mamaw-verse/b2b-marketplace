@@ -34,6 +34,13 @@ final class BuildRobotsTxt
             );
         }
 
+        foreach ((array) config('seo.ai_crawlers.grounding', []) as $agent) {
+            $groups[] = $this->group(
+                (string) $agent,
+                config('seo.block_ai_grounding') ? ['Disallow: /'] : $private,
+            );
+        }
+
         $body = implode("\n\n", $groups);
 
         if (config('seo.sitemap_enabled')) {

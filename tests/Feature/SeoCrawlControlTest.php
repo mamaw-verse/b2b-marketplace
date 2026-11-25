@@ -159,7 +159,7 @@ test('every named AI crawler group repeats all private disallows', function () {
         static fn (string $pattern): string => '/'.$pattern,
         app(IndexingPolicy::class)->privatePathPatterns(),
     );
-    $named = [...config('seo.ai_crawlers.search'), ...config('seo.ai_crawlers.training')];
+    $named = [...config('seo.ai_crawlers.search'), ...config('seo.ai_crawlers.training'), ...config('seo.ai_crawlers.grounding')];
 
     expect($named)->not->toBeEmpty();
 
@@ -185,6 +185,23 @@ test('the training toggle changes only the training groups', function () {
     }
 
     expect(array_diff_key($blocked, array_flip($training)))->toBe(array_diff_key($open, array_flip($training)));
+});
+
+test('Google-Extended is allowed by default and blocked only by its own toggle', function () {
+    seoAsProduction();
+    Config::set('seo.block_ai_training', true);
+
+    Config::set('seo.block_ai_grounding', false);
+    $allowed = seoRobotsGroups($this->get('/robots.txt')->getContent());
+
+    Config::set('seo.block_ai_grounding', true);
+    $blocked = seoRobotsGroups($this->get('/robots.txt')->getContent());
+
+    expect(config('seo.ai_crawlers.grounding'))->toBe(['Google-Extended'])
+        ->and(config('seo.ai_crawlers.training'))->not->toContain('Google-Extended')
+        ->and($allowed['Google-Extended'])->not->toContain('/')
+        ->and($blocked['Google-Extended'])->toBe(['/'])
+        ->and(array_diff_key($allowed, ['Google-Extended' => true]))->toBe(array_diff_key($blocked, ['Google-Extended' => true]));
 });
 
 test('answer and user-triggered bots stay allowed even when training bots are blocked', function () {

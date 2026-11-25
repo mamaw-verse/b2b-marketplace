@@ -219,6 +219,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 - *Done:* `dateModified` for `/terms` and `/privacy` comes from `config('seo.content_modified')` and matches the "Last Updated" date on the page; `/faq` stays a plain `WebPage` until T5.4.
 
 **T2.8 (P2, deferred) — Video**
+- *Decision: stays deferred.* `VideoObject` needs a stable `contentUrl`/`embedUrl`, a thumbnail and an upload date, and product videos play from presigned URLs that expire after 30 minutes. B2B product videos rarely earn video rich results, so invalid markup would add risk for little gain. Revisit when videos have a stable public watch URL and a stored poster; until then keep the video visible on the page.
 - Products can have a video (flagged `product_video_enabled`) but playback uses presigned S3 URLs valid 30 minutes. `VideoObject` needs a stable `contentUrl` and `thumbnailUrl`; revisit when a public stable URL and poster exist.
 
 ### Phase 3 — Discovery
@@ -263,6 +264,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 - Make the image URL **versioned** (`?v={updated_at}`) and only send `immutable` for versioned requests (today it is `immutable` for one year on a stable URL, which leaves stale previews after an image change).
 - Companies: use a real company logo/cover if one exists; otherwise the default OG image. Do not use private media.
 - *Done:* the product image route uses `Visibility::isProductVisible()` (so moderation is enforced); `featured_image_url` carries `?v={updated_at}` and only a request with the current token is `immutable` (others get `public, max-age=3600`); product SEO data uses the product photo only while it is publicly visible, otherwise the default image. Companies have no logo/cover upload (D7), so they use the default image. *Dimension/size check done in `seo:audit` (T6.4):* every advertised `og:image`/`twitter:image` is downloaded and must be a readable raster image, under 5 MB and at least 600×315 (1200×630 stays the recommendation). *Still open:* the generated-card decision.
+- *Decision: no generated social cards for now.* Companies have no logo or cover (D7), so a card would only be a name on a template, and rendering five locales (Arabic shaping in particular) is costly. The cheaper path is to add a company logo upload (D7) and use it for `og:image` and `Organization.logo`; revisit cards if share previews underperform after launch.
 - **(verify)** actual dimensions/size of seller-uploaded images; OG images should be ≥1200×630 where possible and < ~5 MB; decide whether a generated card (as in B2C `GenerateSocialImage`) is worth it for B2B or if a default is enough.
 
 **T4.3 (P2) — Favicon/app signals**
@@ -276,7 +278,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 - A named `User-agent` group replaces `*` for that bot, so **repeat the private `Disallow` lines inside every named group**.
 - Verify each vendor's current bot names before launch; they change.
 - **AC:** test asserts every named agent repeats all private disallows; toggle changes only training groups.
-- *Done (D1 taken at the recommended default, **please confirm**):* `config/seo.php` lists `ai_crawlers.search` (`OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`, `Perplexity-User`) and `ai_crawlers.training` (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`, `Applebot-Extended`, `Bytespider`). `BuildRobotsTxt` emits one named group per bot repeating every private `Disallow`; `SEO_BLOCK_AI_TRAINING` (default `true`) turns the training groups into `Disallow: /` and changes nothing else. Googlebot/Bingbot need no group (they follow `*`). Names were cross-checked against a third-party list (Search Engine Journal) because the vendor docs were not reachable from this environment; re-verify against vendor docs before launch (D10). Non-production and `force_noindex` still return a blanket block for everyone.
+- *Done (D1 decided, see §8; vendor names re-checked 2026-11-25):* `config/seo.php` lists `ai_crawlers.search` (`OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`, `Perplexity-User`) `ai_crawlers.training` (`GPTBot`, `ClaudeBot`, `CCBot`, `Applebot-Extended`, `Bytespider`) and `ai_crawlers.grounding` (`Google-Extended`). `BuildRobotsTxt` emits one named group per bot repeating every private `Disallow`; `SEO_BLOCK_AI_TRAINING` (default `true`) turns the training groups into `Disallow: /` and changes nothing else. Googlebot/Bingbot need no group (they follow `*`). `Google-Extended` gates Gemini training **and** Gemini grounding together (it does not affect Google Search), so it has its own group, allowed by default so Gemini can cite the site; `SEO_BLOCK_AI_GROUNDING=true` blocks it. Names were re-checked against Anthropic's and OpenAI's current crawler docs and Google's crawler list: the Anthropic and OpenAI names match, `Claude-Web`/`anthropic-ai` are deprecated, and `ChatGPT-User` and `Perplexity-User` are user-triggered fetchers that may ignore robots.txt. Not re-checked: PerplexityBot, CCBot, Applebot-Extended, Bytespider and Meta's crawler. A shared `__usage_ai-training` robots.txt token is only an Internet-Draft; not adopted. Non-production and `force_noindex` still return a blanket block for everyone.
 
 **T5.2 (P1) — `/llms.txt`**
 - `LlmsTxtController` + `BuildLlmsTxt`, cached, production-only (404 on non-production/force-noindex, like robots).
@@ -376,7 +378,7 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 
 | ID | Question | Notes / recommendation |
 | --- | --- | --- |
-| **D1** | AI-crawler policy | Allow-for-citation vs block-for-training is a business call (T5.1). Recommended default: allow search/answer bots, training bots behind a toggle. |
+| **D1** | AI-crawler policy | **Decided:** allow search/answer bots, block training bots (`SEO_BLOCK_AI_TRAINING`), and allow `Google-Extended` (`SEO_BLOCK_AI_GROUNDING=false`) because it also gates Gemini grounding and cannot be split from training. Flip either toggle to change the policy; re-verify crawler names before each launch. |
 | **D2** | Does the product page show public prices/availability? | If prices are quote-only or gated, emit no `offers`. Decide per the real page (T2.5). |
 | **D3** | Publish certificate registration numbers and expiry dates in schema? | Only if already visible on the company page; suppliers may not expect machine-readable exposure. |
 | **D4** | Locale URL strategy | Keep session-based locale and no cross-locale hreflang (minimum), or introduce locale-prefixed URLs (larger project, out of scope here). |
