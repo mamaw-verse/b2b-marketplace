@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
-use App\Models\Category;
-use App\Models\Shop;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Actions\Seo\BuildCompanySeoData;
 use App\Actions\Seo\BuildContentSeoData;
+use App\Models\Category;
+use App\Models\Shop;
 use App\Support\Seo\SeoResolver;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;

@@ -33,8 +33,8 @@
             <div class="col-span-2 sm:w-32">
                 <flux:input wire:model.live.debounce.500ms="shopId" label="{{ __('Shop ID') }}" placeholder="{{ __('Filter by shop') }}" size="sm" class="w-full sm:w-32" />
             </div>
-            <flux:date-picker wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
-            <flux:date-picker wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
+            <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
+            <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
         </div>
 
         {{-- Mobile: stacked card list --}}

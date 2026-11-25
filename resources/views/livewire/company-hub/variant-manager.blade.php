@@ -66,6 +66,7 @@
                                 size="sm"
                                 :icon="$variant['status'] === 'published' ? 'archive-box' : 'arrow-up-circle'"
                                 wire:click="toggleStatus({{ $variant['id'] }})"
+                                tooltip="{{ $variant['status'] === 'published' ? __('Archive') : __('Publish') }}"
                             >
                                 <span class="hidden sm:inline">{{ $variant['status'] === 'published' ? __('Archive') : __('Publish') }}</span>
                             </flux:button>

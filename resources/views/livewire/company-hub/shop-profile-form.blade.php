@@ -11,145 +11,142 @@
 
             {{-- ── Business Identity ─────────────────────────────────────── --}}
             @php $identityHasErrors = $errors->hasAny(['registered_business_name', 'business_structure', 'slug']); @endphp
-            <flux:accordion transition wire:key="profile-identity-{{ $identityHasErrors ? 'err' : 'ok' }}">
-                <flux:accordion.item :expanded="true">
-                    <flux:accordion.heading>{{ __('Business Identity') }}</flux:accordion.heading>
-                    <flux:accordion.content>
-                        <div class="space-y-5 pt-2">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <flux:input wire:model="registered_business_name" :label="__('Registered Business Name')" required />
-                                    @error('registered_business_name') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                                <div>
-                                    <flux:select wire:model="business_structure" :label="__('Business Structure')">
-                                        <flux:select.option value="sole_proprietorship">{{ __('Sole Proprietorship') }}</flux:select.option>
-                                        <flux:select.option value="partnership">{{ __('Partnership') }}</flux:select.option>
-                                        <flux:select.option value="corporation">{{ __('Corporation') }}</flux:select.option>
-                                    </flux:select>
-                                    @error('business_structure') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                            </div>
-
-                            <div>
-                                <flux:input wire:model="slug" :label="__('Storefront URL slug')" placeholder="{{ __('Leave blank to generate from the storefront name') }}" />
-                                <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
-                                    {{ __('Public URL:') }} <span class="font-medium">{{ url('/companies/'.($slug ?: Str::slug($storefront_name))) }}</span>
-                                    {{ __('Changing the slug keeps the old link working.') }}
-                                </p>
-                                @error('slug') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                            </div>
+            <details open class="group rounded-lg border border-[var(--hs-neutral-200)]" wire:key="profile-identity-{{ $identityHasErrors ? 'err' : 'ok' }}">
+                <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-semibold text-[var(--hs-neutral-900)] select-none [&::-webkit-details-marker]:hidden">
+                    <span>{{ __('Business Identity') }}</span>
+                    <flux:icon.chevron-down class="size-4 text-[var(--hs-neutral-500)] transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+                <div class="space-y-5 p-4 pt-0">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <flux:input wire:model="registered_business_name" :label="__('Registered Business Name')" required />
+                            @error('registered_business_name') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                         </div>
-                    </flux:accordion.content>
-                </flux:accordion.item>
-            </flux:accordion>
+                        <div>
+                            <flux:select wire:model="business_structure" :label="__('Business Structure')">
+                                <flux:select.option value="sole_proprietorship">{{ __('Sole Proprietorship') }}</flux:select.option>
+                                <flux:select.option value="partnership">{{ __('Partnership') }}</flux:select.option>
+                                <flux:select.option value="corporation">{{ __('Corporation') }}</flux:select.option>
+                            </flux:select>
+                            @error('business_structure') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <flux:input wire:model="slug" :label="__('Storefront URL slug')" placeholder="{{ __('Leave blank to generate from the storefront name') }}" />
+                        <p class="mt-1 text-xs text-[var(--hs-neutral-500)]">
+                            {{ __('Public URL:') }} <span class="font-medium">{{ url('/companies/'.($slug ?: Str::slug($storefront_name))) }}</span>
+                            {{ __('Changing the slug keeps the old link working.') }}
+                        </p>
+                        @error('slug') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </details>
 
             {{-- ── Contact ───────────────────────────────────────────────── --}}
             @php $contactHasErrors = $errors->hasAny(['phone', 'email', 'address_1', 'address_2', 'city', 'province', 'zip_code']); @endphp
-            <flux:accordion transition wire:key="profile-contact-{{ $contactHasErrors ? 'err' : 'ok' }}">
-                <flux:accordion.item :expanded="$contactHasErrors">
-                    <flux:accordion.heading>{{ __('Contact') }}</flux:accordion.heading>
-                    <flux:accordion.content>
-                        <div class="space-y-5 pt-2">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <flux:input wire:model="phone" :label="__('Contact Phone')" />
-                                    @error('phone') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                                <div>
-                                    <flux:input wire:model="email" type="email" :label="__('Contact Email')" />
-                                    @error('email') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                            </div>
-
-                            <div>
-                                <flux:input wire:model="address_1" :label="__('Address Line 1')" required />
-                                @error('address_1') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                            </div>
-
-                            <div>
-                                <flux:input wire:model="address_2" :label="__('Address Line 2')" />
-                                @error('address_2') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <flux:input wire:model="city" :label="__('City')" required />
-                                    @error('city') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                                <div>
-                                    <flux:input wire:model="province" :label="__('Province')" required />
-                                    @error('province') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                                <div>
-                                    <flux:input wire:model="zip_code" :label="__('ZIP Code')" required />
-                                    @error('zip_code') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                            </div>
+            <details {{ $contactHasErrors ? 'open' : '' }} class="group rounded-lg border border-[var(--hs-neutral-200)]" wire:key="profile-contact-{{ $contactHasErrors ? 'err' : 'ok' }}">
+                <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-semibold text-[var(--hs-neutral-900)] select-none [&::-webkit-details-marker]:hidden">
+                    <span>{{ __('Contact') }}</span>
+                    <flux:icon.chevron-down class="size-4 text-[var(--hs-neutral-500)] transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+                <div class="space-y-5 p-4 pt-0">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <flux:input wire:model="phone" :label="__('Contact Phone')" />
+                            @error('phone') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                         </div>
-                    </flux:accordion.content>
-                </flux:accordion.item>
-            </flux:accordion>
+                        <div>
+                            <flux:input wire:model="email" type="email" :label="__('Contact Email')" />
+                            @error('email') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <flux:input wire:model="address_1" :label="__('Address Line 1')" required />
+                        @error('address_1') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <flux:input wire:model="address_2" :label="__('Address Line 2')" />
+                        @error('address_2') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <flux:input wire:model="city" :label="__('City')" required />
+                            @error('city') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <flux:input wire:model="province" :label="__('Province')" required />
+                            @error('province') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <flux:input wire:model="zip_code" :label="__('ZIP Code')" required />
+                            @error('zip_code') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+                </div>
+            </details>
 
             {{-- ── Operations ────────────────────────────────────────────── --}}
             @php $operationsHasErrors = $errors->hasAny(['product_categories', 'fda_lto_number', 'average_production_lead_time', 'export_readiness_status']); @endphp
-            <flux:accordion transition wire:key="profile-operations-{{ $operationsHasErrors ? 'err' : 'ok' }}">
-                <flux:accordion.item :expanded="$operationsHasErrors">
-                    <flux:accordion.heading>{{ __('Operations') }}</flux:accordion.heading>
-                    <flux:accordion.content>
-                        <div class="space-y-5 pt-2">
-                            <div>
-                                <flux:label>{{ __('Product Categories') }}</flux:label>
-                                <flux:text class="mt-1 mb-3">{{ __('Select the product categories you sell or manufacture.') }}</flux:text>
+            <details {{ $operationsHasErrors ? 'open' : '' }} class="group rounded-lg border border-[var(--hs-neutral-200)]" wire:key="profile-operations-{{ $operationsHasErrors ? 'err' : 'ok' }}">
+                <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-semibold text-[var(--hs-neutral-900)] select-none [&::-webkit-details-marker]:hidden">
+                    <span>{{ __('Operations') }}</span>
+                    <flux:icon.chevron-down class="size-4 text-[var(--hs-neutral-500)] transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+                <div class="space-y-5 p-4 pt-0">
+                    <div>
+                        <flux:label>{{ __('Product Categories') }}</flux:label>
+                        <flux:text class="mt-1 mb-3">{{ __('Select the product categories you sell or manufacture.') }}</flux:text>
 
-                                @if ($this->categoryGroups->isEmpty())
-                                    <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No categories are available yet.') }}</p>
-                                @else
-                                    <div class="space-y-4">
-                                        @foreach ($this->categoryGroups as $group)
-                                            <div wire:key="category-group-{{ $group->id }}">
-                                                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">{{ $group->name }}</p>
-                                                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                                    @foreach ($group->children->isNotEmpty() ? $group->children : collect([$group]) as $category)
-                                                        <label
-                                                            wire:key="category-{{ $category->id }}"
-                                                            class="flex min-h-11 items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2.5 text-sm text-[var(--hs-neutral-800)] cursor-pointer hover:border-[var(--hs-green-400)] transition"
-                                                        >
-                                                            <flux:checkbox wire:model="product_categories" value="{{ $category->id }}" />
-                                                            <span>{{ $category->name }}</span>
-                                                        </label>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endforeach
+                        @if ($this->categoryGroups->isEmpty())
+                            <p class="text-sm text-[var(--hs-neutral-500)]">{{ __('No categories are available yet.') }}</p>
+                        @else
+                            <div class="space-y-4">
+                                @foreach ($this->categoryGroups as $group)
+                                    <div wire:key="category-group-{{ $group->id }}">
+                                        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--hs-neutral-500)]">{{ $group->name }}</p>
+                                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                            @foreach ($group->children->isNotEmpty() ? $group->children : collect([$group]) as $category)
+                                                <label
+                                                    wire:key="category-{{ $category->id }}"
+                                                    class="flex min-h-11 items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] bg-[var(--hs-neutral-0)] px-3 py-2.5 text-sm text-[var(--hs-neutral-800)] cursor-pointer hover:border-[var(--hs-green-400)] transition"
+                                                >
+                                                    <flux:checkbox wire:model="product_categories" value="{{ $category->id }}" />
+                                                    <span>{{ $category->name }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                @endif
-                                @error('product_categories') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                                @endforeach
                             </div>
+                        @endif
+                        @error('product_categories') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <flux:input wire:model="fda_lto_number" :label="__('FDA LTO Number')" />
-                                    @error('fda_lto_number') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                                <div>
-                                    <flux:input wire:model="average_production_lead_time" type="number" min="0" :label="__('Avg. Production Lead Time (days)')" />
-                                    @error('average_production_lead_time') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                                </div>
-                            </div>
-
-                            <div>
-                                <flux:select wire:model="export_readiness_status" :label="__('Export Readiness')">
-                                    <flux:select.option value="never_exported">{{ __('Never Exported') }}</flux:select.option>
-                                    <flux:select.option value="exporting_regionally">{{ __('Exporting Regionally') }}</flux:select.option>
-                                    <flux:select.option value="exporting_globally">{{ __('Exporting Globally') }}</flux:select.option>
-                                </flux:select>
-                                @error('export_readiness_status') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-                            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <flux:input wire:model="fda_lto_number" :label="__('FDA LTO Number')" />
+                            @error('fda_lto_number') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
                         </div>
-                    </flux:accordion.content>
-                </flux:accordion.item>
-            </flux:accordion>
+                        <div>
+                            <flux:input wire:model="average_production_lead_time" type="number" min="0" :label="__('Avg. Production Lead Time (days)')" />
+                            @error('average_production_lead_time') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <flux:select wire:model="export_readiness_status" :label="__('Export Readiness')">
+                            <flux:select.option value="never_exported">{{ __('Never Exported') }}</flux:select.option>
+                            <flux:select.option value="exporting_regionally">{{ __('Exporting Regionally') }}</flux:select.option>
+                            <flux:select.option value="exporting_globally">{{ __('Exporting Globally') }}</flux:select.option>
+                        </flux:select>
+                        @error('export_readiness_status') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </details>
 
             {{-- ── Value Chain & Capabilities ────────────────────────────── --}}
             @php
@@ -177,39 +174,38 @@
                 ];
                 $capabilitiesHaveErrors = $errors->hasAny(['value_chain_positions', 'capabilities']);
             @endphp
-            <flux:accordion transition wire:key="profile-capabilities-{{ $capabilitiesHaveErrors ? 'err' : 'ok' }}">
-                <flux:accordion.item :expanded="$capabilitiesHaveErrors">
-                    <flux:accordion.heading>{{ __('Value Chain & Capabilities') }}</flux:accordion.heading>
-                    <flux:accordion.content>
-                        <div class="space-y-5 pt-2">
-                            {{-- Each option is a full-width label (min 44px tall) so the whole row is the tap target --}}
-                            <flux:checkbox.group wire:model="value_chain_positions" :label="__('Value Chain Positions')" :description="__('Select all that apply to your business.')">
-                                <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                    @foreach ($valueChainOptions as $value => $label)
-                                        <label class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] px-3 py-2.5 text-sm text-[var(--hs-neutral-800)] transition hover:border-[var(--hs-green-400)]">
-                                            <flux:checkbox value="{{ $value }}" />
-                                            <span>{{ $label }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </flux:checkbox.group>
-                            @error('value_chain_positions') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
-
-                            <flux:checkbox.group wire:model="capabilities" :label="__('Capabilities')" :description="__('Select all capabilities your business offers.')">
-                                <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                    @foreach ($capabilityOptions as $value => $label)
-                                        <label class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] px-3 py-2.5 text-sm text-[var(--hs-neutral-800)] transition hover:border-[var(--hs-green-400)]">
-                                            <flux:checkbox value="{{ $value }}" />
-                                            <span>{{ $label }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </flux:checkbox.group>
-                            @error('capabilities') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+            <details {{ $capabilitiesHaveErrors ? 'open' : '' }} class="group rounded-lg border border-[var(--hs-neutral-200)]" wire:key="profile-capabilities-{{ $capabilitiesHaveErrors ? 'err' : 'ok' }}">
+                <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-semibold text-[var(--hs-neutral-900)] select-none [&::-webkit-details-marker]:hidden">
+                    <span>{{ __('Value Chain & Capabilities') }}</span>
+                    <flux:icon.chevron-down class="size-4 text-[var(--hs-neutral-500)] transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+                <div class="space-y-5 p-4 pt-0">
+                    {{-- Each option is a full-width label (min 44px tall) so the whole row is the tap target --}}
+                    <flux:checkbox.group wire:model="value_chain_positions" :label="__('Value Chain Positions')" :description="__('Select all that apply to your business.')">
+                        <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($valueChainOptions as $value => $label)
+                                <label class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] px-3 py-2.5 text-sm text-[var(--hs-neutral-800)] transition hover:border-[var(--hs-green-400)]">
+                                    <flux:checkbox value="{{ $value }}" />
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
                         </div>
-                    </flux:accordion.content>
-                </flux:accordion.item>
-            </flux:accordion>
+                    </flux:checkbox.group>
+                    @error('value_chain_positions') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+
+                    <flux:checkbox.group wire:model="capabilities" :label="__('Capabilities')" :description="__('Select all capabilities your business offers.')">
+                        <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($capabilityOptions as $value => $label)
+                                <label class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[var(--hs-radius-card)] border border-[var(--hs-neutral-200)] px-3 py-2.5 text-sm text-[var(--hs-neutral-800)] transition hover:border-[var(--hs-green-400)]">
+                                    <flux:checkbox value="{{ $value }}" />
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </flux:checkbox.group>
+                    @error('capabilities') <p class="mt-1 text-xs text-[var(--hs-danger-500)]">{{ $message }}</p> @enderror
+                </div>
+            </details>
 
             {{-- Sticky on mobile so Save is reachable from any section of this long form --}}
             <div class="sticky bottom-0 z-10 -mx-6 -mb-6 flex items-center justify-end gap-3 border-t border-[var(--hs-neutral-100)] bg-[var(--hs-neutral-0)] px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:pt-4 sm:pb-6">

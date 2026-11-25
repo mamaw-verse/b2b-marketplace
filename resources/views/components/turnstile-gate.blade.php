@@ -27,7 +27,7 @@
     let _widgetId = null;
     let _widgetPromise = null;
     let _pendingResolve = null;
-    let _pendingReject = null;
+    let _pendingFailure = null;
     let _expiresAt = 0;
     let _ensuringPromise = null;
 
@@ -84,34 +84,34 @@
                         if (_pendingResolve) {
                             const res = _pendingResolve;
                             _pendingResolve = null;
-                            _pendingReject = null;
+                            _pendingFailure = null;
                             res(token);
                         }
                     },
                     'error-callback': () => {
                         showToast('Verification failed, please try again.');
-                        if (_pendingReject) {
-                            const rej = _pendingReject;
+                        if (_pendingFailure) {
+                            const rej = _pendingFailure;
                             _pendingResolve = null;
-                            _pendingReject = null;
+                            _pendingFailure = null;
                             rej(new Error('Turnstile verification failed'));
                         }
                     },
                     'expired-callback': () => {
                         _expiresAt = 0;
-                        if (_pendingReject) {
-                            const rej = _pendingReject;
+                        if (_pendingFailure) {
+                            const rej = _pendingFailure;
                             _pendingResolve = null;
-                            _pendingReject = null;
+                            _pendingFailure = null;
                             rej(new Error('Turnstile expired'));
                         }
                     },
                     'timeout-callback': () => {
                         showToast('Verification failed, please try again.');
-                        if (_pendingReject) {
-                            const rej = _pendingReject;
+                        if (_pendingFailure) {
+                            const rej = _pendingFailure;
                             _pendingResolve = null;
-                            _pendingReject = null;
+                            _pendingFailure = null;
                             rej(new Error('Turnstile timed out'));
                         }
                     },
@@ -130,12 +130,12 @@
             try {
                 await initWidget();
                 _pendingResolve = resolve;
-                _pendingReject = reject;
+                _pendingFailure = reject;
                 window.turnstile.reset(_widgetId);
                 window.turnstile.execute(_widgetId);
             } catch (e) {
                 _pendingResolve = null;
-                _pendingReject = null;
+                _pendingFailure = null;
                 reject(e);
             }
         });

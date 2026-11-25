@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Actions\Seo\BuildContentSeoData;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\SponsoredContent;
+use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
-use App\Actions\Seo\BuildContentSeoData;
-use App\Support\Seo\SeoResolver;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;

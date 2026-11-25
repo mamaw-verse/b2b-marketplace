@@ -2660,7 +2660,6 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Sijil halal anda untuk **:shopName** telah disemak dan tidak dapat diluluskan.",
   "You have a team invitation": "Anda mempunyai jemputan pasukan",
   ":category Products — :app": "Produk :category — :app",
-  "Subcategories": "Subkategori",
   "How are suppliers verified?": "Bagaimanakah pembekal disahkan?",
   "How are halal certificates tracked?": "Bagaimanakah sijil halal dijejaki?",
   "Can buyers ask suppliers for quotations or message them?": "Bolehkah pembeli meminta sebut harga daripada pembekal atau menghantar mesej kepada mereka?",
@@ -2673,5 +2672,9 @@
   "Buyers can place and track orders with suppliers on the platform.": "Pembeli boleh membuat dan menjejaki pesanan dengan pembekal di platform.",
   "Order payments are protected by escrow.": "Pembayaran pesanan dilindungi oleh escrow.",
   "Buyers can raise a dispute on an order.": "Pembeli boleh membangkitkan pertikaian ke atas pesanan.",
-  "Buyers can leave ratings and reviews on products.": "Pembeli boleh memberi penilaian dan ulasan pada produk."
+  "Buyers can leave ratings and reviews on products.": "Pembeli boleh memberi penilaian dan ulasan pada produk.",
+  "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "Tidak menemui produk halal yang anda perlukan? Beritahu :app apa yang anda cari dan pasukan sumber kami akan mencari dalam rangkaian pembekal yang disahkan untuk anda.",
+  "Request a Product — :app": "Permintaan satu Produk — :app",
+  "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": "Mohon sokongan pensijilan halal melalui :app: muat turun Surat Niat, muat naik kembali setelah lengkap dan pasukan kami akan membuat susulan.",
+  "Subcategories": "Subkategori"
 }

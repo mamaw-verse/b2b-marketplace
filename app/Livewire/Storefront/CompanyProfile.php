@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Actions\Seo\BuildCompanySeoData;
 use App\Models\Conversation;
 use App\Models\Shop;
-use App\Actions\Seo\BuildCompanySeoData;
 use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;

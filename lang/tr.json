@@ -2660,7 +2660,6 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "**:shopName** için helal sertifikanız incelendi ancak onaylanamadı.",
   "You have a team invitation": "Bir ekip davetiniz var",
   ":category Products — :app": ":category Ürünleri — :app",
-  "Subcategories": "Alt kategoriler",
   "How are suppliers verified?": "Tedarikçiler nasıl doğrulanır?",
   "How are halal certificates tracked?": "Helal sertifikaları nasıl takip edilir?",
   "Can buyers ask suppliers for quotations or message them?": "Alıcılar tedarikçilerden teklif isteyebilir veya onlara mesaj gönderebilir mi?",
@@ -2673,5 +2672,9 @@
   "Buyers can place and track orders with suppliers on the platform.": "Alıcılar platform üzerinde tedarikçilerle sipariş verebilir ve siparişleri takip edebilir.",
   "Order payments are protected by escrow.": "Sipariş ödemeleri emanet (escrow) ile korunur.",
   "Buyers can raise a dispute on an order.": "Alıcılar bir sipariş için anlaşmazlık bildirebilir.",
-  "Buyers can leave ratings and reviews on products.": "Alıcılar ürünler için puan verebilir ve yorum yazabilir."
+  "Buyers can leave ratings and reviews on products.": "Alıcılar ürünler için puan verebilir ve yorum yazabilir.",
+  "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "İhtiyacınız olan helal ürünü bulamıyor musunuz? :app'e ne aradığınızı söyleyin ve tedarik ekibimiz doğrulanmış tedarikçi ağında sizin için arasın.",
+  "Request a Product — :app": "Talep bir Ürün — :app",
+  "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": ":app üzerinden helal sertifikasyon desteği için başvurun: Niyet Mektubunu indirin, doldurulduktan sonra yükleyin ve ekibimiz takip etsin.",
+  "Subcategories": "Alt kategoriler"
 }

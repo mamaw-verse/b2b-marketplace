@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Actions\Seo\BuildProductSeoData;
 use App\Actions\Storefront\RecordProductShareAction;
 use App\Models\Product;
-use App\Actions\Seo\BuildProductSeoData;
 use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\RateLimiter;

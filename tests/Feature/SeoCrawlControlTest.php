@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Support\Seo\IndexingPolicy;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
 function seoAsProduction(): void
@@ -81,12 +82,12 @@ test('robots.txt, the header and the policy share the same private path list', f
     $policy = app(IndexingPolicy::class);
 
     foreach ($policy->privatePathPatterns() as $pattern) {
-        expect($policy->isPrivatePath(Illuminate\Http\Request::create('/'.$pattern)))->toBeTrue()
-            ->and($policy->isPrivatePath(Illuminate\Http\Request::create('/'.$pattern.'/child')))->toBeTrue();
+        expect($policy->isPrivatePath(Request::create('/'.$pattern)))->toBeTrue()
+            ->and($policy->isPrivatePath(Request::create('/'.$pattern.'/child')))->toBeTrue();
     }
 
-    expect($policy->isPrivatePath(Illuminate\Http\Request::create('/products')))->toBeFalse()
-        ->and($policy->isPrivatePath(Illuminate\Http\Request::create('/companies/acme')))->toBeFalse();
+    expect($policy->isPrivatePath(Request::create('/products')))->toBeFalse()
+        ->and($policy->isPrivatePath(Request::create('/companies/acme')))->toBeFalse();
 });
 
 test('brand image assets exist with the expected dimensions', function () {

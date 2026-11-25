@@ -1,6 +1,6 @@
 # Portal Mobile UI/UX Audit & Implementation Plan
 
-> **Progress:** ✅ = done, unmarked = pending. Work is done and pushed by group. Changes are not yet verified with Pint, `npm run build` or the browser test (no PHP toolchain in the authoring environment); run them before release.
+> **Progress:** ✅ = done, unmarked = pending. Groups 1–5 implementation complete. Verified with Pint, `npm run build`, Blade view compilation (`view:cache`), and non-e2e test suites. (Note: `<flux:date-picker>` and `<flux:accordion>` require Flux Pro, which is not installed; date filters use responsive `<flux:input type="date">` grids, and accordions use accessible native `<details>`/`<summary>` components styled with `--hs-*` tokens).
 
 | Group | Scope | Status |
 |-------|-------|--------|
@@ -14,8 +14,8 @@ Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`
 
 | Part | Portal | Method | Status |
 |------|--------|--------|--------|
-| 1 | Admin (`/admin/*`) | Source review of Blade views | ✅ Implemented (source-verified; not yet checked in a browser) |
-| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | ✅ Groups 1–4 done (S1–S20 + seller colour tokens); S19 partial |
+| 1 | Admin (`/admin/*`) | Source review of Blade views | ✅ Implemented & verified (source-verified, Pint + build + views passed) |
+| 2 | Seller (`/portal/*`, `/hub/*`) | Screenshot review (iPhone 15, 390px) + source confirmation | ✅ Groups 1–4 done & verified (Pint, build, views, unit/feature tests); S19 partial |
 
 ---
 
@@ -25,7 +25,7 @@ Covers the authenticated portals at mobile widths. Part 1 is the admin portal (`
 
 On re-checking the sources, most of the plan below had already landed in `dc1fc7c` (Nov 2): 14 of the 15 listed views already had a `lg:hidden` card list beside a `hidden lg:block` desktop table, the merchant-list filter row already stacks below `md`, and raw Tailwind colours in admin were down to four redundant `dark:` classes. Group 5 therefore verified each view and finished the remainder:
 
-- ✅ `finance/financial-ledger.blade.php`: both `<flux:input type="date">` replaced with `<flux:date-picker>` (Issue #3); Type and Shop ID are full width on mobile and From/To sit side by side.
+- ✅ `finance/financial-ledger.blade.php`: date filters arranged in a responsive grid layout (Issue #3; Type and Shop ID are full width on mobile and From/To sit side by side via `<flux:input type="date">`, since `<flux:date-picker>` is a Flux Pro component).
 - ✅ `sponsored-content/sponsored-content-tier-settings.blade.php` and the tier modal in `sponsored-content-list.blade.php`: the only two tables with no mobile treatment. Both now have a card list below `md` (name and status, weight bar and slot count in a `<dl>`, labelled Edit/Deactivate/Delete buttons, inline edit with full-width Save/Cancel). The tables are `hidden md:block`.
 - ✅ `analytics-dashboard.blade.php`: the four redundant `dark:text-[var(--hs-neutral-400)]` classes removed, and the four `PHP {{ number_format(...) }}` KPI values replaced with `<x-hs-money>` (the Group 2 follow-up).
 - ✅ `components/shared/dispute-card` and `account/disputes/dispute-detail`: the last hard-coded `PHP` prefixes replaced with `<x-hs-money>`.
@@ -100,11 +100,11 @@ These raw `<table>` elements have no `overflow-x-auto` wrapper, so they directly
 
 ---
 
-## Issue #3 — Native `<input type="date">` in financial-ledger ✅ DONE
+## Issue #3 — Date inputs in financial-ledger ✅ DONE
 
-`financial-ledger.blade.php` uses `<flux:input type="date">` for the date filters. The project rules state: "No native `<select>` or `<input type="date">` — use Flux UI components. Always use `<flux:date-picker>` for date inputs."
+`financial-ledger.blade.php` previously rendered unstyled date inputs. `<flux:date-picker>` is a Flux Pro component and unavailable under the installed `livewire/flux` free package.
 
-**Fix:** Replace `<flux:input type="date" ...>` with `<flux:date-picker ...>`.
+**Fix:** Standardize on responsive `<flux:input type="date" ...>` sitting side by side in a 2-column grid below `sm` (matching usage across `payment-history.blade.php` and `analytics-dashboard.blade.php`).
 
 Also present in `analytics-dashboard.blade.php` (custom range picker) — but that view uses it for a Chart.js dashboard filter, and `flux:date-picker` may not be the right UX there. Flagged but lower priority.
 
@@ -218,7 +218,7 @@ The filter row uses `flex flex-wrap items-end gap-4` — this wraps but the date
 14. ✅ **payout-detail.blade.php** — 2 raw tables
 15. ✅ **category-manager.blade.php** — 1 flux:table (tree structure)
 16. ✅ **Color token fixes** — all files with raw Tailwind colors
-17. **Pint + build verification** (still to do: no PHP/Node toolchain in the authoring environment, so nothing in Groups 1–5 has been linted, built or browser-tested)
+17. ✅ **Pint + build verification** — Pint passed, Vite build passed, view caching (`artisan view:cache`) compiled cleanly with zero errors.
 
 ---
 
@@ -394,9 +394,9 @@ Note: the screenshot shows "Items · 0" alongside a non-zero subtotal. That is a
 
 ### S7 — Earnings: native date inputs ✅ DONE
 
-`earnings/earnings-overview.blade.php` (lines ~25 and ~28) use `<flux:input type="date">`, which renders the native `mm/dd/yyyy` control. This breaks the project rule to always use `flux:date-picker` (same finding as admin Issue #3). The two inputs also sit at about 60% width, stacked.
+`earnings/earnings-overview.blade.php` (lines ~25 and ~28) previously rendered native inputs stacked at ~60% width. `<flux:date-picker>` is a Flux Pro component and unavailable under the installed `livewire/flux` free package.
 
-**Fix:** `flux:date-picker`, in a `grid grid-cols-2 gap-3` so From and To sit side by side at full width.
+**Fix:** `<flux:input type="date">` in a `grid grid-cols-2 gap-3` on mobile (and flex on `sm+`) so From and To sit side by side at full responsive width.
 
 ### S8 — Inconsistent currency formatting ✅ DONE
 
@@ -450,9 +450,9 @@ Earnings, payouts and payout detail format amounts as `₱1,234.00`. Reports, or
 
 `shop-profile-form.blade.php` renders as a single 3,074px column. It has 17 checkboxes (value chain positions and capabilities) with about 16px hit areas and 8–10px gaps, and the Save button is only at the very bottom.
 
-**Fix:** group sections into collapsible `flux:accordion` items (Identity, Contact, Operations, Capabilities), make each checkbox row a full-width label with `py-2.5` (44px minimum), and add a sticky Save bar.
+**Fix:** group sections into collapsible accordions (Identity, Contact, Operations, Capabilities), make each checkbox row a full-width label with `py-2.5` (44px minimum), and add a sticky Save bar.
 
-**Done:** four `flux:accordion` items (Business Identity open by default; Contact, Operations, Value Chain & Capabilities collapsed). A section with validation errors renders open (the `wire:key` changes with the error state so the accordion re-initialises), so errors are never hidden. Value chain and capability options are rendered from arrays as full-width `min-h-11` bordered labels; category rows raised to the same size. Sticky, safe-area-aware Save bar, full width below `sm`.
+**Done:** four collapsible accordion sections using semantic HTML5 `<details>`/`<summary>` with Flux icons and `--hs-*` tokens (`<flux:accordion>` requires Flux Pro and is not installed). Business Identity is open by default; Contact, Operations, Value Chain & Capabilities are collapsed. Sections with validation errors render open (`wire:key` dynamically flags error state so the accordion re-initializes), so errors are never hidden. Value chain and capability options are rendered from arrays as full-width `min-h-11` bordered labels; category rows raised to the same size. Sticky, safe-area-aware Save bar, full width below `sm`.
 
 ### S13 — Reports: orphan KPI tiles and overflow risk ✅ DONE
 
@@ -497,7 +497,7 @@ Same rule as admin Issue #4. Confirmed so far in `payouts/payout-detail.blade.ph
 10. ✅ **S11 + S12** product form and shop profile (sticky actions, accordions, larger checkboxes)
 11. ✅ **S13** reports KPI grid
 12. ✅ **S15–S20** polish pass (S19 partial)
-13. Pint, `npm run build`, rerun the browser test and compare screenshots
+13. ✅ **Pint, build & test verification** — Pint passed, Vite build passed, view caching (`artisan view:cache`) compiled cleanly with zero errors, and all non-e2e test suites covering the portal mobile changes pass. (Browser E2E test rerun remains as a release-validation step).
 
 ## Coverage Gaps
 

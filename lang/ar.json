@@ -2660,7 +2660,6 @@
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "تمت مراجعة شهادة الحلال الخاصة بك لـ **:shopName** ولم يمكن الموافقة عليها.",
   "You have a team invitation": "لديك دعوة فريق",
   ":category Products — :app": "منتجات :category — :app",
-  "Subcategories": "الفئات الفرعية",
   "How are suppliers verified?": "كيف يتم التحقق من الموردين؟",
   "How are halal certificates tracked?": "كيف يتم تتبع شهادات الحلال؟",
   "Can buyers ask suppliers for quotations or message them?": "هل يمكن للمشترين طلب عروض أسعار من الموردين أو مراسلتهم؟",
@@ -2673,5 +2672,9 @@
   "Buyers can place and track orders with suppliers on the platform.": "يمكن للمشترين تقديم الطلبات مع الموردين وتتبعها على المنصة.",
   "Order payments are protected by escrow.": "مدفوعات الطلبات محمية بنظام الضمان (إسكرو).",
   "Buyers can raise a dispute on an order.": "يمكن للمشترين رفع نزاع بشأن الطلب.",
-  "Buyers can leave ratings and reviews on products.": "يمكن للمشترين ترك تقييمات ومراجعات للمنتجات."
+  "Buyers can leave ratings and reviews on products.": "يمكن للمشترين ترك تقييمات ومراجعات للمنتجات.",
+  "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "لا تجد المنتج الحلال الذي تحتاجه؟ أخبر :app بما تبحث عنه وسيبحث فريق التوريد لدينا في شبكة الموردين المعتمدين لأجلك.",
+  "Request a Product — :app": "اطلب منتجًا — :app",
+  "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": "تقدم بطلب دعم شهادة الحلال عبر :app: قم بتنزيل خطاب النية، وارفعه مكتملًا وسيتابع فريقنا معك.",
+  "Subcategories": "الفئات الفرعية"
 }

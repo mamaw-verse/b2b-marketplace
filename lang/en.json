@@ -2678,7 +2678,6 @@
   "Target budget: :budget": "Target budget: :budget",
   "Your halal certificate for **:shopName** has been reviewed and could not be approved.": "Your halal certificate for **:shopName** has been reviewed and could not be approved.",
   ":category Products — :app": ":category Products — :app",
-  "Subcategories": "Subcategories",
   "How are suppliers verified?": "How are suppliers verified?",
   "How are halal certificates tracked?": "How are halal certificates tracked?",
   "Can buyers ask suppliers for quotations or message them?": "Can buyers ask suppliers for quotations or message them?",
@@ -2691,5 +2690,9 @@
   "Buyers can place and track orders with suppliers on the platform.": "Buyers can place and track orders with suppliers on the platform.",
   "Order payments are protected by escrow.": "Order payments are protected by escrow.",
   "Buyers can raise a dispute on an order.": "Buyers can raise a dispute on an order.",
-  "Buyers can leave ratings and reviews on products.": "Buyers can leave ratings and reviews on products."
+  "Buyers can leave ratings and reviews on products.": "Buyers can leave ratings and reviews on products.",
+  "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.": "Can't find the halal product you need? Tell :app what you are looking for and our sourcing team will search the verified supplier network for you.",
+  "Request a Product — :app": "Request a Product — :app",
+  "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.": "Apply for halal certification support through :app: download the Letter of Intent, upload it completed and our team will follow up.",
+  "Subcategories": "Subcategories"
 }

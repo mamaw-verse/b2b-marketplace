@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Storefront;
 
+use App\Actions\Seo\BuildContentSeoData;
 use App\Concerns\RequiresHumanPass;
 use App\Mail\CertificationApplicationAcknowledgment;
 use App\Models\CertificationApplication;
 use App\Models\User;
 use App\Notifications\CertificationInterestNotification;
-use App\Actions\Seo\BuildContentSeoData;
 use App\Support\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;

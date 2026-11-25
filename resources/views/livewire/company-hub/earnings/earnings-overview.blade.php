@@ -21,8 +21,8 @@
 
         {{-- Filters --}}
         <div class="grid grid-cols-2 items-end gap-3 border-t border-[var(--hs-neutral-100)] px-6 pt-5 sm:flex sm:flex-wrap sm:gap-4">
-            <flux:date-picker wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
-            <flux:date-picker wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
+            <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" size="sm" />
+            <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" size="sm" />
         </div>
 
         {{-- Transaction List --}}
