@@ -14,7 +14,7 @@
             <ul class="space-y-1 text-sm text-[var(--hs-neutral-600)]">
                 <li>{{ __('Controller: Ismail Abaya') }}</li>
                 <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
-                <li>{{ __('Privacy email: admin@gmail.com') }}</li>
+                <li>{{ __('Privacy email: admin@1halalstore.com') }}</li>
                 @if ($adminPhone)
                     <li>{{ __('Phone: :phone', ['phone' => $adminPhone]) }}</li>
                 @endif
@@ -105,7 +105,7 @@
 
     <section id="section-13" class="py-6 scroll-mt-24">
         <h2 class="text-[1.05rem] font-bold text-[var(--hs-neutral-900)]">{{ __('13. How to Exercise Your Rights') }}</h2>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Send a request to the Data Protection Officer at admin@gmail.com with sufficient information to verify your identity and understand your request. We may need to retain certain information where required by law or necessary to establish, exercise or defend legal claims.') }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('Send a request to the Data Protection Officer at admin@1halalstore.com with sufficient information to verify your identity and understand your request. We may need to retain certain information where required by law or necessary to establish, exercise or defend legal claims.') }}</p>
     </section>
 
     <section id="section-14" class="py-6 scroll-mt-24">
@@ -140,7 +140,7 @@
             <ul class="mt-2 space-y-1 text-sm text-[var(--hs-neutral-600)]">
                 <li>{{ __('Operator: Ismail Abaya') }}</li>
                 <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
-                <li>{{ __('Privacy email: admin@gmail.com') }}</li>
+                <li>{{ __('Privacy email: admin@1halalstore.com') }}</li>
                 <li>{{ __('DPO: Ismail Abaya') }}</li>
             </ul>
         </div>

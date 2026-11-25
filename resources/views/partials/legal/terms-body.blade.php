@@ -171,8 +171,8 @@
             <ul class="mt-2 space-y-1 text-sm text-[var(--hs-neutral-600)]">
                 <li>{{ __('Operator: Ismail Abaya') }}</li>
                 <li>{{ __('Address: BO. Taytay, El Salvador City, Misamis Oriental 9017') }}</li>
-                <li>{{ __('Support email: admin@gmail.com') }}</li>
-                <li>{{ __('Customer support: admin@gmail.com') }}</li>
+                <li>{{ __('Support email: admin@1halalstore.com') }}</li>
+                <li>{{ __('Customer support: admin@1halalstore.com') }}</li>
             </ul>
         </div>
         <p class="mt-3 text-sm leading-relaxed text-[var(--hs-neutral-700)]">{{ __('By clicking “I Agree,” registering an account, placing an order, listing products or otherwise using the Platform, you acknowledge that you have read and agreed to these Terms of Service.') }}</p>

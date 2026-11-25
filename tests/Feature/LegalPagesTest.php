@@ -95,7 +95,7 @@ test('privacy page shows controller details and hides phone when unset', functio
     $response->assertOk();
     $response->assertSee('Controller: Ismail Abaya');
     $response->assertSee('BO. Taytay, El Salvador City, Misamis Oriental 9017');
-    $response->assertSee('admin@gmail.com');
+    $response->assertSee('admin@1halalstore.com');
     $response->assertSee('Data Protection Officer: Ismail Abaya');
     $response->assertSee('Effective Date: September 16, 2026');
     $response->assertDontSee('To be confirmed');

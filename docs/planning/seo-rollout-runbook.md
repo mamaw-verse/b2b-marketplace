@@ -9,8 +9,8 @@ tables at the bottom of this file (one row per run, per country instance).
 - [ ] `php artisan test --compact` is green in CI (B15 resolved; includes the SEO suites).
 - [ ] Re-verify vendor drift (D10): crawler names in `config/seo.php` against each vendor's
       current docs; Google structured-data and Rich Results requirements.
-- [ ] Confirm D1 (AI-crawler policy: `SEO_BLOCK_AI_TRAINING`), and replace the placeholder
-      `admin@gmail.com` in the FAQ with the real support address (`SEO_CONTACT_EMAIL`).
+- [ ] Confirm D1 (AI-crawler policy: `SEO_BLOCK_AI_TRAINING`), and set `SEO_CONTACT_EMAIL=admin@1halalstore.com`
+      so the Organization `contactPoint` matches the address shown in the FAQ, Terms and Privacy pages.
 - [ ] Set per-instance env: `APP_URL`, `MARKETPLACE_INSTANCE_COUNTRY`, `SEO_SOCIAL_PROFILES`,
       `SEO_ENTITY_DESCRIPTION`, `PORTAL_xx_URL` (+ `SEO_HREFLANG_X_DEFAULT_COUNTRY` if wanted).
 
