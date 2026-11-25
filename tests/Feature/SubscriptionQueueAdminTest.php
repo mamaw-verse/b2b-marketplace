@@ -317,21 +317,14 @@ test('forceActivate is rejected for a non-pending_payment subscription', functio
         'status' => 'active',
     ]);
 
-    $c = Livewire::actingAs($this->admin)->test(SubscriptionQueue::class)->set('confirmingActivateId', $subscription->id);
-    $threw = null;
-    try {
-        $c->call('forceActivate');
-    } catch (Throwable $e) {
-        $threw = $e::class.': '.$e->getMessage();
-    }
-    expect([
-        'threw' => $threw,
-        'db_status' => Subscription::find($subscription->id)?->status,
-        'confirming' => $c->get('confirmingActivateId'),
-        'sub_id' => $subscription->id,
-        'pending_count' => Subscription::where('status', 'pending_payment')->count(),
-        'resp_status' => $c->lastState?->getResponse()?->status ?? null,
-    ])->toBe(['DEBUG']);
+    // findOrFail() inside forceActivate() throws ModelNotFoundException when the
+    // subscription status is not pending_payment, but Livewire catches it and
+    // converts it to a 404 response — no validation errors surface.
+    Livewire::actingAs($this->admin)
+        ->test(SubscriptionQueue::class)
+        ->set('confirmingActivateId', $subscription->id)
+        ->call('forceActivate')
+        ->assertStatus(404);
 });
 
 // ──────────────────────────────────────────────────────────────

