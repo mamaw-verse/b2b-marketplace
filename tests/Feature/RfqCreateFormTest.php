@@ -39,7 +39,7 @@ test('buyer without a profile lands on step 1', function () {
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
         ->assertSet('step', 1)
         ->assertSee('Set up your buyer profile')
-        ->assertSee('Continue to RFQ');
+        ->assertSee('Continue to Request for Quotation');
 });
 
 test('buyer with an existing profile lands directly on step 2', function () {
@@ -47,7 +47,7 @@ test('buyer with an existing profile lands directly on step 2', function () {
         ->test(RfqCreateForm::class, ['shop_id' => $this->shop->id])
         ->assertSet('step', 2)
         ->assertDontSee('Set up your buyer profile')
-        ->assertSee('Send RFQ');
+        ->assertSee('Send Request for Quotation');
 });
 
 test('the RFQ form renders without redirecting even when buyer profile is absent', function () {
@@ -85,7 +85,7 @@ test('saveProfile creates the buyer profile and advances to step 2', function ()
         ->call('saveProfile')
         ->assertHasNoErrors()
         ->assertSet('step', 2)
-        ->assertSee('Send RFQ');
+        ->assertSee('Send Request for Quotation');
 
     expect($noProfileBuyer->fresh()->buyerProfile)->not->toBeNull()
         ->and($noProfileBuyer->fresh()->buyerProfile->business_name)->toBe('Acme Supplies');
@@ -364,8 +364,8 @@ test('submitting stays on the page and shows an in-place success message with a 
         ->call('submit')
         ->assertHasNoErrors()
         ->assertNoRedirect()
-        ->assertSee('RFQ submitted')
-        ->assertSee('Go to My RFQs')
+        ->assertSee('Request for Quotation submitted')
+        ->assertSee('Go to My Requests for Quotation')
         ->assertSee(route('account.rfqs.index'), false)
         ->assertDontSee('wire:submit="submit"', false);
 
@@ -421,5 +421,5 @@ test('a seller viewing their own shop sees the self-RFQ blocked state', function
     Livewire::actingAs($seller)
         ->test(RfqCreateForm::class, ['shop_id' => $ownShop->id])
         ->assertSee('You cannot request a quote from your own business')
-        ->assertDontSee('Send RFQ');
+        ->assertDontSee('Send Request for Quotation');
 });

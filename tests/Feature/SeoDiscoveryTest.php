@@ -424,8 +424,11 @@ function discoveryPortals(array $urls): array
         $portals[] = [
             'country_code' => $country,
             'display_name' => $country,
+            'card_heading' => mb_strtoupper($country),
+            'flag' => '🏳',
             'locale' => $locale,
             'url' => $urls[$country] ?? null,
+            'landmark_image' => '/images/countries/'.mb_strtolower($country).'.jpg',
         ];
     }
 

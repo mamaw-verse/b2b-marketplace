@@ -6,6 +6,7 @@ namespace App\Actions\Seo;
 
 use App\Actions\Seo\Schema\BuildSupplierNode;
 use App\Models\Shop;
+use App\Support\Schema\PlainText;
 use App\Support\Schema\SchemaId;
 use App\Support\Seo\SeoData;
 use App\ValueObjects\PublicCompany;
@@ -23,7 +24,7 @@ final class BuildCompanySeoData
     public function handle(Shop $shop): SeoData
     {
         $description = filled($shop->company_description)
-            ? Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags((string) $shop->company_description)) ?? ''), 160)
+            ? Str::limit((string) PlainText::from($shop->company_description), 160)
             : __('Discover :name on :app — a verified halal-certified business on the marketplace.', ['name' => $shop->storefront_name, 'app' => config('app.name')]);
 
         $company = PublicCompany::fromShop($shop);

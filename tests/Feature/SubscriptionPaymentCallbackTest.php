@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
+    // The callback routes are behind the subscriptions feature flag (off in .env.example).
+    config()->set('marketplace.features.subscriptions_enabled', true);
+
     Queue::fake();
     Event::fake();
 

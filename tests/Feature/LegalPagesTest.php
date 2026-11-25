@@ -49,16 +49,14 @@ test('storefront footer links to legal pages', function () {
     $response->assertSee(route('help.faq'));
 });
 
-test('register page shows terms checkbox with full-document modal and gated agree button', function () {
+test('register page shows a terms checkbox linking to the terms and privacy pages', function () {
     $response = $this->get(route('register'));
 
     $response->assertOk();
     $response->assertSee('name="terms"', false);
-    $response->assertSee('Terms of Service and Privacy Policy');
-    $response->assertSee('Limitation of Liability');
-    $response->assertSee('Data Breaches and Security Incidents');
-    $response->assertSee('Scroll to the bottom to enable Agree');
-    $response->assertSee('Agree');
+    $response->assertSee('By creating an account, you agree to our');
+    $response->assertSee(route('legal.terms'));
+    $response->assertSee(route('legal.privacy'));
 });
 
 test('registration requires terms acceptance', function () {

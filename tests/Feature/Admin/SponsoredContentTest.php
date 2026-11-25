@@ -30,6 +30,7 @@ beforeEach(function () {
     $this->silverTier = SponsoredContentTier::firstOrCreate(['name' => 'Silver'], ['priority_weight' => 50]);
 
     Storage::fake('local');
+    Storage::fake('s3');
     $this->media = Media::factory()->create([
         'uploaded_by_id' => $this->admin->id,
         'extension' => 'jpg',

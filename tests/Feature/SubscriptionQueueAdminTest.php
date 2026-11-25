@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    config()->set('marketplace.features.subscriptions_enabled', true);
+
     $this->seed(RolePermissionSeeder::class);
     Event::fake();
 
