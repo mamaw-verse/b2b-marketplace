@@ -6,7 +6,7 @@
 **Scope:** Schema.org JSON-LD · Open Graph / social previews · crawl control (robots, sitemaps, hreflang) · GEO (Generative Engine Optimization)
 **Source plan adapted from:** `mamaw-verse/b2c` → `docs/planning/14-seo-geo-optimization.md`
 
-> **Status: in progress.** Phases 0, 1, 2, 3 and 5 implemented, and Phase 4 except the open image checks in T4.2 (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). Phase 6 is planning only; **T6.1 (JSON-LD validation in CI) is the next task.** Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
+> **Status: in progress.** Phases 0, 1, 2, 3 and 5 implemented, and Phase 4 except the open image checks in T4.2 (T0.5 landed with the shared head in Phase 1; T2.8 video is deferred). In Phase 6, T6.1 (JSON-LD validation) is implemented but CI is red (B15), so the gate does not run yet; **fixing CI, then T6.2–T6.5 (staging validation, Search Console, `seo:audit`, rollout), is next.** Every finding below was read from the code in this repo; items marked **(verify)** could not be confirmed from source alone and need a check on a running/deployed environment.
 
 ---
 
@@ -61,7 +61,7 @@ The B2C plan targets Laravel + Inertia/React with SSR, a consumer shop checkout 
 | **B12** | **FAQ content is inline Alpine markup** (`x-data open/query`) in `legal/faq-page.blade.php`, with no shared data source, so `FAQPage` markup cannot be guaranteed to equal visible text. | `faq-page.blade.php` | Low–Medium |
 | **B13** | **Title/description quality is uneven**; several pages have no `<meta name="description">` (home, about, directories use only OG). | per-view `@push('meta')` | Medium |
 | **B14** | **Private/PII fields exist on `Shop`** (`phone`, `email`, `address_1/2`, `zip_code`, `dti_sec_number`, `tax_identification_number`, `fda_lto_number`, `geo_location`). Any schema builder that reads the model wholesale would leak them. | `Shop::$fillable` | **Guardrail** (see §3) |
-| **B15** | **CI pins PHP 8.3** while `composer.json` requires `^8.4.27`. Confirm CI is currently green before adding more gates. | `.github/workflows/tests.yml`, `composer.json` | Low (verify) |
+| **B15** | **CI pins PHP 8.3** while `composer.json` requires `^8.4.27`. **Confirmed red:** every push fails at `composer setup` (`symfony/* requires php >=8.4.1`), so no test, including the SEO suites, runs in CI. The job also lacks a PostgreSQL/PostGIS service, so the PHP bump alone is not enough (see T6.1). | `.github/workflows/tests.yml`, `composer.json` | **High** (blocks the T6.1 gate) |
 
 ---
 
@@ -310,10 +310,11 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 
 ### Phase 6 — Validation, monitoring, rollout
 
-**T6.1 (P0) — JSON-LD validation in CI**
+**✅ T6.1 (P0) — JSON-LD validation in CI**
 - `JsonLdValidator` (PHP): single `@context` + `@graph`, `@type` on every node, unique/resolvable `@id`s, no empty values, absolute URLs, Google's required properties for the types we emit. Pest policy test renders home, product (single/variant), company, category, directories, FAQ and about in-process and validates each.
 - Add the private-field leak test (B14) to the same gate.
 - Confirm CI is green first (B15).
+- *Done:* `Support/Schema/JsonLdValidator` (framework-free; `validate()` for a decoded document, `validateHtml()` for a rendered page, which also requires exactly one script and that it sits in `<head>`, so T6.4's `seo:audit` can reuse it). Rules: `@context` exactly `https://schema.org` with only `@context`/`@graph` at the top; a non-empty `@graph` of typed nodes; unique top-level `@id`s; every `{"@id": …}` reference resolves to a declared node; no null/blank/empty values anywhere; absolute `http(s)` URLs for `@id`/`url`/`contentUrl`/`image`/`sameAs`/`item`; ISO `dateModified`; and the required properties per emitted type (Organization, WebSite, the WebPage family, FAQPage/Question/Answer, BreadcrumbList and ItemList items, Product/ProductGroup, Offer/UnitPriceSpecification price + 3-letter currency, AggregateRating with a count and an in-range value, Certification, ImageObject, PropertyValue, ContactPoint). `tests/Unit/JsonLdValidatorTest` has a negative case per rule; `tests/Feature/SeoJsonLdPolicyTest` validates home, about, FAQ, terms, privacy, both directories, `/certification/apply`, `/request-a-product`, a group and a sub-category, a single-variant product, a multi-variant product and a company (verified certificate, rating, address), asserts the catalogue really produced every expected type (so the gate cannot pass vacuously), re-checks hostile names on the detail pages and both listings, and runs the B14 leak check across the head of six page types plus all sitemaps, `llms.txt` and `robots.txt`. The tests run inside the normal `php artisan test`, which `composer ci:check` already calls. **B15 confirmed, not fixed:** CI has been red since the first SEO commit (every push fails in about 12 seconds) because `.github/workflows/tests.yml` pins PHP 8.3 while `composer.json` and the lock file need `>=8.4`, so `composer install` aborts before any test runs. The gate therefore cannot protect anything until CI is repaired, and the workflow needs more than the PHP bump: `composer setup` migrates, `.env.example` points at the Sail `pgsql` host, and the schema uses PostgreSQL enums and PostGIS, so the job also needs a PostGIS service container, `pdo_pgsql`, and a `.env` that targets it. Written without a Composer install available, so run `php artisan test --compact --filter="JsonLdValidator|SeoJsonLdPolicy"` locally before merging.
 
 **T6.2 (P0) — Manual pre-release checklist** (needs a deployed staging site)
 - Google Rich Results Test (product snippets, breadcrumb, organization, FAQ where relevant), Schema Markup Validator, Facebook Sharing Debugger, LinkedIn Post Inspector, X card validator, WhatsApp/Telegram paste tests. Document results in a short runbook.
@@ -390,5 +391,5 @@ Phase 0 → 1 are sequential. Phases 2, 3, 4 and 5 can run in parallel after Pha
 1. **Day 1:** T0.1, T0.2, T0.3, T0.4 (hotfix PR; ship alone).
 2. **Days 2–4:** T0.5, T1.1–T1.3, T2.1.
 3. **Days 5–9:** T2.2–T2.7 in parallel with T3.1–T3.3 and T4.1–T4.2; T5.1–T5.3.
-4. **Days 10–12:** T3.4, T5.4–T5.6, T6.1. *(T3.4 and T5.4–T5.6 done; **T6.1 is next**.)*
+4. **Days 10–12:** T3.4, T5.4–T5.6, T6.1. *(All done. Repair CI (B15) so the T6.1 gate actually runs.)*
 5. **Days 13–14:** T6.2–T6.5 and per-country rollout.
