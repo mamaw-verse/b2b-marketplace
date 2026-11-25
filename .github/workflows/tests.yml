@@ -85,4 +85,30 @@ jobs:
       - name: Tests
         run: |
           php artisan config:clear --ansi
-          php artisan test
+          php artisan test --log-junit=junit.xml
+
+      # Groups failures by cause into a handful of annotations so they are readable on the
+      # run page and through the checks API without downloading the raw log.
+      - name: Summarise test failures
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import re, xml.etree.ElementTree as ET
+          from collections import defaultdict
+          try:
+              root = ET.parse('junit.xml').getroot()
+          except Exception as e:
+              print(f'::warning::no junit.xml ({e})'); raise SystemExit
+          groups = defaultdict(list)
+          for tc in root.iter('testcase'):
+              for f in list(tc.findall('failure')) + list(tc.findall('error')):
+                  text = (f.get('message') or f.text or '').strip().splitlines()
+                  head = text[0] if text else 'unknown'
+                  key = re.sub(r'\d+', 'N', head)[:160]
+                  groups[key].append((tc.get('classname') or '') + '::' + (tc.get('name') or ''))
+          for key, tests in sorted(groups.items(), key=lambda kv: -len(kv[1]))[:9]:
+              body = ' | '.join(t.split('\\')[-1] for t in tests[:6])
+              msg = f'{len(tests)} test(s): {key} || e.g. {body}'
+              print('::error title=test failure group::' + msg.replace('%', '%25').replace('\n', '%0A'))
+          print(f'::error title=test failure groups::{len(groups)} distinct causes')
+          PY
