@@ -112,13 +112,17 @@ it('refuses to audit a noindex deployment unless allowed', function () {
     $this->artisan('seo:audit')->assertFailed();
 });
 
-it('exits non-zero when the audit finds a problem and zero when it does not', function () {
+it('exits zero when the audit finds nothing', function () {
     Config::set('app.url', AUDIT_ORIGIN);
-
     fakeHealthySite();
-    $this->artisan('seo:audit', ['--sample' => 2])->assertSuccessful();
 
+    $this->artisan('seo:audit', ['--sample' => 2])->assertSuccessful();
+});
+
+it('exits non-zero when the audit finds a problem', function () {
+    Config::set('app.url', AUDIT_ORIGIN);
     fakeHealthySite(validPage: false);
+
     $this->artisan('seo:audit', ['--sample' => 2])->assertFailed();
 });
 
