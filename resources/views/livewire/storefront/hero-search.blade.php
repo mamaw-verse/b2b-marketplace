@@ -13,63 +13,47 @@
         {{-- Radial glow (gold, offset right to sit behind the carousel) --}}
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_80%_15%,rgba(238,201,0,0.12),transparent)]"></div>
 
-        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-14 lg:pt-20 lg:pb-24">
-            <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-5 pb-12 lg:pt-20 lg:pb-24">
+            <div class="grid grid-cols-1 items-center gap-4 lg:grid-cols-12 lg:gap-12">
 
-                {{-- ── Copy column ─────────────────────────────────────────── --}}
-                <div class="text-center lg:text-left lg:col-span-7">
+                {{-- ── Copy column (unwrapped via contents on mobile so buttons sit below slider) ── --}}
+                <div class="contents lg:block lg:col-span-7 text-center lg:text-left">
 
-                    <span class="inline-flex items-center gap-2 rounded-full border border-[var(--hs-green-700)] bg-white/10 px-4 py-1.5 text-xs font-semibold text-[var(--hs-green-300)] uppercase tracking-widest">
-                        <flux:icon.shield-check class="size-3.5 text-[var(--hs-gold-400)]" />
-                        {{ __('MHCB-Verified Halal Marketplace') }}
-                    </span>
+                    <div class="order-1 text-center lg:text-left">
+                        <span class="hidden lg:inline-flex items-center gap-2 rounded-full border border-[var(--hs-green-700)] bg-white/10 px-4 py-1.5 text-xs font-semibold text-[var(--hs-green-300)] uppercase tracking-widest">
+                            <flux:icon.shield-check class="size-3.5 text-[var(--hs-gold-400)]" />
+                            {{ __('MHCB-Verified Halal Marketplace') }}
+                        </span>
 
-                    <h1 class="mt-5 lg:mt-6 mx-auto lg:mx-0 max-w-xl text-3xl sm:text-4xl font-bold tracking-tight text-white lg:text-5xl font-[var(--hs-font-display)] leading-tight">
-                        {{ __('We connect the entire halal supply chain,') }}
-                        <span class="text-[var(--hs-green-300)]">{{ __('not just a storefront.') }}</span>
-                    </h1>
+                        <h1 class="lg:mt-6 mx-auto lg:mx-0 max-w-xl text-2xl sm:text-4xl font-bold tracking-tight text-white lg:text-5xl font-[var(--hs-font-display)] leading-tight">
+                            {{ __('We connect the entire halal supply chain,') }}
+                            <span class="text-[var(--hs-green-300)]">{{ __('not just a storefront.') }}</span>
+                        </h1>
 
-                    <p class="mt-4 lg:mt-5 mx-auto lg:mx-0 max-w-lg text-base sm:text-lg text-white/70 leading-relaxed">
-                        {{ __('1HalalStore.com is a B2B marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.') }}
-                    </p>
+                        <p class="hidden lg:block mt-5 mx-auto lg:mx-0 max-w-lg text-lg text-white/70 leading-relaxed">
+                            {{ __('1HalalStore.com is a B2B marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.') }}
+                        </p>
+                    </div>
 
-                    <div class="mt-7 lg:mt-8 flex flex-col sm:flex-row sm:flex-wrap justify-center lg:justify-start gap-3">
+                    <div class="order-3 lg:mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:justify-center lg:justify-start sm:gap-3">
                         <a href="{{ route('register') }}" wire:navigate
-                           class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-full bg-[var(--hs-gold-500)] px-6 py-3 text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition">
-                            <flux:icon.arrow-right class="size-4" />
+                           class="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 sm:gap-2 rounded-full bg-[var(--hs-gold-500)] px-3 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition whitespace-nowrap">
+                            <flux:icon.arrow-right class="size-3.5 sm:size-4 shrink-0" />
                             {{ __('Create account') }}
                         </a>
                         <a href="#supply-chain"
-                           class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
-                            <flux:icon.play class="size-4" />
+                           class="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 sm:gap-2 rounded-full border border-white/30 px-3 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:bg-white/10 transition whitespace-nowrap">
+                            <flux:icon.play class="size-3.5 sm:size-4 shrink-0" />
                             {{ __('See How It Works') }}
                         </a>
                     </div>
 
                 </div>
 
-                {{-- ── Visual column: Featured Voice card ─────── --}}
-                {{-- Desktop: full 2:3 carousel card; Mobile: compact trust pill row --}}
-                <div class="lg:col-span-5">
+                {{-- ── Visual column: Featured Voice & Sponsored Ads carousel ─────── --}}
+                <div class="order-2 lg:order-none lg:col-span-5">
 
-                    {{-- Mobile-only compact trust strip (shows instead of the tall carousel) --}}
-                    <div class="lg:hidden flex flex-wrap justify-center gap-2 mt-2">
-                        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-[var(--hs-green-300)]">
-                            <flux:icon.shield-check class="size-3.5 text-[var(--hs-gold-400)]" />
-                            {{ __('MHCB-Verified Suppliers') }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80">
-                            <flux:icon.globe-alt class="size-3.5 text-white/60" />
-                            {{ __('Global B2B Network') }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/80">
-                            <flux:icon.check-badge class="size-3.5 text-white/60" />
-                            {{ __('Halal Certified') }}
-                        </span>
-                    </div>
-
-                    {{-- Desktop full carousel --}}
-                    <div class="hidden lg:block">
+                    {{-- Full-width slider on mobile; max-w-sm 2:3 card on desktop --}}
                     <div
                         x-data="{
                             index: 0,
@@ -77,6 +61,7 @@
                             timer: null,
                             paused: false,
                             autoplay: 4500,
+                            touchStartX: null,
                             reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
                             init() {
                                 this.total = this.$refs.track.children.length;
@@ -88,6 +73,20 @@
                             },
                             next() { this.goTo(this.index + 1, true); },
                             prev() { this.goTo(this.index - 1, true); },
+                            onTouchStart(e) {
+                                this.touchStartX = e.touches[0].clientX;
+                                this.paused = true;
+                            },
+                            onTouchEnd(e) {
+                                if (this.touchStartX !== null) {
+                                    const diff = e.changedTouches[0].clientX - this.touchStartX;
+                                    if (Math.abs(diff) > 40) {
+                                        diff < 0 ? this.next() : this.prev();
+                                    }
+                                    this.touchStartX = null;
+                                }
+                                this.paused = false;
+                            },
                             startAutoplay() {
                                 if (this.reduceMotion || this.total <= 1) return;
                                 this.stopAutoplay();
@@ -100,7 +99,9 @@
                         @mouseleave="paused = false"
                         @focusin="paused = true"
                         @focusout="paused = false"
-                        class="relative mx-auto max-w-sm"
+                        @touchstart.passive="onTouchStart($event)"
+                        @touchend.passive="onTouchEnd($event)"
+                        class="relative w-full lg:mx-auto lg:max-w-sm"
                         aria-label="{{ __('Hero highlights carousel') }}"
                         aria-roledescription="carousel"
                     >
@@ -290,7 +291,6 @@
                             </div>{{-- /aspect-ratio frame --}}
                         </div>{{-- /gradient border --}}
                     </div>{{-- /x-data --}}
-                    </div>{{-- /hidden lg:block --}}
                 </div>{{-- /visual column --}}
 
             </div>
