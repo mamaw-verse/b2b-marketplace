@@ -13,29 +13,29 @@
         {{-- Radial glow (gold, offset right to sit behind the carousel) --}}
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_80%_15%,rgba(238,201,0,0.12),transparent)]"></div>
 
-        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-5 pb-12 lg:pt-20 lg:pb-24">
-            <div class="grid grid-cols-1 items-center gap-4 lg:grid-cols-12 lg:gap-12">
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-5 pb-12 sm:pt-14 sm:pb-14 lg:pt-20 lg:pb-24">
+            <div class="grid grid-cols-1 items-center gap-4 sm:gap-10 lg:grid-cols-12 lg:gap-12">
 
-                {{-- ── Copy column (unwrapped via contents on mobile so buttons sit below slider) ── --}}
-                <div class="contents lg:block lg:col-span-7 text-center lg:text-left">
+                {{-- ── Copy column (unwrapped via contents on phone so buttons sit below slider) ── --}}
+                <div class="contents sm:block lg:col-span-7 text-center lg:text-left">
 
-                    <div class="order-1 text-center lg:text-left">
-                        <span class="hidden lg:inline-flex items-center gap-2 rounded-full border border-[var(--hs-green-700)] bg-white/10 px-4 py-1.5 text-xs font-semibold text-[var(--hs-green-300)] uppercase tracking-widest">
+                    <div class="order-1 sm:order-none text-center lg:text-left">
+                        <span class="hidden sm:inline-flex items-center gap-2 rounded-full border border-[var(--hs-green-700)] bg-white/10 px-4 py-1.5 text-xs font-semibold text-[var(--hs-green-300)] uppercase tracking-widest">
                             <flux:icon.shield-check class="size-3.5 text-[var(--hs-gold-400)]" />
                             {{ __('MHCB-Verified Halal Marketplace') }}
                         </span>
 
-                        <h1 class="lg:mt-6 mx-auto lg:mx-0 max-w-xl text-2xl sm:text-4xl font-bold tracking-tight text-white lg:text-5xl font-[var(--hs-font-display)] leading-tight">
+                        <h1 class="sm:mt-5 lg:mt-6 mx-auto lg:mx-0 max-w-xl text-2xl sm:text-4xl font-bold tracking-tight text-white lg:text-5xl font-[var(--hs-font-display)] leading-tight">
                             {{ __('We connect the entire halal supply chain,') }}
                             <span class="text-[var(--hs-green-300)]">{{ __('not just a storefront.') }}</span>
                         </h1>
 
-                        <p class="hidden lg:block mt-5 mx-auto lg:mx-0 max-w-lg text-lg text-white/70 leading-relaxed">
+                        <p class="hidden sm:block mt-4 lg:mt-5 mx-auto lg:mx-0 max-w-lg text-base sm:text-lg text-white/70 leading-relaxed">
                             {{ __('1HalalStore.com is a B2B marketplace linking every player in the halal ecosystem — from farm to plate, locally and globally.') }}
                         </p>
                     </div>
 
-                    <div class="order-3 lg:mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:justify-center lg:justify-start sm:gap-3">
+                    <div class="order-3 sm:order-none sm:mt-7 lg:mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:justify-center lg:justify-start sm:gap-3">
                         <a href="{{ route('register') }}" wire:navigate
                            class="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 sm:gap-2 rounded-full bg-[var(--hs-gold-500)] px-3 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-[var(--hs-green-950)] shadow-[var(--hs-shadow-md)] hover:bg-[var(--hs-gold-400)] transition whitespace-nowrap">
                             <flux:icon.arrow-right class="size-3.5 sm:size-4 shrink-0" />
@@ -51,7 +51,7 @@
                 </div>
 
                 {{-- ── Visual column: Featured Voice & Sponsored Ads carousel ─────── --}}
-                <div class="order-2 lg:order-none lg:col-span-5">
+                <div class="order-2 sm:order-none lg:col-span-5">
 
                     {{-- Full-width slider on mobile; max-w-sm 2:3 card on desktop --}}
                     <div
@@ -101,7 +101,7 @@
                         @focusout="paused = false"
                         @touchstart.passive="onTouchStart($event)"
                         @touchend.passive="onTouchEnd($event)"
-                        class="relative w-full lg:mx-auto lg:max-w-sm"
+                        class="relative w-full sm:mx-auto sm:max-w-sm"
                         aria-label="{{ __('Hero highlights carousel') }}"
                         aria-roledescription="carousel"
                     >
